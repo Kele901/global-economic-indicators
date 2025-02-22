@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { fetchGlobalData } from '../services/worldbank';
 import type { CountryData } from '../services/worldbank';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
+import AdSense from './AdSense';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -431,6 +432,11 @@ const GlobalInterestRateApp = () => {
         </div>
       </div>
 
+      {/* Top Ad Placement */}
+      <div className="my-4">
+        <AdSense />
+      </div>
+
       <div className="mb-4 space-y-4">
         <div className="flex justify-between items-center">
           <select
@@ -508,11 +514,17 @@ const GlobalInterestRateApp = () => {
         </div>
 
         {selectedCountryForSummary && (
-          <CountryEconomicSummary
-            country={selectedCountryForSummary}
-            data={data}
-            isDarkMode={isDarkMode}
-          />
+          <>
+            <CountryEconomicSummary
+              country={selectedCountryForSummary}
+              data={data}
+              isDarkMode={isDarkMode}
+            />
+            {/* Ad after country summary */}
+            <div className="my-4">
+              <AdSense />
+            </div>
+          </>
         )}
       </div>
 
@@ -576,6 +588,11 @@ const GlobalInterestRateApp = () => {
             summary={GDPGrowthSummary}
           />
         )}
+      </div>
+
+      {/* Bottom Ad Placement */}
+      <div className="mt-8">
+        <AdSense />
       </div>
     </div>
   );
