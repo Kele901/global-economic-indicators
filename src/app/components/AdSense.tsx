@@ -2,16 +2,18 @@
 
 import { useEffect } from 'react';
 
-interface AdSenseProps {
-  style?: React.CSSProperties;
-  className?: string;
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
 }
 
-const AdSense: React.FC<AdSenseProps> = ({ style, className }) => {
+const AdSense: React.FC = () => {
   useEffect(() => {
     try {
-      // Push the command to run when the previous command is complete
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      if (typeof window !== 'undefined') {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
     } catch (err) {
       console.error('AdSense error:', err);
     }
@@ -19,10 +21,10 @@ const AdSense: React.FC<AdSenseProps> = ({ style, className }) => {
 
   return (
     <ins
-      className={`adsbygoogle ${className || ''}`}
-      style={style || { display: 'block' }}
+      className="adsbygoogle"
+      style={{ display: 'block' }}
       data-ad-client="ca-pub-1726759813423594"
-      data-ad-slot="4834833787"
+      data-ad-slot="YOUR_AD_SLOT_ID"
       data-ad-format="auto"
       data-full-width-responsive="true"
     />
