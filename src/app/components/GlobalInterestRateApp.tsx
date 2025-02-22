@@ -1,0 +1,584 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { fetchGlobalData } from '../services/worldbank';
+import type { CountryData } from '../services/worldbank';
+import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
+
+const countryColors = {
+  USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
+  Japan: "#d0ed57", UK: "#83a6ed", Australia: "#ff7300", Mexico: "#e60049", SouthKorea: "#0bb4ff", 
+  Spain: "#50e991", Sweden: "#e6d800", Switzerland: "#9b19f5", Turkey: "#dc0ab4", Nigeria: "#00bfa0",
+  China: "#b3d4ff", Russia: "#fd7f6f", Brazil: "#7eb0d5", Chile: "#b2e061", Argentina: "#bd7ebe",
+  India: "#ff9ff3", Norway: "#45aaf2"
+};
+
+const countryFlags: { [key: string]: React.ComponentType<any> } = {
+  UK: GB,
+  USA: US,
+  Canada: CA,
+  France: FR,
+  Germany: DE,
+  Italy: IT,
+  Japan: JP,
+  Australia: AU,
+  Mexico: MX,
+  SouthKorea: KR,
+  Spain: ES,
+  Sweden: SE,
+  Switzerland: CH,
+  Turkey: TR,
+  Nigeria: NG,
+  China: CN,
+  Russia: RU,
+  Brazil: BR,
+  Chile: CL,
+  Argentina: AR,
+  India: IN,
+  Norway: NO
+};
+
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center h-[400px]">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+  </div>
+);
+
+const ErrorMessage = ({ message }: { message: string }) => (
+  <div className="flex justify-center items-center h-[400px] text-red-500">
+    <p>{message}</p>
+  </div>
+);
+
+const InterestRateSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-sm">
+      This dashboard displays historical economic indicators from the World Bank: interest rates (from 1960), employment and unemployment rates (from 1990), and government debt (from 1989). Interest rates represent the cost of borrowing money, employment rates show the percentage of working-age population that is employed, and unemployment rates indicate the percentage of the labor force that is actively seeking employment.
+    </p>
+  </div>
+);
+
+const EmploymentSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-sm">
+      The employment rate represents the percentage of working-age population (ages 15-64) that is employed. A higher employment rate indicates a greater proportion of the population is engaged in productive work, suggesting economic strength and efficient labor market utilization. Data shown from 1990 onwards.
+    </p>
+  </div>
+);
+
+const UnemploymentSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-sm">
+      The unemployment rate shows the percentage of the labor force that is actively seeking employment but unable to find work. This metric is a key indicator of labor market health and economic conditions, with lower rates generally indicating a stronger economy. Data shown from 1990 onwards.
+    </p>
+  </div>
+);
+
+const DebtSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-sm">
+      Central government debt shown as a percentage of each country's GDP (Gross Domestic Product). For example, a value of 100% means the government's debt equals one year's GDP. This ratio is a key measure of fiscal sustainability, with lower percentages generally indicating more manageable debt levels relative to the size of the economy. Historical data available from 1989 onwards.
+    </p>
+  </div>
+);
+
+const InflationSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-sm">
+      The inflation rate measures the annual percentage change in consumer prices. It indicates how quickly the general level of prices for goods and services is rising, and consequently, how quickly purchasing power is falling. Data available from 1960 onwards provides insights into long-term price stability trends.
+    </p>
+  </div>
+);
+
+const GDPGrowthSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-sm">
+      GDP (Gross Domestic Product) growth shows the annual percentage increase in a country's economic output. A positive rate indicates economic expansion, while a negative rate suggests contraction. This metric is crucial for understanding economic health and living standards. Data available from 1960 onwards provides insights into long-term economic development patterns.
+    </p>
+  </div>
+);
+
+const CountryEconomicSummary = ({ 
+  country, 
+  data, 
+  isDarkMode 
+}: { 
+  country: string;
+  data: {
+    interestRates: CountryData[];
+    employmentRates: CountryData[];
+    unemploymentRates: CountryData[];
+    governmentDebt: CountryData[];
+    inflationRates: CountryData[];
+    gdpGrowth: CountryData[];
+  };
+  isDarkMode: boolean;
+}) => {
+  if (!country) return null;
+
+  const FlagComponent = countryFlags[country];
+
+  // Prepare data for the combined chart
+  const combinedData = data.interestRates.map(yearData => {
+    const year = yearData.year;
+    return {
+      year,
+      'Interest Rate': yearData[country] || null,
+      'Employment': data.employmentRates.find(d => d.year === year)?.[country] || null,
+      'Unemployment': data.unemploymentRates.find(d => d.year === year)?.[country] || null,
+      'Govt Debt': data.governmentDebt.find(d => d.year === year)?.[country] || null,
+      'Inflation': data.inflationRates.find(d => d.year === year)?.[country] || null,
+      'GDP Growth': data.gdpGrowth.find(d => d.year === year)?.[country] || null,
+    };
+  }).filter(d => 
+    d['Interest Rate'] !== null || 
+    d['Employment'] !== null || 
+    d['Unemployment'] !== null || 
+    d['Govt Debt'] !== null || 
+    d['Inflation'] !== null || 
+    d['GDP Growth'] !== null
+  );
+
+  // Calculate metrics as before
+  const calculateMetrics = (dataset: CountryData[], countryKey: string) => {
+    const countryData = dataset
+      .filter(d => d[countryKey] !== 0)
+      .map(d => ({ year: d.year, value: d[countryKey] }));
+    
+    if (countryData.length === 0) return { recent: 0, avg: 0, trend: 'stable' };
+    
+    const recent = countryData[countryData.length - 1].value;
+    const avg = countryData.reduce((sum, d) => sum + d.value, 0) / countryData.length;
+    
+    const recentYears = countryData.slice(-5);
+    const trend = recentYears[recentYears.length - 1]?.value > recentYears[0]?.value 
+      ? 'increasing' 
+      : recentYears[recentYears.length - 1]?.value < recentYears[0]?.value 
+        ? 'decreasing' 
+        : 'stable';
+    
+    return { recent, avg, trend };
+  };
+
+  const metrics = {
+    interest: calculateMetrics(data.interestRates, country),
+    employment: calculateMetrics(data.employmentRates, country),
+    unemployment: calculateMetrics(data.unemploymentRates, country),
+    debt: calculateMetrics(data.governmentDebt, country),
+    inflation: calculateMetrics(data.inflationRates, country),
+    gdp: calculateMetrics(data.gdpGrowth, country)
+  };
+
+  const getTrendEmoji = (trend: string) => {
+    switch (trend) {
+      case 'increasing': return '↗️';
+      case 'decreasing': return '↘️';
+      default: return '➡️';
+    }
+  };
+
+  // Define line colors for the combined chart
+  const metricColors = {
+    'Interest Rate': '#8884d8',
+    'Employment': '#82ca9d',
+    'Unemployment': '#ffc658',
+    'Govt Debt': '#ff8042',
+    'Inflation': '#a4de6c',
+    'GDP Growth': '#83a6ed'
+  };
+
+  return (
+    <div className={`p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Economic Summary for {country}</h3>
+        {FlagComponent && (
+          <div className="w-16 h-10 overflow-hidden rounded-md shadow-lg border-2 border-gray-200 dark:border-gray-600 hover:scale-110 transition-transform duration-200">
+            <FlagComponent />
+          </div>
+        )}
+      </div>
+      <hr className={`my-4 border-t ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`} />
+      
+      <div className="mb-6 h-[200px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={combinedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+            <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
+            <YAxis stroke={isDarkMode ? '#fff' : '#666'} />
+            <Tooltip
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+            />
+            <Legend />
+            {Object.entries(metricColors).map(([metric, color]) => (
+              <Line
+                key={metric}
+                type="monotone"
+                dataKey={metric}
+                stroke={color}
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="space-y-2">
+        <p>
+          <strong>Interest Rates:</strong> Currently at {metrics.interest.recent.toFixed(1)}% 
+          {getTrendEmoji(metrics.interest.trend)} (Historical avg: {metrics.interest.avg.toFixed(1)}%)
+        </p>
+        <p>
+          <strong>Employment:</strong> Currently at {metrics.employment.recent.toFixed(1)}% 
+          {getTrendEmoji(metrics.employment.trend)} (Historical avg: {metrics.employment.avg.toFixed(1)}%)
+        </p>
+        <p>
+          <strong>Unemployment:</strong> Currently at {metrics.unemployment.recent.toFixed(1)}% 
+          {getTrendEmoji(metrics.unemployment.trend)} (Historical avg: {metrics.unemployment.avg.toFixed(1)}%)
+        </p>
+        <p>
+          <strong>Government Debt:</strong> Currently at {metrics.debt.recent.toFixed(1)}% of GDP 
+          {getTrendEmoji(metrics.debt.trend)} (Historical avg: {metrics.debt.avg.toFixed(1)}%)
+        </p>
+        <p>
+          <strong>Inflation Rate:</strong> Currently at {metrics.inflation.recent.toFixed(1)}% 
+          {getTrendEmoji(metrics.inflation.trend)} (Historical avg: {metrics.inflation.avg.toFixed(1)}%)
+        </p>
+        <p>
+          <strong>GDP Growth:</strong> Currently at {metrics.gdp.recent.toFixed(1)}% 
+          {getTrendEmoji(metrics.gdp.trend)} (Historical avg: {metrics.gdp.avg.toFixed(1)}%)
+        </p>
+
+        <div className={`mt-6 p-4 rounded-md ${isDarkMode ? 'bg-gray-600' : 'bg-blue-100'}`}>
+          <p className="text-sm">
+            <strong>Economic Overview:</strong> {country}'s economy shows {' '}
+            {metrics.gdp.recent > 2 ? 'strong' : metrics.gdp.recent > 0 ? 'moderate' : 'challenging'} growth at {metrics.gdp.recent.toFixed(1)}% with {' '}
+            {metrics.inflation.recent > 5 ? 'high' : metrics.inflation.recent > 2 ? 'moderate' : 'low'} inflation ({metrics.inflation.recent.toFixed(1)}%). {' '}
+            Employment levels are {metrics.employment.recent > 65 ? 'robust' : metrics.employment.recent > 55 ? 'moderate' : 'concerning'} at {metrics.employment.recent.toFixed(1)}%, while {' '}
+            government debt is {metrics.debt.recent > 100 ? 'significantly high' : metrics.debt.recent > 60 ? 'moderate' : 'manageable'} at {metrics.debt.recent.toFixed(1)}% of GDP. {' '}
+            {metrics.interest.recent > 5 ? 'High' : metrics.interest.recent > 2 ? 'Moderate' : 'Low'} interest rates ({metrics.interest.recent.toFixed(1)}%) suggest {' '}
+            {metrics.interest.recent > 5 ? 'tight' : metrics.interest.recent > 2 ? 'balanced' : 'accommodative'} monetary policy.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const GlobalInterestRateApp = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState('all');
+  const [selectedCountries, setSelectedCountries] = useState(Object.keys(countryColors).slice(0, 9));
+  const [searchTerm, setSearchTerm] = useState('');
+  const [maxYAxis, setMaxYAxis] = useState(20);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isGridView, setIsGridView] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'all'>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<{
+    interestRates: CountryData[];
+    employmentRates: CountryData[];
+    unemploymentRates: CountryData[];
+    governmentDebt: CountryData[];
+    inflationRates: CountryData[];
+    gdpGrowth: CountryData[];
+  }>({
+    interestRates: [],
+    employmentRates: [],
+    unemploymentRates: [],
+    governmentDebt: [],
+    inflationRates: [],
+    gdpGrowth: []
+  });
+  const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await fetchGlobalData();
+        setData(result);
+      } catch (err) {
+        setError('Failed to load data. Please try again later.');
+        console.error('Error loading data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
+  const filterData = (period: string, data: CountryData[]) => {
+    const currentYear = new Date().getFullYear();
+    switch (period) {
+      case '20years':
+        return data.filter(item => item.year >= currentYear - 20);
+      case '10years':
+        return data.filter(item => item.year >= currentYear - 10);
+      case '5years':
+        return data.filter(item => item.year >= currentYear - 5);
+      default:
+        return data;
+    }
+  };
+
+  const handlePeriodChange = (value: string) => {
+    setSelectedPeriod(value);
+  };
+
+  const handleCountryToggle = (country: string) => {
+    setSelectedCountries(prev =>
+      prev.includes(country)
+        ? prev.filter(c => c !== country)
+        : [...prev, country]
+    );
+  };
+
+  const filteredCountries = Object.keys(countryColors).filter(country =>
+    country.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Create a reusable chart component
+  const Chart = ({ 
+    title, 
+    data, 
+    yDomain, 
+    subtitle,
+    summary: SummaryComponent 
+  }: { 
+    title: string;
+    data: CountryData[];
+    yDomain: [number, number];
+    subtitle: string;
+    summary: React.ComponentType<{ isDarkMode: boolean }>;
+  }) => (
+    <div className={`mb-8 ${isGridView ? 'h-[500px]' : ''}`}>
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+        {subtitle}
+      </div>
+      {!isGridView && <SummaryComponent isDarkMode={isDarkMode} />}
+      <div className={`${isGridView ? 'h-[350px]' : 'h-[400px]'} w-full`}>
+        <ResponsiveContainer>
+          <LineChart data={filterData(selectedPeriod, data)} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+            <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
+            <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
+            <Tooltip
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+            />
+            <Legend />
+            {selectedCountries.map(country => (
+              <Line
+                key={country}
+                type="monotone"
+                dataKey={country}
+                stroke={countryColors[country as keyof typeof countryColors]}
+                activeDot={isGridView ? false : { r: 6 }}
+                dot={isGridView ? false : { r: 2 }}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Global Economic Indicators</h1>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-4xl mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Global Economic Indicators</h1>
+        <ErrorMessage message={error} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-4xl mx-auto p-4">
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Global Economic Indicators</h1>
+          <div className="flex items-center space-x-2">
+            <span>Light</span>
+            <button
+              className={`w-12 h-6 rounded-full p-1 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+              onClick={() => setIsDarkMode(!isDarkMode)}
+            >
+              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform ${isDarkMode ? 'translate-x-6' : ''}`} />
+            </button>
+            <span>Dark</span>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-gray-500 dark:text-gray-300">Powered by World Bank Economic Data</p>
+          <p className="text-sm text-gray-500 dark:text-gray-300">Available data ranges: Interest Rates (1960-Present), Employment & Unemployment (1990-Present), Government Debt (1989-Present)</p>
+        </div>
+      </div>
+
+      <div className="mb-4 space-y-4">
+        <div className="flex justify-between items-center">
+          <select
+            value={selectedPeriod}
+            onChange={(e) => handlePeriodChange(e.target.value)}
+            className={`w-[180px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+          >
+            <option value="all">All Time</option>
+            <option value="20years">Last 20 Years</option>
+            <option value="10years">Last 10 Years</option>
+            <option value="5years">Last 5 Years</option>
+          </select>
+          <select
+            value={selectedMetric}
+            onChange={(e) => setSelectedMetric(e.target.value as 'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'all')}
+            className={`w-[180px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+          >
+            <option value="all">All Metrics</option>
+            <option value="interest">Interest Rates</option>
+            <option value="employment">Employment Rates</option>
+            <option value="unemployment">Unemployment Rates</option>
+            <option value="debt">Government Debt</option>
+            <option value="inflation">Inflation Rates</option>
+            <option value="gdp">GDP Growth</option>
+          </select>
+          <button
+            onClick={() => setIsGridView(!isGridView)}
+            className={`px-4 py-2 rounded-md ${
+              isDarkMode 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+            }`}
+          >
+            {isGridView ? 'Stack View' : 'Grid View'}
+          </button>
+          <input
+            type="text"
+            placeholder="Search countries..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              // Update selected country for summary when there's an exact match
+              const searchValue = e.target.value.toLowerCase();
+              const matchedCountry = Object.keys(countryColors).find(
+                country => country.toLowerCase() === searchValue
+              );
+              setSelectedCountryForSummary(matchedCountry || '');
+            }}
+            className={`w-[200px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <label htmlFor="maxYAxis" className={isDarkMode ? 'text-white' : ''}>Max Y-Axis Value (Interest Rate):</label>
+          <input
+            id="maxYAxis"
+            type="number"
+            value={maxYAxis}
+            onChange={(e) => setMaxYAxis(Number(e.target.value))}
+            className={`w-[100px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+          />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {filteredCountries.map(country => (
+            <div key={country} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id={country}
+                checked={selectedCountries.includes(country)}
+                onChange={() => handleCountryToggle(country)}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor={country} className={isDarkMode ? 'text-white' : ''}>{country}</label>
+            </div>
+          ))}
+        </div>
+
+        {selectedCountryForSummary && (
+          <CountryEconomicSummary
+            country={selectedCountryForSummary}
+            data={data}
+            isDarkMode={isDarkMode}
+          />
+        )}
+      </div>
+
+      <div className={`${isGridView ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8' : 'space-y-16'} mt-12`}>
+        {(selectedMetric === 'interest' || selectedMetric === 'all') && (
+          <Chart
+            title="Interest Rates (%)"
+            data={data.interestRates}
+            yDomain={[0, maxYAxis]}
+            subtitle="Vertical axis shows interest rates as a percentage, where 5 = 5% interest rate"
+            summary={InterestRateSummary}
+          />
+        )}
+
+        {(selectedMetric === 'employment' || selectedMetric === 'all') && (
+          <Chart
+            title="Employment Rates (%)"
+            data={data.employmentRates}
+            yDomain={[40, 80]}
+            subtitle="Vertical axis shows percentage of working-age population employed, where 60 = 60% of population is employed"
+            summary={EmploymentSummary}
+          />
+        )}
+
+        {(selectedMetric === 'unemployment' || selectedMetric === 'all') && (
+          <Chart
+            title="Unemployment Rates (%)"
+            data={data.unemploymentRates}
+            yDomain={[0, 30]}
+            subtitle="Vertical axis shows percentage of labor force unemployed, where 10 = 10% of labor force is seeking work"
+            summary={UnemploymentSummary}
+          />
+        )}
+
+        {(selectedMetric === 'debt' || selectedMetric === 'all') && (
+          <Chart
+            title="Central Government Debt (% of GDP)"
+            data={data.governmentDebt}
+            yDomain={[0, 250]}
+            subtitle="Vertical axis shows debt as a percentage of GDP, where 100 = debt equals one year's GDP"
+            summary={DebtSummary}
+          />
+        )}
+
+        {(selectedMetric === 'inflation' || selectedMetric === 'all') && (
+          <Chart
+            title="Inflation Rates (%)"
+            data={data.inflationRates}
+            yDomain={[0, 25]}
+            subtitle="Vertical axis shows annual percentage change in consumer prices, where 5 = 5% price increase per year"
+            summary={InflationSummary}
+          />
+        )}
+
+        {(selectedMetric === 'gdp' || selectedMetric === 'all') && (
+          <Chart
+            title="GDP Growth (%)"
+            data={data.gdpGrowth}
+            yDomain={[-10, 15]}
+            subtitle="Vertical axis shows annual GDP growth as a percentage, where 3 = 3% growth in economic output"
+            summary={GDPGrowthSummary}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default GlobalInterestRateApp; 
