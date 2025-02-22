@@ -24,7 +24,7 @@ const AdSense: React.FC = () => {
       className="adsbygoogle"
       style={{ display: 'block' }}
       data-ad-client="ca-pub-1726759813423594"
-      data-ad-slot="YOUR_AD_SLOT_ID"
+      data-ad-slot="4834833787"
       data-ad-format="auto"
       data-full-width-responsive="true"
     />
