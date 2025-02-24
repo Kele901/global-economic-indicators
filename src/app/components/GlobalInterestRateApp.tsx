@@ -430,11 +430,23 @@ const GlobalInterestRateApp = () => {
           <p className="text-gray-500 dark:text-gray-300">Powered by World Bank Economic Data</p>
           <p className="text-sm text-gray-500 dark:text-gray-300">Available data ranges: Interest Rates (1960-Present), Employment & Unemployment (1990-Present), Government Debt (1989-Present)</p>
         </div>
-      </div>
 
-      {/* Top Ad Placement */}
-      <div className="my-4">
-        <AdSense />
+        {/* Top Ad Placement - Now with surrounding content */}
+        <div className="my-8">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold mb-2">Economic Data Analysis</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Explore comprehensive economic data from {Object.keys(countryColors).length} major economies, 
+              with historical trends and real-time updates from the World Bank database.
+            </p>
+          </div>
+          <AdSense />
+          <div className="mt-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Use the controls below to customize your view and compare different economic indicators across countries.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="mb-4 space-y-4">
@@ -520,8 +532,15 @@ const GlobalInterestRateApp = () => {
               data={data}
               isDarkMode={isDarkMode}
             />
-            {/* Ad after country summary */}
-            <div className="my-4">
+            {/* Middle Ad Placement - Now with context */}
+            <div className="my-8">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold mb-2">Detailed Analysis</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  View detailed economic metrics and historical trends for {selectedCountryForSummary}.
+                  Compare with other countries using the interactive charts below.
+                </p>
+              </div>
               <AdSense />
             </div>
           </>
@@ -590,9 +609,22 @@ const GlobalInterestRateApp = () => {
         )}
       </div>
 
-      {/* Bottom Ad Placement */}
-      <div className="mt-8">
+      {/* Bottom Ad Placement - Now with context */}
+      <div className="mt-8 mb-4">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold mb-2">Data Sources & Methodology</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            All economic indicators are sourced from the World Bank's official database, 
+            ensuring reliable and consistent data across all countries. Updates are made 
+            as new data becomes available.
+          </p>
+        </div>
         <AdSense />
+        <div className="mt-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            © {new Date().getFullYear()} Global Economic Indicators. Data provided by the World Bank.
+          </p>
+        </div>
       </div>
     </div>
   );
