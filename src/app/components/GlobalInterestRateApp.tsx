@@ -203,7 +203,7 @@ const CountryEconomicSummary = ({
 
   return (
     <div className={`p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h3 className="text-lg font-semibold">Economic Summary for {country}</h3>
         {FlagComponent && (
           <div className="w-16 h-10 overflow-hidden rounded-md shadow-lg border-2 border-gray-200 dark:border-gray-600 hover:scale-110 transition-transform duration-200">
@@ -213,7 +213,7 @@ const CountryEconomicSummary = ({
       </div>
       <hr className={`my-4 border-t ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`} />
       
-      <div className="mb-6 h-[200px]">
+      <div className="mb-6 h-[200px] sm:h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={combinedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
@@ -237,7 +237,7 @@ const CountryEconomicSummary = ({
         </ResponsiveContainer>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 text-sm sm:text-base">
         <p>
           <strong>Interest Rates:</strong> Currently at {metrics.interest.recent.toFixed(1)}% 
           {getTrendEmoji(metrics.interest.trend)} (Historical avg: {metrics.interest.avg.toFixed(1)}%)
@@ -378,30 +378,45 @@ const GlobalInterestRateApp = () => {
     subtitle: string;
     summary: React.ComponentType<{ isDarkMode: boolean }>;
   }) => (
-    <div className={`mb-8 ${isGridView ? 'h-[500px]' : ''}`}>
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+    <div className={`mb-8 ${isGridView ? 'h-[400px] sm:h-[500px]' : ''}`}>
+      <h2 className="text-lg sm:text-xl font-semibold mb-4">{title}</h2>
       <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
         {subtitle}
       </div>
       {!isGridView && <SummaryComponent isDarkMode={isDarkMode} />}
-      <div className={`${isGridView ? 'h-[350px]' : 'h-[400px]'} w-full`}>
+      <div className={`${isGridView ? 'h-[250px] sm:h-[350px]' : 'h-[300px] sm:h-[400px]'} w-full`}>
         <ResponsiveContainer>
-          <LineChart data={filterData(selectedPeriod, data)} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <LineChart data={filterData(selectedPeriod, data)} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
-            <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
-            <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
+            <XAxis 
+              dataKey="year" 
+              stroke={isDarkMode ? '#fff' : '#666'}
+              tick={{ fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis 
+              domain={yDomain} 
+              stroke={isDarkMode ? '#fff' : '#666'}
+              tick={{ fontSize: 12 }}
+              width={40}
+            />
             <Tooltip
               contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
             />
-            <Legend />
+            <Legend 
+              wrapperStyle={{ fontSize: '12px', marginTop: '10px' }}
+            />
             {selectedCountries.map(country => (
               <Line
                 key={country}
                 type="monotone"
                 dataKey={country}
                 stroke={countryColors[country as keyof typeof countryColors]}
-                activeDot={isGridView ? false : { r: 6 }}
+                activeDot={isGridView ? false : { r: 4 }}
                 dot={isGridView ? false : { r: 2 }}
+                strokeWidth={2}
               />
             ))}
           </LineChart>
@@ -431,8 +446,8 @@ const GlobalInterestRateApp = () => {
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Global Economic Indicators</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold">Global Economic Indicators</h1>
           <div className="flex items-center space-x-2">
             <span>Light</span>
             <button
@@ -445,8 +460,12 @@ const GlobalInterestRateApp = () => {
           </div>
         </div>
         <div className="space-y-2">
-          <p className="text-gray-500 dark:text-gray-300">Powered by World Bank Economic Data</p>
-          <p className="text-sm text-gray-500 dark:text-gray-300">Available data ranges: Interest Rates (1960-Present), Employment & Unemployment (1990-Present), Government Debt (1989-Present)</p>
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-300">
+            Powered by World Bank Economic Data
+          </p>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-300">
+            Available data ranges: Interest Rates (1960-2023), Employment & Unemployment (1990-2023), Government Debt (1989-2023)
+          </p>
         </div>
 
         {/* Top Ad Placement - Now with surrounding content */}
@@ -468,11 +487,11 @@ const GlobalInterestRateApp = () => {
       </div>
 
       <div className="mb-4 space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <select
             value={selectedPeriod}
             onChange={(e) => handlePeriodChange(e.target.value)}
-            className={`w-[180px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full sm:w-[180px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           >
             <option value="all">All Time</option>
             <option value="20years">Last 20 Years</option>
@@ -482,7 +501,7 @@ const GlobalInterestRateApp = () => {
           <select
             value={selectedMetric}
             onChange={(e) => setSelectedMetric(e.target.value as typeof selectedMetric)}
-            className={`w-[180px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full sm:w-[180px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           >
             <option value="all">All Metrics</option>
             <option value="interest">Interest Rates</option>
@@ -495,7 +514,7 @@ const GlobalInterestRateApp = () => {
           </select>
           <button
             onClick={() => setIsGridView(!isGridView)}
-            className={`px-4 py-2 rounded-md ${
+            className={`w-full sm:w-auto px-4 py-2 rounded-md ${
               isDarkMode 
                 ? 'bg-blue-600 text-white hover:bg-blue-700' 
                 : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
@@ -509,29 +528,32 @@ const GlobalInterestRateApp = () => {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              // Update selected country for summary when there's an exact match
               const searchValue = e.target.value.toLowerCase();
               const matchedCountry = Object.keys(countryColors).find(
                 country => country.toLowerCase() === searchValue
               );
               setSelectedCountryForSummary(matchedCountry || '');
             }}
-            className={`w-[200px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full sm:w-[200px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           />
         </div>
-        <div className="flex items-center space-x-2">
-          <label htmlFor="maxYAxis" className={isDarkMode ? 'text-white' : ''}>Max Y-Axis Value (Interest Rate):</label>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          <label htmlFor="maxYAxis" className={`${isDarkMode ? 'text-white' : ''} whitespace-nowrap`}>
+            Max Y-Axis Value (Interest Rate):
+          </label>
           <input
             id="maxYAxis"
             type="number"
             value={maxYAxis}
             onChange={(e) => setMaxYAxis(Number(e.target.value))}
-            className={`w-[100px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full sm:w-[100px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {filteredCountries.map(country => (
-            <div key={country} className="flex items-center space-x-2">
+            <div key={country} className="flex items-center space-x-2 p-2">
               <input
                 type="checkbox"
                 id={country}
@@ -539,7 +561,7 @@ const GlobalInterestRateApp = () => {
                 onChange={() => handleCountryToggle(country)}
                 className="rounded border-gray-300"
               />
-              <label htmlFor={country} className={isDarkMode ? 'text-white' : ''}>{country}</label>
+              <label htmlFor={country} className={`${isDarkMode ? 'text-white' : ''} truncate`}>{country}</label>
             </div>
           ))}
         </div>
