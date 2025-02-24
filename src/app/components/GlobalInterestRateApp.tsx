@@ -283,11 +283,10 @@ const CountryEconomicSummary = ({
   );
 };
 
-// Add this hook before the GlobalInterestRateApp component
-const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T) => void] => {
+const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] => {
   // Get from local storage then
   // parse stored json or return initialValue
-  const readValue = () => {
+  const readValue = (): T => {
     // Prevent build error "window is undefined" but keep keep working
     if (typeof window === 'undefined') {
       return initialValue;
@@ -308,22 +307,51 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T) => vo
 
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to localStorage.
-  const setValue = (value: T) => {
+  const setValue = (value: T | ((prev: T) => T)) => {
     try {
+      // Allow value to be a function so we have same API as useState
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      
       // Save state
-      setStoredValue(value);
+      setStoredValue(valueToStore);
+      
       // Save to local storage
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(value));
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
         // If the value is isDarkMode, also update the HTML theme
         if (key === 'isDarkMode') {
-          document.documentElement.setAttribute('data-theme', value ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', valueToStore ? 'dark' : 'light');
+          // Also update body class for better dark mode support
+          document.body.classList.toggle('dark', valueToStore);
         }
       }
     } catch (error) {
       console.warn(`Error setting localStorage key "${key}":`, error);
     }
   };
+
+  // Listen for changes to this key from other tabs/windows
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === key && e.newValue !== null) {
+        try {
+          const newValue = JSON.parse(e.newValue) as T;
+          setStoredValue(newValue);
+          if (key === 'isDarkMode') {
+            document.documentElement.setAttribute('data-theme', newValue ? 'dark' : 'light');
+            document.body.classList.toggle('dark', newValue);
+          }
+        } catch (error) {
+          console.warn(`Error parsing storage change for key "${key}":`, error);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
+  }, [key]);
 
   return [storedValue, setValue];
 };
@@ -357,8 +385,6 @@ const GlobalInterestRateApp = () => {
     cpiData: []
   });
   const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
-
-  // Remove the old useEffect hooks for localStorage as they're now handled by the custom hook
 
   // Keep the data fetching useEffect
   useEffect(() => {
