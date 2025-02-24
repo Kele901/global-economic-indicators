@@ -335,14 +335,14 @@ const GlobalInterestRateApp = () => {
   }, [isDarkMode]);
 
   const filterData = (period: string, data: CountryData[]) => {
-    const currentYear = new Date().getFullYear();
+    const referenceYear = 2023; // Set fixed reference year to 2023
     switch (period) {
       case '20years':
-        return data.filter(item => item.year >= currentYear - 20);
+        return data.filter(item => item.year >= referenceYear - 20);
       case '10years':
-        return data.filter(item => item.year >= currentYear - 10);
+        return data.filter(item => item.year >= referenceYear - 10);
       case '5years':
-        return data.filter(item => item.year >= currentYear - 5);
+        return data.filter(item => item.year >= referenceYear - 5);
       default:
         return data;
     }

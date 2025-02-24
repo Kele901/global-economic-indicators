@@ -303,7 +303,7 @@ const interpolateMissingValues = (data: CountryData[]): CountryData[] => {
 
 export const fetchGlobalData = async () => {
   try {
-    const currentYear = new Date().getFullYear();
+    const endYear = 2023; // Set fixed end year to 2023
     const [
       interestRates, 
       employmentRates, 
@@ -313,13 +313,13 @@ export const fetchGlobalData = async () => {
       gdpGrowth,
       cpiData
     ] = await Promise.all([
-      fetchAllCountriesData(INDICATORS.INTEREST_RATE, 1960, currentYear),
-      fetchAllCountriesData(INDICATORS.EMPLOYMENT_RATE, 1990, currentYear),
-      fetchAllCountriesData(INDICATORS.UNEMPLOYMENT_RATE, 1990, currentYear),
-      fetchAllCountriesData(INDICATORS.GOVT_DEBT, 1989, currentYear),
-      fetchAllCountriesData(INDICATORS.INFLATION_RATE, 1960, currentYear),
-      fetchAllCountriesData(INDICATORS.GDP_GROWTH, 1960, currentYear),
-      fetchAllCountriesData(INDICATORS.CPI, 1960, currentYear)
+      fetchAllCountriesData(INDICATORS.INTEREST_RATE, 1960, endYear),
+      fetchAllCountriesData(INDICATORS.EMPLOYMENT_RATE, 1990, endYear),
+      fetchAllCountriesData(INDICATORS.UNEMPLOYMENT_RATE, 1990, endYear),
+      fetchAllCountriesData(INDICATORS.GOVT_DEBT, 1989, endYear),
+      fetchAllCountriesData(INDICATORS.INFLATION_RATE, 1960, endYear),
+      fetchAllCountriesData(INDICATORS.GDP_GROWTH, 1960, endYear),
+      fetchAllCountriesData(INDICATORS.CPI, 1960, endYear)
     ]);
 
     return {
