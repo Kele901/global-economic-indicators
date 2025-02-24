@@ -405,7 +405,7 @@ const GlobalInterestRateApp = () => {
   };
 
   const handleCountryToggle = (country: string) => {
-    setSelectedCountries(prev =>
+    setSelectedCountries((prev: string[]) =>
       prev.includes(country)
         ? prev.filter(c => c !== country)
         : [...prev, country]
