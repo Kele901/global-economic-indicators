@@ -34,6 +34,7 @@ const INDICATORS = {
   GOVT_DEBT: 'GC.DOD.TOTL.GD.ZS', // Central government debt, total (% of GDP)
   INFLATION_RATE: 'FP.CPI.TOTL.ZG', // Inflation, consumer prices (annual %)
   GDP_GROWTH: 'NY.GDP.MKTP.KD.ZG', // GDP growth (annual %)
+  CPI: 'FP.CPI.TOTL', // Consumer Price Index (2010 = 100)
   // Alternative indicators for better historical coverage
   LENDING_RATE: 'FR.INR.LEND', // Lending interest rate (%)
   // Multiple employment indicators for better historical coverage
@@ -67,6 +68,12 @@ const INDICATORS = {
     'NY.GDP.MKTP.KD.ZG',    // GDP growth (annual %)
     'NY.GDP.PCAP.KD.ZG',    // GDP per capita growth (annual %)
     'NY.GDP.MKTP.CD'        // GDP (current US$)
+  ],
+  // Multiple CPI indicators for better historical coverage
+  CPI_INDICATORS: [
+    'FP.CPI.TOTL',    // Consumer Price Index (2010 = 100)
+    'FP.CPI.TOTL.ZG', // Consumer price index (annual % change)
+    'NV.IND.MANF.ZS'  // Manufacturing, value added (% of GDP)
   ],
 };
 
@@ -198,6 +205,21 @@ const fetchGDPGrowthData = async (
   return [];
 };
 
+const fetchCPIData = async (
+  countryCode: string,
+  startYear: number,
+  endYear: number
+): Promise<{ year: number; value: number }[]> => {
+  // Try each CPI indicator in sequence until we get data
+  for (const indicator of INDICATORS.CPI_INDICATORS) {
+    const data = await fetchWorldBankData(countryCode, indicator, startYear, endYear, false);
+    if (data.length > 0) {
+      return data;
+    }
+  }
+  return [];
+};
+
 export const fetchAllCountriesData = async (
   indicator: string,
   startYear: number = 1960,
@@ -218,6 +240,8 @@ export const fetchAllCountriesData = async (
           data = await fetchInflationData(countryCode, startYear, endYear);
         } else if (indicator === INDICATORS.GDP_GROWTH) {
           data = await fetchGDPGrowthData(countryCode, startYear, endYear);
+        } else if (indicator === INDICATORS.CPI) {
+          data = await fetchCPIData(countryCode, startYear, endYear);
         } else {
           data = await fetchWorldBankData(countryCode, indicator, startYear, endYear);
         }
@@ -280,13 +304,22 @@ const interpolateMissingValues = (data: CountryData[]): CountryData[] => {
 export const fetchGlobalData = async () => {
   try {
     const currentYear = new Date().getFullYear();
-    const [interestRates, employmentRates, unemploymentRates, governmentDebt, inflationRates, gdpGrowth] = await Promise.all([
+    const [
+      interestRates, 
+      employmentRates, 
+      unemploymentRates, 
+      governmentDebt, 
+      inflationRates, 
+      gdpGrowth,
+      cpiData
+    ] = await Promise.all([
       fetchAllCountriesData(INDICATORS.INTEREST_RATE, 1960, currentYear),
       fetchAllCountriesData(INDICATORS.EMPLOYMENT_RATE, 1990, currentYear),
       fetchAllCountriesData(INDICATORS.UNEMPLOYMENT_RATE, 1990, currentYear),
       fetchAllCountriesData(INDICATORS.GOVT_DEBT, 1989, currentYear),
       fetchAllCountriesData(INDICATORS.INFLATION_RATE, 1960, currentYear),
-      fetchAllCountriesData(INDICATORS.GDP_GROWTH, 1960, currentYear)
+      fetchAllCountriesData(INDICATORS.GDP_GROWTH, 1960, currentYear),
+      fetchAllCountriesData(INDICATORS.CPI, 1960, currentYear)
     ]);
 
     return {
@@ -295,7 +328,8 @@ export const fetchGlobalData = async () => {
       unemploymentRates,
       governmentDebt,
       inflationRates,
-      gdpGrowth
+      gdpGrowth,
+      cpiData
     };
   } catch (error) {
     console.error('Error fetching global data:', error);
@@ -305,7 +339,8 @@ export const fetchGlobalData = async () => {
       unemploymentRates: [],
       governmentDebt: [],
       inflationRates: [],
-      gdpGrowth: []
+      gdpGrowth: [],
+      cpiData: []
     };
   }
 }; 

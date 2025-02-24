@@ -100,6 +100,16 @@ const GDPGrowthSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
   </div>
 );
 
+const CPISummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-sm">
+      The Consumer Price Index (CPI) measures changes in the price level of a weighted average market basket of consumer goods and services. 
+      The index is normalized to 100 in the base year (2010), making it easy to track price level changes over time. 
+      A rising CPI indicates increasing consumer prices and potentially decreased purchasing power.
+    </p>
+  </div>
+);
+
 const CountryEconomicSummary = ({ 
   country, 
   data, 
@@ -113,6 +123,7 @@ const CountryEconomicSummary = ({
     governmentDebt: CountryData[];
     inflationRates: CountryData[];
     gdpGrowth: CountryData[];
+    cpiData: CountryData[];
   };
   isDarkMode: boolean;
 }) => {
@@ -168,7 +179,8 @@ const CountryEconomicSummary = ({
     unemployment: calculateMetrics(data.unemploymentRates, country),
     debt: calculateMetrics(data.governmentDebt, country),
     inflation: calculateMetrics(data.inflationRates, country),
-    gdp: calculateMetrics(data.gdpGrowth, country)
+    gdp: calculateMetrics(data.gdpGrowth, country),
+    cpi: calculateMetrics(data.cpiData, country)
   };
 
   const getTrendEmoji = (trend: string) => {
@@ -250,6 +262,10 @@ const CountryEconomicSummary = ({
           <strong>GDP Growth:</strong> Currently at {metrics.gdp.recent.toFixed(1)}% 
           {getTrendEmoji(metrics.gdp.trend)} (Historical avg: {metrics.gdp.avg.toFixed(1)}%)
         </p>
+        <p>
+          <strong>Consumer Price Index:</strong> Currently at {metrics.cpi.recent.toFixed(1)} 
+          {getTrendEmoji(metrics.cpi.trend)} (2010 base year = 100, Historical avg: {metrics.cpi.avg.toFixed(1)})
+        </p>
 
         <div className={`mt-6 p-4 rounded-md ${isDarkMode ? 'bg-gray-600' : 'bg-blue-100'}`}>
           <p className="text-sm">
@@ -274,7 +290,7 @@ const GlobalInterestRateApp = () => {
   const [maxYAxis, setMaxYAxis] = useState(20);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isGridView, setIsGridView] = useState(false);
-  const [selectedMetric, setSelectedMetric] = useState<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'all'>('all');
+  const [selectedMetric, setSelectedMetric] = useState<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<{
@@ -284,13 +300,15 @@ const GlobalInterestRateApp = () => {
     governmentDebt: CountryData[];
     inflationRates: CountryData[];
     gdpGrowth: CountryData[];
+    cpiData: CountryData[];
   }>({
     interestRates: [],
     employmentRates: [],
     unemploymentRates: [],
     governmentDebt: [],
     inflationRates: [],
-    gdpGrowth: []
+    gdpGrowth: [],
+    cpiData: []
   });
   const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
 
@@ -463,7 +481,7 @@ const GlobalInterestRateApp = () => {
           </select>
           <select
             value={selectedMetric}
-            onChange={(e) => setSelectedMetric(e.target.value as 'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'all')}
+            onChange={(e) => setSelectedMetric(e.target.value as typeof selectedMetric)}
             className={`w-[180px] p-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           >
             <option value="all">All Metrics</option>
@@ -473,6 +491,7 @@ const GlobalInterestRateApp = () => {
             <option value="debt">Government Debt</option>
             <option value="inflation">Inflation Rates</option>
             <option value="gdp">GDP Growth</option>
+            <option value="cpi">Consumer Price Index</option>
           </select>
           <button
             onClick={() => setIsGridView(!isGridView)}
@@ -605,6 +624,16 @@ const GlobalInterestRateApp = () => {
             yDomain={[-10, 15]}
             subtitle="Vertical axis shows annual GDP growth as a percentage, where 3 = 3% growth in economic output"
             summary={GDPGrowthSummary}
+          />
+        )}
+
+        {(selectedMetric === 'cpi' || selectedMetric === 'all') && (
+          <Chart
+            title="Consumer Price Index"
+            data={data.cpiData}
+            yDomain={[0, 200]}
+            subtitle="Base year 2010 = 100. Values above 100 indicate price increases since 2010, below 100 indicate decreases."
+            summary={CPISummary}
           />
         )}
       </div>
