@@ -284,76 +284,62 @@ const CountryEconomicSummary = ({
 };
 
 const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] => {
-  // Get from local storage then
-  // parse stored json or return initialValue
-  const readValue = (): T => {
-    // Prevent build error "window is undefined" but keep keep working
+  // Initialize state with a function to avoid unnecessary localStorage access on every render
+  const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return initialValue;
     }
 
     try {
       const item = window.localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
+      return item ? JSON.parse(item) : initialValue;
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
-  };
+  });
 
-  // State to store our value
-  // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState<T>(readValue);
+  // Sync with localStorage and update theme when value changes
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
 
-  // Return a wrapped version of useState's setter function that ...
-  // ... persists the new value to localStorage.
-  const setValue = (value: T | ((prev: T) => T)) => {
     try {
-      // Allow value to be a function so we have same API as useState
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      // Save state
-      setStoredValue(valueToStore);
-      
-      // Save to local storage
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        // If the value is isDarkMode, also update the HTML theme
-        if (key === 'isDarkMode') {
-          document.documentElement.setAttribute('data-theme', valueToStore ? 'dark' : 'light');
-          // Also update body class for better dark mode support
-          document.body.classList.toggle('dark', valueToStore);
-        }
+      window.localStorage.setItem(key, JSON.stringify(storedValue));
+
+      // Handle theme-specific updates
+      if (key === 'isDarkMode') {
+        document.documentElement.setAttribute('data-theme', storedValue ? 'dark' : 'light');
+        document.body.classList.toggle('dark', storedValue as boolean);
       }
     } catch (error) {
       console.warn(`Error setting localStorage key "${key}":`, error);
     }
-  };
+  }, [key, storedValue]);
 
-  // Listen for changes to this key from other tabs/windows
+  // Handle storage events from other tabs/windows
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key && e.newValue !== null) {
         try {
           const newValue = JSON.parse(e.newValue) as T;
           setStoredValue(newValue);
-          if (key === 'isDarkMode') {
-            document.documentElement.setAttribute('data-theme', newValue ? 'dark' : 'light');
-            document.body.classList.toggle('dark', newValue);
-          }
         } catch (error) {
           console.warn(`Error parsing storage change for key "${key}":`, error);
         }
       }
     };
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', handleStorageChange);
-      return () => window.removeEventListener('storage', handleStorageChange);
-    }
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [key]);
 
-  return [storedValue, setValue];
+  return [storedValue, setStoredValue];
 };
 
 const GlobalInterestRateApp = () => {
@@ -408,7 +394,10 @@ const GlobalInterestRateApp = () => {
   // Initialize theme on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+      const savedTheme = window.localStorage.getItem('isDarkMode');
+      const initialDarkMode = savedTheme ? JSON.parse(savedTheme) : false;
+      document.documentElement.setAttribute('data-theme', initialDarkMode ? 'dark' : 'light');
+      document.body.classList.toggle('dark', initialDarkMode);
     }
   }, []);
 
