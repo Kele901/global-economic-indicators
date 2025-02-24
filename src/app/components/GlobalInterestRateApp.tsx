@@ -283,14 +283,60 @@ const CountryEconomicSummary = ({
   );
 };
 
+// Add this hook before the GlobalInterestRateApp component
+const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T) => void] => {
+  // Get from local storage then
+  // parse stored json or return initialValue
+  const readValue = () => {
+    // Prevent build error "window is undefined" but keep keep working
+    if (typeof window === 'undefined') {
+      return initialValue;
+    }
+
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? (JSON.parse(item) as T) : initialValue;
+    } catch (error) {
+      console.warn(`Error reading localStorage key "${key}":`, error);
+      return initialValue;
+    }
+  };
+
+  // State to store our value
+  // Pass initial state function to useState so logic is only executed once
+  const [storedValue, setStoredValue] = useState<T>(readValue);
+
+  // Return a wrapped version of useState's setter function that ...
+  // ... persists the new value to localStorage.
+  const setValue = (value: T) => {
+    try {
+      // Save state
+      setStoredValue(value);
+      // Save to local storage
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(key, JSON.stringify(value));
+        // If the value is isDarkMode, also update the HTML theme
+        if (key === 'isDarkMode') {
+          document.documentElement.setAttribute('data-theme', value ? 'dark' : 'light');
+        }
+      }
+    } catch (error) {
+      console.warn(`Error setting localStorage key "${key}":`, error);
+    }
+  };
+
+  return [storedValue, setValue];
+};
+
 const GlobalInterestRateApp = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('all');
-  const [selectedCountries, setSelectedCountries] = useState(Object.keys(countryColors).slice(0, 9));
+  const [selectedPeriod, setSelectedPeriod] = useLocalStorage('selectedPeriod', 'all');
+  const [selectedCountries, setSelectedCountries] = useLocalStorage('selectedCountries', Object.keys(countryColors).slice(0, 9));
+  const [maxYAxis, setMaxYAxis] = useLocalStorage('maxYAxis', 20);
+  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isGridView, setIsGridView] = useLocalStorage('isGridView', false);
+  const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'all'>('selectedMetric', 'all');
+  
   const [searchTerm, setSearchTerm] = useState('');
-  const [maxYAxis, setMaxYAxis] = useState(20);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isGridView, setIsGridView] = useState(false);
-  const [selectedMetric, setSelectedMetric] = useState<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<{
@@ -312,6 +358,9 @@ const GlobalInterestRateApp = () => {
   });
   const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
 
+  // Remove the old useEffect hooks for localStorage as they're now handled by the custom hook
+
+  // Keep the data fetching useEffect
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -330,9 +379,12 @@ const GlobalInterestRateApp = () => {
     loadData();
   }, []);
 
+  // Initialize theme on mount
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
+    if (typeof window !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    }
+  }, []);
 
   const filterData = (period: string, data: CountryData[]) => {
     const referenceYear = 2023; // Set fixed reference year to 2023
