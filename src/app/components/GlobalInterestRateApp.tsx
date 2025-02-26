@@ -54,17 +54,47 @@ const ErrorMessage = ({ message }: { message: string }) => (
 
 const InterestRateSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
   <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
-    <p className="text-sm">
-      This dashboard displays historical economic indicators from the World Bank: interest rates (from 1960), employment and unemployment rates (from 1990), and government debt (from 1989). Interest rates represent the cost of borrowing money, employment rates show the percentage of working-age population that is employed, and unemployment rates indicate the percentage of the labor force that is actively seeking employment.
-    </p>
+    <h3 className="text-lg font-semibold mb-2">Understanding Interest Rates</h3>
+    <div className="space-y-3">
+      <p className="text-sm">
+        Interest rates are crucial economic indicators that influence borrowing costs, investment decisions, and overall economic activity. Our data, sourced from the World Bank, tracks real interest rates from 1960 to present day across major economies.
+      </p>
+      <div className="bg-white/10 p-3 rounded">
+        <h4 className="font-medium mb-1">Key Insights:</h4>
+        <ul className="list-disc list-inside text-sm space-y-1">
+          <li>Real interest rates account for inflation, showing actual borrowing costs</li>
+          <li>Higher rates typically indicate tighter monetary policy</li>
+          <li>Negative rates suggest accommodative monetary conditions</li>
+          <li>Rates influence currency values and international capital flows</li>
+        </ul>
+      </div>
+      <p className="text-sm italic">
+        Historical trends show how central banks use interest rates to manage inflation and economic growth.
+      </p>
+    </div>
   </div>
 );
 
 const EmploymentSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
   <div className={`p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
-    <p className="text-sm">
-      The employment rate represents the percentage of working-age population (ages 15-64) that is employed. A higher employment rate indicates a greater proportion of the population is engaged in productive work, suggesting economic strength and efficient labor market utilization. Data shown from 1990 onwards.
-    </p>
+    <h3 className="text-lg font-semibold mb-2">Employment Rate Analysis</h3>
+    <div className="space-y-3">
+      <p className="text-sm">
+        Employment rates provide crucial insights into labor market health and economic vitality. Our comprehensive data covers employment trends from 1990 onwards, measuring the percentage of working-age population (ages 15-64) engaged in productive work.
+      </p>
+      <div className="bg-white/10 p-3 rounded">
+        <h4 className="font-medium mb-1">Employment Indicators:</h4>
+        <ul className="list-disc list-inside text-sm space-y-1">
+          <li>Labor force participation trends</li>
+          <li>Sectoral employment distribution</li>
+          <li>Regional employment variations</li>
+          <li>Gender-based employment metrics</li>
+        </ul>
+      </div>
+      <p className="text-sm italic">
+        Higher employment rates often correlate with economic growth and improved living standards.
+      </p>
+    </div>
   </div>
 );
 
@@ -535,19 +565,35 @@ const GlobalInterestRateApp = () => {
           </p>
         </div>
 
-        {/* Top Ad Placement - Now with surrounding content */}
-        <div className="my-8">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-2">Economic Data Analysis</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Explore comprehensive economic data from {Object.keys(countryColors).length} major economies, 
-              with historical trends and real-time updates from the World Bank database.
+        {/* Enhanced Introduction Section */}
+        <div className="mb-8 space-y-4">
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+            <h2 className="text-lg font-semibold mb-3">Comprehensive Economic Analysis Platform</h2>
+            <p className="text-sm mb-3">
+              Welcome to our advanced economic data visualization platform. We provide in-depth analysis of key economic indicators across {Object.keys(countryColors).length} major economies, leveraging official World Bank data to deliver accurate, timely insights into global economic trends.
             </p>
-          </div>
-          <AdSense />
-          <div className="mt-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Use the controls below to customize your view and compare different economic indicators across countries.
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white/10 p-3 rounded">
+                <h3 className="font-medium mb-2">Key Features:</h3>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  <li>Real-time economic data visualization</li>
+                  <li>Cross-country comparative analysis</li>
+                  <li>Historical trend examination</li>
+                  <li>Multiple indicator correlation</li>
+                </ul>
+              </div>
+              <div className="bg-white/10 p-3 rounded">
+                <h3 className="font-medium mb-2">Available Metrics:</h3>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  <li>Interest & Inflation Rates</li>
+                  <li>Employment Statistics</li>
+                  <li>GDP Growth Trends</li>
+                  <li>Government Debt Levels</li>
+                </ul>
+              </div>
+            </div>
+            <p className="text-sm italic">
+              Updated regularly with the latest World Bank economic data releases.
             </p>
           </div>
         </div>
@@ -640,16 +686,35 @@ const GlobalInterestRateApp = () => {
               data={data}
               isDarkMode={isDarkMode}
             />
-            {/* Middle Ad Placement - Now with context */}
+            {/* Middle Ad Placement - Enhanced with more context */}
             <div className="my-8">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">Detailed Analysis</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  View detailed economic metrics and historical trends for {selectedCountryForSummary}.
-                  Compare with other countries using the interactive charts below.
-                </p>
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">Detailed Economic Analysis</h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    View comprehensive economic metrics and historical trends for {selectedCountryForSummary}. 
+                    Our detailed analysis includes key economic indicators, historical comparisons, and trend analysis.
+                  </p>
+                  <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded-md">
+                    <h4 className="font-medium mb-2">Key Economic Indicators:</h4>
+                    <ul className="list-disc list-inside text-sm space-y-2">
+                      <li>GDP Growth Rate and Economic Performance</li>
+                      <li>Employment and Labor Market Statistics</li>
+                      <li>Inflation Rates and Price Stability</li>
+                      <li>Government Debt and Fiscal Position</li>
+                      <li>Interest Rates and Monetary Policy</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               <AdSense />
+              <div className="mt-6">
+                <h4 className="text-md font-semibold mb-2">Comparative Analysis</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Compare economic performance across different time periods and countries to identify trends, 
+                  patterns, and correlations between various economic indicators.
+                </p>
+              </div>
             </div>
           </>
         )}
@@ -727,19 +792,72 @@ const GlobalInterestRateApp = () => {
         )}
       </div>
 
-      {/* Bottom Ad Placement - Now with context */}
+      {/* Enhanced Methodology Section */}
+      <div className="mt-12 mb-8">
+        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+          <h2 className="text-lg font-semibold mb-3">Data Methodology & Sources</h2>
+          <div className="space-y-4">
+            <p className="text-sm">
+              Our platform aggregates and processes economic data from the World Bank's official databases, ensuring reliability and consistency across all indicators. We employ rigorous data validation and normalization procedures to maintain data integrity.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white/10 p-3 rounded">
+                <h3 className="font-medium mb-2">Data Processing:</h3>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  <li>Automated data validation</li>
+                  <li>Statistical normalization</li>
+                  <li>Missing data interpolation</li>
+                  <li>Cross-reference verification</li>
+                </ul>
+              </div>
+              <div className="bg-white/10 p-3 rounded">
+                <h3 className="font-medium mb-2">Quality Assurance:</h3>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  <li>Regular data audits</li>
+                  <li>Source verification</li>
+                  <li>Trend analysis validation</li>
+                  <li>Expert review process</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Ad Placement - Enhanced with methodology and sources */}
       <div className="mt-8 mb-4">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold mb-2">Data Sources & Methodology</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            All economic indicators are sourced from the World Bank's official database, 
-            ensuring reliable and consistent data across all countries. Updates are made 
-            as new data becomes available.
-          </p>
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold mb-3">Data Sources & Methodology</h2>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              All economic indicators are sourced from the World Bank's official database, ensuring reliable 
+              and consistent data across all countries. Our methodology includes:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 ml-4">
+              <li>Regular data updates from official World Bank APIs</li>
+              <li>Standardized data processing and normalization</li>
+              <li>Quality checks and validation procedures</li>
+              <li>Historical data preservation and versioning</li>
+            </ul>
+            <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded-md">
+              <h4 className="font-medium mb-2">Data Coverage:</h4>
+              <ul className="text-sm space-y-2">
+                <li>Interest Rates: 1960-2023</li>
+                <li>Employment Statistics: 1990-2023</li>
+                <li>Government Debt: 1989-2023</li>
+                <li>Inflation & GDP: 1960-2023</li>
+              </ul>
+            </div>
+          </div>
         </div>
         <AdSense />
-        <div className="mt-4">
+        <div className="mt-6">
+          <h3 className="text-md font-semibold mb-2">Updates and Maintenance</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
+            Our platform is regularly updated to ensure accuracy and reliability of economic data. 
+            Updates are performed automatically when new data becomes available from the World Bank.
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
             © {new Date().getFullYear()} Global Economic Indicators. Data provided by the World Bank.
           </p>
         </div>

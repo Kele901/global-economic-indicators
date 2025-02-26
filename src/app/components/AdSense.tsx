@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
@@ -8,52 +8,43 @@ declare global {
   }
 }
 
-const AdSense: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const adRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000); // Set a reasonable timeout for ad loading
-
     try {
-      if (typeof window !== 'undefined') {
-        // Check if the AdSense script is loaded
-        if (!window.adsbygoogle) {
-          setError('AdSense script not loaded');
-          setIsLoading(false);
-          return;
-        }
+      if (typeof window !== 'undefined' && adRef.current) {
+        // Push ads only after content is loaded
+        const pushAd = () => {
+          if (window.adsbygoogle) {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          }
+        };
 
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        // Delay ad loading slightly to ensure content is ready
+        setTimeout(pushAd, 100);
       }
     } catch (err) {
       console.error('AdSense error:', err);
-      setError('Failed to load advertisement');
-      setIsLoading(false);
     }
-
-    return () => clearTimeout(timeout);
   }, []);
 
-  if (error) {
-    // Return an empty div with min height to prevent layout shift
-    return <div className="min-h-[100px] bg-gray-50 dark:bg-gray-800" />;
-  }
-
   return (
-    <div className="relative min-h-[100px]">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-          <div className="animate-pulse text-sm text-gray-500 dark:text-gray-400">
-            Loading advertisement...
-          </div>
-        </div>
-      )}
+    <div 
+      ref={adRef} 
+      className={`my-8 min-h-[280px] bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden ${className}`}
+    >
+      <div className="text-center text-sm text-gray-500 dark:text-gray-400 p-2">
+        Advertisement
+      </div>
       <ins
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{
+          display: 'block',
+          width: '100%',
+          minHeight: '250px',
+          backgroundColor: 'transparent',
+        }}
         data-ad-client="ca-pub-1726759813423594"
         data-ad-slot="4834833787"
         data-ad-format="auto"
