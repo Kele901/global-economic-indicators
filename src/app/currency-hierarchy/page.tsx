@@ -1,13 +1,224 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AdSense from '../components/AdSense';
+import { calculateCurrencyPairs } from '../services/forex';
+
+interface CurrencyInfo {
+  code: string;
+  name: string;
+  description: string;
+  tier: number;
+  exchangeRates?: {
+    [key: string]: number;
+  };
+}
+
+const currencyData: { [key: string]: CurrencyInfo } = {
+  USD: {
+    code: 'USD',
+    name: 'US Dollar',
+    description: 'Global reserve currency, dominates international trade and foreign exchange reserves.',
+    tier: 1
+  },
+  EUR: {
+    code: 'EUR',
+    name: 'Euro',
+    description: 'Second most traded currency, official currency of the Eurozone.',
+    tier: 2
+  },
+  JPY: {
+    code: 'JPY',
+    name: 'Japanese Yen',
+    description: 'Major Asian currency, known for its role in carry trades.',
+    tier: 2
+  },
+  GBP: {
+    code: 'GBP',
+    name: 'British Pound',
+    description: 'Oldest currency still in use, major reserve currency.',
+    tier: 2
+  },
+  CNY: {
+    code: 'CNY',
+    name: 'Chinese Yuan',
+    description: 'Growing international currency, backed by world\'s second-largest economy.',
+    tier: 3
+  },
+  CHF: {
+    code: 'CHF',
+    name: 'Swiss Franc',
+    description: 'Traditional safe-haven currency, known for stability.',
+    tier: 3
+  },
+  CAD: {
+    code: 'CAD',
+    name: 'Canadian Dollar',
+    description: 'Commodity currency, closely tied to natural resources.',
+    tier: 3
+  },
+  AUD: {
+    code: 'AUD',
+    name: 'Australian Dollar',
+    description: 'Major commodity currency, highly traded in Asian markets.',
+    tier: 3
+  },
+  SGD: {
+    code: 'SGD',
+    name: 'Singapore Dollar',
+    description: 'Major Asian financial hub currency, known for stability.',
+    tier: 3
+  }
+};
 
 const CurrencyHierarchyPage = () => {
+  const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [hoveredCurrency, setHoveredCurrency] = useState<string | null>(null);
+  const [exchangeRates, setExchangeRates] = useState<{ [key: string]: { [key: string]: number } }>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const currencies = Object.keys(currencyData);
+        const rates: { [key: string]: { [key: string]: number } } = {};
+
+        // Fetch rates for each currency
+        for (const currency of currencies) {
+          const pairs = await calculateCurrencyPairs(
+            currency,
+            currencies.filter(c => c !== currency)
+          );
+          rates[currency] = {};
+          pairs.forEach(pair => {
+            rates[currency][pair.to] = pair.rate;
+          });
+        }
+
+        setExchangeRates(rates);
+      } catch (err) {
+        setError('Failed to fetch exchange rates');
+        console.error('Error fetching rates:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRates();
+    // Refresh rates every 5 minutes
+    const interval = setInterval(fetchRates, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleCurrencyClick = (currency: string) => {
+    setSelectedCurrency(selectedCurrency === currency ? null : currency);
+  };
+
+  const handleCurrencyHover = (
+    event: React.MouseEvent<SVGElement>,
+    currency: string | null
+  ) => {
+    if (currency) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top + scrollTop
+      });
+    }
+    setHoveredCurrency(currency);
+  };
+
+  const getCurrencyStyle = (currency: string) => {
+    const isSelected = selectedCurrency === currency;
+    const isHovered = hoveredCurrency === currency;
+    
+    return {
+      transform: isSelected ? 'scale(1.2)' : 'scale(1)',
+      filter: isSelected || isHovered ? 'brightness(1.2)' : 'none',
+      transition: 'all 0.3s ease',
+      cursor: 'pointer'
+    };
+  };
+
+  const formatRate = (rate: number) => {
+    return rate.toFixed(4);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Global Currency Hierarchy</h1>
-      <div className="w-full overflow-x-auto">
+      
+      {/* Loading and Error States */}
+      {loading && (
+        <div className="mb-4 text-blue-600 dark:text-blue-400">
+          Loading exchange rates...
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
+      
+      {/* Currency Details Panel with Exchange Rates */}
+      {selectedCurrency && currencyData[selectedCurrency] && (
+        <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+          <h2 className="text-xl font-bold mb-2">
+            {currencyData[selectedCurrency].code} - {currencyData[selectedCurrency].name}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            {currencyData[selectedCurrency].description}
+          </p>
+          
+          {/* Exchange Rates Section */}
+          {exchangeRates[selectedCurrency] && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Exchange Rates</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {Object.entries(exchangeRates[selectedCurrency])
+                  .sort(([, rateA], [, rateB]) => rateB - rateA)
+                  .map(([currency, rate]) => (
+                    <div 
+                      key={currency}
+                      className="p-2 bg-gray-50 dark:bg-gray-700 rounded"
+                    >
+                      <div className="font-medium">{currency}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        1 {selectedCurrency} = {formatRate(rate)} {currency}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="w-full overflow-x-auto relative">
+        {/* Tooltip with Exchange Rate */}
+        {hoveredCurrency && currencyData[hoveredCurrency] && (
+          <div
+            className="absolute z-10 bg-black bg-opacity-80 text-white p-2 rounded pointer-events-none"
+            style={{
+              left: `${tooltipPosition.x}px`,
+              top: `${tooltipPosition.y - 40}px`,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <div>{currencyData[hoveredCurrency].name}</div>
+            {selectedCurrency && exchangeRates[selectedCurrency]?.[hoveredCurrency] && (
+              <div className="text-sm opacity-80">
+                1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency][hoveredCurrency])} {hoveredCurrency}
+              </div>
+            )}
+          </div>
+        )}
+
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" className="w-full h-auto">
           {/* Gradient Definitions */}
           <defs>
@@ -160,42 +371,105 @@ const CurrencyHierarchyPage = () => {
           
           {/* Tier 1: Global Reserve Currencies */}
           {/* USD */}
-          <circle cx="400" cy="150" r="30" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
-          <text x="400" y="155" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">USD</text>
+          <g
+            style={getCurrencyStyle('USD')}
+            onClick={() => handleCurrencyClick('USD')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'USD')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="400" cy="150" r="30" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
+            <text x="400" y="155" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">USD</text>
+          </g>
           
           {/* Tier 2: Major Currencies */}
           {/* EUR */}
-          <circle cx="200" cy="250" r="24" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-          <text x="200" y="255" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">EUR</text>
+          <g
+            style={getCurrencyStyle('EUR')}
+            onClick={() => handleCurrencyClick('EUR')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'EUR')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="200" cy="250" r="24" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="200" y="255" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">EUR</text>
+          </g>
           
           {/* JPY */}
-          <circle cx="400" cy="250" r="24" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-          <text x="400" y="255" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">JPY</text>
+          <g
+            style={getCurrencyStyle('JPY')}
+            onClick={() => handleCurrencyClick('JPY')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'JPY')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="400" cy="250" r="24" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="400" y="255" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">JPY</text>
+          </g>
           
           {/* GBP */}
-          <circle cx="600" cy="250" r="24" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-          <text x="600" y="255" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">GBP</text>
+          <g
+            style={getCurrencyStyle('GBP')}
+            onClick={() => handleCurrencyClick('GBP')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'GBP')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="600" cy="250" r="24" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="600" y="255" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">GBP</text>
+          </g>
           
           {/* Tier 3: Regional Currencies */}
           {/* CNY */}
-          <circle cx="100" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-          <text x="100" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">CNY</text>
+          <g
+            style={getCurrencyStyle('CNY')}
+            onClick={() => handleCurrencyClick('CNY')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'CNY')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="100" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
+            <text x="100" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">CNY</text>
+          </g>
           
           {/* CHF */}
-          <circle cx="230" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-          <text x="230" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">CHF</text>
+          <g
+            style={getCurrencyStyle('CHF')}
+            onClick={() => handleCurrencyClick('CHF')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'CHF')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="230" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
+            <text x="230" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">CHF</text>
+          </g>
           
           {/* CAD */}
-          <circle cx="360" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-          <text x="360" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">CAD</text>
+          <g
+            style={getCurrencyStyle('CAD')}
+            onClick={() => handleCurrencyClick('CAD')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'CAD')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="360" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
+            <text x="360" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">CAD</text>
+          </g>
           
           {/* AUD */}
-          <circle cx="490" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-          <text x="490" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">AUD</text>
+          <g
+            style={getCurrencyStyle('AUD')}
+            onClick={() => handleCurrencyClick('AUD')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'AUD')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="490" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
+            <text x="490" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">AUD</text>
+          </g>
           
           {/* SGD */}
-          <circle cx="620" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-          <text x="620" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">SGD</text>
+          <g
+            style={getCurrencyStyle('SGD')}
+            onClick={() => handleCurrencyClick('SGD')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'SGD')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="620" cy="350" r="18" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
+            <text x="620" y="355" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="12" fontWeight="bold" fill="#ffffff">SGD</text>
+          </g>
           
           {/* Tier 4: Local Currencies */}
           {/* MXN */}
