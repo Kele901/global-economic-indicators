@@ -424,10 +424,56 @@ const CurrencyHierarchyPage = () => {
           <circle cx="300" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
           <text x="300" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">BRL</text>
 
-          {/* Continue updating other Tier 4 currencies... */}
+          {/* Connection paths */}
+          <g stroke="url(#connectionGradient)" strokeWidth="2" opacity="0.4">
+            {/* USD to Tier 2 connections */}
+            <path d="M600,270 Q600,322 300,375" fill="none"/>
+            <path d="M600,270 L600,375" fill="none"/>
+            <path d="M600,270 Q600,322 900,375" fill="none"/>
 
-          {/* Update connection paths with new coordinates */}
-          {/* Add connection paths here with updated coordinates */}
+            {/* EUR to Tier 3 connections */}
+            <path d="M300,411 Q300,468 150,525" fill="none"/>
+            <path d="M300,411 Q300,468 345,525" fill="none"/>
+
+            {/* JPY to Tier 3 connections */}
+            <path d="M600,411 Q600,468 540,525" fill="none"/>
+            <path d="M600,411 Q600,468 735,525" fill="none"/>
+
+            {/* GBP to Tier 3 connections */}
+            <path d="M900,411 Q900,468 930,525" fill="none"/>
+
+            {/* Tier 3 to Tier 4 connections */}
+            <path d="M150,552 Q150,613 195,675" fill="none"/>
+            <path d="M345,552 Q345,613 300,675" fill="none"/>
+          </g>
+
+          {/* Add glowing effect for selected currency connections */}
+          {selectedCurrency && (
+            <g stroke="#ffffff" strokeWidth="3" opacity="0.6" filter="url(#glow1)">
+              {selectedCurrency === 'USD' && (
+                <>
+                  <path d="M600,270 Q600,322 300,375" fill="none"/>
+                  <path d="M600,270 L600,375" fill="none"/>
+                  <path d="M600,270 Q600,322 900,375" fill="none"/>
+                </>
+              )}
+              {selectedCurrency === 'EUR' && (
+                <>
+                  <path d="M300,411 Q300,468 150,525" fill="none"/>
+                  <path d="M300,411 Q300,468 345,525" fill="none"/>
+                </>
+              )}
+              {selectedCurrency === 'JPY' && (
+                <>
+                  <path d="M600,411 Q600,468 540,525" fill="none"/>
+                  <path d="M600,411 Q600,468 735,525" fill="none"/>
+                </>
+              )}
+              {selectedCurrency === 'GBP' && (
+                <path d="M900,411 Q900,468 930,525" fill="none"/>
+              )}
+            </g>
+          )}
         </svg>
       </div>
       <div className="mt-8">
