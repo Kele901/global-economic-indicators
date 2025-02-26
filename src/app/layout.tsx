@@ -45,16 +45,30 @@ export default function RootLayout({
         <div className="flex flex-col min-h-screen">
           <header className="bg-white dark:bg-gray-800 shadow-sm">
             <div className="max-w-4xl mx-auto py-4 px-4">
-              <nav className="flex justify-between items-center">
+              <nav className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div className="text-lg font-semibold">Global Economic Indicators</div>
-                <a 
-                  href="https://github.com/Kele901/global-economic-indicators" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  View on GitHub
-                </a>
+                <div className="flex items-center gap-6">
+                  <a 
+                    href="/" 
+                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    Dashboard
+                  </a>
+                  <a 
+                    href="/currency-hierarchy" 
+                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    Currency Hierarchy
+                  </a>
+                  <a 
+                    href="https://github.com/Kele901/global-economic-indicators" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    View on GitHub
+                  </a>
+                </div>
               </nav>
             </div>
           </header>
