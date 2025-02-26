@@ -68,6 +68,42 @@ const currencyData: { [key: string]: CurrencyInfo } = {
     name: 'Singapore Dollar',
     description: 'Major Asian financial hub currency, known for stability.',
     tier: 3
+  },
+  MXN: {
+    code: 'MXN',
+    name: 'Mexican Peso',
+    description: 'Most traded currency in Latin America.',
+    tier: 4
+  },
+  BRL: {
+    code: 'BRL',
+    name: 'Brazilian Real',
+    description: 'Major South American currency.',
+    tier: 4
+  },
+  INR: {
+    code: 'INR',
+    name: 'Indian Rupee',
+    description: 'Currency of one of the world\'s largest economies.',
+    tier: 4
+  },
+  ZAR: {
+    code: 'ZAR',
+    name: 'South African Rand',
+    description: 'Most traded African currency.',
+    tier: 4
+  },
+  RUB: {
+    code: 'RUB',
+    name: 'Russian Ruble',
+    description: 'Major commodity currency.',
+    tier: 4
+  },
+  TRY: {
+    code: 'TRY',
+    name: 'Turkish Lira',
+    description: 'Important regional currency in the Middle East.',
+    tier: 4
   }
 };
 
@@ -417,12 +453,70 @@ const CurrencyHierarchyPage = () => {
 
           {/* Update Tier 4 currencies */}
           {/* MXN */}
-          <circle cx="195" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-          <text x="195" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">MXN</text>
+          <g
+            style={getCurrencyStyle('MXN')}
+            onClick={() => handleCurrencyClick('MXN')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'MXN')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="195" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
+            <text x="195" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">MXN</text>
+          </g>
 
           {/* BRL */}
-          <circle cx="300" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-          <text x="300" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">BRL</text>
+          <g
+            style={getCurrencyStyle('BRL')}
+            onClick={() => handleCurrencyClick('BRL')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'BRL')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="300" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
+            <text x="300" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">BRL</text>
+          </g>
+
+          {/* INR */}
+          <g
+            style={getCurrencyStyle('INR')}
+            onClick={() => handleCurrencyClick('INR')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'INR')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="450" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
+            <text x="450" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">INR</text>
+          </g>
+
+          {/* ZAR */}
+          <g
+            style={getCurrencyStyle('ZAR')}
+            onClick={() => handleCurrencyClick('ZAR')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'ZAR')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="600" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
+            <text x="600" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">ZAR</text>
+          </g>
+
+          {/* RUB */}
+          <g
+            style={getCurrencyStyle('RUB')}
+            onClick={() => handleCurrencyClick('RUB')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'RUB')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="750" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
+            <text x="750" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">RUB</text>
+          </g>
+
+          {/* TRY */}
+          <g
+            style={getCurrencyStyle('TRY')}
+            onClick={() => handleCurrencyClick('TRY')}
+            onMouseEnter={(e) => handleCurrencyHover(e, 'TRY')}
+            onMouseLeave={() => handleCurrencyHover(null, null)}
+          >
+            <circle cx="900" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
+            <text x="900" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">TRY</text>
+          </g>
 
           {/* Connection paths */}
           <g stroke="url(#connectionGradient)" strokeWidth="2" opacity="0.4">
@@ -445,6 +539,10 @@ const CurrencyHierarchyPage = () => {
             {/* Tier 3 to Tier 4 connections */}
             <path d="M150,552 Q150,613 195,675" fill="none"/>
             <path d="M345,552 Q345,613 300,675" fill="none"/>
+            <path d="M540,552 Q540,613 450,675" fill="none"/>
+            <path d="M735,552 Q735,613 600,675" fill="none"/>
+            <path d="M735,552 Q735,613 750,675" fill="none"/>
+            <path d="M930,552 Q930,613 900,675" fill="none"/>
           </g>
 
           {/* Add glowing effect for selected currency connections */}
@@ -471,6 +569,24 @@ const CurrencyHierarchyPage = () => {
               )}
               {selectedCurrency === 'GBP' && (
                 <path d="M900,411 Q900,468 930,525" fill="none"/>
+              )}
+              {selectedCurrency === 'CNY' && (
+                <path d="M150,552 Q150,613 195,675" fill="none"/>
+              )}
+              {selectedCurrency === 'CHF' && (
+                <path d="M345,552 Q345,613 300,675" fill="none"/>
+              )}
+              {selectedCurrency === 'CAD' && (
+                <path d="M540,552 Q540,613 450,675" fill="none"/>
+              )}
+              {selectedCurrency === 'AUD' && (
+                <>
+                  <path d="M735,552 Q735,613 600,675" fill="none"/>
+                  <path d="M735,552 Q735,613 750,675" fill="none"/>
+                </>
+              )}
+              {selectedCurrency === 'SGD' && (
+                <path d="M930,552 Q930,613 900,675" fill="none"/>
               )}
             </g>
           )}
