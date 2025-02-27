@@ -1,26 +1,19 @@
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-};
-
 export const metadata: Metadata = {
-  title: {
-    template: '%s | Global Economic Indicators',
-    default: 'Global Economic Indicators',
-  },
-  description: 'Interactive visualization of global economic indicators and currency relationships',
+  title: 'Global Economic Indicators Dashboard | World Bank Data Analysis',
+  description: 'Comprehensive analysis of global economic indicators including interest rates, employment, GDP, inflation, and debt across major economies. Data sourced from the World Bank.',
   keywords: 'economic indicators, world bank data, global economy, interest rates, employment rates, GDP growth, inflation rates, economic analysis, financial data, economic trends',
   authors: [{ name: 'Global Economic Indicators' }],
   creator: 'Global Economic Indicators',
   publisher: 'Global Economic Indicators',
   robots: 'index, follow',
+  viewport: 'width=device-width, initial-scale=1',
   openGraph: {
     type: 'website',
     title: 'Global Economic Indicators Dashboard',
@@ -38,6 +31,7 @@ export default function RootLayout({
     <html lang="en" data-theme="light">
       <head>
         <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="google-adsense-account" content="ca-pub-1726759813423594" />
         <Script
           async
