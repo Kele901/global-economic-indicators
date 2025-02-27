@@ -219,6 +219,29 @@ const CurrencyHierarchyPage = () => {
     <div className="w-full max-w-6xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Global Currency Hierarchy</h1>
       
+      {/* Data Coverage Section with improved dark mode styling */}
+      <div className="mb-8 p-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg">
+        <h2 className="text-xl font-semibold mb-4 text-blue-400">Data Coverage</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center space-x-3 text-gray-200">
+            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+            <span>Interest Rates: 1960-2023</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-200">
+            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+            <span>Employment Statistics: 1990-2023</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-200">
+            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+            <span>Government Debt: 1989-2023</span>
+          </div>
+          <div className="flex items-center space-x-3 text-gray-200">
+            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+            <span>Inflation & GDP: 1960-2023</span>
+          </div>
+        </div>
+      </div>
+
       {/* Loading and Error States */}
       {loading && (
         <div className="mb-4 text-blue-600 dark:text-blue-400">
