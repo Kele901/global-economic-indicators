@@ -16,11 +16,7 @@ export const metadata: Metadata = {
   creator: 'Global Economic Indicators',
   publisher: 'Global Economic Indicators',
   robots: 'index, follow',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
+  viewport: 'width=device-width, initial-scale=1',
   openGraph: {
     type: 'website',
     title: 'Global Economic Indicators Dashboard',
@@ -38,7 +34,6 @@ export default function RootLayout({
     <html lang="en" data-theme="light">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="google-adsense-account" content="ca-pub-1726759813423594" />
         <Script
           async
