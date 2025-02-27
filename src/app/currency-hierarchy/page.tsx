@@ -9,6 +9,8 @@ interface CurrencyInfo {
   name: string;
   description: string;
   tier: number;
+  x: number;
+  y: number;
   exchangeRates?: {
     [key: string]: number;
   };
@@ -19,127 +21,169 @@ const currencyData: { [key: string]: CurrencyInfo } = {
     code: 'USD',
     name: 'US Dollar',
     description: 'Global reserve currency, dominates international trade and foreign exchange reserves.',
-    tier: 1
+    tier: 1,
+    x: 600,
+    y: 225
   },
   EUR: {
     code: 'EUR',
     name: 'Euro',
     description: 'Second most traded currency, official currency of the Eurozone.',
-    tier: 2
+    tier: 2,
+    x: 200,
+    y: 375
   },
   JPY: {
     code: 'JPY',
     name: 'Japanese Yen',
     description: 'Major Asian currency, known for its role in carry trades.',
-    tier: 2
+    tier: 2,
+    x: 400,
+    y: 375
   },
   GBP: {
     code: 'GBP',
     name: 'British Pound',
     description: 'Oldest currency still in use, major reserve currency.',
-    tier: 2
+    tier: 2,
+    x: 600,
+    y: 375
   },
   CNH: {
     code: 'CNH',
     name: 'Offshore Chinese Yuan',
     description: 'Offshore trading version of the Chinese Yuan, increasingly important in global trade.',
-    tier: 2
+    tier: 2,
+    x: 800,
+    y: 375
   },
   CHF: {
     code: 'CHF',
     name: 'Swiss Franc',
     description: 'Traditional safe-haven currency, known for stability.',
-    tier: 2
+    tier: 2,
+    x: 1000,
+    y: 375
   },
   CNY: {
     code: 'CNY',
     name: 'Chinese Yuan',
     description: 'Growing international currency, backed by world\'s second-largest economy.',
-    tier: 3
+    tier: 3,
+    x: 120,
+    y: 525
   },
   KRW: {
     code: 'KRW',
     name: 'South Korean Won',
     description: 'Major Asian economy currency, important in technology trade.',
-    tier: 3
+    tier: 3,
+    x: 240,
+    y: 525
   },
   HKD: {
     code: 'HKD',
     name: 'Hong Kong Dollar',
     description: 'Major financial hub currency, pegged to USD.',
-    tier: 3
+    tier: 3,
+    x: 360,
+    y: 525
   },
   CAD: {
     code: 'CAD',
     name: 'Canadian Dollar',
     description: 'Commodity currency, closely tied to natural resources.',
-    tier: 3
+    tier: 3,
+    x: 480,
+    y: 525
   },
   AUD: {
     code: 'AUD',
     name: 'Australian Dollar',
     description: 'Major commodity currency, highly traded in Asian markets.',
-    tier: 3
+    tier: 3,
+    x: 600,
+    y: 525
   },
   NZD: {
     code: 'NZD',
     name: 'New Zealand Dollar',
     description: 'Commodity currency, known for high interest rates.',
-    tier: 3
+    tier: 3,
+    x: 720,
+    y: 525
   },
   SGD: {
     code: 'SGD',
     name: 'Singapore Dollar',
     description: 'Major Asian financial hub currency, known for stability.',
-    tier: 3
+    tier: 3,
+    x: 840,
+    y: 525
   },
   SEK: {
     code: 'SEK',
     name: 'Swedish Krona',
     description: 'Important European currency outside Eurozone.',
-    tier: 3
+    tier: 3,
+    x: 960,
+    y: 525
   },
   NOK: {
     code: 'NOK',
     name: 'Norwegian Krone',
     description: 'Oil-linked currency, stable European economy.',
-    tier: 3
+    tier: 3,
+    x: 1080,
+    y: 525
   },
   MXN: {
     code: 'MXN',
     name: 'Mexican Peso',
     description: 'Most traded currency in Latin America.',
-    tier: 4
+    tier: 4,
+    x: 195,
+    y: 675
   },
   BRL: {
     code: 'BRL',
     name: 'Brazilian Real',
     description: 'Major South American currency.',
-    tier: 4
+    tier: 4,
+    x: 300,
+    y: 675
   },
   INR: {
     code: 'INR',
     name: 'Indian Rupee',
     description: 'Currency of one of the world\'s largest economies.',
-    tier: 4
+    tier: 4,
+    x: 450,
+    y: 675
   },
   ZAR: {
     code: 'ZAR',
     name: 'South African Rand',
     description: 'Most traded African currency.',
-    tier: 4
+    tier: 4,
+    x: 600,
+    y: 675
   },
   RUB: {
     code: 'RUB',
     name: 'Russian Ruble',
     description: 'Major commodity currency.',
-    tier: 4
+    tier: 4,
+    x: 750,
+    y: 675
   },
   TRY: {
     code: 'TRY',
     name: 'Turkish Lira',
     description: 'Important regional currency in the Middle East.',
-    tier: 4
+    tier: 4,
+    x: 900,
+    y: 675
   }
 };
 
@@ -277,6 +321,47 @@ const CurrencyHierarchyPage = () => {
     );
   };
 
+  const renderCurrencyNode = (currency: CurrencyInfo) => {
+    const isSelected = selectedCurrency === currency.code;
+    const radius = currency.tier === 1 ? 45 : currency.tier === 2 ? 40 : currency.tier === 3 ? 35 : 30;
+    
+    return (
+      <g
+        key={currency.code}
+        transform={`translate(${currency.x},${currency.y})`}
+        onClick={() => setSelectedCurrency(currency.code)}
+        className="cursor-pointer"
+        filter="url(#dropShadow)"
+      >
+        <circle
+          r={radius}
+          fill={isSelected ? "#2563EB" : "#1F2937"}
+          stroke={isSelected ? "#60A5FA" : "#3B82F6"}
+          strokeWidth={isSelected ? 3 : 2}
+          className="transition-all duration-200"
+          filter={isSelected ? "url(#glow1)" : undefined}
+        />
+        <text
+          y="-8"
+          textAnchor="middle"
+          fill={isSelected ? "#F3F4F6" : "#D1D5DB"}
+          fontSize="16"
+          className="font-semibold"
+        >
+          {currency.code}
+        </text>
+        <text
+          y="12"
+          textAnchor="middle"
+          fill={isSelected ? "#E5E7EB" : "#9CA3AF"}
+          fontSize="12"
+        >
+          {currency.name}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto p-4 bg-gray-900 rounded-xl shadow-2xl">
       <div className="relative">
@@ -361,208 +446,8 @@ const CurrencyHierarchyPage = () => {
             </text>
           </g>
 
-          {/* Update currency node styles */}
-          const renderCurrencyNode = (currency: Currency) => {
-            const isSelected = selectedCurrency === currency.code;
-            const radius = currency.tier === 1 ? 45 : currency.tier === 2 ? 40 : currency.tier === 3 ? 35 : 30;
-            
-            return (
-              <g
-                key={currency.code}
-                transform={`translate(${currency.x},${currency.y})`}
-                onClick={() => setSelectedCurrency(currency.code)}
-                className="cursor-pointer"
-                filter="url(#dropShadow)"
-              >
-                <circle
-                  r={radius}
-                  fill={isSelected ? "#2563EB" : "#1F2937"}
-                  stroke={isSelected ? "#60A5FA" : "#3B82F6"}
-                  strokeWidth={isSelected ? 3 : 2}
-                  className="transition-all duration-200"
-                  filter={isSelected ? "url(#glow1)" : undefined}
-                />
-                <text
-                  y="-8"
-                  textAnchor="middle"
-                  fill={isSelected ? "#F3F4F6" : "#D1D5DB"}
-                  fontSize="16"
-                  className="font-semibold"
-                >
-                  {currency.code}
-                </text>
-                <text
-                  y="12"
-                  textAnchor="middle"
-                  fill={isSelected ? "#E5E7EB" : "#9CA3AF"}
-                  fontSize="12"
-                >
-                  {currency.name}
-                </text>
-              </g>
-            );
-          };
-
-          {/* Update currency positions for larger SVG */}
-          {/* USD */}
-          <g
-            style={getCurrencyStyle('USD')}
-            onClick={() => handleCurrencyClick('USD')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'USD')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="600" cy="225" r="45" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
-            <text x="600" y="235" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#ffffff">USD</text>
-          </g>
-
-          {/* Update Tier 2 currencies */}
-          {/* EUR */}
-          <g
-            style={getCurrencyStyle('EUR')}
-            onClick={() => handleCurrencyClick('EUR')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'EUR')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="200" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="200" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">EUR</text>
-          </g>
-
-          {/* JPY */}
-          <g
-            style={getCurrencyStyle('JPY')}
-            onClick={() => handleCurrencyClick('JPY')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'JPY')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="400" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="400" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">JPY</text>
-          </g>
-
-          {/* GBP */}
-          <g
-            style={getCurrencyStyle('GBP')}
-            onClick={() => handleCurrencyClick('GBP')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'GBP')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="600" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="600" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">GBP</text>
-          </g>
-
-          {/* CNH */}
-          <g
-            style={getCurrencyStyle('CNH')}
-            onClick={() => handleCurrencyClick('CNH')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'CNH')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="800" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="800" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">CNH</text>
-          </g>
-
-          {/* CHF */}
-          <g
-            style={getCurrencyStyle('CHF')}
-            onClick={() => handleCurrencyClick('CHF')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'CHF')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="1000" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="1000" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">CHF</text>
-          </g>
-
-          {/* Update Tier 3 currencies */}
-          {/* First row of Tier 3 */}
-          <g
-            style={getCurrencyStyle('CNY')}
-            onClick={() => handleCurrencyClick('CNY')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'CNY')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="120" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="120" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">CNY</text>
-          </g>
-
-          <g
-            style={getCurrencyStyle('KRW')}
-            onClick={() => handleCurrencyClick('KRW')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'KRW')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="240" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="240" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">KRW</text>
-          </g>
-
-          <g
-            style={getCurrencyStyle('HKD')}
-            onClick={() => handleCurrencyClick('HKD')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'HKD')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="360" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="360" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">HKD</text>
-          </g>
-
-          <g
-            style={getCurrencyStyle('CAD')}
-            onClick={() => handleCurrencyClick('CAD')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'CAD')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="480" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="480" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">CAD</text>
-          </g>
-
-          <g
-            style={getCurrencyStyle('AUD')}
-            onClick={() => handleCurrencyClick('AUD')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'AUD')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="600" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="600" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">AUD</text>
-          </g>
-
-          {/* Second row of Tier 3 */}
-          <g
-            style={getCurrencyStyle('NZD')}
-            onClick={() => handleCurrencyClick('NZD')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'NZD')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="720" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="720" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">NZD</text>
-          </g>
-
-          <g
-            style={getCurrencyStyle('SGD')}
-            onClick={() => handleCurrencyClick('SGD')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'SGD')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="840" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="840" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">SGD</text>
-          </g>
-
-          <g
-            style={getCurrencyStyle('SEK')}
-            onClick={() => handleCurrencyClick('SEK')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'SEK')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="960" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="960" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">SEK</text>
-          </g>
-
-          <g
-            style={getCurrencyStyle('NOK')}
-            onClick={() => handleCurrencyClick('NOK')}
-            onMouseEnter={(e) => handleCurrencyHover(e, 'NOK')}
-            onMouseLeave={() => handleCurrencyHover(null, null)}
-          >
-            <circle cx="1080" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="1080" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">NOK</text>
-          </g>
+          {/* Currency Nodes */}
+          {Object.values(currencyData).map(currency => renderCurrencyNode(currency))}
 
           {/* Connection paths */}
           <g>
