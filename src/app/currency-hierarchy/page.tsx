@@ -241,31 +241,33 @@ const CurrencyHierarchyPage = () => {
       <g>
         <path 
           d={path} 
-          stroke={selected ? "#ffffff" : "url(#connectionGradient)"} 
+          stroke={selected ? "#60A5FA" : "url(#connectionGradient)"} 
           strokeWidth={selected ? "3" : "2"} 
-          opacity={selected ? "0.6" : "0.4"} 
+          opacity={selected ? "0.8" : "0.5"} 
           fill="none"
           filter={selected ? "url(#glow1)" : undefined}
         />
         {rate && (
           <g transform={`translate(${x},${y})`}>
             <rect
-              x="-30"
-              y="-12"
-              width="60"
-              height="24"
-              rx="4"
-              fill="#1a1f3d"
-              fillOpacity="0.9"
+              x="-35"
+              y="-14"
+              width="70"
+              height="28"
+              rx="6"
+              fill="#1F2937"
+              stroke="#3B82F6"
+              strokeWidth="1"
+              filter="url(#dropShadow)"
             />
             <text
               x="0"
               y="4"
               textAnchor="middle"
               fontFamily="'Helvetica Neue', Arial, sans-serif"
-              fontSize="12"
-              fill="#ffffff"
-              opacity="0.9"
+              fontSize="13"
+              fill="#F3F4F6"
+              className="font-medium"
             >
               {formattedRate}
             </text>
@@ -276,168 +278,130 @@ const CurrencyHierarchyPage = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Global Currency Hierarchy</h1>
-      
-      {/* Loading and Error States */}
-      {loading && (
-        <div className="mb-4 text-blue-600 dark:text-blue-400">
-          Loading exchange rates...
-        </div>
-      )}
-      {error && (
-        <div className="mb-4 text-red-600 dark:text-red-400">
-          {error}
-        </div>
-      )}
-      
-      {/* Currency Details Panel with Exchange Rates */}
-      {selectedCurrency && currencyData[selectedCurrency] && (
-        <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold mb-2">
-            {currencyData[selectedCurrency].code} - {currencyData[selectedCurrency].name}
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            {currencyData[selectedCurrency].description}
-          </p>
-          
-          {/* Exchange Rates Section */}
-          {exchangeRates[selectedCurrency] && (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Exchange Rates</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(exchangeRates[selectedCurrency])
-                  .sort(([, rateA], [, rateB]) => rateB - rateA)
-                  .map(([currency, rate]) => (
-                    <div 
-                      key={currency}
-                      className="p-3 bg-gray-50 dark:bg-gray-700 rounded"
-                    >
-                      <div className="font-medium">{currency}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">
-                        1 {selectedCurrency} = {formatRate(rate)} {currency}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="w-full overflow-x-auto relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-        {/* Tooltip with Exchange Rate */}
-        {hoveredCurrency && currencyData[hoveredCurrency] && (
-          <div
-            className="absolute z-10 bg-black bg-opacity-80 text-white p-2 rounded pointer-events-none"
-            style={{
-              left: `${tooltipPosition.x}px`,
-              top: `${tooltipPosition.y - 40}px`,
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <div>{currencyData[hoveredCurrency].name}</div>
-            {selectedCurrency && exchangeRates[selectedCurrency]?.[hoveredCurrency] && (
-              <div className="text-sm opacity-80">
-                1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency][hoveredCurrency])} {hoveredCurrency}
-              </div>
-            )}
+    <div className="w-full max-w-6xl mx-auto p-4 bg-gray-900 rounded-xl shadow-2xl">
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 rounded-xl z-10">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         )}
-
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 rounded-xl z-10">
+            <div className="text-red-500 bg-gray-800 px-4 py-2 rounded-lg shadow-lg">
+              {error}
+            </div>
+          </div>
+        )}
         <svg 
-          xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 1200 900" 
-          className="w-full h-auto min-h-[600px]"
-          preserveAspectRatio="xMidYMid meet"
+          className="w-full min-h-[600px] bg-gray-900 rounded-xl"
         >
-          {/* Gradient Definitions */}
           <defs>
-            {/* Background gradient */}
-            <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#121438" />
-              <stop offset="100%" stopColor="#1e1f45" />
-            </linearGradient>
-            
-            {/* Node gradients */}
-            <radialGradient id="tier1Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#4fc3f7" />
-              <stop offset="100%" stopColor="#2196f3" />
-            </radialGradient>
-            
-            <radialGradient id="tier2Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#ffb74d" />
-              <stop offset="100%" stopColor="#ff9800" />
-            </radialGradient>
-            
-            <radialGradient id="tier3Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#81c784" />
-              <stop offset="100%" stopColor="#4caf50" />
-            </radialGradient>
-            
-            <radialGradient id="tier4Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#e57373" />
-              <stop offset="100%" stopColor="#f44336" />
-            </radialGradient>
-            
-            {/* Glow filters */}
-            <filter id="glow1" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-            </filter>
-            
-            <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="blur"/>
-              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-            </filter>
-            
-            {/* Connection gradient */}
             <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.1"/>
-              <stop offset="50%" stopColor="#ffffff" stopOpacity="0.7"/>
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.1"/>
+              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#60A5FA" stopOpacity="0.6" />
             </linearGradient>
+            <filter id="glow1">
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id="dropShadow">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+              <feOffset dx="1" dy="1"/>
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.3"/>
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
           </defs>
-          
+
           {/* Background */}
-          <rect width="1200" height="900" fill="url(#bgGradient)"/>
-          
+          <rect x="0" y="0" width="1200" height="900" fill="#111827" rx="12"/>
+
           {/* Grid lines */}
-          <g stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1">
-            {/* Horizontal lines */}
+          <g stroke="#1F2937" strokeWidth="1">
             <line x1="0" y1="225" x2="1200" y2="225"/>
             <line x1="0" y1="375" x2="1200" y2="375"/>
             <line x1="0" y1="525" x2="1200" y2="525"/>
             <line x1="0" y1="675" x2="1200" y2="675"/>
-            
-            {/* Vertical lines */}
-            <line x1="300" y1="150" x2="300" y2="750"/>
-            <line x1="600" y1="150" x2="600" y2="750"/>
-            <line x1="900" y1="150" x2="900" y2="750"/>
+            <line x1="300" y1="0" x2="300" y2="900"/>
+            <line x1="600" y1="0" x2="600" y2="900"/>
+            <line x1="900" y1="0" x2="900" y2="900"/>
           </g>
-          
+
           {/* Title */}
-          <text x="600" y="90" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="42" fontWeight="bold" fill="#ffffff" opacity="0.9">GLOBAL CURRENCY HIERARCHY</text>
-          <line x1="375" y1="105" x2="825" y2="105" stroke="#ffffff" strokeOpacity="0.3" strokeWidth="1"/>
-          
-          {/* Legend - moved to the right */}
-          <g transform="translate(930, 150)">
-            <rect x="-10" y="-10" width="250" height="210" rx="10" ry="10" fill="#ffffff" fillOpacity="0.05"/>
-            <text x="0" y="10" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff" opacity="0.9">CURRENCY TIERS</text>
-            
-            {/* Update legend items with larger text and spacing */}
-            <circle cx="15" cy="50" r="12" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
-            <text x="40" y="55" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 1: Global Reserve</text>
-            
-            <circle cx="15" cy="90" r="12" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="40" y="95" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 2: Major</text>
-            
-            <circle cx="15" cy="130" r="12" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="40" y="135" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 3: Regional</text>
-            
-            <circle cx="15" cy="170" r="12" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="40" y="175" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 4: Local</text>
+          <text
+            x="600"
+            y="90"
+            textAnchor="middle"
+            className="text-4xl font-bold"
+            fill="#F3F4F6"
+            filter="url(#dropShadow)"
+          >
+            Currency Hierarchy
+          </text>
+
+          {/* Legend */}
+          <g transform="translate(50, 50)">
+            <rect width="250" height="120" rx="8" fill="#1F2937" filter="url(#dropShadow)"/>
+            <text x="20" y="40" fill="#F3F4F6" fontSize="16">
+              Tier 1: Reserve Currency
+            </text>
+            <text x="20" y="70" fill="#D1D5DB" fontSize="16">
+              Tier 2: Major Currency
+            </text>
+            <text x="20" y="100" fill="#9CA3AF" fontSize="16">
+              Tier 3: Secondary Currency
+            </text>
           </g>
+
+          {/* Update currency node styles */}
+          const renderCurrencyNode = (currency: Currency) => {
+            const isSelected = selectedCurrency === currency.code;
+            const radius = currency.tier === 1 ? 45 : currency.tier === 2 ? 40 : currency.tier === 3 ? 35 : 30;
+            
+            return (
+              <g
+                key={currency.code}
+                transform={`translate(${currency.x},${currency.y})`}
+                onClick={() => setSelectedCurrency(currency.code)}
+                className="cursor-pointer"
+                filter="url(#dropShadow)"
+              >
+                <circle
+                  r={radius}
+                  fill={isSelected ? "#2563EB" : "#1F2937"}
+                  stroke={isSelected ? "#60A5FA" : "#3B82F6"}
+                  strokeWidth={isSelected ? 3 : 2}
+                  className="transition-all duration-200"
+                  filter={isSelected ? "url(#glow1)" : undefined}
+                />
+                <text
+                  y="-8"
+                  textAnchor="middle"
+                  fill={isSelected ? "#F3F4F6" : "#D1D5DB"}
+                  fontSize="16"
+                  className="font-semibold"
+                >
+                  {currency.code}
+                </text>
+                <text
+                  y="12"
+                  textAnchor="middle"
+                  fill={isSelected ? "#E5E7EB" : "#9CA3AF"}
+                  fontSize="12"
+                >
+                  {currency.name}
+                </text>
+              </g>
+            );
+          };
 
           {/* Update currency positions for larger SVG */}
           {/* USD */}
