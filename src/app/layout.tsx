@@ -61,6 +61,12 @@ export default function RootLayout({
                     Currency Hierarchy
                   </a>
                   <a 
+                    href="/economic-gravity" 
+                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    Economic Gravity
+                  </a>
+                  <a 
                     href="https://github.com/Kele901/global-economic-indicators" 
                     target="_blank" 
                     rel="noopener noreferrer"

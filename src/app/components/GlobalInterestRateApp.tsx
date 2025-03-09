@@ -686,35 +686,9 @@ const GlobalInterestRateApp = () => {
               data={data}
               isDarkMode={isDarkMode}
             />
-            {/* Middle Ad Placement - Enhanced with more context */}
+            {/* Middle Ad Placement */}
             <div className="my-8">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">Detailed Economic Analysis</h3>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    View comprehensive economic metrics and historical trends for {selectedCountryForSummary}. 
-                    Our detailed analysis includes key economic indicators, historical comparisons, and trend analysis.
-                  </p>
-                  <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded-md">
-                    <h4 className="font-medium mb-2">Key Economic Indicators:</h4>
-                    <ul className="list-disc list-inside text-sm space-y-2">
-                      <li>GDP Growth Rate and Economic Performance</li>
-                      <li>Employment and Labor Market Statistics</li>
-                      <li>Inflation Rates and Price Stability</li>
-                      <li>Government Debt and Fiscal Position</li>
-                      <li>Interest Rates and Monetary Policy</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
               <AdSense />
-              <div className="mt-6">
-                <h4 className="text-md font-semibold mb-2">Comparative Analysis</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Compare economic performance across different time periods and countries to identify trends, 
-                  patterns, and correlations between various economic indicators.
-                </p>
-              </div>
             </div>
           </>
         )}
@@ -792,72 +766,35 @@ const GlobalInterestRateApp = () => {
         )}
       </div>
 
-      {/* Enhanced Methodology Section */}
-      <div className="mt-12 mb-8">
-        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-          <h2 className="text-lg font-semibold mb-3">Data Methodology & Sources</h2>
-          <div className="space-y-4">
-            <p className="text-sm">
-              Our platform aggregates and processes economic data from the World Bank's official databases, ensuring reliability and consistency across all indicators. We employ rigorous data validation and normalization procedures to maintain data integrity.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white/10 p-3 rounded">
-                <h3 className="font-medium mb-2">Data Processing:</h3>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  <li>Automated data validation</li>
-                  <li>Statistical normalization</li>
-                  <li>Missing data interpolation</li>
-                  <li>Cross-reference verification</li>
-                </ul>
-              </div>
-              <div className="bg-white/10 p-3 rounded">
-                <h3 className="font-medium mb-2">Quality Assurance:</h3>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  <li>Regular data audits</li>
-                  <li>Source verification</li>
-                  <li>Trend analysis validation</li>
-                  <li>Expert review process</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Bottom Ad Placement - Enhanced with methodology and sources */}
       <div className="mt-8 mb-4">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3">Data Sources & Methodology</h2>
+        <div className={`mb-6 p-6 rounded-lg ${
+          isDarkMode 
+            ? 'bg-gray-900 border-2 border-white-600 shadow-lg' 
+            : 'bg-white'
+        }`}>
+          <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">Data Sources & Methodology</h2>
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-base sm:text-lg dark:text-white-200 text-white-700">
               All economic indicators are sourced from the World Bank's official database, ensuring reliable 
               and consistent data across all countries. Our methodology includes:
             </p>
-            <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 ml-4">
+            <ul className="list-disc list-inside text-base sm:text-lg dark:text-white-200 text-white-700 ml-4 space-y-3">
               <li>Regular data updates from official World Bank APIs</li>
               <li>Standardized data processing and normalization</li>
               <li>Quality checks and validation procedures</li>
               <li>Historical data preservation and versioning</li>
             </ul>
-            <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded-md">
-              <h4 className="font-medium mb-2">Data Coverage:</h4>
-              <ul className="text-sm space-y-2">
-                <li>Interest Rates: 1960-2023</li>
-                <li>Employment Statistics: 1990-2023</li>
-                <li>Government Debt: 1989-2023</li>
-                <li>Inflation & GDP: 1960-2023</li>
-              </ul>
-            </div>
           </div>
         </div>
         <AdSense />
-        <div className="mt-6">
-          <h3 className="text-md font-semibold mb-2">Updates and Maintenance</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className={`mt-6 p-6 rounded-lg ${isDarkMode ? 'bg-gray-800 border border-gray-700 shadow-lg' : 'bg-white'}`}>
+          <h3 className="text-xl font-bold mb-3 dark:text-white">Updates and Maintenance</h3>
+          <p className="text-base sm:text-lg dark:text-white text-white-700">
             Our platform is regularly updated to ensure accuracy and reliability of economic data. 
             Updates are performed automatically when new data becomes available from the World Bank.
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
+          <p className="text-base sm:text-lg dark:text-white text-white-700 mt-4">
             © {new Date().getFullYear()} Global Economic Indicators. Data provided by the World Bank.
           </p>
         </div>

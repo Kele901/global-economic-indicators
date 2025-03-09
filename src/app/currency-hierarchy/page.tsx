@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AdSense from '../components/AdSense';
 import { calculateCurrencyPairs } from '../services/forex';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface CurrencyInfo {
   code: string;
@@ -144,6 +145,15 @@ const CurrencyHierarchyPage = () => {
   const [exchangeRates, setExchangeRates] = useState<{ [key: string]: { [key: string]: number } }>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+
+  useEffect(() => {
+    // Initialize theme on mount
+    if (typeof window !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+      document.body.classList.toggle('dark', isDarkMode);
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -211,37 +221,34 @@ const CurrencyHierarchyPage = () => {
     };
   };
 
-  const formatRate = (rate: number) => {
-    return rate.toFixed(4);
+  const formatRate = (rate: number | undefined) => {
+    if (typeof rate !== 'number' || isNaN(rate)) {
+      return 'N/A';
+    }
+    try {
+      return rate.toFixed(4);
+    } catch (error) {
+      console.error('Error formatting rate:', error);
+      return 'N/A';
+    }
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Global Currency Hierarchy</h1>
-      
-      {/* Data Coverage Section with improved dark mode styling */}
-      <div className="mb-8 p-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg">
-        <h2 className="text-xl font-semibold mb-4 text-blue-400">Data Coverage</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center space-x-3 text-gray-200">
-            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-            <span>Interest Rates: 1960-2023</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-200">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span>Employment Statistics: 1990-2023</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-200">
-            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-            <span>Government Debt: 1989-2023</span>
-          </div>
-          <div className="flex items-center space-x-3 text-gray-200">
-            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-            <span>Inflation & GDP: 1960-2023</span>
-          </div>
+    <div className={`w-full max-w-6xl mx-auto p-4 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Global Currency Hierarchy</h1>
+        <div className="flex items-center space-x-2">
+          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
+          <button
+            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+            onClick={() => setIsDarkMode(!isDarkMode)}
+          >
+            <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
+          </button>
+          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
         </div>
       </div>
-
+      
       {/* Loading and Error States */}
       {loading && (
         <div className="mb-4 text-blue-600 dark:text-blue-400">
@@ -254,41 +261,7 @@ const CurrencyHierarchyPage = () => {
         </div>
       )}
       
-      {/* Currency Details Panel with Exchange Rates */}
-      {selectedCurrency && currencyData[selectedCurrency] && (
-        <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold mb-2">
-            {currencyData[selectedCurrency].code} - {currencyData[selectedCurrency].name}
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            {currencyData[selectedCurrency].description}
-          </p>
-          
-          {/* Exchange Rates Section */}
-          {exchangeRates[selectedCurrency] && (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Exchange Rates</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(exchangeRates[selectedCurrency])
-                  .sort(([, rateA], [, rateB]) => rateB - rateA)
-                  .map(([currency, rate]) => (
-                    <div 
-                      key={currency}
-                      className="p-3 bg-gray-50 dark:bg-gray-700 rounded"
-                    >
-                      <div className="font-medium">{currency}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">
-                        1 {selectedCurrency} = {formatRate(rate)} {currency}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="w-full overflow-x-auto relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+      <div className="w-full overflow-x-auto relative bg-white dark:bg-gray-900 rounded-lg shadow-lg p-4 transition-colors duration-200">
         {/* Tooltip with Exchange Rate */}
         {hoveredCurrency && currencyData[hoveredCurrency] && (
           <div
@@ -302,7 +275,7 @@ const CurrencyHierarchyPage = () => {
             <div>{currencyData[hoveredCurrency].name}</div>
             {selectedCurrency && exchangeRates[selectedCurrency]?.[hoveredCurrency] && (
               <div className="text-sm opacity-80">
-                1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency][hoveredCurrency])} {hoveredCurrency}
+                1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency]?.[hoveredCurrency])} {hoveredCurrency}
               </div>
             )}
           </div>
@@ -356,17 +329,21 @@ const CurrencyHierarchyPage = () => {
             
             {/* Connection gradient */}
             <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.1"/>
-              <stop offset="50%" stopColor="#ffffff" stopOpacity="0.7"/>
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.1"/>
+              <stop offset="0%" stopColor={isDarkMode ? "#ffffff" : "#000000"} stopOpacity="0.1"/>
+              <stop offset="50%" stopColor={isDarkMode ? "#ffffff" : "#000000"} stopOpacity="0.7"/>
+              <stop offset="100%" stopColor={isDarkMode ? "#ffffff" : "#000000"} stopOpacity="0.1"/>
             </linearGradient>
           </defs>
           
           {/* Background */}
-          <rect width="1200" height="900" fill="url(#bgGradient)"/>
+          <rect 
+            width="1200" 
+            height="900" 
+            fill={isDarkMode ? "rgb(17, 24, 39)" : "#f8fafc"}
+          />
           
           {/* Grid lines */}
-          <g stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1">
+          <g stroke={isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"} strokeWidth="1">
             {/* Horizontal lines */}
             <line x1="0" y1="225" x2="1200" y2="225"/>
             <line x1="0" y1="375" x2="1200" y2="375"/>
@@ -380,26 +357,100 @@ const CurrencyHierarchyPage = () => {
           </g>
           
           {/* Title */}
-          <text x="600" y="90" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="42" fontWeight="bold" fill="#ffffff" opacity="0.9">GLOBAL CURRENCY HIERARCHY</text>
-          <line x1="375" y1="105" x2="825" y2="105" stroke="#ffffff" strokeOpacity="0.3" strokeWidth="1"/>
+          <text 
+            x="600" 
+            y="90" 
+            textAnchor="middle" 
+            fontFamily="'Helvetica Neue', Arial, sans-serif" 
+            fontSize="42" 
+            fontWeight="bold" 
+            fill={isDarkMode ? "#ffffff" : "#000000"} 
+            opacity="0.9"
+          >
+            GLOBAL CURRENCY HIERARCHY
+          </text>
+          <line 
+            x1="375" 
+            y1="105" 
+            x2="825" 
+            y2="105" 
+            stroke={isDarkMode ? "#ffffff" : "#000000"} 
+            strokeOpacity="0.3" 
+            strokeWidth="1"
+          />
           
           {/* Legend - moved to the right */}
           <g transform="translate(930, 150)">
-            <rect x="-10" y="-10" width="250" height="210" rx="10" ry="10" fill="#ffffff" fillOpacity="0.05"/>
-            <text x="0" y="10" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff" opacity="0.9">CURRENCY TIERS</text>
+            <rect 
+              x="-10" 
+              y="-10" 
+              width="250" 
+              height="210" 
+              rx="10" 
+              ry="10" 
+              fill={isDarkMode ? "rgb(31, 41, 55)" : "#000000"} 
+              fillOpacity={isDarkMode ? "1" : "0.05"}
+            />
+            <text 
+              x="0" 
+              y="10" 
+              fontFamily="'Helvetica Neue', Arial, sans-serif" 
+              fontSize="20" 
+              fontWeight="bold" 
+              fill={isDarkMode ? "#ffffff" : "#000000"} 
+              opacity="0.9"
+            >
+              CURRENCY TIERS
+            </text>
             
             {/* Update legend items with larger text and spacing */}
             <circle cx="15" cy="50" r="12" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
-            <text x="40" y="55" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 1: Global Reserve</text>
+            <text 
+              x="40" 
+              y="55" 
+              fontFamily="'Helvetica Neue', Arial, sans-serif" 
+              fontSize="16" 
+              fill={isDarkMode ? "#ffffff" : "#000000"} 
+              opacity="0.8"
+            >
+              Tier 1: Global Reserve
+            </text>
             
             <circle cx="15" cy="90" r="12" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="40" y="95" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 2: Major</text>
+            <text 
+              x="40" 
+              y="95" 
+              fontFamily="'Helvetica Neue', Arial, sans-serif" 
+              fontSize="16" 
+              fill={isDarkMode ? "#ffffff" : "#000000"} 
+              opacity="0.8"
+            >
+              Tier 2: Major
+            </text>
             
             <circle cx="15" cy="130" r="12" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="40" y="135" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 3: Regional</text>
+            <text 
+              x="40" 
+              y="135" 
+              fontFamily="'Helvetica Neue', Arial, sans-serif" 
+              fontSize="16" 
+              fill={isDarkMode ? "#ffffff" : "#000000"} 
+              opacity="0.8"
+            >
+              Tier 3: Regional
+            </text>
             
             <circle cx="15" cy="170" r="12" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="40" y="175" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fill="#ffffff" opacity="0.8">Tier 4: Local</text>
+            <text 
+              x="40" 
+              y="175" 
+              fontFamily="'Helvetica Neue', Arial, sans-serif" 
+              fontSize="16" 
+              fill={isDarkMode ? "#ffffff" : "#000000"} 
+              opacity="0.8"
+            >
+              Tier 4: Local
+            </text>
           </g>
 
           {/* Update currency positions for larger SVG */}
@@ -637,17 +688,38 @@ const CurrencyHierarchyPage = () => {
             <path d="M800,411 Q800,468 1050,525" fill="none"/>
 
             {/* Tier 3 to Tier 4 connections */}
+            {/* CNY connections */}
             <path d="M150,552 Q150,613 195,675" fill="none"/>
+            <path d="M150,552 Q150,613 300,675" fill="none"/>
+            
+            {/* HKD connections */}
             <path d="M300,552 Q300,613 300,675" fill="none"/>
+            <path d="M300,552 Q300,613 450,675" fill="none"/>
+            
+            {/* SEK connections */}
             <path d="M450,552 Q450,613 450,675" fill="none"/>
+            <path d="M450,552 Q450,613 600,675" fill="none"/>
+            
+            {/* NOK connections */}
             <path d="M600,552 Q600,613 600,675" fill="none"/>
+            <path d="M600,552 Q600,613 750,675" fill="none"/>
+            
+            {/* NZD connections */}
             <path d="M750,552 Q750,613 750,675" fill="none"/>
+            <path d="M750,552 Q750,613 900,675" fill="none"/>
+            
+            {/* CAD connections */}
+            <path d="M900,552 Q900,613 195,675" fill="none"/>
             <path d="M900,552 Q900,613 900,675" fill="none"/>
+            
+            {/* AUD connections */}
+            <path d="M1050,552 Q1050,613 600,675" fill="none"/>
+            <path d="M1050,552 Q1050,613 750,675" fill="none"/>
           </g>
 
           {/* Add glowing effect for selected currency connections */}
           {selectedCurrency && (
-            <g stroke="#ffffff" strokeWidth="3" opacity="0.6" filter="url(#glow1)">
+            <g stroke={isDarkMode ? "#ffffff" : "#000000"} strokeWidth="3" opacity="0.6" filter="url(#glow1)">
               {selectedCurrency === 'USD' && (
                 <>
                   <path d="M600,270 Q600,322 200,375" fill="none"/>
@@ -682,6 +754,41 @@ const CurrencyHierarchyPage = () => {
           )}
         </svg>
       </div>
+
+      {/* Currency Details Panel with Exchange Rates - Moved below SVG */}
+      {selectedCurrency && currencyData[selectedCurrency] && (
+        <div className={`mt-8 p-4 rounded-lg shadow-lg transition-all duration-200 ${isDarkMode ? 'bg-[#0A192F]' : 'bg-white'}`}>
+          <h2 className="text-xl font-bold mb-2 dark:text-white">
+            {currencyData[selectedCurrency].code} - {currencyData[selectedCurrency].name}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-100 mb-4">
+            {currencyData[selectedCurrency].description}
+          </p>
+          
+          {/* Exchange Rates Section */}
+          {exchangeRates[selectedCurrency] && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2 dark:text-white">Exchange Rates</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Object.entries(exchangeRates[selectedCurrency] || {})
+                  .sort(([, rateA], [, rateB]) => (rateB || 0) - (rateA || 0))
+                  .map(([currency, rate]) => (
+                    <div 
+                      key={currency}
+                      className={`p-3 rounded transition-all duration-200 ${isDarkMode ? 'bg-[#112240]' : 'bg-gray-50'}`}
+                    >
+                      <div className="font-medium dark:text-gray-100">{currency}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-200">
+                        1 {selectedCurrency} = {formatRate(rate)} {currency}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-8">
         <AdSense />
       </div>

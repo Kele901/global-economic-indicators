@@ -14,15 +14,16 @@ const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
   useEffect(() => {
     try {
       if (typeof window !== 'undefined' && adRef.current) {
-        // Push ads only after content is loaded
-        const pushAd = () => {
-          if (window.adsbygoogle) {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-          }
-        };
-
-        // Delay ad loading slightly to ensure content is ready
-        setTimeout(pushAd, 100);
+        // Initialize adsbygoogle array if it doesn't exist
+        if (!window.adsbygoogle) {
+          window.adsbygoogle = [];
+        }
+        
+        // Check if this ad slot has already been pushed
+        const adElement = adRef.current.querySelector('.adsbygoogle');
+        if (adElement && !adElement.getAttribute('data-adsbygoogle-status')) {
+          window.adsbygoogle.push({});
+        }
       }
     } catch (err) {
       console.error('AdSense error:', err);
