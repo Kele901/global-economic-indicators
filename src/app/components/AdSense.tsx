@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
-    adsbygoogle: any[];
+    adsbygoogle: any[] | undefined;
   }
 }
 
@@ -15,9 +15,7 @@ const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
     try {
       if (typeof window !== 'undefined' && adRef.current) {
         // Initialize adsbygoogle array if it doesn't exist
-        if (!window.adsbygoogle) {
-          window.adsbygoogle = [];
-        }
+        window.adsbygoogle = window.adsbygoogle || [];
         
         // Check if this ad slot has already been pushed
         const adElement = adRef.current.querySelector('.adsbygoogle');
