@@ -67,6 +67,12 @@ export default function RootLayout({
                     Economic Gravity
                   </a>
                   <a 
+                    href="/compare" 
+                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    Compare Countries
+                  </a>
+                  <a 
                     href="https://github.com/Kele901/global-economic-indicators" 
                     target="_blank" 
                     rel="noopener noreferrer"
