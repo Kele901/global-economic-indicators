@@ -16,4 +16,130 @@ body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
   min-height: 100vh;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Improve touch targets */
+  button, input, select, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better mobile scrolling */
+  .overflow-auto, .overflow-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Mobile-optimized spacing */
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Mobile chart improvements */
+  .recharts-wrapper {
+    touch-action: pan-x pan-y;
+  }
+  
+  /* Mobile text sizing */
+  .mobile-text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .mobile-text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}
+
+/* Improve mobile form elements */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Better mobile button states */
+  button:active {
+    transform: scale(0.98);
+  }
+  
+  /* Mobile-optimized charts */
+  .recharts-legend-wrapper {
+    font-size: 0.75rem !important;
+  }
+  
+  .recharts-tooltip-wrapper {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Dark mode mobile improvements */
+@media (max-width: 640px) {
+  [data-theme='dark'] {
+    /* Better contrast for mobile dark mode */
+    --background-rgb: 17, 24, 39;
+  }
+}
+
+/* Mobile navigation improvements */
+@media (max-width: 640px) {
+  .mobile-nav-item {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin: 0.25rem 0;
+  }
+  
+  .mobile-nav-item:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+}
+
+/* Mobile chart responsiveness */
+@media (max-width: 640px) {
+  .chart-container {
+    height: 250px;
+    margin: 0 -0.5rem;
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .chart-subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Mobile grid improvements */
+@media (max-width: 640px) {
+  .mobile-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .mobile-grid-1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile summary improvements */
+@media (max-width: 640px) {
+  .summary-container {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .summary-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .summary-text {
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
 } 

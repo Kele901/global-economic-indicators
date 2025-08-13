@@ -50,27 +50,27 @@ export default function RootLayout({
             {children}
           </main>
 
-          <footer className="bg-gray-50 dark:bg-gray-800 mt-12">
-            <div className="max-w-4xl mx-auto py-8 px-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <footer className="bg-gray-50 dark:bg-gray-800 mt-8 sm:mt-12">
+            <div className="max-w-4xl mx-auto py-6 sm:py-8 px-3 sm:px-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">About Us</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">About Us</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     We provide comprehensive economic data analysis and visualization, 
                     helping users understand global economic trends through reliable 
                     World Bank data.
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Data Sources</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Data Sources</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     All economic data is sourced from the World Bank's official databases, 
                     ensuring accuracy and reliability in our analysis.
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Legal</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Legal</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     © {new Date().getFullYear()} Global Economic Indicators.
                     This site uses cookies for analytics and personalized content.
                     By using this site, you agree to our privacy policy.

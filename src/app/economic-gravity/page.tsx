@@ -245,37 +245,37 @@ const EconomicGravityPage = () => {
   };
 
   return (
-    <div className={`w-full max-w-6xl mx-auto p-4 ${themeColors.text} ${themeColors.background} min-h-screen`}>
+    <div className={`w-full max-w-6xl mx-auto p-3 sm:p-4 ${themeColors.text} ${themeColors.background} min-h-screen`}>
       <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
       
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-bold mb-2">Economic Center of Gravity Through History</h1>
-          <p className="text-gray-600 dark:text-gray-100 max-w-xl">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2">Economic Center of Gravity Through History</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-100 max-w-xl">
             Tracking the shift of global economic power from ancient civilizations to modern times. Explore how economic dominance has moved across continents and empires throughout human history.
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
+          <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Light</span>
           <button
-            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+            className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
             onClick={() => setIsDarkMode(!isDarkMode)}
           >
-            <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
+            <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-5 sm:translate-x-6' : ''}`} />
           </button>
-          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
+          <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Dark</span>
         </div>
       </div>
 
       {/* World Map Visualization */}
-      <div className={`mb-12 p-6 rounded-2xl ${
+      <div className={`mb-8 sm:mb-12 p-4 sm:p-6 rounded-2xl ${
         isDarkMode 
           ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700' 
           : 'bg-gradient-to-br from-white via-gray-50 to-white border border-gray-100'
       }`}>
-        <h2 className={`text-2xl font-bold mb-6 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
+        <h2 className={`text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 flex items-center ${themeColors.text}`}>
+          <span className={`inline-block w-2 h-2 rounded-full mr-2 sm:mr-3 ${themeColors.accent}`} />
           Global Economic Center of Gravity
         </h2>
         <div className="relative w-full h-[600px] mb-6">
@@ -441,31 +441,31 @@ const EconomicGravityPage = () => {
       </div>
 
       {/* Timeline Visualization */}
-      <div className={`p-8 rounded-2xl mb-12 ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow}`}>
-        <h2 className={`text-2xl font-bold mb-6 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
+      <div className={`p-4 sm:p-6 md:p-8 rounded-2xl mb-8 sm:mb-12 ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow}`}>
+        <h2 className={`text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 flex items-center ${themeColors.text}`}>
+          <span className={`inline-block w-2 h-2 rounded-full mr-2 sm:mr-3 ${themeColors.accent}`} />
           Historical Timeline
         </h2>
-        <div className="h-[500px]">
+        <div className="h-[400px] sm:h-[500px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={gdpShareData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <LineChart data={gdpShareData} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} />
               <XAxis 
                 dataKey="label" 
                 stroke={themeColors.textSecondary}
                 angle={-45}
                 textAnchor="end"
-                height={80}
-                tick={{ fontSize: 12, fill: isDarkMode ? '#e5e7eb' : '#374151' }}
+                height={60}
+                tick={{ fontSize: 10, fill: isDarkMode ? '#e5e7eb' : '#374151' }}
               />
               <YAxis 
                 stroke={themeColors.textSecondary}
-                tick={{ fontSize: 12, fill: isDarkMode ? '#e5e7eb' : '#374151' }}
+                tick={{ fontSize: 10, fill: isDarkMode ? '#e5e7eb' : '#374151' }}
                 label={{ 
                   value: 'Share of Global GDP (%)', 
                   angle: -90, 
                   position: 'insideLeft',
-                  style: { textAnchor: 'middle', fill: isDarkMode ? '#e5e7eb' : '#374151' }
+                  style: { textAnchor: 'middle', fill: isDarkMode ? '#e5e7eb' : '#374151', fontSize: 10 }
                 }}
               />
               <Tooltip 
@@ -474,15 +474,16 @@ const EconomicGravityPage = () => {
                   border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                  color: isDarkMode ? '#e5e7eb' : '#374151'
+                  color: isDarkMode ? '#e5e7eb' : '#374151',
+                  fontSize: '12px'
                 }}
               />
               <Legend 
                 verticalAlign="top"
-                height={36}
+                height={30}
                 wrapperStyle={{
-                  paddingBottom: '20px',
-                  fontSize: '14px',
+                  paddingBottom: '15px',
+                  fontSize: '12px',
                   color: isDarkMode ? '#e5e7eb' : '#374151'
                 }}
               />
@@ -490,9 +491,9 @@ const EconomicGravityPage = () => {
                 type="monotone" 
                 dataKey="Asia" 
                 stroke="#f97316" 
-                strokeWidth={3}
+                strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 8 }}
+                activeDot={{ r: 6 }}
                 fillOpacity={1}
                 fill="url(#asiaGradient)"
               />
@@ -500,9 +501,9 @@ const EconomicGravityPage = () => {
                 type="monotone" 
                 dataKey="Europe" 
                 stroke="#3b82f6" 
-                strokeWidth={3}
+                strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 8 }}
+                activeDot={{ r: 6 }}
                 fillOpacity={1}
                 fill="url(#europeGradient)"
               />
