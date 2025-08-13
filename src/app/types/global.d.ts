@@ -3,5 +3,5 @@ declare global {
     adsbygoogle: any[];
   }
 }
-
+ 
 export {}; 

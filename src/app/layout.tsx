@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Script from 'next/script';
+import Navbar from './components/Navbar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -43,47 +44,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} min-h-screen`}>
         <div className="flex flex-col min-h-screen">
-          <header className="bg-white dark:bg-gray-800 shadow-sm">
-            <div className="max-w-4xl mx-auto py-4 px-4">
-              <nav className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-lg font-semibold">Global Economic Indicators</div>
-                <div className="flex items-center gap-6">
-                  <a 
-                    href="/" 
-                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  >
-                    Dashboard
-                  </a>
-                  <a 
-                    href="/currency-hierarchy" 
-                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  >
-                    Currency Hierarchy
-                  </a>
-                  <a 
-                    href="/economic-gravity" 
-                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  >
-                    Economic Gravity
-                  </a>
-                  <a 
-                    href="/compare" 
-                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  >
-                    Compare Countries
-                  </a>
-                  <a 
-                    href="https://github.com/Kele901/global-economic-indicators" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    View on GitHub
-                  </a>
-                </div>
-              </nav>
-            </div>
-          </header>
+          <Navbar />
 
           <main className="flex-grow">
             {children}

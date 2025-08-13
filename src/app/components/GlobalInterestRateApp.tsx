@@ -431,6 +431,13 @@ const GlobalInterestRateApp = () => {
     }
   }, []);
 
+  // Dispatch theme change event when isDarkMode changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('themeChange'));
+    }
+  }, [isDarkMode]);
+
   const filterData = (period: string, data: CountryData[]) => {
     const referenceYear = 2023; // Set fixed reference year to 2023
     switch (period) {

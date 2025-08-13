@@ -146,6 +146,14 @@ const CurrencyHierarchyPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [refreshInterval, setRefreshInterval] = useState(5 * 60 * 1000); // 5 minutes default
+  const [converterAmount, setConverterAmount] = useState<string>('100');
+  const [converterFromCurrency, setConverterFromCurrency] = useState<string>('USD');
+  const [converterResults, setConverterResults] = useState<{ [key: string]: number }>({});
+
+  // Define Tier 4 currencies for tooltip positioning
+  const tier4Currencies = ['MXN', 'BRL', 'INR', 'ZAR', 'RUB', 'TRY'];
 
   useEffect(() => {
     // Initialize theme on mount
@@ -176,6 +184,7 @@ const CurrencyHierarchyPage = () => {
         }
 
         setExchangeRates(rates);
+        setLastUpdated(new Date().toISOString());
       } catch (err) {
         setError('Failed to fetch exchange rates');
         console.error('Error fetching rates:', err);
@@ -186,12 +195,76 @@ const CurrencyHierarchyPage = () => {
 
     fetchRates();
     // Refresh rates every 5 minutes
-    const interval = setInterval(fetchRates, 5 * 60 * 1000);
+    const interval = setInterval(fetchRates, refreshInterval);
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshInterval]);
+
+  // Calculate converter results when exchange rates or converter inputs change
+  useEffect(() => {
+    if (exchangeRates[converterFromCurrency] && converterAmount) {
+      const amount = parseFloat(converterAmount);
+      if (!isNaN(amount) && amount > 0) {
+        const results: { [key: string]: number } = {};
+        const currencies = Object.keys(currencyData);
+        
+        currencies.forEach(currency => {
+          if (currency !== converterFromCurrency) {
+            const rate = exchangeRates[converterFromCurrency]?.[currency];
+            if (rate) {
+              results[currency] = amount * rate;
+            }
+          }
+        });
+        
+        setConverterResults(results);
+      }
+    }
+  }, [exchangeRates, converterFromCurrency, converterAmount]);
 
   const handleCurrencyClick = (currency: string) => {
     setSelectedCurrency(selectedCurrency === currency ? null : currency);
+  };
+
+  const handleManualRefresh = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const currencies = Object.keys(currencyData);
+      const rates: { [key: string]: { [key: string]: number } } = {};
+
+      // Fetch rates for each currency
+      for (const currency of currencies) {
+        const pairs = await calculateCurrencyPairs(
+          currency,
+          currencies.filter(c => c !== currency)
+        );
+        rates[currency] = {};
+        pairs.forEach(pair => {
+          rates[currency][pair.to] = pair.rate;
+        });
+      }
+
+      setExchangeRates(rates);
+      setLastUpdated(new Date().toISOString());
+    } catch (err) {
+      setError('Failed to fetch exchange rates');
+      console.error('Error fetching rates:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefreshIntervalChange = (interval: number) => {
+    setRefreshInterval(interval);
+  };
+
+  const handleConverterCurrencyChange = (currency: string) => {
+    setConverterFromCurrency(currency);
+    setSelectedCurrency(currency);
+  };
+
+  const handleConverterAmountChange = (amount: string) => {
+    setConverterAmount(amount);
   };
 
   const handleCurrencyHover = (
@@ -201,10 +274,123 @@ const CurrencyHierarchyPage = () => {
     if (currency) {
       const rect = event.currentTarget.getBoundingClientRect();
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      setTooltipPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top + scrollTop
-      });
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate base position
+      let x = rect.left + rect.width / 2;
+      let y = rect.top + scrollTop;
+      
+      // Aggressive handling for right-side currencies (like TRY at x=900)
+      if (x > viewportWidth * 0.5) {
+        // For currencies on the right half, position tooltip to the left with more offset
+        x = x - 300;
+      }
+      
+      // Extra aggressive handling for currencies at the very right edge
+      if (x > viewportWidth * 0.7) {
+        // For currencies very close to the right edge, position tooltip much further left
+        x = x - 400;
+      }
+      
+      // Super aggressive for extreme right edge currencies
+      if (x > viewportWidth * 0.8) {
+        // For currencies at the extreme right edge, force tooltip to left side
+        x = 200;
+      }
+      
+      // Specific positioning for known right-edge currencies
+      if (currency === 'TRY' || currency === 'RUB' || currency === 'AUD') {
+        // Force these currencies to have tooltips on the left side of the screen
+        x = Math.min(250, viewportWidth * 0.3);
+      }
+      
+      // Adjust horizontal position to keep tooltip within viewport
+      if (x < 120) {
+        x = 120; // Keep tooltip away from left edge
+      } else if (x > viewportWidth - 120) {
+        x = viewportWidth - 120; // Keep tooltip away from right edge
+      }
+      
+      // Final fallback: if tooltip would still be off-screen, force it to center
+      if (x < 100 || x > viewportWidth - 100) {
+        x = viewportWidth / 2; // Center the tooltip as a last resort
+      }
+      
+      // Ultimate safety override for right-edge currencies
+      if (currency === 'TRY' || currency === 'RUB' || currency === 'AUD') {
+        // These currencies ALWAYS get tooltips in the left third of the screen
+        x = Math.max(150, Math.min(300, viewportWidth * 0.25));
+        console.log(`${currency} Ultimate Safety Override:`, { x, viewportWidth });
+      }
+      
+      // Special positioning for Tier 4 currencies - keep them closer to their actual positions
+      if (tier4Currencies.includes(currency)) {
+        // For Tier 4 currencies, use a more moderate leftward shift to keep them closer
+        const originalX = rect.left + rect.width / 2;
+        if (originalX > viewportWidth * 0.7) {
+          // Only shift significantly if they're very close to the right edge
+          x = originalX - 200;
+        } else if (originalX > viewportWidth * 0.6) {
+          // Moderate shift for currencies in the right third
+          x = originalX - 150;
+        } else {
+          // Keep close to original position for currencies in the left/middle
+          x = originalX - 50;
+        }
+        
+        // Ensure the tooltip stays within viewport bounds
+        if (x < 120) {
+          x = 120;
+        } else if (x > viewportWidth - 120) {
+          x = viewportWidth - 120;
+        }
+      }
+      
+      // Special vertical positioning for TRY
+      if (currency === 'TRY') {
+        // Position TRY tooltip higher on the screen
+        y = Math.max(100, y - 100);
+      }
+      
+      // Special vertical positioning for all Tier 4 currencies
+      if (tier4Currencies.includes(currency)) {
+        // Position all Tier 4 currency tooltips higher on the screen
+        y = Math.max(100, y - 80);
+      }
+      
+      // Debug logging for TRY positioning
+      if (currency === 'TRY') {
+        console.log('TRY Tooltip Positioning:', {
+          originalX: rect.left + rect.width / 2,
+          adjustedX: x,
+          originalY: rect.top + scrollTop,
+          adjustedY: y,
+          viewportWidth,
+          rect: { left: rect.left, right: rect.right, width: rect.width },
+          finalX: x,
+          currency: currency
+        });
+      }
+      
+      // Debug logging for all right-edge currencies
+      if (x > viewportWidth * 0.6) {
+        console.log(`${currency} Tooltip (Right Edge):`, {
+          originalX: rect.left + rect.width / 2,
+          adjustedX: x,
+          viewportWidth,
+          finalX: x
+        });
+      }
+      
+      // Adjust vertical position to keep tooltip within viewport
+      if (y < 100) {
+        y = rect.bottom + scrollTop + 20; // Show tooltip below if too close to top
+      } else if (y > viewportHeight - 100) {
+        y = rect.top + scrollTop - 20; // Show tooltip above if too close to bottom
+      }
+      
+      setTooltipPosition({ x, y });
     }
     setHoveredCurrency(currency);
   };
@@ -233,49 +419,172 @@ const CurrencyHierarchyPage = () => {
     }
   };
 
+  const formatLastUpdated = (timestamp: string | null) => {
+    if (!timestamp) return 'Never';
+    
+    try {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffSecs = Math.floor((diffMs % 60000) / 1000);
+      
+      if (diffMins < 1) {
+        return `${diffSecs} seconds ago`;
+      } else if (diffMins < 60) {
+        return `${diffMins} minutes ago`;
+      } else {
+        return date.toLocaleTimeString();
+      }
+    } catch (error) {
+      return 'Unknown';
+    }
+  };
+
+  const formatConvertedAmount = (amount: number, currency: string): string => {
+    if (isNaN(amount) || amount <= 0) return '0.00';
+    
+    // Format based on currency type
+    if (currency === 'JPY' || currency === 'KRW' || currency === 'INR') {
+      // For currencies with low unit values, show 2 decimal places
+      return amount.toFixed(2);
+    } else if (currency === 'BTC' || currency === 'ETH') {
+      // For cryptocurrencies, show 6 decimal places
+      return amount.toFixed(6);
+    } else {
+      // For most currencies, show 2 decimal places
+      return amount.toFixed(2);
+    }
+  };
+
   return (
     <div className={`w-full max-w-6xl mx-auto p-4 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Global Currency Hierarchy</h1>
-        <div className="flex items-center space-x-2">
-          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
-          <button
-            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-            onClick={() => setIsDarkMode(!isDarkMode)}
-          >
-            <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
-          </button>
-          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
+        <div className="flex items-center space-x-4">
+          {/* Live Exchange Rate Controls */}
+          <div className="flex items-center space-x-2">
+            <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              Refresh:
+            </span>
+            <select
+              value={refreshInterval / 1000 / 60}
+              onChange={(e) => handleRefreshIntervalChange(parseInt(e.target.value) * 60 * 1000)}
+              className={`px-2 py-1 rounded border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
+            >
+              <option value={1}>1 min</option>
+              <option value={5}>5 min</option>
+              <option value={15}>15 min</option>
+              <option value={30}>30 min</option>
+            </select>
+            <button
+              onClick={handleManualRefresh}
+              disabled={loading}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                loading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : isDarkMode 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+            >
+              {loading ? 'Refreshing...' : 'Refresh Now'}
+            </button>
+          </div>
+          
+          {/* Last Updated Indicator */}
+          {lastUpdated && (
+            <div className={`text-xs ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
+              Live: {formatLastUpdated(lastUpdated)}
+            </div>
+          )}
+          
+          {/* Theme Toggle */}
+          <div className="flex items-center space-x-2">
+            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
+            <button
+              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+              onClick={() => setIsDarkMode(!isDarkMode)}
+            >
+              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
+            </button>
+            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
+          </div>
         </div>
       </div>
       
       {/* Loading and Error States */}
       {loading && (
-        <div className="mb-4 text-blue-600 dark:text-blue-400">
-          Loading exchange rates...
+        <div className={`mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-50 text-blue-800'}`}>
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+            <span>Fetching live exchange rates...</span>
+          </div>
         </div>
       )}
       {error && (
-        <div className="mb-4 text-red-600 dark:text-red-400">
-          {error}
+        <div className={`mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-red-900 text-red-200' : 'bg-red-50 text-red-800'}`}>
+          <div className="flex items-center space-x-2">
+            <span>⚠️ {error}</span>
+            <button
+              onClick={handleManualRefresh}
+              className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                isDarkMode 
+                  ? 'bg-red-700 hover:bg-red-600 text-white' 
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
+            >
+              Retry
+            </button>
+          </div>
         </div>
       )}
       
-      <div className="w-full overflow-x-auto relative bg-white dark:bg-gray-900 rounded-lg shadow-lg p-4 transition-colors duration-200">
+      <div className={`w-full overflow-x-auto relative rounded-lg shadow-lg p-4 transition-colors duration-200 ${
+        isDarkMode 
+          ? 'bg-gray-900 border border-gray-700' 
+          : 'bg-white border border-gray-200'
+      }`}>
         {/* Tooltip with Exchange Rate */}
         {hoveredCurrency && currencyData[hoveredCurrency] && (
           <div
-            className="absolute z-10 bg-black bg-opacity-80 text-white p-2 rounded pointer-events-none"
+            className="absolute z-50 bg-black bg-opacity-95 text-white p-3 rounded-lg pointer-events-none shadow-xl transition-all duration-200 ease-out animate-in fade-in-0 zoom-in-95"
             style={{
               left: `${tooltipPosition.x}px`,
-              top: `${tooltipPosition.y - 40}px`,
+              top: `${tooltipPosition.y - (hoveredCurrency === 'TRY' ? 60 : tier4Currencies.includes(hoveredCurrency) ? 50 : 35)}px`,
               transform: 'translateX(-50%)',
+              minWidth: '200px',
+              maxWidth: '250px'
             }}
           >
-            <div>{currencyData[hoveredCurrency].name}</div>
+            <div className="font-semibold text-sm mb-1">{currencyData[hoveredCurrency].name}</div>
+            <div className="text-xs text-gray-300 mb-2">Tier {currencyData[hoveredCurrency].tier}</div>
             {selectedCurrency && exchangeRates[selectedCurrency]?.[hoveredCurrency] && (
-              <div className="text-sm opacity-80">
-                1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency]?.[hoveredCurrency])} {hoveredCurrency}
+              <div className="text-sm">
+                <div className="font-medium text-green-400">
+                  1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency]?.[hoveredCurrency])} {hoveredCurrency}
+                </div>
+                {lastUpdated && (
+                  <div className="text-xs text-gray-400 mt-1">
+                    Updated: {formatLastUpdated(lastUpdated)}
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Quick Converter in Tooltip */}
+            {converterAmount && converterFromCurrency && converterFromCurrency !== hoveredCurrency && (
+              <div className="mt-2 pt-2 border-t border-gray-600">
+                <div className="text-xs text-gray-300 mb-1">Quick Convert:</div>
+                <div className="text-sm text-blue-300">
+                  {converterAmount} {converterFromCurrency} = {
+                    formatConvertedAmount(
+                      parseFloat(converterAmount) * (exchangeRates[converterFromCurrency]?.[hoveredCurrency] || 0),
+                      hoveredCurrency
+                    )
+                  } {hoveredCurrency}
+                </div>
               </div>
             )}
           </div>
@@ -340,10 +649,27 @@ const CurrencyHierarchyPage = () => {
             width="1200" 
             height="900" 
             fill={isDarkMode ? "rgb(17, 24, 39)" : "#f8fafc"}
+            stroke={isDarkMode ? "rgb(55, 65, 81)" : "rgb(229, 231, 235)"}
+            strokeWidth="2"
+            rx="8"
+            ry="8"
+          />
+          
+          {/* Inner border for better definition in dark mode */}
+          <rect 
+            x="4" 
+            y="4" 
+            width="1192" 
+            height="892" 
+            fill="none"
+            stroke={isDarkMode ? "rgba(75, 85, 99, 0.4)" : "rgba(0, 0, 0, 0.1)"}
+            strokeWidth="1"
+            rx="6"
+            ry="6"
           />
           
           {/* Grid lines */}
-          <g stroke={isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"} strokeWidth="1">
+          <g stroke={isDarkMode ? "rgba(75, 85, 99, 0.3)" : "rgba(0, 0, 0, 0.05)"} strokeWidth="1">
             {/* Horizontal lines */}
             <line x1="0" y1="225" x2="1200" y2="225"/>
             <line x1="0" y1="375" x2="1200" y2="375"/>
@@ -390,6 +716,8 @@ const CurrencyHierarchyPage = () => {
               ry="10" 
               fill={isDarkMode ? "rgb(31, 41, 55)" : "#000000"} 
               fillOpacity={isDarkMode ? "1" : "0.05"}
+              stroke={isDarkMode ? "rgb(75, 85, 99)" : "rgba(0, 0, 0, 0.1)"}
+              strokeWidth="1"
             />
             <text 
               x="0" 
@@ -755,30 +1083,188 @@ const CurrencyHierarchyPage = () => {
         </svg>
       </div>
 
+      {/* Interactive Currency Converter Bar */}
+      <div className={`mt-8 p-4 rounded-lg shadow-lg transition-all duration-200 ${
+        isDarkMode ? 'bg-[#0A192F] border border-gray-700' : 'bg-white border border-gray-200'
+      }`}>
+        <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+          <div className="flex items-center space-x-3">
+            <span className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+              Convert:
+            </span>
+            <input
+              type="number"
+              value={converterAmount}
+              onChange={(e) => handleConverterAmountChange(e.target.value)}
+              min="0"
+              step="0.01"
+              className={`w-24 px-3 py-2 rounded-lg border text-center font-semibold ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-white border-gray-600 focus:border-blue-500' 
+                  : 'bg-gray-50 text-gray-900 border-gray-300 focus:border-blue-500'
+              } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
+              placeholder="100"
+            />
+            <select
+              value={converterFromCurrency}
+              onChange={(e) => handleConverterCurrencyChange(e.target.value)}
+              className={`px-3 py-2 rounded-lg border font-medium ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-white border-gray-600 focus:border-blue-500' 
+                  : 'bg-gray-50 text-gray-900 border-gray-300 focus:border-blue-500'
+              } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
+            >
+              {Object.keys(currencyData).map(currency => (
+                <option key={currency} value={currency}>
+                  {currency} - {currencyData[currency].name}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            {lastUpdated && (
+              <span className="flex items-center space-x-2">
+                <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span>Live rates updated {formatLastUpdated(lastUpdated)}</span>
+              </span>
+            )}
+          </div>
+        </div>
+        
+        {/* Conversion Results Grid */}
+        {Object.keys(converterResults).length > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600">
+            <h3 className={`text-sm font-medium mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              {converterAmount} {converterFromCurrency} equals:
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {Object.entries(converterResults)
+                .sort(([, amountA], [, amountB]) => amountB - amountA)
+                .map(([currency, amount]) => (
+                  <div
+                    key={currency}
+                    className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer hover:scale-105 ${
+                      isDarkMode 
+                        ? 'bg-[#112240] border-gray-700 hover:border-blue-500' 
+                        : 'bg-gray-50 border-gray-200 hover:border-blue-300'
+                    }`}
+                    onClick={() => handleCurrencyClick(currency)}
+                  >
+                    <div className="text-center">
+                      <div className={`text-lg font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                        {formatConvertedAmount(amount, currency)}
+                      </div>
+                      <div className={`text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {currency}
+                      </div>
+                      <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {currencyData[currency]?.name}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Currency Details Panel with Exchange Rates - Moved below SVG */}
       {selectedCurrency && currencyData[selectedCurrency] && (
-        <div className={`mt-8 p-4 rounded-lg shadow-lg transition-all duration-200 ${isDarkMode ? 'bg-[#0A192F]' : 'bg-white'}`}>
-          <h2 className="text-xl font-bold mb-2 dark:text-white">
-            {currencyData[selectedCurrency].code} - {currencyData[selectedCurrency].name}
-          </h2>
-          <p className="text-gray-600 dark:text-gray-100 mb-4">
-            {currencyData[selectedCurrency].description}
-          </p>
+        <div className={`mt-8 p-6 rounded-lg shadow-lg transition-all duration-200 ${isDarkMode ? 'bg-[#0A192F]' : 'bg-white'}`}>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-xl font-bold mb-2 dark:text-white">
+                {currencyData[selectedCurrency].code} - {currencyData[selectedCurrency].name}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-100 mb-2">
+                {currencyData[selectedCurrency].description}
+              </p>
+              <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                isDarkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'
+              }`}>
+                Tier {currencyData[selectedCurrency].tier}
+              </div>
+            </div>
+            
+            {/* Live Status */}
+            {lastUpdated && (
+              <div className={`text-right ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
+                <div className="flex items-center space-x-2">
+                  <span className="inline-block w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                  <span className="text-sm font-medium">Live Rates</span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {formatLastUpdated(lastUpdated)}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Quick Conversion Display */}
+          {converterAmount && converterFromCurrency && selectedCurrency !== converterFromCurrency && (
+            <div className={`mb-4 p-3 rounded-lg ${
+              isDarkMode ? 'bg-[#112240] border border-gray-700' : 'bg-gray-50 border border-gray-200'
+            }`}>
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                  {converterAmount} {converterFromCurrency} = {
+                    formatConvertedAmount(
+                      parseFloat(converterAmount) * (exchangeRates[converterFromCurrency]?.[selectedCurrency] || 0),
+                      selectedCurrency
+                    )
+                  } {selectedCurrency}
+                </div>
+                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Exchange Rate: 1 {converterFromCurrency} = {formatRate(exchangeRates[converterFromCurrency]?.[selectedCurrency])} {selectedCurrency}
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Exchange Rates Section */}
           {exchangeRates[selectedCurrency] && (
             <div>
-              <h3 className="text-lg font-semibold mb-2 dark:text-white">Exchange Rates</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center space-x-2">
+                <span>Exchange Rates</span>
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={loading}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                    loading 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : isDarkMode 
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  }`}
+                >
+                  {loading ? '↻' : '↻'}
+                </button>
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {Object.entries(exchangeRates[selectedCurrency] || {})
                   .sort(([, rateA], [, rateB]) => (rateB || 0) - (rateA || 0))
                   .map(([currency, rate]) => (
                     <div 
                       key={currency}
-                      className={`p-3 rounded transition-all duration-200 ${isDarkMode ? 'bg-[#112240]' : 'bg-gray-50'}`}
+                      className={`p-4 rounded-lg transition-all duration-200 border ${
+                        isDarkMode 
+                          ? 'bg-[#112240] border-gray-700 hover:border-blue-500' 
+                          : 'bg-gray-50 border-gray-200 hover:border-blue-300'
+                      }`}
                     >
-                      <div className="font-medium dark:text-gray-100">{currency}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-semibold dark:text-gray-100">{currency}</div>
+                        <div className={`text-xs px-2 py-1 rounded ${
+                          isDarkMode ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800'
+                        }`}>
+                          Live
+                        </div>
+                      </div>
+                      <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                        {formatRate(rate)}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         1 {selectedCurrency} = {formatRate(rate)} {currency}
                       </div>
                     </div>

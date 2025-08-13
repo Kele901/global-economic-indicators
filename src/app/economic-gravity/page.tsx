@@ -217,7 +217,18 @@ const EconomicGravityPage = () => {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
+    // Dispatch theme change event for navbar synchronization
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('themeChange'));
+    }
   };
+
+  // Dispatch theme change event when isDarkMode changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('themeChange'));
+    }
+  }, [isDarkMode]);
 
   // Define unified theme colors
   const themeColors = {
@@ -237,23 +248,24 @@ const EconomicGravityPage = () => {
     <div className={`w-full max-w-6xl mx-auto p-4 ${themeColors.text} ${themeColors.background} min-h-screen`}>
       <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
       
-      {/* Hero Section */}
-      <div className={`relative overflow-hidden rounded-2xl mb-12 p-8 ${
-        isDarkMode 
-          ? 'bg-gradient-to-br from-gray-800 via-blue-900 to-gray-800 border border-gray-700' 
-          : 'bg-gradient-to-br from-white via-blue-50 to-white border border-gray-100'
-      }`}>
-        <div className="relative z-10">
-          <h1 className={`text-4xl font-bold mb-4 ${themeColors.text}`}>
-            Economic Center of Gravity Through History
-          </h1>
-          <p className={themeColors.textSecondary}>
-            Tracking the shift of global economic power from ancient civilizations to modern times
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Economic Center of Gravity Through History</h1>
+          <p className="text-gray-600 dark:text-gray-100 max-w-xl">
+            Tracking the shift of global economic power from ancient civilizations to modern times. Explore how economic dominance has moved across continents and empires throughout human history.
           </p>
         </div>
-        <div className={`absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l ${
-          isDarkMode ? 'from-blue-400' : 'from-blue-600'
-        } to-transparent`} />
+        <div className="flex items-center space-x-2">
+          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
+          <button
+            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+            onClick={() => setIsDarkMode(!isDarkMode)}
+          >
+            <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
+          </button>
+          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
+        </div>
       </div>
 
       {/* World Map Visualization */}
@@ -268,11 +280,11 @@ const EconomicGravityPage = () => {
         </h2>
         <div className="relative w-full h-[600px] mb-6">
           {/* World Map with points overlay */}
-          <div className="absolute inset-0 rounded-xl overflow-hidden bg-gray-100">
+          <div className="absolute inset-0 rounded-xl overflow-hidden">
             <img 
               src="/World map.jpg" 
               alt="World Map"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
               style={{ 
                 filter: isDarkMode ? 'brightness(0.7) contrast(1.2)' : 'brightness(1) contrast(1)'
               }}
