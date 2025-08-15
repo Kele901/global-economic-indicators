@@ -739,7 +739,10 @@ const GlobalInterestRateApp = () => {
               data={data}
               isDarkMode={isDarkMode}
             />
-
+            {/* Middle Ad Placement */}
+            <div className="my-8">
+              <AdSense />
+            </div>
           </>
         )}
       </div>
