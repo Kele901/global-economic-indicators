@@ -97,35 +97,40 @@ const Navbar = () => {
       <div className="max-w-4xl mx-auto py-3 sm:py-4 px-3 sm:px-4">
         <nav className="flex justify-between items-center">
           {/* Logo/Brand */}
-          <div className={`text-base sm:text-lg font-semibold transition-colors duration-200 ${
+          <div className={`text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
             Global Economic Indicators
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-center space-x-0">
-            {navLinks.map((link, index) => (
-              <div key={link.href} className="flex items-center">
-                <a 
-                  href={link.href} 
-                  className={`text-sm px-3 py-2 transition-colors duration-200 ${
-                    isDarkMode 
-                      ? 'text-gray-300 hover:text-blue-400' 
-                      : 'text-gray-700 hover:text-blue-600'
-                  }`}
-                >
-                  {link.label}
-                </a>
-                {/* Add separator line between links (except after the last one) */}
-                {index < navLinks.length - 1 && (
-                  <div className={`w-px h-4 mx-1 transition-colors duration-200 ${
-                    isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
-                  }`}></div>
-                )}
-              </div>
-            ))}
+          {/* Desktop Navigation - Centered with even spacing */}
+          <div className="hidden md:flex items-center justify-center flex-1 mx-8">
+            <div className="flex items-center justify-center space-x-0">
+              {navLinks.map((link, index) => (
+                <div key={link.href} className="flex items-center">
+                  <a 
+                    href={link.href} 
+                    className={`text-sm px-4 py-2 transition-colors duration-200 whitespace-nowrap ${
+                      isDarkMode 
+                        ? 'text-gray-300 hover:text-blue-400' 
+                        : 'text-gray-700 hover:text-blue-600'
+                    }`}
+                  >
+                    {link.label}
+                  </a>
+                  {/* Add separator line between links (except after the last one) */}
+                  {index < navLinks.length - 1 && (
+                    <div className={`w-px h-4 mx-2 transition-colors duration-200 ${
+                      isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+                    }`}></div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Right side spacer to balance the layout */}
+          <div className="hidden md:block flex-shrink-0 w-0 sm:w-8"></div>
 
           {/* Mobile Menu Button */}
           <button
