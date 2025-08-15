@@ -733,11 +733,14 @@ const GlobalInterestRateApp = () => {
         </div>
 
         {selectedCountryForSummary && (
-          <CountryEconomicSummary
-            country={selectedCountryForSummary}
-            data={data}
-            isDarkMode={isDarkMode}
-          />
+          <>
+            <CountryEconomicSummary
+              country={selectedCountryForSummary}
+              data={data}
+              isDarkMode={isDarkMode}
+            />
+
+          </>
         )}
       </div>
 
