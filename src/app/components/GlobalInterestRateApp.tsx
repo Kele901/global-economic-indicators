@@ -733,17 +733,11 @@ const GlobalInterestRateApp = () => {
         </div>
 
         {selectedCountryForSummary && (
-          <>
-            <CountryEconomicSummary
-              country={selectedCountryForSummary}
-              data={data}
-              isDarkMode={isDarkMode}
-            />
-            {/* Middle Ad Placement */}
-            <div className="my-8">
-              <AdSense />
-            </div>
-          </>
+          <CountryEconomicSummary
+            country={selectedCountryForSummary}
+            data={data}
+            isDarkMode={isDarkMode}
+          />
         )}
       </div>
 
