@@ -32,8 +32,8 @@ export default function ComparePage() {
   if (loading) {
     return (
       <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-800 text-white' : 'bg-gray-50 text-gray-900'}`}>
-        <div className="w-full max-w-7xl mx-auto p-3 sm:p-4">
-          <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Country Comparison</h1>
+        <div className="w-full max-w-7xl mx-auto p-4">
+          <h1 className="text-2xl font-bold mb-4">Country Comparison</h1>
           <LoadingSpinner />
         </div>
       </div>
@@ -43,8 +43,8 @@ export default function ComparePage() {
   if (error) {
     return (
       <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-800 text-white' : 'bg-gray-50 text-gray-900'}`}>
-        <div className="w-full max-w-7xl mx-auto p-3 sm:p-4">
-          <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Country Comparison</h1>
+        <div className="w-full max-w-7xl mx-auto p-4">
+          <h1 className="text-2xl font-bold mb-4">Country Comparison</h1>
           <ErrorMessage message={error} />
         </div>
       </div>
@@ -53,23 +53,23 @@ export default function ComparePage() {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-800 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="w-full max-w-7xl mx-auto p-3 sm:p-4 space-y-6 sm:space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+      <div className="w-full max-w-7xl mx-auto p-4 space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Economic Indicators Comparison</h1>
-            <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mt-1 sm:mt-2`}>
+            <h1 className="text-2xl font-bold">Economic Indicators Comparison</h1>
+            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Compare key economic indicators across multiple countries to analyze trends, patterns, and relationships between different economies.
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Light</span>
+            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
             <button
-              className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
               onClick={() => setIsDarkMode(!isDarkMode)}
             >
-              <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-5 sm:translate-x-6' : ''}`} />
+              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
             </button>
-            <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Dark</span>
+            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
           </div>
         </div>
 

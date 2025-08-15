@@ -458,9 +458,9 @@ const CurrencyHierarchyPage = () => {
   };
 
   return (
-          <div className={`w-full max-w-6xl mx-auto p-3 sm:p-4 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold">Global Currency Hierarchy</h1>
+    <div className={`w-full max-w-6xl mx-auto p-4 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Global Currency Hierarchy</h1>
         <div className="flex items-center space-x-4">
           {/* Live Exchange Rate Controls */}
           <div className="flex items-center space-x-2">
@@ -1241,13 +1241,13 @@ const CurrencyHierarchyPage = () => {
                   {loading ? '↻' : '↻'}
                 </button>
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {Object.entries(exchangeRates[selectedCurrency] || {})
                   .sort(([, rateA], [, rateB]) => (rateB || 0) - (rateA || 0))
                   .map(([currency, rate]) => (
                     <div 
                       key={currency}
-                      className={`p-3 sm:p-4 rounded-lg transition-all duration-200 border ${
+                      className={`p-4 rounded-lg transition-all duration-200 border ${
                         isDarkMode 
                           ? 'bg-[#112240] border-gray-700 hover:border-blue-500' 
                           : 'bg-gray-50 border-gray-200 hover:border-blue-300'
@@ -1275,7 +1275,7 @@ const CurrencyHierarchyPage = () => {
         </div>
       )}
 
-      <div className="mt-6 sm:mt-8">
+      <div className="mt-8">
         <AdSense />
       </div>
     </div>

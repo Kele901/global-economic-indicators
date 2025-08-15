@@ -31,9 +31,9 @@ const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (
     <div 
       ref={adRef} 
-      className={`my-8 min-h-[280px] bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden ${className}`}
+      className={`my-4 sm:my-6 md:my-8 min-h-[200px] sm:min-h-[250px] md:min-h-[280px] bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden ${className}`}
     >
-      <div className="text-center text-sm text-gray-500 dark:text-gray-400 p-2">
+      <div className="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 p-2">
         Advertisement
       </div>
       <ins
@@ -41,7 +41,7 @@ const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
         style={{
           display: 'block',
           width: '100%',
-          minHeight: '250px',
+          minHeight: '180px',
           backgroundColor: 'transparent',
         }}
         data-ad-client="ca-pub-1726759813423594"

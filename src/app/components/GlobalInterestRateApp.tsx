@@ -258,12 +258,14 @@ const CountryEconomicSummary = ({
             <YAxis 
               stroke={isDarkMode ? '#fff' : '#666'}
               tick={{ fontSize: 10 }}
-              width={30}
+              width={35}
             />
             <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
             />
-            <Legend wrapperStyle={{ fontSize: '10px', marginTop: '5px' }} />
+            <Legend 
+              wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
+            />
             {Object.entries(metricColors).map(([metric, color]) => (
               <Line
                 key={metric}
@@ -272,13 +274,14 @@ const CountryEconomicSummary = ({
                 stroke={color}
                 dot={false}
                 activeDot={{ r: 3 }}
+                strokeWidth={1.5}
               />
             ))}
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm md:text-base">
+      <div className="space-y-2 text-xs sm:text-sm">
         <p>
           <strong>Interest Rates:</strong> Currently at {metrics.interest.recent.toFixed(1)}% 
           {getTrendEmoji(metrics.interest.trend)} (Historical avg: {metrics.interest.avg.toFixed(1)}%)
@@ -309,7 +312,7 @@ const CountryEconomicSummary = ({
         </p>
 
         <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-md ${isDarkMode ? 'bg-gray-600' : 'bg-blue-100'}`}>
-          <p className="text-xs sm:text-sm leading-relaxed">
+          <p className="text-xs sm:text-sm">
             <strong>Economic Overview:</strong> {country}'s economy shows {' '}
             {metrics.gdp.recent > 2 ? 'strong' : metrics.gdp.recent > 0 ? 'moderate' : 'challenging'} growth at {metrics.gdp.recent.toFixed(1)}% with {' '}
             {metrics.inflation.recent > 5 ? 'high' : metrics.inflation.recent > 2 ? 'moderate' : 'low'} inflation ({metrics.inflation.recent.toFixed(1)}%). {' '}
@@ -501,7 +504,7 @@ const GlobalInterestRateApp = () => {
       {!isGridView && <SummaryComponent isDarkMode={isDarkMode} />}
       <div className={`${isGridView ? 'h-[200px] sm:h-[250px] md:h-[350px]' : 'h-[250px] sm:h-[300px] md:h-[400px]'} w-full`}>
         <ResponsiveContainer>
-          <LineChart data={filterData(selectedPeriod, data)} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+          <LineChart data={filterData(selectedPeriod, data)} margin={{ top: 5, right: 15, left: 5, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
             <XAxis 
               dataKey="year" 
@@ -518,7 +521,7 @@ const GlobalInterestRateApp = () => {
               width={35}
             />
             <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
             />
             <Legend 
               wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
@@ -592,7 +595,7 @@ const GlobalInterestRateApp = () => {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
               <div className="bg-white/10 p-2 sm:p-3 rounded">
-                <h3 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">Key Features:</h3>
+                <h3 className="font-medium mb-1 sm:mb-2 text-sm">Key Features:</h3>
                 <ul className="list-disc list-inside text-xs sm:text-sm space-y-1">
                   <li>Real-time economic data visualization</li>
                   <li>Cross-country comparative analysis</li>
@@ -601,7 +604,7 @@ const GlobalInterestRateApp = () => {
                 </ul>
               </div>
               <div className="bg-white/10 p-2 sm:p-3 rounded">
-                <h3 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">Available Metrics:</h3>
+                <h3 className="font-medium mb-1 sm:mb-2 text-sm">Available Metrics:</h3>
                 <ul className="list-disc list-inside text-xs sm:text-sm space-y-1">
                   <li>Interest & Inflation Rates</li>
                   <li>Employment Statistics</li>
@@ -618,11 +621,12 @@ const GlobalInterestRateApp = () => {
       </div>
 
       <div className="mb-4 space-y-3 sm:space-y-4">
+        {/* Controls Grid - Mobile First */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <select
             value={selectedPeriod}
             onChange={(e) => handlePeriodChange(e.target.value)}
-            className={`w-full p-2 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full p-2 sm:p-2.5 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           >
             <option value="all">All Time</option>
             <option value="20years">Last 20 Years</option>
@@ -632,7 +636,7 @@ const GlobalInterestRateApp = () => {
           <select
             value={selectedMetric}
             onChange={(e) => setSelectedMetric(e.target.value as typeof selectedMetric)}
-            className={`w-full p-2 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full p-2 sm:p-2.5 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           >
             <option value="all">All Metrics</option>
             <option value="interest">Interest Rates</option>
@@ -645,7 +649,7 @@ const GlobalInterestRateApp = () => {
           </select>
           <button
             onClick={() => setIsGridView(!isGridView)}
-            className={`w-full px-3 py-2 rounded-md text-sm ${
+            className={`w-full p-2 sm:p-2.5 rounded-md text-sm font-medium ${
               isDarkMode 
                 ? 'bg-blue-600 text-white hover:bg-blue-700' 
                 : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
@@ -665,12 +669,17 @@ const GlobalInterestRateApp = () => {
               );
               setSelectedCountryForSummary(matchedCountry || '');
             }}
-            className={`w-full p-2 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full p-2 sm:p-2.5 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-3">
-          <label htmlFor="maxYAxis" className={`${isDarkMode ? 'text-white' : ''} whitespace-nowrap text-sm`}>
+        {/* Y-Axis Control - Mobile Optimized */}
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 p-3 sm:p-4 rounded-lg border ${
+          isDarkMode 
+            ? 'bg-gray-800 border-gray-600' 
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          <label htmlFor="maxYAxis" className={`${isDarkMode ? 'text-gray-100' : 'text-gray-700'} text-sm font-medium whitespace-nowrap`}>
             Max Y-Axis Value (Interest Rate):
           </label>
           <input
@@ -678,23 +687,49 @@ const GlobalInterestRateApp = () => {
             type="number"
             value={maxYAxis}
             onChange={(e) => setMaxYAxis(Number(e.target.value))}
-            className={`w-full sm:w-[100px] p-2 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            className={`w-full sm:w-[120px] p-2 rounded-md border text-sm transition-colors duration-200 ${
+              isDarkMode 
+                ? 'bg-gray-700 text-white border-gray-600 focus:border-blue-400 focus:ring-1 focus:ring-blue-400' 
+                : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+            }`}
           />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-4">
-          {filteredCountries.map(country => (
-            <div key={country} className="flex items-center space-x-2 p-2">
-              <input
-                type="checkbox"
-                id={country}
-                checked={selectedCountries.includes(country)}
-                onChange={() => handleCountryToggle(country)}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor={country} className={`${isDarkMode ? 'text-white' : ''} truncate text-xs sm:text-sm`}>{country}</label>
-            </div>
-          ))}
+        {/* Country Selection - Improved Mobile Layout */}
+        <div className={`rounded-lg p-3 sm:p-4 border ${
+          isDarkMode 
+            ? 'bg-gray-800 border-gray-600' 
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          <h3 className={`text-sm sm:text-base font-medium mb-3 ${
+            isDarkMode ? 'text-gray-100' : 'text-gray-700'
+          }`}>
+            Select Countries to Display:
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+            {filteredCountries.map(country => (
+              <div key={country} className={`flex items-center space-x-2 p-2 rounded border transition-colors duration-200 ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
+                  : 'bg-white border-gray-200 hover:bg-gray-100'
+              }`}>
+                <input
+                  type="checkbox"
+                  id={country}
+                  checked={selectedCountries.includes(country)}
+                  onChange={() => handleCountryToggle(country)}
+                  className={`rounded w-4 h-4 transition-colors duration-200 ${
+                    isDarkMode 
+                      ? 'border-gray-500 text-blue-400 focus:ring-blue-400' 
+                      : 'border-gray-300 text-blue-600 focus:ring-blue-500'
+                  }`}
+                />
+                <label htmlFor={country} className={`${isDarkMode ? 'text-gray-100' : 'text-gray-700'} text-xs sm:text-sm truncate cursor-pointer transition-colors duration-200`}>
+                  {country}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
 
         {selectedCountryForSummary && (
@@ -712,7 +747,7 @@ const GlobalInterestRateApp = () => {
         )}
       </div>
 
-      <div className={`${isGridView ? 'grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8' : 'space-y-12 sm:space-y-16'} mt-8 sm:mt-12`}>
+      <div className={`${isGridView ? 'grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8' : 'space-y-12 sm:space-y-16'} mt-8 sm:mt-12`}>
         {(selectedMetric === 'interest' || selectedMetric === 'all') && (
           <Chart
             title="Interest Rates (%)"
@@ -788,16 +823,16 @@ const GlobalInterestRateApp = () => {
       <div className="mt-6 sm:mt-8 mb-4">
         <div className={`mb-4 sm:mb-6 p-4 sm:p-6 rounded-lg ${
           isDarkMode 
-            ? 'bg-gray-900 border-2 border-white-600 shadow-lg' 
-            : 'bg-white'
+            ? 'bg-gray-900 border border-gray-700 shadow-lg' 
+            : 'bg-white border border-gray-200'
         }`}>
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4 dark:text-gray-100">Data Sources & Methodology</h2>
           <div className="space-y-3 sm:space-y-4">
-            <p className="text-sm sm:text-base md:text-lg dark:text-white-200 text-white-700">
+            <p className="text-sm sm:text-base md:text-lg dark:text-gray-200 text-gray-700">
               All economic indicators are sourced from the World Bank's official database, ensuring reliable 
               and consistent data across all countries. Our methodology includes:
             </p>
-            <ul className="list-disc list-inside text-sm sm:text-base md:text-lg dark:text-white-200 text-white-700 ml-3 sm:ml-4 space-y-2 sm:space-y-3">
+            <ul className="list-disc list-inside text-sm sm:text-base md:text-lg dark:text-gray-200 text-gray-700 ml-4 space-y-2 sm:space-y-3">
               <li>Regular data updates from official World Bank APIs</li>
               <li>Standardized data processing and normalization</li>
               <li>Quality checks and validation procedures</li>
@@ -806,13 +841,13 @@ const GlobalInterestRateApp = () => {
           </div>
         </div>
         <AdSense />
-        <div className={`mt-4 sm:mt-6 p-4 sm:p-6 rounded-lg ${isDarkMode ? 'bg-gray-800 border border-gray-700 shadow-lg' : 'bg-white'}`}>
-          <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 dark:text-white">Updates and Maintenance</h3>
-          <p className="text-sm sm:text-base md:text-lg dark:text-white text-white-700">
+        <div className={`mt-4 sm:mt-6 p-4 sm:p-6 rounded-lg ${isDarkMode ? 'bg-gray-800 border border-gray-700 shadow-lg' : 'bg-white border border-gray-200'}`}>
+          <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3 dark:text-white">Updates and Maintenance</h3>
+          <p className="text-sm sm:text-base md:text-lg dark:text-white text-gray-700">
             Our platform is regularly updated to ensure accuracy and reliability of economic data. 
             Updates are performed automatically when new data becomes available from the World Bank.
           </p>
-          <p className="text-sm sm:text-base md:text-lg dark:text-white text-white-700 mt-3 sm:mt-4">
+          <p className="text-sm sm:text-base md:text-lg dark:text-white text-gray-700 mt-3 sm:mt-4">
             © {new Date().getFullYear()} Global Economic Indicators. Data provided by the World Bank.
           </p>
         </div>

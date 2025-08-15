@@ -19,127 +19,178 @@ body {
 }
 
 /* Mobile-specific improvements */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   /* Improve touch targets */
-  button, input, select, a {
+  button, 
+  input[type="checkbox"], 
+  input[type="radio"],
+  select,
+  a {
     min-height: 44px;
     min-width: 44px;
   }
   
-  /* Better mobile scrolling */
-  .overflow-auto, .overflow-scroll {
+  /* Better scrolling on mobile */
+  .overflow-auto,
+  .overflow-scroll {
     -webkit-overflow-scrolling: touch;
   }
   
-  /* Mobile-optimized spacing */
-  .mobile-padding {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  /* Mobile chart improvements */
+  /* Improve chart readability on small screens */
   .recharts-wrapper {
-    touch-action: pan-x pan-y;
+    touch-action: manipulation;
   }
   
-  /* Mobile text sizing */
-  .mobile-text-sm {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+  /* Better spacing for mobile */
+  .space-y-4 > * + * {
+    margin-top: 1rem;
   }
   
-  .mobile-text-xs {
-    font-size: 0.75rem;
-    line-height: 1rem;
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
   }
-}
+  
+  .space-y-8 > * + * {
+    margin-top: 2rem;
+  }
 
-/* Improve mobile form elements */
-@media (max-width: 640px) {
-  input, select, textarea {
+  /* Mobile-optimized chart containers */
+  .recharts-responsive-container {
+    min-height: 250px;
+  }
+
+  /* Better mobile form controls */
+  select, input, button {
     font-size: 16px; /* Prevents zoom on iOS */
   }
-  
-  /* Better mobile button states */
-  button:active {
-    transform: scale(0.98);
+
+  /* Improved mobile grid layouts */
+  .grid-cols-2 {
+    gap: 0.5rem;
   }
-  
-  /* Mobile-optimized charts */
-  .recharts-legend-wrapper {
-    font-size: 0.75rem !important;
+
+  /* Better mobile spacing */
+  .p-4 {
+    padding: 1rem;
   }
-  
-  .recharts-tooltip-wrapper {
-    font-size: 0.75rem !important;
+
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+
+  .mt-4 {
+    margin-top: 1rem;
   }
 }
 
-/* Dark mode mobile improvements */
-@media (max-width: 640px) {
+/* Small mobile devices */
+@media (max-width: 480px) {
+  /* Even more compact spacing */
+  .p-3 {
+    padding: 0.75rem;
+  }
+
+  .p-4 {
+    padding: 0.75rem;
+  }
+
+  .mb-6 {
+    margin-bottom: 1rem;
+  }
+
+  .mt-6 {
+    margin-top: 1rem;
+  }
+
+  /* Smaller text on very small screens */
+  .text-sm {
+    font-size: 0.875rem;
+  }
+
+  .text-xs {
+    font-size: 0.75rem;
+  }
+
+  /* Compact grid for very small screens */
+  .grid-cols-2 {
+    gap: 0.25rem;
+  }
+}
+
+/* Dark mode improvements for mobile */
+@media (max-width: 768px) {
   [data-theme='dark'] {
-    /* Better contrast for mobile dark mode */
     --background-rgb: 17, 24, 39;
   }
 }
 
+/* Improve focus states for accessibility */
+button:focus,
+input:focus,
+select:focus,
+a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Mobile-optimized chart improvements */
+@media (max-width: 768px) {
+  .recharts-tooltip-wrapper {
+    font-size: 12px !important;
+  }
+  
+  .recharts-legend-wrapper {
+    font-size: 10px !important;
+  }
+  
+  .recharts-cartesian-axis-tick-value {
+    font-size: 10px !important;
+  }
+}
+
+/* Touch-friendly interactive elements */
+@media (max-width: 768px) {
+  .hover\:scale-110:hover {
+    transform: scale(1.05);
+  }
+  
+  .hover\:bg-blue-700:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .hover\:bg-blue-200:hover {
+    background-color: #bfdbfe;
+  }
+}
+
 /* Mobile navigation improvements */
-@media (max-width: 640px) {
-  .mobile-nav-item {
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    margin: 0.25rem 0;
+@media (max-width: 768px) {
+  .mobile-menu-enter {
+    opacity: 0;
+    transform: translateY(-10px);
   }
   
-  .mobile-nav-item:hover {
-    background-color: rgba(59, 130, 246, 0.1);
-  }
-}
-
-/* Mobile chart responsiveness */
-@media (max-width: 640px) {
-  .chart-container {
-    height: 250px;
-    margin: 0 -0.5rem;
+  .mobile-menu-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 200ms, transform 200ms;
   }
   
-  .chart-title {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
+  .mobile-menu-exit {
+    opacity: 1;
+    transform: translateY(0);
   }
   
-  .chart-subtitle {
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-}
-
-/* Mobile grid improvements */
-@media (max-width: 640px) {
-  .mobile-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-  
-  .mobile-grid-1 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Mobile summary improvements */
-@media (max-width: 640px) {
-  .summary-container {
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-  }
-  
-  .summary-title {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .summary-text {
-    font-size: 0.75rem;
-    line-height: 1.25;
+  .mobile-menu-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 200ms, transform 200ms;
   }
 } 

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   creator: 'Global Economic Indicators',
   publisher: 'Global Economic Indicators',
   robots: 'index, follow',
-  viewport: 'width=device-width, initial-scale=1',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
   openGraph: {
     type: 'website',
     title: 'Global Economic Indicators Dashboard',
@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en" data-theme="light">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <meta name="google-adsense-account" content="ca-pub-1726759813423594" />
         <Script
           async
@@ -54,23 +54,23 @@ export default function RootLayout({
             <div className="max-w-4xl mx-auto py-6 sm:py-8 px-3 sm:px-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">About Us</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">About Us</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                     We provide comprehensive economic data analysis and visualization, 
                     helping users understand global economic trends through reliable 
                     World Bank data.
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Data Sources</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Data Sources</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                     All economic data is sourced from the World Bank's official databases, 
                     ensuring accuracy and reliability in our analysis.
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Legal</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Legal</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                     © {new Date().getFullYear()} Global Economic Indicators.
                     This site uses cookies for analytics and personalized content.
                     By using this site, you agree to our privacy policy.

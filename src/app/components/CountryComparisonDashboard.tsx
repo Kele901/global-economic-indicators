@@ -58,31 +58,19 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   yDomain = [0, 100],
   valueFormatter = (value: number) => `${value.toFixed(1)}%`
 }) => (
-  <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-    <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">{title}</h3>
-    <div className="h-[180px] sm:h-[200px]">
+  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+    <h3 className="text-lg font-semibold mb-4">{title}</h3>
+    <div className="h-[200px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data[metricKey]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+        <LineChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
-          <XAxis 
-            dataKey="year" 
-            stroke={isDarkMode ? '#fff' : '#666'}
-            tick={{ fontSize: 10 }}
-            angle={-45}
-            textAnchor="end"
-            height={50}
-          />
-          <YAxis 
-            domain={yDomain} 
-            stroke={isDarkMode ? '#fff' : '#666'}
-            tick={{ fontSize: 10 }}
-            width={35}
-          />
+          <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
+          <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
           <Tooltip
             contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
             formatter={(value: number) => valueFormatter(value)}
           />
-          <Legend wrapperStyle={{ fontSize: '10px', marginTop: '5px' }} />
+          <Legend />
           {countries.map(country => (
             <Line
               key={country}
@@ -90,8 +78,7 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
               dataKey={country}
               stroke={countryColors[country as keyof typeof countryColors]}
               dot={false}
-              activeDot={{ r: 3 }}
-              strokeWidth={1.5}
+              activeDot={{ r: 4 }}
             />
           ))}
         </LineChart>
@@ -121,22 +108,22 @@ const StatComparison = ({
   const sorted = [...countries].sort((a, b) => (latest[b] || 0) - (latest[a] || 0));
 
   return (
-    <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">{title}</h3>
-      <div className="space-y-2 sm:space-y-4">
+    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <div className="space-y-4">
         {sorted.map(country => {
           const value = latest[country] || 0;
           const FlagComponent = countryFlags[country];
           
           return (
-            <div key={country} className="flex items-center gap-2 sm:gap-4">
+            <div key={country} className="flex items-center gap-4">
               {FlagComponent && (
-                <div className="w-6 h-4 sm:w-8 sm:h-6 overflow-hidden rounded shadow flex-shrink-0">
+                <div className="w-8 h-6 overflow-hidden rounded shadow">
                   <FlagComponent />
                 </div>
               )}
-              <span className="flex-1 text-sm sm:text-base truncate">{country}</span>
-              <span className="font-semibold text-sm sm:text-base">{format(value)}</span>
+              <span className="flex-1">{country}</span>
+              <span className="font-semibold">{format(value)}</span>
             </div>
           );
         })}
@@ -207,23 +194,23 @@ const CorrelationMatrix = ({
   }, [data, countries]);
 
   return (
-    <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Economic Correlations</h3>
-      <div className="space-y-2 sm:space-y-4">
+    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+      <h3 className="text-lg font-semibold mb-4">Economic Correlations</h3>
+      <div className="space-y-4">
         {correlations.map(({ country1, country2, gdp, inflation }) => {
           const Flag1 = countryFlags[country1];
           const Flag2 = countryFlags[country2];
           
           return (
-            <div key={`${country1}-${country2}`} className="p-2 sm:p-3 rounded bg-opacity-10 bg-blue-500">
-              <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                {Flag1 && <Flag1 className="w-5 h-3 sm:w-6 sm:h-4" />}
-                <span className="font-medium text-sm sm:text-base">{country1}</span>
-                <span className="mx-1 sm:mx-2">⟷</span>
-                {Flag2 && <Flag2 className="w-5 h-3 sm:w-6 sm:h-4" />}
-                <span className="font-medium text-sm sm:text-base">{country2}</span>
+            <div key={`${country1}-${country2}`} className="p-3 rounded bg-opacity-10 bg-blue-500">
+              <div className="flex items-center gap-2 mb-2">
+                {Flag1 && <Flag1 className="w-6 h-4" />}
+                <span className="font-medium">{country1}</span>
+                <span className="mx-2">⟷</span>
+                {Flag2 && <Flag2 className="w-6 h-4" />}
+                <span className="font-medium">{country2}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">GDP Correlation: </span>
                   <span className={gdp > 0.5 ? 'text-green-500' : gdp < -0.5 ? 'text-red-500' : ''}>
@@ -289,9 +276,9 @@ const EconomicSimilarityChart = ({
   }, [data, countries]);
 
   return (
-    <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Economic Similarity Analysis</h3>
-      <div className="h-[250px] sm:h-[300px]">
+    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+      <h3 className="text-lg font-semibold mb-4">Economic Similarity Analysis</h3>
+      <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
@@ -300,14 +287,12 @@ const EconomicSimilarityChart = ({
               name="GDP Difference" 
               unit="%" 
               stroke={isDarkMode ? '#fff' : '#666'}
-              tick={{ fontSize: 10 }}
             />
             <YAxis 
               dataKey="inflationDiff" 
               name="Inflation Difference" 
               unit="%" 
               stroke={isDarkMode ? '#fff' : '#666'}
-              tick={{ fontSize: 10 }}
             />
             <ZAxis 
               dataKey="similarity" 
@@ -321,7 +306,7 @@ const EconomicSimilarityChart = ({
                 name.replace('Diff', ' Difference')
               ]}
             />
-            <Legend wrapperStyle={{ fontSize: '10px', marginTop: '5px' }} />
+            <Legend />
             {chartData.map((entry, index) => (
               <Scatter
                 key={index}
@@ -333,7 +318,7 @@ const EconomicSimilarityChart = ({
           </ScatterChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-2 sm:mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
         Bubble size indicates overall economic similarity. Smaller distances (closer to origin) suggest more similar economies.
       </div>
     </div>
@@ -383,17 +368,17 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
   }, [data, selectedPeriod]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-4">
+    <div className="space-y-8">
+      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold">Country Comparison Dashboard</h2>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Select up to {maxCountries} countries to compare</p>
+            <h2 className="text-xl font-bold">Country Comparison Dashboard</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Select up to {maxCountries} countries to compare</p>
           </div>
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
-            className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md border text-xs sm:text-sm ${
+            className={`px-3 py-2 rounded-md border ${
               isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-white border-gray-300'
             }`}
           >
@@ -403,7 +388,7 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
           </select>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {Object.keys(countryColors).map(country => {
             const isSelected = selectedCountries.includes(country);
             const FlagComponent = countryFlags[country];
@@ -412,18 +397,18 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
               <button
                 key={country}
                 onClick={() => handleCountryToggle(country)}
-                className={`p-1 sm:p-2 rounded-md flex items-center gap-1 sm:gap-2 transition-colors
+                className={`p-2 rounded-lg flex items-center gap-2 transition-colors
                   ${isSelected 
                     ? (isDarkMode ? 'bg-blue-600' : 'bg-blue-100') 
                     : (isDarkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-100 hover:bg-gray-200')
                   }`}
               >
                 {FlagComponent && (
-                  <div className="w-4 sm:w-5 h-3 sm:h-4 overflow-hidden rounded">
+                  <div className="w-6 h-4 overflow-hidden rounded">
                     <FlagComponent />
                   </div>
                 )}
-                <span className="text-xs sm:text-sm">{country}</span>
+                <span className="text-sm">{country}</span>
               </button>
             );
           })}
@@ -432,7 +417,7 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
 
       {selectedCountries.length > 0 && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <ComparisonMetric
               title="Interest Rates"
               data={filteredData}
@@ -477,7 +462,7 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             </>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatComparison
               title="Latest Interest Rates"
               countries={selectedCountries}
@@ -501,9 +486,9 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             />
           </div>
 
-          <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Comparative Analysis</h3>
-            <div className="space-y-2 sm:space-y-4">
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+            <h3 className="text-lg font-semibold mb-4">Comparative Analysis</h3>
+            <div className="space-y-4">
               {selectedCountries.map(country => {
                 const latestData = {
                   interest: data.interestRates[data.interestRates.length - 1][country],
@@ -515,12 +500,12 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
                 };
 
                 return (
-                  <div key={country} className="p-2 sm:p-3 rounded bg-opacity-10 bg-blue-500">
-                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                      {countryFlags[country] && React.createElement(countryFlags[country], { className: "w-5 h-3 sm:w-6 h-4" })}
-                      <h4 className="font-semibold text-sm sm:text-base">{country}</h4>
+                  <div key={country} className="p-4 rounded bg-opacity-10 bg-blue-500">
+                    <div className="flex items-center gap-2 mb-2">
+                      {countryFlags[country] && React.createElement(countryFlags[country], { className: "w-6 h-4" })}
+                      <h4 className="font-semibold">{country}</h4>
                     </div>
-                    <p className="text-xs sm:text-sm">
+                    <p className="text-sm">
                       {country} currently shows {' '}
                       {latestData.gdp > 2 ? 'strong' : latestData.gdp > 0 ? 'moderate' : 'challenging'} growth at {latestData.gdp.toFixed(1)}% with {' '}
                       {latestData.inflation > 5 ? 'high' : latestData.inflation > 2 ? 'moderate' : 'low'} inflation ({latestData.inflation.toFixed(1)}%). {' '}

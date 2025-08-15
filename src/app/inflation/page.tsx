@@ -959,23 +959,23 @@ export default function InflationPage() {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="w-full max-w-5xl mx-auto p-3 sm:p-4 space-y-6 sm:space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+      <div className="w-full max-w-5xl mx-auto p-4 space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold mb-2">Global Inflation Rates</h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-xl">
+            <h1 className="text-2xl font-bold mb-2">Global Inflation Rates</h1>
+            <p className="text-gray-600 dark:text-gray-300 max-w-xl">
               Track and compare inflation rates across countries. Inflation measures the rate at which the general level of prices for goods and services is rising, eroding purchasing power.
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Light</span>
+            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
             <button
-              className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
               onClick={() => setIsDarkMode(!isDarkMode)}
             >
-              <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-5 sm:translate-x-6' : ''}`} />
+              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
             </button>
-            <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Dark</span>
+            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
           </div>
         </div>
 
@@ -1017,16 +1017,16 @@ export default function InflationPage() {
         </div>
 
         {/* Key Stats */}
-        <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {latestStats.map(({ country, value }) => {
             const FlagComponent = countryFlags[country];
             return (
-              <div key={country} className={`p-3 sm:p-4 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div key={country} className={`p-4 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
                 <div className="flex items-center gap-2 mb-2">
-                  {FlagComponent && <FlagComponent className="w-5 h-3 sm:w-6 sm:h-4 rounded" />}
-                  <span className="font-semibold text-base sm:text-lg">{country}</span>
+                  {FlagComponent && <FlagComponent className="w-6 h-4 rounded" />}
+                  <span className="font-semibold text-lg">{country}</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-bold">{value !== undefined ? `${value.toFixed(2)}%` : 'N/A'}</div>
+                <div className="text-2xl font-bold">{value !== undefined ? `${value.toFixed(2)}%` : 'N/A'}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Latest available</div>
               </div>
             );
@@ -1034,35 +1034,28 @@ export default function InflationPage() {
         </div>
 
         {/* Chart */}
-        <div className={`rounded-lg shadow p-3 sm:p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-          <h2 className="text-base sm:text-lg font-semibold mb-2">Inflation Rate Over Time</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 sm:mb-4 italic">Data source: Numbeo.com</p>
-          <div className="h-[300px] sm:h-[350px]">
+        <div className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
+          <h2 className="text-lg font-semibold mb-2">Inflation Rate Over Time</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+          <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={inflationData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <LineChart data={inflationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
-                <XAxis 
-                  dataKey="year" 
-                  stroke={isDarkMode ? '#e5e7eb' : '#374151'} 
-                  tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500, fontSize: 10 }} 
-                />
-                <YAxis 
-                  stroke={isDarkMode ? '#e5e7eb' : '#374151'} 
-                  tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500, fontSize: 10 }} 
-                />
+                <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
                 <Tooltip
-                  contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 12 } : { fontSize: 12 }}
+                  contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
                   labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
                   formatter={(value: number) => `${value?.toFixed(2)}%`}
                 />
-                <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 12 }} />
+                <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
                 {selectedCountries.map((country, idx) => (
                   <Line
                     key={country}
                     type="monotone"
                     dataKey={country}
                     stroke={countryColors[country as keyof typeof countryColors] || '#6366f1'}
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     dot={false}
                     activeDot={{ r: 5 }}
                   />
