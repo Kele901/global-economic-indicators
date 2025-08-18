@@ -441,76 +441,357 @@ const EconomicGravityPage = () => {
       </div>
 
       {/* Timeline Visualization */}
-      <div className={`p-8 rounded-2xl mb-12 ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow}`}>
+      <div className={`p-8 rounded-2xl mb-12 ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow} backdrop-blur-sm`}>
         <h2 className={`text-2xl font-bold mb-6 flex items-center ${themeColors.text}`}>
           <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
           Historical Timeline
         </h2>
-        <div className="h-[500px]">
+        <p className={`text-sm mb-6 ${themeColors.textSecondary} max-w-2xl`}>
+          Track the shifting balance of global economic power across continents and time periods. 
+          The chart shows the relative share of global GDP by region, revealing how economic 
+          dominance has moved from ancient civilizations to modern economic powerhouses.
+        </p>
+        <div className="h-[500px] relative">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={gdpShareData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} />
+              {/* Define gradients for enhanced visual appeal */}
+              <defs>
+                <linearGradient id="asiaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f97316" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#f97316" stopOpacity={0.1} />
+                </linearGradient>
+                <linearGradient id="europeGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.1} />
+                </linearGradient>
+                <linearGradient id="americasGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#22c55e" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#22c55e" stopOpacity={0.1} />
+                </linearGradient>
+                <linearGradient id="africaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#eab308" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#eab308" stopOpacity={0.1} />
+                </linearGradient>
+                <linearGradient id="oceaniaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.1} />
+                </linearGradient>
+              </defs>
+              
+              {/* Enhanced grid with better opacity and styling */}
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke={isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}
+                strokeWidth={0.5}
+                vertical={false}
+              />
+              
+              {/* Enhanced X-axis with better styling */}
               <XAxis 
                 dataKey="label" 
                 stroke={themeColors.textSecondary}
                 angle={-45}
                 textAnchor="end"
                 height={80}
-                tick={{ fontSize: 12, fill: isDarkMode ? '#e5e7eb' : '#374151' }}
+                tick={{ 
+                  fontSize: 11, 
+                  fill: themeColors.textSecondary,
+                  fontWeight: 500
+                }}
+                axisLine={{ 
+                  stroke: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                  strokeWidth: 1
+                }}
+                tickLine={{ 
+                  stroke: isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                  strokeWidth: 1
+                }}
               />
+              
+              {/* Enhanced Y-axis with better styling */}
               <YAxis 
                 stroke={themeColors.textSecondary}
-                tick={{ fontSize: 12, fill: isDarkMode ? '#e5e7eb' : '#374151' }}
+                tick={{ 
+                  fontSize: 11, 
+                  fill: themeColors.textSecondary,
+                  fontWeight: 500
+                }}
+                axisLine={{ 
+                  stroke: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                  strokeWidth: 1
+                }}
+                tickLine={{ 
+                  stroke: isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                  strokeWidth: 1
+                }}
                 label={{ 
                   value: 'Share of Global GDP (%)', 
                   angle: -90, 
                   position: 'insideLeft',
-                  style: { textAnchor: 'middle', fill: isDarkMode ? '#e5e7eb' : '#374151' }
+                  style: { 
+                    textAnchor: 'middle', 
+                    fill: themeColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: 600
+                  }
                 }}
               />
+              
+              {/* Enhanced tooltip with better styling and information */}
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
                   border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                  color: isDarkMode ? '#e5e7eb' : '#374151'
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
+                  color: isDarkMode ? '#e5e7eb' : '#374151',
+                  fontSize: '13px',
+                  padding: '12px 16px'
                 }}
+                labelStyle={{
+                  fontWeight: 600,
+                  marginBottom: '8px',
+                  color: themeColors.accent
+                }}
+                formatter={(value: number, name: string) => [
+                  `${value.toFixed(1)}%`,
+                  name
+                ]}
               />
+              
+              {/* Enhanced legend with better styling */}
               <Legend 
                 verticalAlign="top"
                 height={36}
                 wrapperStyle={{
                   paddingBottom: '20px',
-                  fontSize: '14px',
-                  color: isDarkMode ? '#e5e7eb' : '#374151'
+                  fontSize: '13px',
+                  color: themeColors.textSecondary,
+                  fontWeight: 500
                 }}
+                iconType="circle"
+                iconSize={8}
               />
+              
+              {/* Enhanced line charts with gradients and better styling */}
               <Line 
                 type="monotone" 
                 dataKey="Asia" 
                 stroke="#f97316" 
                 strokeWidth={3}
-                dot={false}
-                activeDot={{ r: 8 }}
-                fillOpacity={1}
+                dot={{ 
+                  r: 4, 
+                  fill: '#f97316',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 8, 
+                  fill: '#f97316',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 3,
+                  filter: 'drop-shadow(0 4px 8px rgba(249, 115, 22, 0.4))'
+                }}
                 fill="url(#asiaGradient)"
+                fillOpacity={0.1}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <Line 
                 type="monotone" 
                 dataKey="Europe" 
                 stroke="#3b82f6" 
                 strokeWidth={3}
-                dot={false}
-                activeDot={{ r: 8 }}
-                fillOpacity={1}
+                dot={{ 
+                  r: 4, 
+                  fill: '#3b82f6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 8, 
+                  fill: '#3b82f6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 3,
+                  filter: 'drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4))'
+                }}
                 fill="url(#europeGradient)"
+                fillOpacity={0.1}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-              <Line type="monotone" dataKey="Americas" stroke="#22c55e" strokeWidth={3} dot={false} activeDot={{ r: 8 }} />
-              <Line type="monotone" dataKey="Africa" stroke="#eab308" strokeWidth={3} dot={false} activeDot={{ r: 8 }} />
-              <Line type="monotone" dataKey="Oceania" stroke="#8b5cf6" strokeWidth={3} dot={false} activeDot={{ r: 8 }} />
+              <Line 
+                type="monotone" 
+                dataKey="Americas" 
+                stroke="#22c55e" 
+                strokeWidth={3}
+                dot={{ 
+                  r: 4, 
+                  fill: '#22c55e',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 8, 
+                  fill: '#22c55e',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 3,
+                  filter: 'drop-shadow(0 4px 8px rgba(34, 197, 94, 0.4))'
+                }}
+                fill="url(#americasGradient)"
+                fillOpacity={0.1}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="Africa" 
+                stroke="#eab308" 
+                strokeWidth={3}
+                dot={{ 
+                  r: 4, 
+                  fill: '#eab308',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 8, 
+                  fill: '#eab308',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 3,
+                  filter: 'drop-shadow(0 4px 8px rgba(234, 179, 8, 0.4))'
+                }}
+                fill="url(#africaGradient)"
+                fillOpacity={0.1}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="Oceania" 
+                stroke="#8b5cf6" 
+                strokeWidth={3}
+                dot={{ 
+                  r: 4, 
+                  fill: '#8b5cf6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 8, 
+                  fill: '#8b5cf6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 3,
+                  filter: 'drop-shadow(0 4px 8px rgba(139, 92, 246, 0.4))'
+                }}
+                fill="url(#oceaniaGradient)"
+                fillOpacity={0.1}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </LineChart>
           </ResponsiveContainer>
+          
+          {/* Enhanced chart overlay with key insights */}
+          <div className="absolute -top-8 right-16 bg-black/20 backdrop-blur-md rounded-lg p-1 border border-white/30 shadow-2xl">
+            <h5 className="text-xs text-white/90 font-bold mb-2 uppercase tracking-wide">Economic Power Centers</h5>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-orange-500 shadow-sm"></div>
+                <span className="text-xs text-white/90 font-medium">Asia: Ancient dominance</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm"></div>
+                <span className="text-xs text-white/90 font-medium">Europe: Industrial rise</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 shadow-sm"></div>
+                <span className="text-xs text-white/90 font-medium">Americas: Modern power</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-sm"></div>
+                <span className="text-xs text-white/90 font-medium">Africa: Resource wealth</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-purple-500 shadow-sm"></div>
+                <span className="text-xs text-white/90 font-medium">Oceania: Emerging</span>
+              </div>
+            </div>
+            <div className="mt-2 pt-2 border-t border-white/20">
+              <div className="text-xs text-white/70">
+                <div className="font-medium mb-1">Current Trend:</div>
+                <div className="text-green-400 font-semibold">Multi-polar world</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Timeline insights and analysis */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
+            <div className="flex items-center mb-2">
+              <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
+              <h4 className={`font-semibold text-sm ${themeColors.text}`}>Ancient Era (2000 BCE - 500 CE)</h4>
+            </div>
+            <p className={`text-xs ${themeColors.textSecondary}`}>
+              Asia dominated with advanced agriculture, trade networks, and early civilizations
+            </p>
+            <div className="mt-2 text-xs text-orange-500 font-medium">
+              Peak: 60-70% of global GDP
+            </div>
+          </div>
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
+            <div className="flex items-center mb-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+              <h4 className={`font-semibold text-sm ${themeColors.text}`}>Medieval Period (500 - 1500 CE)</h4>
+            </div>
+            <p className={`text-xs ${themeColors.textSecondary}`}>
+              Europe began its rise through trade, banking, and maritime exploration
+            </p>
+            <div className="mt-2 text-xs text-blue-500 font-medium">
+              Peak: 40-50% of global GDP
+            </div>
+          </div>
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
+            <div className="flex items-center mb-2">
+              <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+              <h4 className={`font-semibold text-sm ${themeColors.text}`}>Modern Era (1500 - Present)</h4>
+            </div>
+            <p className={`text-xs ${themeColors.textSecondary}`}>
+              Americas emerged as economic powerhouses through industrialization and innovation
+            </p>
+            <div className="mt-2 text-xs text-green-500 font-medium">
+              Peak: 25-30% of global GDP
+            </div>
+          </div>
+        </div>
+        
+        {/* Enhanced chart statistics */}
+        <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700">
+          <h4 className={`font-semibold text-sm mb-3 ${themeColors.text} flex items-center`}>
+            <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Key Economic Shifts
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div className="text-center">
+              <div className="font-bold text-blue-600 dark:text-blue-400">2000 BCE</div>
+              <div className="text-gray-600 dark:text-gray-300">Asia: 70%</div>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-blue-600 dark:text-blue-400">500 CE</div>
+              <div className="text-gray-600 dark:text-gray-300">Asia: 65%</div>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-blue-600 dark:text-blue-400">1500 CE</div>
+              <div className="text-gray-600 dark:text-gray-300">Europe: 45%</div>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-blue-600 dark:text-blue-400">2000 CE</div>
+              <div className="text-gray-600 dark:text-gray-300">Americas: 28%</div>
+            </div>
+          </div>
         </div>
       </div>
 

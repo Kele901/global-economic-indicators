@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart } from 'recharts';
 import { fetchGlobalData } from '../services/worldbank';
 import type { CountryData } from '../services/worldbank';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
@@ -140,6 +140,92 @@ const CPISummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
   </div>
 );
 
+const PopulationGrowthSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+          <p className="text-xs sm:text-sm">
+        Population growth rate shows the annual percentage change in a country&apos;s total population. This metric reflects demographic trends, 
+        labor force availability, and long-term economic potential. Higher growth rates can indicate expanding markets and labor pools, 
+        while lower rates may suggest aging populations and potential labor shortages.
+      </p>
+  </div>
+);
+
+const FDISummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-xs sm:text-sm">
+      Foreign Direct Investment (FDI) represents international capital flows into a country, measured as a percentage of GDP. 
+      FDI indicates investor confidence, economic openness, and potential for technology transfer and job creation. 
+      Higher FDI levels often correlate with economic growth and international integration.
+    </p>
+  </div>
+);
+
+const TradeBalanceSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-xs sm:text-sm">
+      Trade balance shows the difference between a country&apos;s exports and imports as a percentage of GDP. 
+      Positive values indicate trade surpluses (exports &gt; imports), while negative values show trade deficits. 
+      This metric reflects economic competitiveness, currency strength, and global market position.
+    </p>
+  </div>
+);
+
+const GovernmentSpendingSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-xs sm:text-sm">
+      Government spending represents total public expenditure as a percentage of GDP. This includes infrastructure, 
+      social services, defense, and other public investments. Higher spending can stimulate economic activity 
+      but may also indicate fiscal expansion and potential debt concerns.
+    </p>
+  </div>
+);
+
+const LaborProductivitySummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-xs sm:text-sm">
+      Labor productivity measures economic output per hour worked, indicating efficiency and technological advancement. 
+      Higher productivity suggests better resource utilization, innovation, and competitive advantages. 
+      This metric is crucial for understanding long-term economic growth potential.
+    </p>
+  </div>
+);
+
+const GiniCoefficientSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-xs sm:text-sm">
+      The Gini coefficient measures income inequality on a scale from 0 (perfect equality) to 1 (perfect inequality). 
+      Lower values indicate more equal income distribution, while higher values suggest greater inequality. 
+      This metric helps assess social stability and economic inclusiveness.
+    </p>
+    <div className={`mt-2 p-2 rounded ${isDarkMode ? 'bg-green-900/30 text-green-200' : 'bg-green-100 text-green-800'}`}>
+      <p className="text-xs">
+        <strong>Data Sources:</strong> Income inequality data combines World Bank statistics, OECD reports, 
+        and academic research to provide comprehensive coverage across all countries.
+      </p>
+    </div>
+  </div>
+);
+
+const RDSpendingSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-xs sm:text-sm">
+      Research and Development spending as a percentage of GDP indicates a country&apos;s commitment to innovation and 
+      technological advancement. Higher R&D investment often correlates with future economic competitiveness, 
+      productivity gains, and long-term growth potential.
+    </p>
+  </div>
+);
+
+const EnergyConsumptionSummary = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <div className={`p-3 sm:p-4 rounded-md mb-4 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
+    <p className="text-xs sm:text-sm">
+      Energy consumption per capita reflects economic activity levels, industrialization, and living standards. 
+      Higher consumption often indicates more developed economies, though efficiency improvements can reduce 
+      this correlation. This metric helps assess economic development and sustainability challenges.
+    </p>
+  </div>
+);
+
 const CountryEconomicSummary = ({ 
   country, 
   data, 
@@ -154,6 +240,14 @@ const CountryEconomicSummary = ({
     inflationRates: CountryData[];
     gdpGrowth: CountryData[];
     cpiData: CountryData[];
+    populationGrowth: CountryData[];
+    fdi: CountryData[];
+    tradeBalance: CountryData[];
+    governmentSpending: CountryData[];
+    laborProductivity: CountryData[];
+    giniCoefficient: CountryData[];
+    rdSpending: CountryData[];
+    energyConsumption: CountryData[];
   };
   isDarkMode: boolean;
 }) => {
@@ -172,6 +266,14 @@ const CountryEconomicSummary = ({
       'Govt Debt': data.governmentDebt.find(d => d.year === year)?.[country] || null,
       'Inflation': data.inflationRates.find(d => d.year === year)?.[country] || null,
       'GDP Growth': data.gdpGrowth.find(d => d.year === year)?.[country] || null,
+      'Population Growth': data.populationGrowth.find(d => d.year === year)?.[country] || null,
+      'FDI': data.fdi.find(d => d.year === year)?.[country] || null,
+      'Trade Balance': data.tradeBalance.find(d => d.year === year)?.[country] || null,
+      'Govt Spending': data.governmentSpending.find(d => d.year === year)?.[country] || null,
+      'Labor Productivity': data.laborProductivity.find(d => d.year === year)?.[country] || null,
+      'Gini Coefficient': data.giniCoefficient.find(d => d.year === year)?.[country] || null,
+      'R&D Spending': data.rdSpending.find(d => d.year === year)?.[country] || null,
+      'Energy Consumption': data.energyConsumption.find(d => d.year === year)?.[country] || null,
     };
   }).filter(d => 
     d['Interest Rate'] !== null || 
@@ -179,7 +281,15 @@ const CountryEconomicSummary = ({
     d['Unemployment'] !== null || 
     d['Govt Debt'] !== null || 
     d['Inflation'] !== null || 
-    d['GDP Growth'] !== null
+    d['GDP Growth'] !== null ||
+    d['Population Growth'] !== null ||
+    d['FDI'] !== null ||
+    d['Trade Balance'] !== null ||
+    d['Govt Spending'] !== null ||
+    d['Labor Productivity'] !== null ||
+    d['Gini Coefficient'] !== null ||
+    d['R&D Spending'] !== null ||
+    d['Energy Consumption'] !== null
   );
 
   // Calculate metrics as before
@@ -210,7 +320,15 @@ const CountryEconomicSummary = ({
     debt: calculateMetrics(data.governmentDebt, country),
     inflation: calculateMetrics(data.inflationRates, country),
     gdp: calculateMetrics(data.gdpGrowth, country),
-    cpi: calculateMetrics(data.cpiData, country)
+    cpi: calculateMetrics(data.cpiData, country),
+    population: calculateMetrics(data.populationGrowth, country),
+    fdi: calculateMetrics(data.fdi, country),
+    trade: calculateMetrics(data.tradeBalance, country),
+    spending: calculateMetrics(data.governmentSpending, country),
+    productivity: calculateMetrics(data.laborProductivity, country),
+    gini: calculateMetrics(data.giniCoefficient, country),
+    rd: calculateMetrics(data.rdSpending, country),
+    energy: calculateMetrics(data.energyConsumption, country)
   };
 
   const getTrendEmoji = (trend: string) => {
@@ -228,7 +346,15 @@ const CountryEconomicSummary = ({
     'Unemployment': '#ffc658',
     'Govt Debt': '#ff8042',
     'Inflation': '#a4de6c',
-    'GDP Growth': '#83a6ed'
+    'GDP Growth': '#83a6ed',
+    'Population Growth': '#ff6b6b',
+    'FDI': '#4ecdc4',
+    'Trade Balance': '#45b7d1',
+    'Govt Spending': '#96ceb4',
+    'Labor Productivity': '#feca57',
+    'Gini Coefficient': '#ff9ff3',
+    'R&D Spending': '#54a0ff',
+    'Energy Consumption': '#5f27cd'
   };
 
   return (
@@ -310,10 +436,42 @@ const CountryEconomicSummary = ({
           <strong>Consumer Price Index:</strong> Currently at {metrics.cpi.recent.toFixed(1)} 
           {getTrendEmoji(metrics.cpi.trend)} (2010 base year = 100, Historical avg: {metrics.cpi.avg.toFixed(1)})
         </p>
+        <p>
+          <strong>Population Growth:</strong> Currently at {metrics.population.recent.toFixed(2)}% 
+          {getTrendEmoji(metrics.population.trend)} (Historical avg: {metrics.population.avg.toFixed(2)}%)
+        </p>
+        <p>
+          <strong>Foreign Direct Investment:</strong> Currently at {metrics.fdi.recent.toFixed(2)}% of GDP 
+          {getTrendEmoji(metrics.fdi.trend)} (Historical avg: {metrics.fdi.avg.toFixed(2)}%)
+        </p>
+        <p>
+          <strong>Trade Balance:</strong> Currently at {metrics.trade.recent.toFixed(2)}% of GDP 
+          {getTrendEmoji(metrics.trade.trend)} (Historical avg: {metrics.trade.avg.toFixed(2)}%)
+        </p>
+        <p>
+          <strong>Government Spending:</strong> Currently at {metrics.spending.recent.toFixed(1)}% of GDP 
+          {getTrendEmoji(metrics.spending.trend)} (Historical avg: {metrics.spending.avg.toFixed(1)}%)
+        </p>
+        <p>
+          <strong>Labor Productivity:</strong> Currently at {metrics.productivity.recent.toFixed(0)} 
+          {getTrendEmoji(metrics.productivity.trend)} (Historical avg: {metrics.productivity.avg.toFixed(0)})
+        </p>
+        <p>
+          <strong>Income Inequality (Gini):</strong> Currently at {metrics.gini.recent.toFixed(3)} 
+          {getTrendEmoji(metrics.gini.trend)} (Historical avg: {metrics.gini.avg.toFixed(3)})
+        </p>
+        <p>
+          <strong>R&D Spending:</strong> Currently at {metrics.rd.recent.toFixed(2)}% of GDP 
+          {getTrendEmoji(metrics.rd.trend)} (Historical avg: {metrics.rd.avg.toFixed(2)}%)
+        </p>
+        <p>
+          <strong>Energy Consumption:</strong> Currently at {metrics.energy.recent.toFixed(0)} kWh per capita 
+          {getTrendEmoji(metrics.energy.trend)} (Historical avg: {metrics.energy.avg.toFixed(0)} kWh)
+        </p>
 
         <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-md ${isDarkMode ? 'bg-gray-600' : 'bg-blue-100'}`}>
           <p className="text-xs sm:text-sm">
-            <strong>Economic Overview:</strong> {country}'s economy shows {' '}
+            <strong>Economic Overview:</strong> {country}&apos;s economy shows {' '}
             {metrics.gdp.recent > 2 ? 'strong' : metrics.gdp.recent > 0 ? 'moderate' : 'challenging'} growth at {metrics.gdp.recent.toFixed(1)}% with {' '}
             {metrics.inflation.recent > 5 ? 'high' : metrics.inflation.recent > 2 ? 'moderate' : 'low'} inflation ({metrics.inflation.recent.toFixed(1)}%). {' '}
             Employment levels are {metrics.employment.recent > 65 ? 'robust' : metrics.employment.recent > 55 ? 'moderate' : 'concerning'} at {metrics.employment.recent.toFixed(1)}%, while {' '}
@@ -392,7 +550,7 @@ const GlobalInterestRateApp = () => {
   const [maxYAxis, setMaxYAxis] = useLocalStorage('maxYAxis', 20);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [isGridView, setIsGridView] = useLocalStorage('isGridView', false);
-  const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'all'>('selectedMetric', 'all');
+  const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'population' | 'fdi' | 'trade' | 'spending' | 'productivity' | 'gini' | 'rd' | 'energy' | 'all'>('selectedMetric', 'all');
   
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -405,6 +563,14 @@ const GlobalInterestRateApp = () => {
     inflationRates: CountryData[];
     gdpGrowth: CountryData[];
     cpiData: CountryData[];
+    populationGrowth: CountryData[];
+    fdi: CountryData[];
+    tradeBalance: CountryData[];
+    governmentSpending: CountryData[];
+    laborProductivity: CountryData[];
+    giniCoefficient: CountryData[];
+    rdSpending: CountryData[];
+    energyConsumption: CountryData[];
   }>({
     interestRates: [],
     employmentRates: [],
@@ -412,7 +578,15 @@ const GlobalInterestRateApp = () => {
     governmentDebt: [],
     inflationRates: [],
     gdpGrowth: [],
-    cpiData: []
+    cpiData: [],
+    populationGrowth: [],
+    fdi: [],
+    tradeBalance: [],
+    governmentSpending: [],
+    laborProductivity: [],
+    giniCoefficient: [],
+    rdSpending: [],
+    energyConsumption: []
   });
   const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
 
@@ -453,7 +627,7 @@ const GlobalInterestRateApp = () => {
   }, [isDarkMode]);
 
   const filterData = (period: string, data: CountryData[]) => {
-    const referenceYear = 2023; // Set fixed reference year to 2023
+    const referenceYear = 2024; // Set fixed reference year to 2024
     switch (period) {
       case '20years':
         return data.filter(item => item.year >= referenceYear - 20);
@@ -470,6 +644,7 @@ const GlobalInterestRateApp = () => {
     setSelectedPeriod(value);
   };
 
+  
   const handleCountryToggle = (country: string) => {
     setSelectedCountries((prev: string[]) =>
       prev.includes(country)
@@ -482,29 +657,31 @@ const GlobalInterestRateApp = () => {
     country.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Create a reusable chart component
+  // Create a reusable chart component with different styles for different metrics
   const Chart = ({ 
     title, 
     data, 
     yDomain, 
     subtitle,
-    summary: SummaryComponent 
+    summary: SummaryComponent,
+    chartType = 'line'
   }: { 
     title: string;
     data: CountryData[];
     yDomain: [number, number];
     subtitle: string;
     summary: React.ComponentType<{ isDarkMode: boolean }>;
-  }) => (
-    <div className={`mb-6 sm:mb-8 ${isGridView ? 'h-[350px] sm:h-[400px] md:h-[500px]' : ''}`}>
-      <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{title}</h2>
-      <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
-        {subtitle}
-      </div>
-      {!isGridView && <SummaryComponent isDarkMode={isDarkMode} />}
-      <div className={`${isGridView ? 'h-[200px] sm:h-[250px] md:h-[350px]' : 'h-[250px] sm:h-[300px] md:h-[400px]'} w-full`}>
-        <ResponsiveContainer>
-          <LineChart data={filterData(selectedPeriod, data)} margin={{ top: 5, right: 15, left: 5, bottom: 5 }}>
+    chartType?: 'line' | 'area' | 'bar' | 'composed';
+  }) => {
+    const renderChart = () => {
+      const commonProps = {
+        data: filterData(selectedPeriod, data),
+        margin: { top: 5, right: 15, left: 5, bottom: 5 }
+      };
+
+      if (chartType === 'area') {
+        return (
+          <AreaChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
             <XAxis 
               dataKey="year" 
@@ -527,21 +704,163 @@ const GlobalInterestRateApp = () => {
               wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
             />
             {selectedCountries.map(country => (
-              <Line
+              <Area
                 key={country}
                 type="monotone"
                 dataKey={country}
                 stroke={countryColors[country as keyof typeof countryColors]}
-                activeDot={isGridView ? false : { r: 3 }}
-                dot={isGridView ? false : { r: 1 }}
-                strokeWidth={1.5}
+                fill={countryColors[country as keyof typeof countryColors]}
+                fillOpacity={0.3}
+                activeDot={isGridView ? false : { r: 4 }}
+                strokeWidth={2}
               />
             ))}
-          </LineChart>
-        </ResponsiveContainer>
+          </AreaChart>
+        );
+      }
+
+      if (chartType === 'bar') {
+        return (
+          <BarChart {...commonProps}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+            <XAxis 
+              dataKey="year" 
+              stroke={isDarkMode ? '#fff' : '#666'}
+              tick={{ fontSize: 10 }}
+              angle={-45}
+              textAnchor="end"
+              height={50}
+            />
+            <YAxis 
+              domain={yDomain} 
+              stroke={isDarkMode ? '#fff' : '#666'}
+              tick={{ fontSize: 10 }}
+              width={35}
+            />
+            <Tooltip
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
+            />
+            <Legend 
+              wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
+            />
+            {selectedCountries.map(country => (
+              <Bar
+                key={country}
+                dataKey={country}
+                fill={countryColors[country as keyof typeof countryColors]}
+                radius={[2, 2, 0, 0]}
+              />
+            ))}
+          </BarChart>
+        );
+      }
+
+      if (chartType === 'composed') {
+        return (
+          <ComposedChart {...commonProps}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+            <XAxis 
+              dataKey="year" 
+              stroke={isDarkMode ? '#fff' : '#666'}
+              tick={{ fontSize: 10 }}
+              angle={-45}
+              textAnchor="end"
+              height={50}
+            />
+            <YAxis 
+              domain={yDomain} 
+              stroke={isDarkMode ? '#fff' : '#666'}
+              tick={{ fontSize: 10 }}
+              width={35}
+            />
+            <Tooltip
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
+            />
+            <Legend 
+              wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
+            />
+            {selectedCountries.map(country => (
+              <Area
+                key={country}
+                type="monotone"
+                dataKey={country}
+                stroke={countryColors[country as keyof typeof countryColors]}
+                fill={countryColors[country as keyof typeof countryColors]}
+                fillOpacity={0.1}
+                strokeWidth={2}
+              />
+            ))}
+            {selectedCountries.map(country => (
+              <Line
+                key={`${country}-line`}
+                type="monotone"
+                dataKey={country}
+                stroke={countryColors[country as keyof typeof countryColors]}
+                strokeWidth={1}
+                dot={false}
+                activeDot={{ r: 3 }}
+              />
+            ))}
+          </ComposedChart>
+        );
+      }
+
+      // Default line chart with enhanced styling
+      return (
+        <LineChart {...commonProps}>
+          <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+          <XAxis 
+            dataKey="year" 
+            stroke={isDarkMode ? '#fff' : '#666'}
+            tick={{ fontSize: 10 }}
+            angle={-45}
+            textAnchor="end"
+            height={50}
+          />
+          <YAxis 
+            domain={yDomain} 
+            stroke={isDarkMode ? '#fff' : '#666'}
+            tick={{ fontSize: 10 }}
+            width={35}
+          />
+          <Tooltip
+            contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
+          />
+          <Legend 
+            wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
+          />
+          {selectedCountries.map(country => (
+            <Line
+              key={country}
+              type="monotone"
+              dataKey={country}
+              stroke={countryColors[country as keyof typeof countryColors]}
+              activeDot={isGridView ? false : { r: 4 }}
+              dot={isGridView ? false : { r: 2 }}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+        </LineChart>
+      );
+    };
+
+    return (
+      <div className={`mb-6 sm:mb-8 ${isGridView ? 'h-[350px] sm:h-[400px] md:h-[500px]' : ''}`}>
+        <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{title}</h2>
+        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
+          {subtitle}
+        </div>
+        {!isGridView && <SummaryComponent isDarkMode={isDarkMode} />}
+        <div className={`${isGridView ? 'h-[200px] sm:h-[250px] md:h-[350px]' : 'h-[250px] sm:h-[300px] md:h-[400px]'} w-full`}>
+          <ResponsiveContainer>
+            {renderChart()}
+          </ResponsiveContainer>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -582,7 +901,9 @@ const GlobalInterestRateApp = () => {
             Powered by World Bank Economic Data
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-300">
-            Available data ranges: Interest Rates (1960-2023), Employment & Unemployment (1990-2023), Government Debt (1989-2023)
+            Available data ranges: Interest Rates (1960-2024), Employment & Unemployment (1990-2024), Government Debt (1989-2023), 
+            Population Growth (1960-2024), FDI & Trade (1960-2024), Government Spending (1960-2023), Labor Productivity (1990-2024), 
+            Income Inequality (1960-2023), R&D Spending (1996-2023), Energy Consumption (1960-2023)
           </p>
         </div>
 
@@ -610,11 +931,20 @@ const GlobalInterestRateApp = () => {
                   <li>Employment Statistics</li>
                   <li>GDP Growth Trends</li>
                   <li>Government Debt Levels</li>
+                  <li>Population Demographics</li>
+                  <li>International Investment (FDI)</li>
+                  <li>Trade Balance Analysis</li>
+                  <li>Government Spending Patterns</li>
+                  <li>Labor Productivity Metrics</li>
+                  <li>Income Inequality Measures</li>
+                  <li>R&D Investment Levels</li>
+                  <li>Energy Consumption Trends</li>
                 </ul>
               </div>
             </div>
             <p className="text-xs sm:text-sm italic">
-              Updated regularly with the latest World Bank economic data releases.
+              Updated regularly with the latest World Bank economic data releases. Most indicators include data through 2024, 
+              while some specialized metrics (Government Debt, Government Spending, Income Inequality, R&D, Energy) are available through 2023.
             </p>
           </div>
         </div>
@@ -646,6 +976,14 @@ const GlobalInterestRateApp = () => {
             <option value="inflation">Inflation Rates</option>
             <option value="gdp">GDP Growth</option>
             <option value="cpi">Consumer Price Index</option>
+            <option value="population">Population Growth</option>
+            <option value="fdi">Foreign Direct Investment</option>
+            <option value="trade">Trade Balance</option>
+            <option value="spending">Government Spending</option>
+            <option value="productivity">Labor Productivity</option>
+            <option value="gini">Income Inequality (Gini)</option>
+            <option value="rd">R&D Spending</option>
+            <option value="energy">Energy Consumption</option>
           </select>
           <button
             onClick={() => setIsGridView(!isGridView)}
@@ -755,6 +1093,7 @@ const GlobalInterestRateApp = () => {
             yDomain={[0, maxYAxis]}
             subtitle="Vertical axis shows interest rates as a percentage, where 5 = 5% interest rate"
             summary={InterestRateSummary}
+            chartType="line"
           />
         )}
 
@@ -765,6 +1104,7 @@ const GlobalInterestRateApp = () => {
             yDomain={[40, 80]}
             subtitle="Vertical axis shows percentage of working-age population employed, where 60 = 60% of population is employed"
             summary={EmploymentSummary}
+            chartType="composed"
           />
         )}
 
@@ -775,6 +1115,7 @@ const GlobalInterestRateApp = () => {
             yDomain={[0, 30]}
             subtitle="Vertical axis shows percentage of labor force unemployed, where 10 = 10% of labor force is seeking work"
             summary={UnemploymentSummary}
+            chartType="line"
           />
         )}
 
@@ -785,6 +1126,7 @@ const GlobalInterestRateApp = () => {
             yDomain={[0, 250]}
             subtitle="Vertical axis shows debt as a percentage of GDP, where 100 = debt equals one year's GDP"
             summary={DebtSummary}
+            chartType="area"
           />
         )}
 
@@ -795,6 +1137,7 @@ const GlobalInterestRateApp = () => {
             yDomain={[0, 25]}
             subtitle="Vertical axis shows annual percentage change in consumer prices, where 5 = 5% price increase per year"
             summary={InflationSummary}
+            chartType="line"
           />
         )}
 
@@ -805,6 +1148,7 @@ const GlobalInterestRateApp = () => {
             yDomain={[-10, 15]}
             subtitle="Vertical axis shows annual GDP growth as a percentage, where 3 = 3% growth in economic output"
             summary={GDPGrowthSummary}
+            chartType="composed"
           />
         )}
 
@@ -815,6 +1159,95 @@ const GlobalInterestRateApp = () => {
             yDomain={[0, 200]}
             subtitle="Base year 2010 = 100. Values above 100 indicate price increases since 2010, below 100 indicate decreases."
             summary={CPISummary}
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'population' || selectedMetric === 'all') && (
+          <Chart
+            title="Population Growth Rate (%)"
+            data={data.populationGrowth}
+            yDomain={[-2, 5]}
+            subtitle="Annual percentage change in total population. Positive values indicate growth, negative values indicate decline."
+            summary={PopulationGrowthSummary}
+            chartType="composed"
+          />
+        )}
+
+        {(selectedMetric === 'fdi' || selectedMetric === 'all') && (
+          <Chart
+            title="Foreign Direct Investment (% of GDP)"
+            data={data.fdi}
+            yDomain={[-5, 15]}
+            subtitle="FDI inflows as a percentage of GDP. Higher values indicate greater international investment confidence."
+            summary={FDISummary}
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'trade' || selectedMetric === 'all') && (
+          <Chart
+            title="Trade Balance (% of GDP)"
+            data={data.tradeBalance}
+            yDomain={[-15, 15]}
+            subtitle="Trade surplus (positive) or deficit (negative) as a percentage of GDP."
+            summary={TradeBalanceSummary}
+            chartType="composed"
+          />
+        )}
+
+        {(selectedMetric === 'spending' || selectedMetric === 'all') && (
+          <Chart
+            title="Government Spending (% of GDP)"
+            data={data.governmentSpending}
+            yDomain={[0, 60]}
+            subtitle="Total government expenditure as a percentage of GDP, including all public sector spending."
+            summary={GovernmentSpendingSummary}
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'productivity' || selectedMetric === 'all') && (
+          <Chart
+            title="Labor Productivity (Output per Hour)"
+            data={data.laborProductivity}
+            yDomain={[0, 100]}
+            subtitle="Economic output per hour worked, indicating efficiency and technological advancement."
+            summary={LaborProductivitySummary}
+            chartType="bar"
+          />
+        )}
+
+        {(selectedMetric === 'gini' || selectedMetric === 'all') && (
+          <Chart
+            title="Income Inequality (Gini Coefficient)"
+            data={data.giniCoefficient}
+            yDomain={[0, 1]}
+            subtitle="Income distribution measure: 0 = perfect equality, 1 = perfect inequality."
+            summary={GiniCoefficientSummary}
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'rd' || selectedMetric === 'all') && (
+          <Chart
+            title="Research & Development Spending (% of GDP)"
+            data={data.rdSpending}
+            yDomain={[0, 5]}
+            subtitle="R&D investment as a percentage of GDP, indicating innovation commitment and future competitiveness."
+            summary={RDSpendingSummary}
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'energy' || selectedMetric === 'all') && (
+          <Chart
+            title="Energy Consumption per Capita (kWh)"
+            data={data.energyConsumption}
+            yDomain={[0, 20000]}
+            subtitle="Annual energy consumption per person, reflecting economic activity and living standards."
+            summary={EnergyConsumptionSummary}
+            chartType="bar"
           />
         )}
       </div>
@@ -846,9 +1279,10 @@ const GlobalInterestRateApp = () => {
           <p className="text-sm sm:text-base md:text-lg dark:text-white text-gray-700">
             Our platform is regularly updated to ensure accuracy and reliability of economic data. 
             Updates are performed automatically when new data becomes available from the World Bank.
+            Latest data includes 2024 economic indicators for most metrics, with specialized indicators available through 2023.
           </p>
           <p className="text-sm sm:text-base md:text-lg dark:text-white text-gray-700 mt-3 sm:mt-4">
-            © {new Date().getFullYear()} Global Economic Indicators. Data provided by the World Bank.
+            © {new Date().getFullYear()} Global Economic Indicators. Data provided by the World Bank, most indicators updated through 2024.
           </p>
         </div>
       </div>

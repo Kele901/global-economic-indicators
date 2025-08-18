@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area } from 'recharts';
 import type { CountryData } from '../services/worldbank';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
 
@@ -27,6 +27,14 @@ interface ComparisonDashboardProps {
     inflationRates: CountryData[];
     gdpGrowth: CountryData[];
     cpiData: CountryData[];
+    populationGrowth: CountryData[];
+    fdi: CountryData[];
+    tradeBalance: CountryData[];
+    governmentSpending: CountryData[];
+    laborProductivity: CountryData[];
+    giniCoefficient: CountryData[];
+    rdSpending: CountryData[];
+    energyConsumption: CountryData[];
   };
   isDarkMode: boolean;
 }
@@ -41,12 +49,21 @@ interface ComparisonMetricProps {
     inflationRates: CountryData[];
     gdpGrowth: CountryData[];
     cpiData: CountryData[];
+    populationGrowth: CountryData[];
+    fdi: CountryData[];
+    tradeBalance: CountryData[];
+    governmentSpending: CountryData[];
+    laborProductivity: CountryData[];
+    giniCoefficient: CountryData[];
+    rdSpending: CountryData[];
+    energyConsumption: CountryData[];
   };
   metricKey: keyof ComparisonMetricProps['data'];
   countries: string[];
   isDarkMode: boolean;
   yDomain?: [number, number];
   valueFormatter?: (value: number) => string;
+  chartType?: 'line' | 'area' | 'bar';
 }
 
 const ComparisonMetric: React.FC<ComparisonMetricProps> = ({ 
@@ -56,36 +73,99 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   countries, 
   isDarkMode,
   yDomain = [0, 100],
-  valueFormatter = (value: number) => `${value.toFixed(1)}%`
-}) => (
-  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-    <h3 className="text-lg font-semibold mb-4">{title}</h3>
-    <div className="h-[200px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
-          <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
-          <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
-          <Tooltip
-            contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
-            formatter={(value: number) => valueFormatter(value)}
-          />
-          <Legend />
-          {countries.map(country => (
-            <Line
-              key={country}
-              type="monotone"
-              dataKey={country}
-              stroke={countryColors[country as keyof typeof countryColors]}
-              dot={false}
-              activeDot={{ r: 4 }}
+  valueFormatter = (value: number) => `${value.toFixed(1)}%`,
+  chartType = 'line'
+}) => {
+  if (chartType === 'area') {
+    return (
+      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+        <div className="h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+              <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
+              <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
+              <Tooltip
+                contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+                formatter={(value: number) => valueFormatter(value)}
+              />
+              <Legend />
+              {countries.map(country => (
+                <Area
+                  key={country}
+                  type="monotone"
+                  dataKey={country}
+                  stroke={countryColors[country as keyof typeof countryColors]}
+                  fill={countryColors[country as keyof typeof countryColors]}
+                />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  }
+
+  if (chartType === 'bar') {
+    return (
+      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+        <div className="h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+              <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
+              <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
+              <Tooltip
+                contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+                formatter={(value: number) => valueFormatter(value)}
+              />
+              <Legend />
+              {countries.map(country => (
+                <Bar
+                  key={country}
+                  dataKey={country}
+                  fill={countryColors[country as keyof typeof countryColors]}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <div className="h-[200px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
+            <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
+            <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
+            <Tooltip
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+              formatter={(value: number) => valueFormatter(value)}
             />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+            <Legend />
+            {countries.map(country => (
+              <Line
+                key={country}
+                type="monotone"
+                dataKey={country}
+                stroke={countryColors[country as keyof typeof countryColors]}
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface StatComparisonProps {
   countries: string[];
@@ -148,16 +228,30 @@ const calculateCorrelation = (data1: number[], data2: number[]) => {
 };
 
 const calculateEconomicSimilarity = (country1Data: any, country2Data: any) => {
-  const metrics = ['gdp', 'inflation', 'employment', 'debt'];
+  // Enhanced economic similarity calculation with new metrics
+  const metrics = [
+    { key: 'gdp', weight: 20, maxDiff: 20 },
+    { key: 'inflation', weight: 15, maxDiff: 20 },
+    { key: 'employment', weight: 15, maxDiff: 40 },
+    { key: 'debt', weight: 15, maxDiff: 150 },
+    { key: 'fdi', weight: 10, maxDiff: 10 },
+    { key: 'tradeBalance', weight: 10, maxDiff: 20 },
+    { key: 'governmentSpending', weight: 5, maxDiff: 30 },
+    { key: 'laborProductivity', weight: 5, maxDiff: 50000 },
+    { key: 'gini', weight: 5, maxDiff: 0.3 }
+  ];
+  
   let similarity = 0;
+  let totalWeight = 0;
 
   metrics.forEach(metric => {
-    const diff = Math.abs(country1Data[metric] - country2Data[metric]);
-    const maxDiff = metric === 'debt' ? 150 : metric === 'employment' ? 40 : 20;
-    similarity += (1 - Math.min(diff / maxDiff, 1)) * 25;
+    const diff = Math.abs(country1Data[metric.key] - country2Data[metric.key]);
+    const normalizedDiff = Math.min(diff / metric.maxDiff, 1);
+    similarity += (1 - normalizedDiff) * metric.weight;
+    totalWeight += metric.weight;
   });
 
-  return Math.round(similarity);
+  return Math.round((similarity / totalWeight) * 100);
 };
 
 const CorrelationMatrix = ({ 
@@ -251,14 +345,24 @@ const EconomicSimilarityChart = ({
             gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country1],
             inflation: data.inflationRates[data.inflationRates.length - 1][country1],
             employment: data.employmentRates[data.employmentRates.length - 1][country1],
-            debt: data.governmentDebt[data.governmentDebt.length - 1][country1]
+            debt: data.governmentDebt[data.governmentDebt.length - 1][country1],
+            fdi: data.fdi[data.fdi.length - 1][country1],
+            tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country1],
+            governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country1],
+            laborProductivity: data.laborProductivity[data.laborProductivity.length - 1][country1],
+            gini: data.giniCoefficient[data.giniCoefficient.length - 1][country1]
           };
           
           const compareLatest = {
             gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country2],
             inflation: data.inflationRates[data.inflationRates.length - 1][country2],
             employment: data.employmentRates[data.employmentRates.length - 1][country2],
-            debt: data.governmentDebt[data.governmentDebt.length - 1][country2]
+            debt: data.governmentDebt[data.governmentDebt.length - 1][country2],
+            fdi: data.fdi[data.fdi.length - 1][country2],
+            tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country2],
+            governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country2],
+            laborProductivity: data.laborProductivity[data.laborProductivity.length - 1][country2],
+            gini: data.giniCoefficient[data.giniCoefficient.length - 1][country2]
           };
           
           similarities.push({
@@ -266,7 +370,9 @@ const EconomicSimilarityChart = ({
             country2,
             similarity: calculateEconomicSimilarity(latest, compareLatest),
             gdpDiff: Math.abs(latest.gdp - compareLatest.gdp),
-            inflationDiff: Math.abs(latest.inflation - compareLatest.inflation)
+            inflationDiff: Math.abs(latest.inflation - compareLatest.inflation),
+            fdiDiff: Math.abs(latest.fdi - compareLatest.fdi),
+            tradeBalanceDiff: Math.abs(latest.tradeBalance - compareLatest.tradeBalance)
           });
         }
       });
@@ -277,7 +383,7 @@ const EconomicSimilarityChart = ({
 
   return (
     <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-lg font-semibold mb-4">Economic Similarity Analysis</h3>
+      <h3 className="text-lg font-semibold mb-4">Enhanced Economic Similarity Analysis</h3>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
@@ -319,7 +425,102 @@ const EconomicSimilarityChart = ({
         </ResponsiveContainer>
       </div>
       <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-        Bubble size indicates overall economic similarity. Smaller distances (closer to origin) suggest more similar economies.
+        Enhanced analysis includes GDP, inflation, FDI, trade balance, government spending, labor productivity, and Gini coefficient. 
+        Bubble size indicates overall economic similarity. Smaller distances suggest more similar economies.
+      </div>
+    </div>
+  );
+};
+
+// New component for multi-dimensional economic radar chart
+const EconomicRadarChart = ({
+  data,
+  countries,
+  isDarkMode
+}: {
+  data: ComparisonDashboardProps['data'];
+  countries: string[];
+  isDarkMode: boolean;
+}) => {
+  const radarData = useMemo(() => {
+    if (countries.length === 0) return [];
+    
+    return countries.map(country => {
+      const latest = {
+        gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country] || 0,
+        inflation: data.inflationRates[data.inflationRates.length - 1][country] || 0,
+        employment: data.employmentRates[data.employmentRates.length - 1][country] || 0,
+        debt: data.governmentDebt[data.governmentDebt.length - 1][country] || 0,
+        fdi: data.fdi[data.fdi.length - 1][country] || 0,
+        tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country] || 0,
+        governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country] || 0,
+        gini: data.giniCoefficient[data.giniCoefficient.length - 1][country] || 0
+      };
+      
+      // Normalize values to 0-100 scale for radar chart
+      return {
+        country,
+        gdp: Math.min(Math.max((latest.gdp + 10) * 5, 0), 100), // -10% to +10% -> 0-100
+        inflation: Math.min(Math.max((latest.inflation) * 5, 0), 100), // 0-20% -> 0-100
+        employment: Math.min(Math.max((latest.employment - 40) * 2.5, 0), 100), // 40-80% -> 0-100
+        debt: Math.min(Math.max((100 - latest.debt) * 1, 0), 100), // 100-0% -> 0-100 (inverted)
+        fdi: Math.min(Math.max((latest.fdi + 5) * 10, 0), 100), // -5% to +5% -> 0-100
+        tradeBalance: Math.min(Math.max((latest.tradeBalance + 10) * 5, 0), 100), // -10% to +10% -> 0-100
+        governmentSpending: Math.min(Math.max((latest.governmentSpending - 10) * 2, 0), 100), // 10-60% -> 0-100
+        gini: Math.min(Math.max((1 - latest.gini) * 100, 0), 100) // 1-0 -> 0-100 (inverted)
+      };
+    });
+  }, [data, countries]);
+
+  if (radarData.length === 0) return null;
+
+  // Create a combined dataset for the radar chart
+  const combinedData = [
+    { metric: 'GDP Growth', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.gdp }), {}) },
+    { metric: 'Inflation', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.inflation }), {}) },
+    { metric: 'Employment', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.employment }), {}) },
+    { metric: 'Debt Management', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.debt }), {}) },
+    { metric: 'FDI', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.fdi }), {}) },
+    { metric: 'Trade Balance', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.tradeBalance }), {}) },
+    { metric: 'Government Spending', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.governmentSpending }), {}) },
+    { metric: 'Income Equality', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.gini }), {}) }
+  ];
+
+  return (
+    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+      <h3 className="text-lg font-semibold mb-4">Economic Profile Radar Chart</h3>
+      <div className="h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart data={combinedData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+            <PolarGrid stroke={isDarkMode ? '#555' : '#ccc'} />
+            <PolarAngleAxis 
+              dataKey="metric" 
+              tick={{ fill: isDarkMode ? '#fff' : '#666' }}
+            />
+            <PolarRadiusAxis 
+              angle={90} 
+              domain={[0, 100]} 
+              tick={{ fill: isDarkMode ? '#fff' : '#666' }}
+            />
+            {countries.map((country) => (
+              <Radar
+                key={country}
+                name={country}
+                dataKey={country}
+                stroke={countryColors[country as keyof typeof countryColors]}
+                fill={countryColors[country as keyof typeof countryColors]}
+                fillOpacity={0.3}
+              />
+            ))}
+            <Tooltip
+              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+            />
+            <Legend />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+        Multi-dimensional economic profile comparison. Higher values indicate better performance in each metric.
       </div>
     </div>
   );
@@ -363,7 +564,15 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
       governmentDebt: filterByTimeRange(data.governmentDebt),
       inflationRates: filterByTimeRange(data.inflationRates),
       gdpGrowth: filterByTimeRange(data.gdpGrowth),
-      cpiData: filterByTimeRange(data.cpiData)
+      cpiData: filterByTimeRange(data.cpiData),
+      populationGrowth: filterByTimeRange(data.populationGrowth),
+      fdi: filterByTimeRange(data.fdi),
+      tradeBalance: filterByTimeRange(data.tradeBalance),
+      governmentSpending: filterByTimeRange(data.governmentSpending),
+      laborProductivity: filterByTimeRange(data.laborProductivity),
+      giniCoefficient: filterByTimeRange(data.giniCoefficient),
+      rdSpending: filterByTimeRange(data.rdSpending),
+      energyConsumption: filterByTimeRange(data.energyConsumption)
     };
   }, [data, selectedPeriod]);
 
@@ -417,6 +626,7 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
 
       {selectedCountries.length > 0 && (
         <>
+          {/* Core Economic Indicators */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <ComparisonMetric
               title="Interest Rates"
@@ -444,6 +654,99 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
               yDomain={[-10, 15]}
               valueFormatter={(value) => `${value.toFixed(1)}%`}
             />
+            <ComparisonMetric
+              title="Inflation Rates"
+              data={filteredData}
+              metricKey="inflationRates"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[-5, 25]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+          </div>
+
+          {/* New Economic Indicators */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <ComparisonMetric
+              title="Foreign Direct Investment (% of GDP)"
+              data={filteredData}
+              metricKey="fdi"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[-10, 15]}
+              valueFormatter={(value) => `${value.toFixed(2)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Trade Balance (% of GDP)"
+              data={filteredData}
+              metricKey="tradeBalance"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[-20, 20]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Government Spending (% of GDP)"
+              data={filteredData}
+              metricKey="governmentSpending"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[10, 60]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Labor Productivity (GDP per worker)"
+              data={filteredData}
+              metricKey="laborProductivity"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 200000]}
+              valueFormatter={(value) => `$${value.toLocaleString()}`}
+              chartType="bar"
+            />
+          </div>
+
+          {/* Advanced Economic Indicators */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <ComparisonMetric
+              title="Gini Coefficient (Income Inequality)"
+              data={filteredData}
+              metricKey="giniCoefficient"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 1]}
+              valueFormatter={(value) => value.toFixed(3)}
+            />
+            <ComparisonMetric
+              title="R&D Spending (% of GDP)"
+              data={filteredData}
+              metricKey="rdSpending"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 5]}
+              valueFormatter={(value) => `${value.toFixed(2)}%`}
+            />
+            <ComparisonMetric
+              title="Energy Consumption (kg oil equivalent per capita)"
+              data={filteredData}
+              metricKey="energyConsumption"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 10000]}
+              valueFormatter={(value) => `${value.toLocaleString()} kg`}
+              chartType="bar"
+            />
+            <ComparisonMetric
+              title="Population Growth Rate"
+              data={filteredData}
+              metricKey="populationGrowth"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[-2, 5]}
+              valueFormatter={(value) => `${value.toFixed(2)}%`}
+            />
           </div>
 
           {selectedCountries.length >= 2 && (
@@ -459,9 +762,16 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
                 countries={selectedCountries}
                 isDarkMode={isDarkMode}
               />
+
+              <EconomicRadarChart
+                data={data}
+                countries={selectedCountries}
+                isDarkMode={isDarkMode}
+              />
             </>
           )}
 
+          {/* Enhanced Statistics Comparison */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatComparison
               title="Latest Interest Rates"
@@ -484,10 +794,35 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
               data={filteredData}
               isDarkMode={isDarkMode}
             />
+            <StatComparison
+              title="Latest FDI (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.fdi}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(2)}%`}
+            />
+            <StatComparison
+              title="Latest Trade Balance (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.tradeBalance}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Gini Coefficient"
+              countries={selectedCountries}
+              metric={filteredData.giniCoefficient}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => v.toFixed(3)}
+            />
           </div>
 
+          {/* Enhanced Comparative Analysis */}
           <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-            <h3 className="text-lg font-semibold mb-4">Comparative Analysis</h3>
+            <h3 className="text-lg font-semibold mb-4">Enhanced Comparative Analysis</h3>
             <div className="space-y-4">
               {selectedCountries.map(country => {
                 const latestData = {
@@ -497,6 +832,13 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
                   debt: data.governmentDebt[data.governmentDebt.length - 1][country],
                   inflation: data.inflationRates[data.inflationRates.length - 1][country],
                   gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country],
+                  fdi: data.fdi[data.fdi.length - 1][country],
+                  tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country],
+                  governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country],
+                  laborProductivity: data.laborProductivity[data.laborProductivity.length - 1][country],
+                  gini: data.giniCoefficient[data.giniCoefficient.length - 1][country],
+                  rdSpending: data.rdSpending[data.rdSpending.length - 1][country],
+                  energyConsumption: data.energyConsumption[data.energyConsumption.length - 1][country]
                 };
 
                 return (
@@ -506,11 +848,13 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
                       <h4 className="font-semibold">{country}</h4>
                     </div>
                     <p className="text-sm">
-                      {country} currently shows {' '}
+                      {country} shows {' '}
                       {latestData.gdp > 2 ? 'strong' : latestData.gdp > 0 ? 'moderate' : 'challenging'} growth at {latestData.gdp.toFixed(1)}% with {' '}
                       {latestData.inflation > 5 ? 'high' : latestData.inflation > 2 ? 'moderate' : 'low'} inflation ({latestData.inflation.toFixed(1)}%). {' '}
-                      Employment levels are {latestData.employment > 65 ? 'robust' : latestData.employment > 55 ? 'moderate' : 'concerning'} at {latestData.employment.toFixed(1)}%, while {' '}
-                      government debt is {latestData.debt > 100 ? 'significantly high' : latestData.debt > 60 ? 'moderate' : 'manageable'} at {latestData.debt.toFixed(1)}% of GDP.
+                      FDI flows are {latestData.fdi > 2 ? 'strong' : latestData.fdi > 0 ? 'moderate' : 'weak'} at {latestData.fdi.toFixed(2)}% of GDP, while {' '}
+                      trade balance is {latestData.tradeBalance > 2 ? 'positive' : latestData.tradeBalance > -2 ? 'balanced' : 'negative'} at {latestData.tradeBalance.toFixed(1)}% of GDP. {' '}
+                      Income inequality (Gini: {latestData.gini.toFixed(3)}) is {latestData.gini < 0.3 ? 'low' : latestData.gini < 0.4 ? 'moderate' : 'high'}, and {' '}
+                      R&D investment is {latestData.rdSpending > 2 ? 'high' : latestData.rdSpending > 1 ? 'moderate' : 'low'} at {latestData.rdSpending.toFixed(2)}% of GDP.
                     </p>
                   </div>
                 );
