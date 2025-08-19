@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart } from 'recharts';
 import { fetchGlobalData } from '../services/worldbank';
 import type { CountryData } from '../services/worldbank';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
 import AdSense from './AdSense';
+import ChartDownloadButton from './ChartDownloadButton';
+import BulkChartDownload from './BulkChartDownload';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -673,6 +675,7 @@ const GlobalInterestRateApp = () => {
     summary: React.ComponentType<{ isDarkMode: boolean }>;
     chartType?: 'line' | 'area' | 'bar' | 'composed';
   }) => {
+    const chartRef = useRef<HTMLDivElement>(null);
     const renderChart = () => {
       const commonProps = {
         data: filterData(selectedPeriod, data),
@@ -847,8 +850,26 @@ const GlobalInterestRateApp = () => {
     };
 
     return (
-      <div className={`mb-6 sm:mb-8 ${isGridView ? 'h-[350px] sm:h-[400px] md:h-[500px]' : ''}`}>
-        <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-4">{title}</h2>
+      <div 
+        ref={chartRef}
+        data-chart-container
+        data-chart-title={title}
+        className={`mb-6 sm:mb-8 ${isGridView ? 'h-[350px] sm:h-[400px] md:h-[500px]' : ''}`}
+      >
+        <div className="flex justify-between items-start mb-2 sm:mb-4">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold">{title}</h2>
+          <ChartDownloadButton
+            chartElement={chartRef.current}
+            chartData={{
+              title,
+              data: filterData(selectedPeriod, data),
+              type: chartType,
+              countries: selectedCountries
+            }}
+            variant="outline"
+            size="sm"
+          />
+        </div>
         <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
           {subtitle}
         </div>
@@ -886,6 +907,7 @@ const GlobalInterestRateApp = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Global Economic Indicators</h1>
           <div className="flex items-center space-x-2">
+            <BulkChartDownload variant="primary" size="sm" />
             <span className="text-xs sm:text-sm">Light</span>
             <button
               className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}

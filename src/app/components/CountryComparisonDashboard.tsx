@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area } from 'recharts';
 import type { CountryData } from '../services/worldbank';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
+import ChartDownloadButton from './ChartDownloadButton';
+import BulkChartDownload from './BulkChartDownload';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -76,10 +78,29 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   valueFormatter = (value: number) => `${value.toFixed(1)}%`,
   chartType = 'line'
 }) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   if (chartType === 'area') {
     return (
-      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <div 
+        ref={chartRef}
+        data-chart-container
+        data-chart-title={title}
+        className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
+      >
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <ChartDownloadButton
+            chartElement={chartRef.current}
+            chartData={{
+              title,
+              data: data[metricKey],
+              type: 'area',
+              countries
+            }}
+            variant="outline"
+            size="sm"
+          />
+        </div>
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -109,8 +130,26 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
 
   if (chartType === 'bar') {
     return (
-      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <div 
+        ref={chartRef}
+        data-chart-container
+        data-chart-title={title}
+        className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
+      >
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <ChartDownloadButton
+            chartElement={chartRef.current}
+            chartData={{
+              title,
+              data: data[metricKey],
+              type: 'bar',
+              countries
+            }}
+            variant="outline"
+            size="sm"
+          />
+        </div>
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -137,8 +176,26 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   }
 
   return (
-    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+    <div 
+      ref={chartRef}
+      data-chart-container
+      data-chart-title={title}
+      className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <ChartDownloadButton
+          chartElement={chartRef.current}
+          chartData={{
+            title,
+            data: data[metricKey],
+            type: 'line',
+            countries
+          }}
+          variant="outline"
+          size="sm"
+        />
+      </div>
       <div className="h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -584,17 +641,20 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             <h2 className="text-xl font-bold">Country Comparison Dashboard</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">Select up to {maxCountries} countries to compare</p>
           </div>
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
-            className={`px-3 py-2 rounded-md border ${
-              isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-white border-gray-300'
-            }`}
-          >
-            <option value="all">All Time</option>
-            <option value="10y">Last 10 Years</option>
-            <option value="5y">Last 5 Years</option>
-          </select>
+          <div className="flex items-center gap-3">
+            <BulkChartDownload variant="primary" size="sm" />
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
+              className={`px-3 py-2 rounded-md border ${
+                isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-white border-gray-300'
+              }`}
+            >
+              <option value="all">All Time</option>
+              <option value="10y">Last 10 Years</option>
+              <option value="5y">Last 5 Years</option>
+            </select>
+          </div>
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">

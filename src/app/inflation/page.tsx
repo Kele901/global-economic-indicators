@@ -6,6 +6,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
+import BulkChartDownload from '../components/BulkChartDownload';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -968,6 +969,7 @@ export default function InflationPage() {
             </p>
           </div>
           <div className="flex items-center space-x-2">
+            <BulkChartDownload variant="primary" size="sm" />
             <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
             <button
               className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
@@ -1034,7 +1036,11 @@ export default function InflationPage() {
         </div>
 
         {/* Chart */}
-        <div className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
+        <div 
+          data-chart-container
+          data-chart-title="Inflation Rate Over Time"
+          className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+        >
           <h2 className="text-lg font-semibold mb-2">Inflation Rate Over Time</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
           <div className="h-[350px]">
@@ -1073,7 +1079,11 @@ export default function InflationPage() {
           </p>
 
           {/* Essential Goods Prices Chart */}
-          <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
+          <div 
+            data-chart-container
+            data-chart-title="Essential Goods Prices Over the Years"
+            className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+          >
             <h2 className="text-lg font-semibold mb-2">Essential Goods Prices Over the Years</h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               The chart below shows the average price of key goods (in GBP) from 2011 to 2024. Data is based on market averages.
