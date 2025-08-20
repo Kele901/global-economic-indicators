@@ -68,7 +68,8 @@ export const downloadChartAsImage = async (
         chartContentElement = chartCanvas as HTMLElement;
         console.log('Using canvas element for capture');
       } else if (chartSvg) {
-        chartContentElement = chartSvg as HTMLElement;
+        // SVG elements need to be cast to Element first, then to HTMLElement
+        chartContentElement = chartSvg as unknown as HTMLElement;
         console.log('Using SVG element for capture');
       } else {
         console.log('Using container element for capture');
@@ -217,7 +218,8 @@ export const downloadChartAsPDF = async (
         chartContentElement = chartCanvas as HTMLElement;
         console.log('Using canvas element for PDF capture');
       } else if (chartSvg) {
-        chartContentElement = chartSvg as HTMLElement;
+        // SVG elements need to be cast to Element first, then to HTMLElement
+        chartContentElement = chartSvg as unknown as HTMLElement;
         console.log('Using SVG element for PDF capture');
       } else {
         console.log('Using container element for PDF capture');
