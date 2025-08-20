@@ -9,6 +9,7 @@ interface ChartDownloadButtonProps {
   className?: string;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
+  chartRef?: React.RefObject<HTMLDivElement>;
 }
 
 const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
@@ -16,7 +17,8 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
   chartData,
   className = '',
   variant = 'primary',
-  size = 'md'
+  size = 'md',
+  chartRef
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -24,9 +26,9 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary: 'bg-gray-600 hover:bg-gray-700 text-white',
-    outline: 'bg-transparent border border-gray-300 hover:bg-gray-50 text-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg dark:shadow-blue-500/25',
+    secondary: 'bg-gray-600 hover:bg-gray-700 text-white shadow-lg dark:shadow-gray-400/25',
+    outline: 'bg-transparent border-2 border-gray-300 hover:bg-gray-50 text-gray-700 dark:text-white dark:border-gray-400 dark:hover:bg-gray-600 dark:hover:border-gray-300 dark:shadow-lg dark:shadow-gray-900/50 dark:ring-1 dark:ring-gray-400/20'
   };
 
   const sizeClasses = {
@@ -36,24 +38,90 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
   };
 
   const handleDownload = async () => {
-    if (!chartElement) {
+    // Try multiple ways to get the chart element
+    let targetElement = chartElement;
+    
+    // First try: use the chartRef if available
+    if (!targetElement && chartRef?.current) {
+      targetElement = chartRef.current;
+      console.log('Using chartRef.current:', targetElement);
+    }
+    
+    // Second try: use the chartElement prop
+    if (!targetElement) {
+      targetElement = chartElement;
+      console.log('Using chartElement prop:', targetElement);
+    }
+    
+    // Third try: find by chart title using data attributes
+    if (!targetElement) {
+      const chartTitle = chartData.title;
+      const chartContainers = document.querySelectorAll('[data-chart-container]');
+      console.log('Found chart containers:', chartContainers.length);
+      
+      for (const container of chartContainers) {
+        const titleAttr = container.getAttribute('data-chart-title');
+        console.log('Container title:', titleAttr, 'Looking for:', chartTitle);
+        if (titleAttr === chartTitle) {
+          targetElement = container as HTMLElement;
+          console.log('Found chart by title:', targetElement);
+          break;
+        }
+      }
+    }
+    
+    // Fourth try: find any chart container if all else fails
+    if (!targetElement) {
+      const chartContainers = document.querySelectorAll('[data-chart-container]');
+      if (chartContainers.length > 0) {
+        targetElement = chartContainers[0] as HTMLElement;
+        console.log('Using first available chart container:', targetElement);
+      }
+    }
+    
+    if (!targetElement) {
+      console.error('ChartDownloadButton: Could not find chart element for:', chartData.title);
+      console.error('chartElement:', chartElement);
+      console.error('chartRef.current:', chartRef?.current);
+      console.error('Available chart containers:', document.querySelectorAll('[data-chart-container]').length);
+      alert('Chart element not found. Please try again.');
+      return;
+    }
+
+    // Verify the element is actually in the DOM
+    if (!document.contains(targetElement)) {
+      console.error('ChartDownloadButton: Chart element is not in the DOM');
       alert('Chart element not found. Please try again.');
       return;
     }
 
     setIsDownloading(true);
     try {
+      // Validate chart data
+      if (!chartData || !chartData.title) {
+        throw new Error('Invalid chart data: missing title');
+      }
+      
+      if (!chartData.data || !Array.isArray(chartData.data)) {
+        console.warn('Chart data is missing or not an array, using empty data');
+        chartData.data = [];
+      }
+      
       const options: ChartDownloadOptions = {
         format: downloadFormat,
         filename: chartData.title.toLowerCase().replace(/\s+/g, '-'),
         backgroundColor: '#ffffff'
       };
 
-      await downloadChart(chartElement, chartData, options);
+      console.log('Starting download with element:', targetElement);
+      console.log('Chart data:', chartData);
+      console.log('Download options:', options);
+      
+      await downloadChart(targetElement, chartData, options);
       setIsOpen(false);
     } catch (error) {
       console.error('Download failed:', error);
-      alert('Download failed. Please try again.');
+      alert(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setIsDownloading(false);
     }
@@ -70,6 +138,15 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Debug logging to help troubleshoot ref issues
+  React.useEffect(() => {
+    if (chartElement) {
+      console.log('ChartDownloadButton: Chart element found:', chartElement);
+    } else {
+      console.log('ChartDownloadButton: Chart element not found for:', chartData.title);
+    }
+  }, [chartElement, chartData.title]);
+
   return (
     <div className="relative inline-block" ref={dropdownRef}>
       <button
@@ -78,9 +155,11 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
         className={`
           ${variantClasses[variant]}
           ${sizeClasses[size]}
-          rounded-md font-medium transition-colors duration-200
+          rounded-md font-semibold transition-all duration-200
           disabled:opacity-50 disabled:cursor-not-allowed
           flex items-center gap-2
+          dark:text-white dark:font-bold
+          hover:scale-105 active:scale-95
           ${className}
         `}
       >
@@ -103,14 +182,17 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+        <div 
+          data-chart-download-dropdown
+          className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-xl border-2 border-gray-200 dark:border-gray-600 z-50 dark:shadow-2xl dark:shadow-gray-900/50"
+        >
           <div className="py-1">
-            <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Format:</label>
+            <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+              <label className="text-sm font-semibold text-gray-700 dark:text-white">Format:</label>
               <select
                 value={downloadFormat}
                 onChange={(e) => setDownloadFormat(e.target.value as any)}
-                className="mt-1 block w-full px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="mt-1 block w-full px-3 py-1 text-sm border-2 border-gray-300 dark:border-gray-500 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium"
               >
                 <option value="png">PNG Image</option>
                 <option value="jpg">JPG Image</option>
@@ -122,7 +204,7 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
             <button
               onClick={handleDownload}
               disabled={isDownloading}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full text-left px-4 py-2 text-sm font-semibold text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               {isDownloading ? 'Downloading...' : 'Download Now'}
             </button>

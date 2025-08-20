@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchGlobalData } from '../services/worldbank';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
 import BulkChartDownload from '../components/BulkChartDownload';
+import ChartDownloadButton from '../components/ChartDownloadButton';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -869,6 +870,48 @@ export default function InflationPage() {
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["USA", "UK", "Germany"]);
   const [selectedPeriod, setSelectedPeriod] = useState<'5y' | '10y' | 'all'>('all');
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const inflationChartRef = useRef<HTMLDivElement>(null);
+  const londonGoodsChartRef = useRef<HTMLDivElement>(null);
+  const londonProduceChartRef = useRef<HTMLDivElement>(null);
+  const londonProteinChartRef = useRef<HTMLDivElement>(null);
+  const londonRentChartRef = useRef<HTMLDivElement>(null);
+  const londonBuyAptChartRef = useRef<HTMLDivElement>(null);
+  const londonSalaryChartRef = useRef<HTMLDivElement>(null);
+  const londonUtilitiesChartRef = useRef<HTMLDivElement>(null);
+  const londonSportsLeisureChartRef = useRef<HTMLDivElement>(null);
+  const londonClothingShoesChartRef = useRef<HTMLDivElement>(null);
+  const londonTransportationChartRef = useRef<HTMLDivElement>(null);
+  const parisGoodsChartRef = useRef<HTMLDivElement>(null);
+  const parisProduceChartRef = useRef<HTMLDivElement>(null);
+  const parisProteinChartRef = useRef<HTMLDivElement>(null);
+  const parisRentChartRef = useRef<HTMLDivElement>(null);
+  const parisBuyAptChartRef = useRef<HTMLDivElement>(null);
+  const parisSalaryChartRef = useRef<HTMLDivElement>(null);
+  const parisTransportationChartRef = useRef<HTMLDivElement>(null);
+  const parisUtilitiesChartRef = useRef<HTMLDivElement>(null);
+  const parisSportsLeisureChartRef = useRef<HTMLDivElement>(null);
+  const parisClothingShoesChartRef = useRef<HTMLDivElement>(null);
+  const newYorkGoodsChartRef = useRef<HTMLDivElement>(null);
+  const newYorkProduceChartRef = useRef<HTMLDivElement>(null);
+  const newYorkProteinChartRef = useRef<HTMLDivElement>(null);
+  const newYorkRentChartRef = useRef<HTMLDivElement>(null);
+  const newYorkBuyAptChartRef = useRef<HTMLDivElement>(null);
+  const newYorkSalaryChartRef = useRef<HTMLDivElement>(null);
+  const newYorkUtilitiesChartRef = useRef<HTMLDivElement>(null);
+  const newYorkSportsLeisureChartRef = useRef<HTMLDivElement>(null);
+  const newYorkClothingShoesChartRef = useRef<HTMLDivElement>(null);
+  const newYorkTransportationChartRef = useRef<HTMLDivElement>(null);
+  const tokyoGoodsChartRef = useRef<HTMLDivElement>(null);
+  const tokyoProduceChartRef = useRef<HTMLDivElement>(null);
+  const tokyoProteinChartRef = useRef<HTMLDivElement>(null);
+  const tokyoRentChartRef = useRef<HTMLDivElement>(null);
+  const tokyoBuyAptChartRef = useRef<HTMLDivElement>(null);
+  const tokyoSalaryChartRef = useRef<HTMLDivElement>(null);
+  const tokyoUtilitiesChartRef = useRef<HTMLDivElement>(null);
+  const tokyoSportsLeisureChartRef = useRef<HTMLDivElement>(null);
+  const tokyoClothingShoesChartRef = useRef<HTMLDivElement>(null);
+  const tokyoTransportationChartRef = useRef<HTMLDivElement>(null);
+  const tokyoRestaurantChartRef = useRef<HTMLDivElement>(null);
   const [selectedGoods, setSelectedGoods] = useState(goodsList.map(g => g.key));
   const [selectedProduce, setSelectedProduce] = useState(produceList.map(g => g.key));
   const [selectedProtein, setSelectedProtein] = useState(proteinList.map(g => g.key));
@@ -1037,11 +1080,26 @@ export default function InflationPage() {
 
         {/* Chart */}
         <div 
+          ref={inflationChartRef}
           data-chart-container
           data-chart-title="Inflation Rate Over Time"
           className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
         >
-          <h2 className="text-lg font-semibold mb-2">Inflation Rate Over Time</h2>
+          <div className="flex justify-between items-start mb-2">
+            <h2 className="text-lg font-semibold">Inflation Rate Over Time</h2>
+            <ChartDownloadButton
+              chartElement={inflationChartRef.current}
+              chartRef={inflationChartRef}
+              chartData={{
+                title: "Inflation Rate Over Time",
+                data: inflationData,
+                type: 'line',
+                countries: selectedCountries
+              }}
+              variant="outline"
+              size="sm"
+            />
+          </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
           <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -1080,11 +1138,26 @@ export default function InflationPage() {
 
           {/* Essential Goods Prices Chart */}
           <div 
+            ref={londonGoodsChartRef}
             data-chart-container
             data-chart-title="Essential Goods Prices Over the Years"
             className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
           >
-            <h2 className="text-lg font-semibold mb-2">Essential Goods Prices Over the Years</h2>
+            <div className="flex justify-between items-start mb-2">
+              <h2 className="text-lg font-semibold">Essential Goods Prices Over the Years</h2>
+              <ChartDownloadButton
+                chartElement={londonGoodsChartRef.current}
+                chartRef={londonGoodsChartRef}
+                chartData={{
+                  title: "Essential Goods Prices Over the Years",
+                  data: essentialGoodsData,
+                  type: 'line',
+                  countries: selectedGoods
+                }}
+                variant="outline"
+                size="sm"
+              />
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               The chart below shows the average price of key goods (in GBP) from 2011 to 2024. Data is based on market averages.
             </p>
@@ -1142,8 +1215,27 @@ export default function InflationPage() {
           </div>
 
           {/* Produce Prices Chart */}
-          <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-            <h2 className="text-lg font-semibold mb-2">Fruit & Vegetable Prices Over the Years</h2>
+          <div 
+            ref={londonProduceChartRef}
+            data-chart-container
+            data-chart-title="Fruit & Vegetable Prices Over the Years"
+            className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h2 className="text-lg font-semibold">Fruit & Vegetable Prices Over the Years</h2>
+              <ChartDownloadButton
+                chartElement={londonProduceChartRef.current}
+                chartRef={londonProduceChartRef}
+                chartData={{
+                  title: "Fruit & Vegetable Prices Over the Years",
+                  data: produceData,
+                  type: 'line',
+                  countries: selectedProduce
+                }}
+                variant="outline"
+                size="sm"
+              />
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               The chart below shows the average price of selected fruits and vegetables (in GBP) from 2011 to 2024. Data is based on market averages.
             </p>
@@ -1202,8 +1294,27 @@ export default function InflationPage() {
           </div>
 
           {/* Protein Prices Chart */}
-          <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-            <h2 className="text-lg font-semibold mb-2">Cheese, Wine, Cigarettes, Chicken & Beef Prices Over the Years</h2>
+          <div 
+            ref={londonProteinChartRef}
+            data-chart-container
+            data-chart-title="Cheese, Wine, Cigarettes, Chicken & Beef Prices Over the Years"
+            className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h2 className="text-lg font-semibold">Cheese, Wine, Cigarettes, Chicken & Beef Prices Over the Years</h2>
+              <ChartDownloadButton
+                chartElement={londonProteinChartRef.current}
+                chartRef={londonProteinChartRef}
+                chartData={{
+                  title: "Cheese, Wine, Cigarettes, Chicken & Beef Prices Over the Years",
+                  data: proteinData,
+                  type: 'line',
+                  countries: selectedProtein
+                }}
+                variant="outline"
+                size="sm"
+              />
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               The chart below shows the average price of selected protein and related goods (in GBP) from 2011 to 2024. Data is based on market averages.
             </p>
@@ -1262,8 +1373,27 @@ export default function InflationPage() {
           </div>
 
           {/* Rent Prices Chart */}
-          <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-            <h2 className="text-lg font-semibold mb-2">Apartment Rental Prices Over the Years</h2>
+          <div 
+            ref={londonRentChartRef}
+            data-chart-container
+            data-chart-title="Apartment Rental Prices Over the Years"
+            className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h2 className="text-lg font-semibold">Apartment Rental Prices Over the Years</h2>
+              <ChartDownloadButton
+                chartElement={londonRentChartRef.current}
+                chartRef={londonRentChartRef}
+                chartData={{
+                  title: "Apartment Rental Prices Over the Years",
+                  data: rentData,
+                  type: 'line',
+                  countries: selectedRent
+                }}
+                variant="outline"
+                size="sm"
+              />
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               The chart below shows the average monthly rent (in GBP) for different apartment types from 2011 to 2024. Data is based on market averages.
             </p>
@@ -1321,8 +1451,27 @@ export default function InflationPage() {
             </div>
 
             {/* Buy Apartment Price Chart */}
-            <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-              <h2 className="text-lg font-semibold mb-2">Buy Apartment Price per Square Meter</h2>
+            <div 
+              ref={londonBuyAptChartRef}
+              data-chart-container
+              data-chart-title="Buy Apartment Price per Square Meter"
+              className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-lg font-semibold">Buy Apartment Price per Square Meter</h2>
+                <ChartDownloadButton
+                  chartElement={londonBuyAptChartRef.current}
+                  chartRef={londonBuyAptChartRef}
+                  chartData={{
+                    title: "Buy Apartment Price per Square Meter",
+                    data: buyAptData,
+                    type: 'line',
+                    countries: selectedBuyApt
+                  }}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 The chart below shows the average price per square meter (in GBP) to buy an apartment in London, both in the city centre and outside, from 2011 to 2024.
               </p>
@@ -1381,8 +1530,27 @@ export default function InflationPage() {
             </div>
 
             {/* Salary Chart */}
-            <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-              <h2 className="text-lg font-semibold mb-2">Average Monthly Net Salary (After Tax)</h2>
+            <div 
+              ref={londonSalaryChartRef}
+              data-chart-container
+              data-chart-title="Average Monthly Net Salary (After Tax)"
+              className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-lg font-semibold">Average Monthly Net Salary (After Tax)</h2>
+                <ChartDownloadButton
+                  chartElement={londonSalaryChartRef.current}
+                  chartRef={londonSalaryChartRef}
+                  chartData={{
+                    title: "Average Monthly Net Salary (After Tax)",
+                    data: salaryData,
+                    type: 'line',
+                    countries: selectedSalary
+                  }}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 The chart below shows the average monthly net salary (after tax, in GBP) in London from 2011 to 2024.
               </p>
@@ -1441,8 +1609,26 @@ export default function InflationPage() {
             </div>
 
             {/* Utilities (Monthly) Chart */}
-            <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-              <h2 className="text-lg font-semibold mb-2">Utilities (Monthly) Over the Years</h2>
+            <div 
+              ref={londonUtilitiesChartRef}
+              data-chart-container
+              data-chart-title="Utilities (Monthly) Over the Years"
+              className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-lg font-semibold">Utilities (Monthly) Over the Years</h2>
+                <ChartDownloadButton
+                  chartElement={londonUtilitiesChartRef.current}
+                  chartData={{
+                    title: "Utilities (Monthly) Over the Years",
+                    data: utilitiesData,
+                    type: 'line',
+                    countries: selectedUtilities
+                  }}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 The chart below shows the average monthly cost (in GBP) for utilities in London from 2011 to 2024. Data is based on market averages.
               </p>
@@ -1501,8 +1687,26 @@ export default function InflationPage() {
             </div>
 
             {/* Sports and Leisure Chart */}
-            <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-              <h2 className="text-lg font-semibold mb-2">Sports and Leisure Over the Years</h2>
+            <div 
+              ref={londonSportsLeisureChartRef}
+              data-chart-container
+              data-chart-title="Sports and Leisure Over the Years"
+              className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-lg font-semibold">Sports and Leisure Over the Years</h2>
+                <ChartDownloadButton
+                  chartElement={londonSportsLeisureChartRef.current}
+                  chartData={{
+                    title: "Sports and Leisure Over the Years",
+                    data: sportsLeisureData,
+                    type: 'line',
+                    countries: selectedSportsLeisure
+                  }}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 The chart below shows the average monthly cost (in GBP) for sports and leisure activities in London from 2011 to 2024. Data is based on market averages.
               </p>
@@ -1561,8 +1765,26 @@ export default function InflationPage() {
             </div>
 
             {/* Clothing and Shoes Chart */}
-            <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-              <h2 className="text-lg font-semibold mb-2">Clothing and Shoes Over the Years</h2>
+            <div 
+              ref={londonClothingShoesChartRef}
+              data-chart-container
+              data-chart-title="Clothing and Shoes Over the Years"
+              className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-lg font-semibold">Clothing and Shoes Over the Years</h2>
+                <ChartDownloadButton
+                  chartElement={londonClothingShoesChartRef.current}
+                  chartData={{
+                    title: "Clothing and Shoes Over the Years",
+                    data: clothingShoesData,
+                    type: 'line',
+                    countries: selectedClothingShoes
+                  }}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 The chart below shows the average price (in GBP) for clothing and shoes in London from 2011 to 2024. Data is based on market averages.
               </p>
@@ -1621,8 +1843,26 @@ export default function InflationPage() {
             </div>
 
             {/* Transportation Chart */}
-            <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-              <h2 className="text-lg font-semibold mb-2">Transportation Over the Years</h2>
+            <div 
+              ref={londonTransportationChartRef}
+              data-chart-container
+              data-chart-title="Transportation Over the Years"
+              className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-lg font-semibold">Transportation Over the Years</h2>
+                <ChartDownloadButton
+                  chartElement={londonTransportationChartRef.current}
+                  chartData={{
+                    title: "Transportation Over the Years",
+                    data: transportationData,
+                    type: 'line',
+                    countries: selectedTransportation
+                  }}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 The chart below shows the average price (in GBP) for transportation in London from 2011 to 2024. Data is based on market averages.
               </p>
@@ -1690,8 +1930,26 @@ export default function InflationPage() {
           </p>
 
           {/* Essential Goods Prices Chart (Paris) */}
-          <div className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}>
-            <h2 className="text-lg font-semibold mb-2">Essential Goods Prices Over the Years (Paris)</h2>
+          <div 
+            ref={parisGoodsChartRef}
+            data-chart-container
+            data-chart-title="Essential Goods Prices Over the Years (Paris)"
+            className={`rounded-lg shadow p-4 mt-8 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h2 className="text-lg font-semibold">Essential Goods Prices Over the Years (Paris)</h2>
+              <ChartDownloadButton
+                chartElement={parisGoodsChartRef.current}
+                chartData={{
+                  title: "Essential Goods Prices Over the Years (Paris)",
+                  data: parisEssentialGoodsData,
+                  type: 'line',
+                  countries: selectedParisGoods
+                }}
+                variant="outline"
+                size="sm"
+              />
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               The chart below shows the average price of key goods (in EUR) from 2011 to 2024. Data is based on market averages.
             </p>

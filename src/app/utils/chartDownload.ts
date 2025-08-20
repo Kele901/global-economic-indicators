@@ -23,29 +23,144 @@ export const downloadChartAsImage = async (
   options: ChartDownloadOptions
 ): Promise<void> => {
   try {
-    const canvas = await html2canvas(chartElement, {
-      backgroundColor: options.backgroundColor || '#ffffff',
-      scale: options.quality || 2,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-    });
-
-    const link = document.createElement('a');
-    const filename = options.filename || `chart-${Date.now()}`;
+    console.log('Starting image download for element:', chartElement);
+    console.log('Element dimensions:', chartElement.offsetWidth, 'x', chartElement.offsetHeight);
     
-    if (options.format === 'png') {
-      link.download = `${filename}.png`;
-      link.href = canvas.toDataURL('image/png');
-    } else {
-      link.download = `${filename}.jpg`;
-      link.href = canvas.toDataURL('image/jpeg', options.quality || 0.8);
+    // Verify the element has content
+    if (chartElement.offsetWidth === 0 || chartElement.offsetHeight === 0) {
+      throw new Error('Chart element has no dimensions. Please ensure the chart is fully loaded.');
     }
     
-    link.click();
+    // Temporarily hide any dropdowns or overlays that might interfere with the chart
+    const originalOverflow = document.body.style.overflow;
+    const originalZIndex = document.body.style.zIndex;
+    
+    // Hide any open dropdowns or modals
+    const dropdowns = document.querySelectorAll('[data-chart-download-dropdown]');
+    const originalDropdownStyles: { element: Element; display: string }[] = [];
+    
+    dropdowns.forEach(dropdown => {
+      const element = dropdown as HTMLElement;
+      originalDropdownStyles.push({
+        element,
+        display: element.style.display
+      });
+      element.style.display = 'none';
+    });
+    
+    // Ensure the chart element is fully visible
+    const originalChartZIndex = chartElement.style.zIndex;
+    chartElement.style.zIndex = '9999';
+    
+    try {
+      // Small delay to ensure any animations or transitions are complete
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Try to find the actual chart canvas/svg element within the container
+      let chartContentElement = chartElement;
+      const chartCanvas = chartElement.querySelector('canvas');
+      const chartSvg = chartElement.querySelector('svg');
+      
+      console.log('Found chart elements - Canvas:', !!chartCanvas, 'SVG:', !!chartSvg);
+      
+      // If we find a canvas or SVG, use that for better quality
+      if (chartCanvas) {
+        chartContentElement = chartCanvas as HTMLElement;
+        console.log('Using canvas element for capture');
+      } else if (chartSvg) {
+        chartContentElement = chartSvg as HTMLElement;
+        console.log('Using SVG element for capture');
+      } else {
+        console.log('Using container element for capture');
+      }
+      
+      console.log('Capturing chart with element:', chartContentElement);
+      console.log('Content element dimensions:', chartContentElement.offsetWidth, 'x', chartContentElement.offsetHeight);
+      
+      // Try to capture the chart with html2canvas
+      let canvas;
+      try {
+        console.log('Attempting primary html2canvas capture...');
+        canvas = await html2canvas(chartContentElement, {
+          backgroundColor: options.backgroundColor || '#ffffff',
+          scale: 1, // Start with scale 1 for testing
+          useCORS: false,
+          allowTaint: false,
+          logging: true, // Enable logging for debugging
+          // Focus on the chart content only
+          width: chartContentElement.offsetWidth || chartElement.offsetWidth,
+          height: chartContentElement.offsetHeight || chartElement.offsetHeight
+        });
+        console.log('Primary capture successful');
+      } catch (html2canvasError) {
+        console.error('Primary html2canvas failed, trying with minimal options:', html2canvasError);
+        
+        try {
+          // Fallback: try with absolute minimal options
+          console.log('Attempting fallback capture...');
+          canvas = await html2canvas(chartContentElement, {
+            backgroundColor: options.backgroundColor || '#ffffff',
+            scale: 1,
+            useCORS: false,
+            allowTaint: false,
+            logging: true,
+            removeContainer: false,
+            foreignObjectRendering: false
+          });
+          console.log('Fallback capture successful');
+        } catch (fallbackError) {
+          console.error('Fallback html2canvas also failed:', fallbackError);
+          
+          // Last resort: try to capture the entire chart container
+          console.log('Trying to capture entire chart container as last resort...');
+          canvas = await html2canvas(chartElement, {
+            backgroundColor: options.backgroundColor || '#ffffff',
+            scale: 1,
+            useCORS: false,
+            allowTaint: false,
+            logging: true,
+            removeContainer: false,
+            foreignObjectRendering: false
+          });
+          console.log('Last resort capture successful');
+        }
+      }
+
+      console.log('Canvas created successfully:', canvas.width, 'x', canvas.height);
+      
+      const link = document.createElement('a');
+      const filename = options.filename || `chart-${Date.now()}`;
+      
+      if (options.format === 'png') {
+        link.download = `${filename}.png`;
+        link.href = canvas.toDataURL('image/png');
+      } else {
+        link.download = `${filename}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', options.quality || 0.8);
+      }
+      
+      link.click();
+      console.log('Download link clicked for:', filename);
+    } finally {
+      // Restore original styles
+      chartElement.style.zIndex = originalChartZIndex;
+      
+      // Restore dropdown visibility
+      originalDropdownStyles.forEach(({ element, display }) => {
+        (element as HTMLElement).style.display = display;
+      });
+      
+      // Restore body styles
+      document.body.style.overflow = originalOverflow;
+      document.body.style.zIndex = originalZIndex;
+    }
   } catch (error) {
     console.error('Error downloading chart as image:', error);
-    throw new Error('Failed to download chart as image');
+    if (error instanceof Error) {
+      throw new Error(`Failed to download chart as image: ${error.message}`);
+    } else {
+      throw new Error('Failed to download chart as image: Unknown error');
+    }
   }
 };
 
@@ -57,27 +172,142 @@ export const downloadChartAsPDF = async (
   options: ChartDownloadOptions
 ): Promise<void> => {
   try {
-    const canvas = await html2canvas(chartElement, {
-      backgroundColor: options.backgroundColor || '#ffffff',
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
+    console.log('Starting PDF download for element:', chartElement);
+    console.log('Element dimensions:', chartElement.offsetWidth, 'x', chartElement.offsetHeight);
+    
+    // Verify the element has content
+    if (chartElement.offsetWidth === 0 || chartElement.offsetHeight === 0) {
+      throw new Error('Chart element has no dimensions. Please ensure the chart is fully loaded.');
+    }
+    
+    // Temporarily hide any dropdowns or overlays that might interfere with the chart
+    const originalOverflow = document.body.style.overflow;
+    const originalZIndex = document.body.style.zIndex;
+    
+    // Hide any open dropdowns or modals
+    const dropdowns = document.querySelectorAll('[data-chart-download-dropdown]');
+    const originalDropdownStyles: { element: Element; display: string }[] = [];
+    
+    dropdowns.forEach(dropdown => {
+      const element = dropdown as HTMLElement;
+      originalDropdownStyles.push({
+        element,
+        display: element.style.display
+      });
+      element.style.display = 'none';
     });
+    
+    // Ensure the chart element is fully visible
+    const originalChartZIndex = chartElement.style.zIndex;
+    chartElement.style.zIndex = '9999';
+    
+    try {
+      // Small delay to ensure any animations or transitions are complete
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Try to find the actual chart canvas/svg element within the container
+      let chartContentElement = chartElement;
+      const chartCanvas = chartElement.querySelector('canvas');
+      const chartSvg = chartElement.querySelector('svg');
+      
+      console.log('Found chart elements for PDF - Canvas:', !!chartCanvas, 'SVG:', !!chartSvg);
+      
+      // If we find a canvas or SVG, use that for better quality
+      if (chartCanvas) {
+        chartContentElement = chartCanvas as HTMLElement;
+        console.log('Using canvas element for PDF capture');
+      } else if (chartSvg) {
+        chartContentElement = chartSvg as HTMLElement;
+        console.log('Using SVG element for PDF capture');
+      } else {
+        console.log('Using container element for PDF capture');
+      }
+      
+      console.log('Capturing chart for PDF with element:', chartContentElement);
+      console.log('Content element dimensions:', chartContentElement.offsetWidth, 'x', chartContentElement.offsetHeight);
+      
+      // Try to capture the chart with html2canvas for PDF
+      let canvas;
+      try {
+        console.log('Attempting primary html2canvas capture for PDF...');
+        canvas = await html2canvas(chartContentElement, {
+          backgroundColor: options.backgroundColor || '#ffffff',
+          scale: 1, // Start with scale 1 for testing
+          useCORS: false,
+          allowTaint: false,
+          logging: true, // Enable logging for debugging
+          // Focus on the chart content only
+          width: chartContentElement.offsetWidth || chartElement.offsetWidth,
+          height: chartContentElement.offsetHeight || chartElement.offsetHeight
+        });
+        console.log('Primary PDF capture successful');
+      } catch (html2canvasError) {
+        console.error('Primary html2canvas failed for PDF, trying with minimal options:', html2canvasError);
+        
+        try {
+          // Fallback: try with absolute minimal options
+          console.log('Attempting fallback PDF capture...');
+          canvas = await html2canvas(chartContentElement, {
+            backgroundColor: options.backgroundColor || '#ffffff',
+            scale: 1,
+            useCORS: false,
+            allowTaint: false,
+            logging: true,
+            removeContainer: false,
+            foreignObjectRendering: false
+          });
+          console.log('Fallback PDF capture successful');
+        } catch (fallbackError) {
+          console.error('Fallback html2canvas also failed for PDF:', fallbackError);
+          
+          // Last resort: try to capture the entire chart container
+          console.log('Trying to capture entire chart container for PDF as last resort...');
+          canvas = await html2canvas(chartElement, {
+            backgroundColor: options.backgroundColor || '#ffffff',
+            scale: 1,
+            useCORS: false,
+            allowTaint: false,
+            logging: true,
+            removeContainer: false,
+            foreignObjectRendering: false
+          });
+          console.log('Last resort PDF capture successful');
+        }
+      }
 
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('landscape', 'mm', 'a4');
-    
-    const imgWidth = 297; // A4 width in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    
-    const filename = options.filename || `chart-${Date.now()}`;
-    pdf.save(`${filename}.pdf`);
+      console.log('Canvas created successfully for PDF:', canvas.width, 'x', canvas.height);
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      
+      const imgWidth = 297; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      
+      const filename = options.filename || `chart-${Date.now()}`;
+      pdf.save(`${filename}.pdf`);
+      console.log('PDF saved successfully:', filename);
+    } finally {
+      // Restore original styles
+      chartElement.style.zIndex = originalChartZIndex;
+      
+      // Restore dropdown visibility
+      originalDropdownStyles.forEach(({ element, display }) => {
+        (element as HTMLElement).style.display = display;
+      });
+      
+      // Restore body styles
+      document.body.style.overflow = originalOverflow;
+      document.body.style.zIndex = originalZIndex;
+    }
   } catch (error) {
     console.error('Error downloading chart as PDF:', error);
-    throw new Error('Failed to download chart as PDF');
+    if (error instanceof Error) {
+      throw new Error(`Failed to download chart as PDF: ${error.message}`);
+    } else {
+      throw new Error('Failed to download chart as PDF: Unknown error');
+    }
   }
 };
 
@@ -146,6 +376,25 @@ export const downloadChart = async (
   options: ChartDownloadOptions
 ): Promise<void> => {
   try {
+    console.log('downloadChart called with:', {
+      element: chartElement,
+      data: chartData,
+      options
+    });
+    
+    // Validate inputs
+    if (!chartElement) {
+      throw new Error('Chart element is required');
+    }
+    
+    if (!chartData) {
+      throw new Error('Chart data is required');
+    }
+    
+    if (!options.format) {
+      throw new Error('Download format is required');
+    }
+    
     switch (options.format) {
       case 'png':
       case 'jpg':
