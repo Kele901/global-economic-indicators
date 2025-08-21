@@ -193,4 +193,32 @@ a:focus {
     transform: translateY(-10px);
     transition: opacity 200ms, transform 200ms;
   }
+}
+
+/* Info Panel Z-Index Override */
+.info-panel-container {
+  z-index: 99999 !important;
+  position: relative !important;
+}
+
+.info-panel-content {
+  z-index: 99999 !important;
+  position: absolute !important;
+}
+
+/* Force info panels to be on top of everything */
+[style*="z-index: 99999"] {
+  z-index: 99999 !important;
+  position: relative !important;
+}
+
+/* Ensure SVG elements don't interfere with info panels */
+svg {
+  z-index: auto !important;
+}
+
+/* Force stacking context for info panel containers */
+.info-panel-wrapper {
+  position: relative !important;
+  z-index: 99999 !important;
 } 

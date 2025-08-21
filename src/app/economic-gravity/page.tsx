@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import InfoPanel from '../components/InfoPanel';
+import { economicMetrics } from '../data/economicMetrics';
 
 // Historical economic centers of gravity (approximate coordinates and data)
 const historicalData = [
@@ -269,7 +271,7 @@ const EconomicGravityPage = () => {
       </div>
 
       {/* World Map Visualization */}
-      <div className={`mb-12 p-6 rounded-2xl ${
+      <div className={`mb-12 p-6 rounded-2xl relative ${
         isDarkMode 
           ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700' 
           : 'bg-gradient-to-br from-white via-gray-50 to-white border border-gray-100'
@@ -278,7 +280,15 @@ const EconomicGravityPage = () => {
           <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
           Global Economic Center of Gravity
         </h2>
+        
         <div className="relative w-full h-[600px] mb-6">
+          {/* Info Panel for Economic Center of Gravity */}
+          <InfoPanel
+            metric={economicMetrics.economicCenterOfGravity}
+            isDarkMode={isDarkMode}
+            position="top-right"
+            size="large"
+          />
           {/* World Map with points overlay */}
           <div className="absolute inset-0 rounded-xl overflow-hidden">
             <img 
@@ -441,17 +451,25 @@ const EconomicGravityPage = () => {
       </div>
 
       {/* Timeline Visualization */}
-      <div className={`p-8 rounded-2xl mb-12 ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow} backdrop-blur-sm`}>
+      <div className={`p-8 rounded-2xl mb-12 relative ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow} backdrop-blur-sm`}>
         <h2 className={`text-2xl font-bold mb-6 flex items-center ${themeColors.text}`}>
           <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
           Historical Timeline
         </h2>
+        
         <p className={`text-sm mb-6 ${themeColors.textSecondary} max-w-2xl`}>
           Track the shifting balance of global economic power across continents and time periods. 
           The chart shows the relative share of global GDP by region, revealing how economic 
           dominance has moved from ancient civilizations to modern economic powerhouses.
         </p>
         <div className="h-[500px] relative">
+          {/* Info Panel for GDP Share by Region */}
+          <InfoPanel
+            metric={economicMetrics.gdpShareByRegion}
+            isDarkMode={isDarkMode}
+            position="top-right"
+            size="medium"
+          />
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={gdpShareData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
               {/* Define gradients for enhanced visual appeal */}

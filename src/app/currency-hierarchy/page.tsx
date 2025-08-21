@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import AdSense from '../components/AdSense';
 import { calculateCurrencyPairs } from '../services/forex';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import InfoPanel from '../components/InfoPanel';
+import { economicMetrics } from '../data/economicMetrics';
 
 interface CurrencyInfo {
   code: string;
@@ -546,6 +548,14 @@ const CurrencyHierarchyPage = () => {
           ? 'bg-gray-900 border border-gray-700' 
           : 'bg-white border border-gray-200'
       }`}>
+        
+        {/* Info Panel for Currency Hierarchy */}
+        <InfoPanel
+          metric={economicMetrics.currencyStrength}
+          isDarkMode={isDarkMode}
+          position="top-right"
+          size="medium"
+        />
         {/* Tooltip with Exchange Rate */}
         {hoveredCurrency && currencyData[hoveredCurrency] && (
           <div

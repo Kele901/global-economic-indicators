@@ -8,6 +8,8 @@ import ErrorMessage from '../components/ErrorMessage';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
 import BulkChartDownload from '../components/BulkChartDownload';
 import ChartDownloadButton from '../components/ChartDownloadButton';
+import InfoPanel from '../components/InfoPanel';
+import { economicMetrics } from '../data/economicMetrics';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -1083,7 +1085,7 @@ export default function InflationPage() {
           ref={inflationChartRef}
           data-chart-container
           data-chart-title="Inflation Rate Over Time"
-          className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+          className={`rounded-lg shadow p-4 relative ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
         >
           <div className="flex justify-between items-start mb-2">
             <h2 className="text-lg font-semibold">Inflation Rate Over Time</h2>
@@ -1100,6 +1102,15 @@ export default function InflationPage() {
               size="sm"
             />
           </div>
+          
+          {/* Info Panel for Inflation Rate */}
+          <InfoPanel
+            metric={economicMetrics.inflationRate}
+            isDarkMode={isDarkMode}
+            position="top-right"
+            size="medium"
+          />
+          
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
           <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">

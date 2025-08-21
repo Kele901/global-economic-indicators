@@ -4,6 +4,8 @@ import type { CountryData } from '../services/worldbank';
 import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
+import InfoPanel from './InfoPanel';
+import { economicMetrics } from '../data/economicMetrics';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -85,7 +87,7 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
         ref={chartRef}
         data-chart-container
         data-chart-title={title}
-        className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
+        className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
       >
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold">{title}</h3>
@@ -101,6 +103,14 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
             size="sm"
           />
         </div>
+        
+        {/* Info Panel */}
+        <InfoPanel
+          metric={economicMetrics[metricKey as keyof typeof economicMetrics] || economicMetrics.interestRate}
+          isDarkMode={isDarkMode}
+          position="top-right"
+          size="small"
+        />
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -134,7 +144,7 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
         ref={chartRef}
         data-chart-container
         data-chart-title={title}
-        className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
+        className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
       >
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold">{title}</h3>
@@ -150,6 +160,14 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
             size="sm"
           />
         </div>
+        
+        {/* Info Panel */}
+        <InfoPanel
+          metric={economicMetrics[metricKey as keyof typeof economicMetrics] || economicMetrics.interestRate}
+          isDarkMode={isDarkMode}
+          position="top-right"
+          size="small"
+        />
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -180,7 +198,7 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
       ref={chartRef}
       data-chart-container
       data-chart-title={title}
-      className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
+      className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
     >
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-semibold">{title}</h3>
@@ -196,6 +214,14 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
           size="sm"
         />
       </div>
+      
+      {/* Info Panel */}
+      <InfoPanel
+        metric={economicMetrics[metricKey as keyof typeof economicMetrics] || economicMetrics.interestRate}
+        isDarkMode={isDarkMode}
+        position="top-right"
+        size="small"
+      />
       <div className="h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
