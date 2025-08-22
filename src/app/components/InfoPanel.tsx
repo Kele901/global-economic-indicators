@@ -16,7 +16,7 @@ export interface EconomicMetricInfo {
 interface InfoPanelProps {
   metric: EconomicMetricInfo;
   isDarkMode: boolean;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'fixed-top-right';
   size?: 'small' | 'medium' | 'large';
 }
 
@@ -32,7 +32,8 @@ const InfoPanel: React.FC<InfoPanelProps> = ({
     'top-right': 'top-2 right-2',
     'top-left': 'top-2 left-2',
     'bottom-right': 'bottom-2 right-2',
-    'bottom-left': 'bottom-2 left-2'
+    'bottom-left': 'bottom-2 left-2',
+    'fixed-top-right': 'top-2 right-2'
   };
 
   const sizeClasses = {
@@ -61,7 +62,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({
 
   return (
     <div 
-      className={`absolute ${positionClasses[position]} info-panel-wrapper`}
+      className={`${position === 'fixed-top-right' ? 'fixed' : 'absolute'} ${positionClasses[position]} info-panel-wrapper`}
       style={{ zIndex: 99999 }}
     >
       {/* Info Button */}

@@ -471,7 +471,7 @@ const EconomicSimilarityChart = ({
         <InfoPanel
           metric={economicMetrics.economicSimilarityAnalysis}
           isDarkMode={isDarkMode}
-          position="top-right"
+          position="fixed-top-right"
           size="small"
         />
       </div>
