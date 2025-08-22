@@ -398,6 +398,24 @@ export const economicMetrics: { [key: string]: EconomicMetricInfo } = {
     frequency: 'Real-time',
     units: 'Currency pairs (e.g., USD/EUR)',
     relatedMetrics: ['Interest Rate', 'Trade Balance', 'Inflation Rate', 'Currency Strength']
+  },
+
+  economicSimilarityAnalysis: {
+    title: 'Economic Similarity Analysis',
+    description: 'A multi-dimensional analysis that compares countries based on multiple economic indicators to determine their economic similarity and clustering patterns.',
+    formula: 'Similarity Score = Weighted average of normalized differences across GDP, inflation, FDI, trade balance, government spending, labor productivity, and Gini coefficient',
+    interpretation: 'Lower similarity scores indicate more similar economies. Countries closer together on the scatter plot have more similar economic characteristics and may be suitable for similar policy approaches.',
+    implications: [
+      'Helps identify economic clusters and regional patterns',
+      'Useful for policy coordination between similar economies',
+      'Aids in investment diversification strategies',
+      'Supports trade agreement negotiations',
+      'Helps predict economic contagion risks'
+    ],
+    dataSource: 'World Bank, IMF, National Statistical Offices',
+    frequency: 'Quarterly',
+    units: 'Similarity Index (0-100)',
+    relatedMetrics: ['GDP Growth', 'Inflation Rate', 'FDI', 'Trade Balance', 'Government Spending', 'Labor Productivity', 'Gini Coefficient']
   }
 };
 

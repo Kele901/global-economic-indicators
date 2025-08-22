@@ -465,8 +465,16 @@ const EconomicSimilarityChart = ({
   }, [data, countries]);
 
   return (
-    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-lg font-semibold mb-4">Enhanced Economic Similarity Analysis</h3>
+    <div className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-lg font-semibold">Enhanced Economic Similarity Analysis</h3>
+        <InfoPanel
+          metric={economicMetrics.economicSimilarityAnalysis}
+          isDarkMode={isDarkMode}
+          position="top-right"
+          size="small"
+        />
+      </div>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
