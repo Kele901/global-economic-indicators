@@ -298,7 +298,7 @@ const CountryEconomicSummary = ({
   const calculateMetrics = (dataset: CountryData[], countryKey: string) => {
     const countryData = dataset
       .filter(d => d[countryKey] !== 0)
-      .map(d => ({ year: d.year, value: d[countryKey] }));
+      .map(d => ({ year: d.year, value: Number(d[countryKey]) || 0 }));
     
     if (countryData.length === 0) return { recent: 0, avg: 0, trend: 'stable' };
     

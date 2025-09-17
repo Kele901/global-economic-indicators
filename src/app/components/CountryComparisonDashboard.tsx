@@ -268,14 +268,14 @@ const StatComparison = ({
   format = (v: number) => `${v.toFixed(1)}%`
 }: StatComparisonProps) => {
   const latest = metric[metric.length - 1];
-  const sorted = [...countries].sort((a, b) => (latest[b] || 0) - (latest[a] || 0));
+  const sorted = [...countries].sort((a, b) => (Number(latest[b]) || 0) - (Number(latest[a]) || 0));
 
   return (
     <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
       <div className="space-y-4">
         {sorted.map(country => {
-          const value = latest[country] || 0;
+          const value = Number(latest[country]) || 0;
           const FlagComponent = countryFlags[country];
           
           return (
@@ -354,10 +354,10 @@ const CorrelationMatrix = ({
         const country1 = countries[i];
         const country2 = countries[j];
         
-        const gdpData1 = data.gdpGrowth.map(d => d[country1] || 0).filter(v => v !== 0);
-        const gdpData2 = data.gdpGrowth.map(d => d[country2] || 0).filter(v => v !== 0);
-        const inflationData1 = data.inflationRates.map(d => d[country1] || 0).filter(v => v !== 0);
-        const inflationData2 = data.inflationRates.map(d => d[country2] || 0).filter(v => v !== 0);
+        const gdpData1 = data.gdpGrowth.map(d => Number(d[country1]) || 0).filter(v => v !== 0);
+        const gdpData2 = data.gdpGrowth.map(d => Number(d[country2]) || 0).filter(v => v !== 0);
+        const inflationData1 = data.inflationRates.map(d => Number(d[country1]) || 0).filter(v => v !== 0);
+        const inflationData2 = data.inflationRates.map(d => Number(d[country2]) || 0).filter(v => v !== 0);
         
         matrix.push({
           country1,
@@ -425,27 +425,27 @@ const EconomicSimilarityChart = ({
       countries.forEach(country2 => {
         if (country1 !== country2) {
           const latest = {
-            gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country1],
-            inflation: data.inflationRates[data.inflationRates.length - 1][country1],
-            employment: data.employmentRates[data.employmentRates.length - 1][country1],
-            debt: data.governmentDebt[data.governmentDebt.length - 1][country1],
-            fdi: data.fdi[data.fdi.length - 1][country1],
-            tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country1],
-            governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country1],
-            laborProductivity: data.laborProductivity[data.laborProductivity.length - 1][country1],
-            gini: data.giniCoefficient[data.giniCoefficient.length - 1][country1]
+            gdp: Number(data.gdpGrowth[data.gdpGrowth.length - 1][country1]) || 0,
+            inflation: Number(data.inflationRates[data.inflationRates.length - 1][country1]) || 0,
+            employment: Number(data.employmentRates[data.employmentRates.length - 1][country1]) || 0,
+            debt: Number(data.governmentDebt[data.governmentDebt.length - 1][country1]) || 0,
+            fdi: Number(data.fdi[data.fdi.length - 1][country1]) || 0,
+            tradeBalance: Number(data.tradeBalance[data.tradeBalance.length - 1][country1]) || 0,
+            governmentSpending: Number(data.governmentSpending[data.governmentSpending.length - 1][country1]) || 0,
+            laborProductivity: Number(data.laborProductivity[data.laborProductivity.length - 1][country1]) || 0,
+            gini: Number(data.giniCoefficient[data.giniCoefficient.length - 1][country1]) || 0
           };
           
           const compareLatest = {
-            gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country2],
-            inflation: data.inflationRates[data.inflationRates.length - 1][country2],
-            employment: data.employmentRates[data.employmentRates.length - 1][country2],
-            debt: data.governmentDebt[data.governmentDebt.length - 1][country2],
-            fdi: data.fdi[data.fdi.length - 1][country2],
-            tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country2],
-            governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country2],
-            laborProductivity: data.laborProductivity[data.laborProductivity.length - 1][country2],
-            gini: data.giniCoefficient[data.giniCoefficient.length - 1][country2]
+            gdp: Number(data.gdpGrowth[data.gdpGrowth.length - 1][country2]) || 0,
+            inflation: Number(data.inflationRates[data.inflationRates.length - 1][country2]) || 0,
+            employment: Number(data.employmentRates[data.employmentRates.length - 1][country2]) || 0,
+            debt: Number(data.governmentDebt[data.governmentDebt.length - 1][country2]) || 0,
+            fdi: Number(data.fdi[data.fdi.length - 1][country2]) || 0,
+            tradeBalance: Number(data.tradeBalance[data.tradeBalance.length - 1][country2]) || 0,
+            governmentSpending: Number(data.governmentSpending[data.governmentSpending.length - 1][country2]) || 0,
+            laborProductivity: Number(data.laborProductivity[data.laborProductivity.length - 1][country2]) || 0,
+            gini: Number(data.giniCoefficient[data.giniCoefficient.length - 1][country2]) || 0
           };
           
           similarities.push({
@@ -538,14 +538,14 @@ const EconomicRadarChart = ({
     
     return countries.map(country => {
       const latest = {
-        gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country] || 0,
-        inflation: data.inflationRates[data.inflationRates.length - 1][country] || 0,
-        employment: data.employmentRates[data.employmentRates.length - 1][country] || 0,
-        debt: data.governmentDebt[data.governmentDebt.length - 1][country] || 0,
-        fdi: data.fdi[data.fdi.length - 1][country] || 0,
-        tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country] || 0,
-        governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country] || 0,
-        gini: data.giniCoefficient[data.giniCoefficient.length - 1][country] || 0
+        gdp: Number(data.gdpGrowth[data.gdpGrowth.length - 1][country]) || 0,
+        inflation: Number(data.inflationRates[data.inflationRates.length - 1][country]) || 0,
+        employment: Number(data.employmentRates[data.employmentRates.length - 1][country]) || 0,
+        debt: Number(data.governmentDebt[data.governmentDebt.length - 1][country]) || 0,
+        fdi: Number(data.fdi[data.fdi.length - 1][country]) || 0,
+        tradeBalance: Number(data.tradeBalance[data.tradeBalance.length - 1][country]) || 0,
+        governmentSpending: Number(data.governmentSpending[data.governmentSpending.length - 1][country]) || 0,
+        gini: Number(data.giniCoefficient[data.giniCoefficient.length - 1][country]) || 0
       };
       
       // Normalize values to 0-100 scale for radar chart
@@ -920,19 +920,19 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             <div className="space-y-4">
               {selectedCountries.map(country => {
                 const latestData = {
-                  interest: data.interestRates[data.interestRates.length - 1][country],
-                  employment: data.employmentRates[data.employmentRates.length - 1][country],
-                  unemployment: data.unemploymentRates[data.unemploymentRates.length - 1][country],
-                  debt: data.governmentDebt[data.governmentDebt.length - 1][country],
-                  inflation: data.inflationRates[data.inflationRates.length - 1][country],
-                  gdp: data.gdpGrowth[data.gdpGrowth.length - 1][country],
-                  fdi: data.fdi[data.fdi.length - 1][country],
-                  tradeBalance: data.tradeBalance[data.tradeBalance.length - 1][country],
-                  governmentSpending: data.governmentSpending[data.governmentSpending.length - 1][country],
-                  laborProductivity: data.laborProductivity[data.laborProductivity.length - 1][country],
-                  gini: data.giniCoefficient[data.giniCoefficient.length - 1][country],
-                  rdSpending: data.rdSpending[data.rdSpending.length - 1][country],
-                  energyConsumption: data.energyConsumption[data.energyConsumption.length - 1][country]
+                  interest: Number(data.interestRates[data.interestRates.length - 1][country]) || 0,
+                  employment: Number(data.employmentRates[data.employmentRates.length - 1][country]) || 0,
+                  unemployment: Number(data.unemploymentRates[data.unemploymentRates.length - 1][country]) || 0,
+                  debt: Number(data.governmentDebt[data.governmentDebt.length - 1][country]) || 0,
+                  inflation: Number(data.inflationRates[data.inflationRates.length - 1][country]) || 0,
+                  gdp: Number(data.gdpGrowth[data.gdpGrowth.length - 1][country]) || 0,
+                  fdi: Number(data.fdi[data.fdi.length - 1][country]) || 0,
+                  tradeBalance: Number(data.tradeBalance[data.tradeBalance.length - 1][country]) || 0,
+                  governmentSpending: Number(data.governmentSpending[data.governmentSpending.length - 1][country]) || 0,
+                  laborProductivity: Number(data.laborProductivity[data.laborProductivity.length - 1][country]) || 0,
+                  gini: Number(data.giniCoefficient[data.giniCoefficient.length - 1][country]) || 0,
+                  rdSpending: Number(data.rdSpending[data.rdSpending.length - 1][country]) || 0,
+                  energyConsumption: Number(data.energyConsumption[data.energyConsumption.length - 1][country]) || 0
                 };
 
                 return (
