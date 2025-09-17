@@ -1525,7 +1525,7 @@ const TradingPlacesPage: React.FC = () => {
                         Top Export Categories
                       </h3>
                       <DataSourceIndicator
-                        isRealData={enableRealData && selectedCountry.hasRealCategories}
+                        isRealData={enableRealData && !!(selectedCountry as any).hasRealCategories}
                         metric="categories"
                         source={enableRealData ? "UN Comtrade" : undefined}
                         lastUpdated={lastUpdated}
@@ -1533,7 +1533,7 @@ const TradingPlacesPage: React.FC = () => {
                         size="sm"
                       />
                     </div>
-                    {enableRealData && !selectedCountry.hasRealCategories && (
+                    {enableRealData && !(selectedCountry as any).hasRealCategories && (
                       <div className={`p-3 rounded-lg mb-4 ${isDarkMode ? 'bg-yellow-900/20 border border-yellow-800' : 'bg-yellow-50 border border-yellow-200'}`}>
                         <p className={`text-sm ${isDarkMode ? 'text-yellow-300' : 'text-yellow-700'}`}>
                           ⚠️ Real category data unavailable for {selectedCountry.name}. Showing educational mock data based on real trade patterns.
@@ -1553,7 +1553,7 @@ const TradingPlacesPage: React.FC = () => {
                             <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>
                               #{index + 1}
                             </span>
-                            {enableRealData && selectedCountry.hasRealCategories && (
+                            {enableRealData && !!(selectedCountry as any).hasRealCategories && (
                               <span className={`px-2 py-1 rounded text-xs font-medium ${
                                 isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
                               }`}>
@@ -1575,7 +1575,7 @@ const TradingPlacesPage: React.FC = () => {
                       Export Analysis
                     </h3>
                     <DataSourceIndicator
-                      isRealData={enableRealData && selectedCountry.hasRealCategories}
+                      isRealData={enableRealData && !!(selectedCountry as any).hasRealCategories}
                       metric="export-categories"
                       source={enableRealData ? "UN Comtrade" : undefined}
                       lastUpdated={lastUpdated}
@@ -1615,7 +1615,7 @@ const TradingPlacesPage: React.FC = () => {
                       Import Analysis
                     </h3>
                     <DataSourceIndicator
-                      isRealData={enableRealData && selectedCountry.hasRealCategories}
+                      isRealData={enableRealData && !!(selectedCountry as any).hasRealCategories}
                       metric="import-categories"
                       source={enableRealData ? "UN Comtrade" : undefined}
                       lastUpdated={lastUpdated}
