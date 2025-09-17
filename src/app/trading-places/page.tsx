@@ -1873,11 +1873,6 @@ const TradingPlacesPage: React.FC = () => {
                               dataKey="value"
                               strokeWidth={2}
                               stroke={isDarkMode ? '#374151' : '#ffffff'}
-                              labelStyle={{
-                                fontSize: '12px',
-                                fontWeight: '600',
-                                fill: isDarkMode ? '#ffffff' : '#000000'
-                              }}
                             >
                               {chartData.exportData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -1896,10 +1891,6 @@ const TradingPlacesPage: React.FC = () => {
                                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                                 fontSize: '14px',
                                 fontWeight: '500'
-                              }}
-                              labelStyle={{
-                                color: isDarkMode ? '#ffffff' : '#000000',
-                                fontWeight: '600'
                               }}
                             />
                           </RechartsPieChart>
@@ -1957,11 +1948,6 @@ const TradingPlacesPage: React.FC = () => {
                               dataKey="value"
                               strokeWidth={2}
                               stroke={isDarkMode ? '#374151' : '#ffffff'}
-                              labelStyle={{
-                                fontSize: '12px',
-                                fontWeight: '600',
-                                fill: isDarkMode ? '#ffffff' : '#000000'
-                              }}
                             >
                               {chartData.importData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -1980,10 +1966,6 @@ const TradingPlacesPage: React.FC = () => {
                                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                                 fontSize: '14px',
                                 fontWeight: '500'
-                              }}
-                              labelStyle={{
-                                color: isDarkMode ? '#ffffff' : '#000000',
-                                fontWeight: '600'
                               }}
                             />
                           </RechartsPieChart>
@@ -2041,11 +2023,6 @@ const TradingPlacesPage: React.FC = () => {
                               dataKey="value"
                               strokeWidth={2}
                               stroke={isDarkMode ? '#374151' : '#ffffff'}
-                              labelStyle={{
-                                fontSize: '11px',
-                                fontWeight: '600',
-                                fill: isDarkMode ? '#ffffff' : '#000000'
-                              }}
                             >
                               {chartData.partnerData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -2064,10 +2041,6 @@ const TradingPlacesPage: React.FC = () => {
                                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                                 fontSize: '14px',
                                 fontWeight: '500'
-                              }}
-                              labelStyle={{
-                                color: isDarkMode ? '#ffffff' : '#000000',
-                                fontWeight: '600'
                               }}
                             />
                             <Legend 
