@@ -10,10 +10,11 @@ declare global {
 
 const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
   const adRef = useRef<HTMLDivElement>(null);
+  const hasInitialized = useRef(false);
   
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined' && adRef.current) {
+      if (typeof window !== 'undefined' && adRef.current && !hasInitialized.current) {
         // Initialize adsbygoogle array if it doesn't exist
         window.adsbygoogle = window.adsbygoogle || [];
         
@@ -21,6 +22,7 @@ const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
         const adElement = adRef.current.querySelector('.adsbygoogle');
         if (adElement && !adElement.getAttribute('data-adsbygoogle-status')) {
           window.adsbygoogle.push({});
+          hasInitialized.current = true;
         }
       }
     } catch (err) {
@@ -48,6 +50,7 @@ const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
         data-ad-slot="4834833787"
         data-ad-format="auto"
         data-full-width-responsive="true"
+        title="Advertisement"
       />
     </div>
   );

@@ -8,6 +8,7 @@ import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR,
 import AdSense from './AdSense';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
+import DataStatusIndicator from './DataStatusIndicator';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -40,6 +41,52 @@ const countryFlags: { [key: string]: React.ComponentType<any> } = {
   Argentina: AR,
   India: IN,
   Norway: NO
+};
+
+// Custom Tooltip Component to prevent duplicates
+const CustomTooltip = ({ active, payload, label, isDarkMode }: any) => {
+  if (active && payload && payload.length) {
+    // Remove duplicates by creating a Map with country name as key
+    const uniqueData = new Map();
+    payload.forEach((entry: any) => {
+      if (entry.value !== null && entry.value !== undefined) {
+        uniqueData.set(entry.dataKey, {
+          name: entry.dataKey,
+          value: entry.value,
+          color: entry.color
+        });
+      }
+    });
+
+    return (
+      <div 
+        className="custom-tooltip"
+        style={{
+          backgroundColor: isDarkMode ? '#333' : '#fff',
+          border: isDarkMode ? '1px solid #555' : '1px solid #ccc',
+          borderRadius: '4px',
+          padding: '10px',
+          fontSize: '12px',
+          color: isDarkMode ? '#fff' : '#000'
+        }}
+      >
+        <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>{label}</p>
+        {Array.from(uniqueData.values()).map((entry: any) => (
+          <p 
+            key={entry.name}
+            style={{ 
+              margin: '2px 0',
+              color: entry.color
+            }}
+          >
+            {entry.name}: {typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  return null;
 };
 
 const LoadingSpinner = () => (
@@ -388,9 +435,7 @@ const CountryEconomicSummary = ({
               tick={{ fontSize: 10 }}
               width={35}
             />
-            <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
-            />
+            <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Legend 
               wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
             />
@@ -592,23 +637,38 @@ const GlobalInterestRateApp = () => {
   });
   const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
 
-  // Keep the data fetching useEffect
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await fetchGlobalData();
-        setData(result);
-      } catch (err) {
-        setError('Failed to load data. Please try again later.');
-        console.error('Error loading data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Data fetching function
+  const loadData = async (forceRefresh: boolean = false) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await fetchGlobalData(forceRefresh);
+      
+      // Debug: Check what countries we have data for
+      console.log('Available countries in interest rates:', 
+        result.interestRates[0] ? Object.keys(result.interestRates[0]).filter(k => k !== 'year') : []
+      );
+      console.log('Selected countries:', selectedCountries);
+      
+      setData(result);
+    } catch (err) {
+      setError('Failed to load data. Please try again later.');
+      console.error('Error loading data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Initial data load
+  useEffect(() => {
     loadData();
+    
+    // Debug: Check selectedCountries on mount
+    console.log('=== DEBUG INFO ===');
+    console.log('Selected countries from localStorage:', selectedCountries);
+    console.log('Available country names:', Object.keys(countryColors));
+    console.log('USA is selected:', selectedCountries.includes('USA'));
+    console.log('==================');
   }, []);
 
   // Initialize theme on mount
@@ -700,9 +760,7 @@ const GlobalInterestRateApp = () => {
               tick={{ fontSize: 10 }}
               width={35}
             />
-            <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
-            />
+            <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Legend 
               wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
             />
@@ -740,9 +798,7 @@ const GlobalInterestRateApp = () => {
               tick={{ fontSize: 10 }}
               width={35}
             />
-            <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
-            />
+            <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Legend 
               wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
             />
@@ -776,9 +832,7 @@ const GlobalInterestRateApp = () => {
               tick={{ fontSize: 10 }}
               width={35}
             />
-            <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
-            />
+            <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Legend 
               wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
             />
@@ -826,9 +880,7 @@ const GlobalInterestRateApp = () => {
             tick={{ fontSize: 10 }}
             width={35}
           />
-          <Tooltip
-            contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff', fontSize: '12px' } : { fontSize: '12px' }}
-          />
+          <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
           <Legend 
             wrapperStyle={{ fontSize: '10px', marginTop: '8px' }}
           />
@@ -912,16 +964,22 @@ const GlobalInterestRateApp = () => {
             <button
               className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
               onClick={() => setIsDarkMode(!isDarkMode)}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white transform transition-transform ${isDarkMode ? 'translate-x-5 sm:translate-x-6' : ''}`} />
             </button>
             <span className="text-xs sm:text-sm">Dark</span>
           </div>
         </div>
-        <div className="space-y-1 sm:space-y-2">
+        <div className="space-y-2 sm:space-y-3">
           <p className="text-xs sm:text-sm md:text-base text-gray-500 dark:text-gray-300">
             Powered by World Bank Economic Data
           </p>
+          <DataStatusIndicator 
+            isDarkMode={isDarkMode} 
+            onRefresh={() => loadData(true)}
+          />
           <p className="text-xs text-gray-500 dark:text-gray-300">
             Available data ranges: Interest Rates (1960-2024), Employment & Unemployment (1990-2024), Government Debt (1989-2023), 
             Population Growth (1960-2024), FDI & Trade (1960-2024), Government Spending (1960-2023), Labor Productivity (1990-2024), 
@@ -979,6 +1037,7 @@ const GlobalInterestRateApp = () => {
             value={selectedPeriod}
             onChange={(e) => handlePeriodChange(e.target.value)}
             className={`w-full p-2 sm:p-2.5 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            aria-label="Select time period"
           >
             <option value="all">All Time</option>
             <option value="20years">Last 20 Years</option>
@@ -989,6 +1048,7 @@ const GlobalInterestRateApp = () => {
             value={selectedMetric}
             onChange={(e) => setSelectedMetric(e.target.value as typeof selectedMetric)}
             className={`w-full p-2 sm:p-2.5 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+            aria-label="Select economic metric"
           >
             <option value="all">All Metrics</option>
             <option value="interest">Interest Rates</option>
@@ -1061,34 +1121,79 @@ const GlobalInterestRateApp = () => {
             ? 'bg-gray-800 border-gray-600' 
             : 'bg-gray-50 border-gray-200'
         }`}>
-          <h3 className={`text-sm sm:text-base font-medium mb-3 ${
-            isDarkMode ? 'text-gray-100' : 'text-gray-700'
-          }`}>
-            Select Countries to Display:
-          </h3>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className={`text-sm sm:text-base font-medium ${
+              isDarkMode ? 'text-gray-100' : 'text-gray-700'
+            }`}>
+              Select Countries to Display:
+            </h3>
+            <button
+              onClick={() => {
+                const defaultCountries = Object.keys(countryColors).slice(0, 9);
+                setSelectedCountries(defaultCountries);
+                console.log('Reset to default countries:', defaultCountries);
+              }}
+              className={`text-xs px-2 py-1 rounded ${
+                isDarkMode
+                  ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+            >
+              Reset Defaults
+            </button>
+          </div>
+          {!selectedCountries.includes('USA') && (
+            <div className={`mb-3 p-2 rounded-md border ${
+              isDarkMode 
+                ? 'bg-yellow-900/30 border-yellow-600 text-yellow-200' 
+                : 'bg-yellow-50 border-yellow-400 text-yellow-800'
+            }`}>
+              <p className="text-xs flex items-center gap-2">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>USA is not selected. Check the box below to see US data on the graphs.</span>
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
-            {filteredCountries.map(country => (
-              <div key={country} className={`flex items-center space-x-2 p-2 rounded border transition-colors duration-200 ${
-                isDarkMode 
-                  ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                  : 'bg-white border-gray-200 hover:bg-gray-100'
-              }`}>
-                <input
-                  type="checkbox"
-                  id={country}
-                  checked={selectedCountries.includes(country)}
-                  onChange={() => handleCountryToggle(country)}
-                  className={`rounded w-4 h-4 transition-colors duration-200 ${
-                    isDarkMode 
-                      ? 'border-gray-500 text-blue-400 focus:ring-blue-400' 
-                      : 'border-gray-300 text-blue-600 focus:ring-blue-500'
+            {filteredCountries.map(country => {
+              const isUSA = country === 'USA';
+              return (
+                <div 
+                  key={country} 
+                  className={`flex items-center space-x-2 p-2 rounded border transition-colors duration-200 ${
+                    isUSA && !selectedCountries.includes('USA')
+                      ? isDarkMode
+                        ? 'bg-yellow-900/20 border-yellow-600 ring-2 ring-yellow-600'
+                        : 'bg-yellow-50 border-yellow-400 ring-2 ring-yellow-400'
+                      : isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
+                        : 'bg-white border-gray-200 hover:bg-gray-100'
                   }`}
-                />
-                <label htmlFor={country} className={`${isDarkMode ? 'text-gray-100' : 'text-gray-700'} text-xs sm:text-sm truncate cursor-pointer transition-colors duration-200`}>
-                  {country}
-                </label>
-              </div>
-            ))}
+                >
+                  <input
+                    type="checkbox"
+                    id={country}
+                    checked={selectedCountries.includes(country)}
+                    onChange={() => handleCountryToggle(country)}
+                    className={`rounded w-4 h-4 transition-colors duration-200 ${
+                      isDarkMode 
+                        ? 'border-gray-500 text-blue-400 focus:ring-blue-400' 
+                        : 'border-gray-300 text-blue-600 focus:ring-blue-500'
+                    }`}
+                  />
+                  <label 
+                    htmlFor={country} 
+                    className={`${isDarkMode ? 'text-gray-100' : 'text-gray-700'} text-xs sm:text-sm truncate cursor-pointer transition-colors duration-200 ${
+                      isUSA && !selectedCountries.includes('USA') ? 'font-bold' : ''
+                    }`}
+                  >
+                    {country}
+                  </label>
+                </div>
+              );
+            })}
           </div>
         </div>
 
