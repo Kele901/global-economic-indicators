@@ -2,6 +2,8 @@ import axios from "axios";
 import { clientCache, CacheKeys, CURRENT_CACHE_VERSION } from "./clientCache";
 import { fetchUSADataFromFRED, clearFREDCache, type USADataPoint } from "./fred";
 import { fetchAllPolicyRates, clearPolicyRatesCache, type PolicyRateDataPoint } from "./policyRates";
+import { fetchJapanGovernmentDebtOECD, clearOECDCache, type OECDDataPoint } from "./oecd";
+import { fetchJapanGovernmentDebtIMF, fetchIMFGovernmentDebt, fetchIMFInterestRates, clearIMFCache, type IMFDataPoint } from "./imf";
 
 // Type definitions for economic data
 export interface CountryData {
@@ -371,6 +373,61 @@ function mergePolicyRates(
   return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
 }
 
+// Helper function to merge OECD/IMF data into World Bank data
+function mergeAlternativeSource(
+  worldBankData: CountryData[],
+  alternativeData: { [country: string]: (OECDDataPoint | IMFDataPoint)[] },
+  sourceName: string
+): CountryData[] {
+  if (Object.keys(alternativeData).length === 0) {
+    console.warn(`No ${sourceName} data to merge`);
+    return worldBankData;
+  }
+
+  // Create a map of existing years
+  const dataMap = new Map<number, CountryData>();
+  worldBankData.forEach(item => {
+    dataMap.set(item.year, { ...item });
+  });
+
+  let totalAdded = 0;
+  let totalUpdated = 0;
+  
+  // Merge alternative source data for each country
+  Object.entries(alternativeData).forEach(([country, data]) => {
+    if (data.length === 0) return;
+    
+    let addedCount = 0;
+    let updatedCount = 0;
+    
+    data.forEach(({ year, value }) => {
+      if (dataMap.has(year)) {
+        const existing = dataMap.get(year)!;
+        // Fill gaps or update with more recent data
+        if (existing[country] === undefined || existing[country] === null) {
+          existing[country] = value;
+          updatedCount++;
+        }
+      } else {
+        const newEntry: CountryData = { year };
+        newEntry[country] = value;
+        dataMap.set(year, newEntry);
+        addedCount++;
+      }
+    });
+    
+    if (addedCount > 0 || updatedCount > 0) {
+      console.log(`${sourceName === 'OECD' ? '🏛️' : '🌍'} ${sourceName} for ${country}: Added ${addedCount}, updated ${updatedCount} years`);
+      totalAdded += addedCount;
+      totalUpdated += updatedCount;
+    }
+  });
+
+  console.log(`${sourceName === 'OECD' ? '🏛️' : '🌍'} Total ${sourceName} merge: Added ${totalAdded} new years, updated ${totalUpdated} existing years`);
+  
+  return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+}
+
 // Main function to fetch all global economic data with improved error handling
 export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   interestRates: CountryData[];
@@ -623,17 +680,42 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
     const policyRatesData = await fetchAllPolicyRates();
     console.log('🏦 Policy rates fetch complete. Processing merge...');
     
+    // Fetch OECD data for developed countries (fills gaps for Japan and others)
+    console.log('🏛️ ========================================');
+    console.log('🏛️ Fetching OECD Data (Japan Gov Debt)...');
+    console.log('🏛️ ========================================');
+    const oecdJapanDebt = await fetchJapanGovernmentDebtOECD();
+    console.log('🏛️ OECD fetch complete.');
+    
+    // Fetch IMF data for broader coverage
+    console.log('🌍 ========================================');
+    console.log('🌍 Fetching IMF Data (Government Debt, Interest Rates)...');
+    console.log('🌍 ========================================');
+    const [imfGovDebt, imfJapanDebt, imfInterestRates] = await Promise.all([
+      fetchIMFGovernmentDebt(),
+      fetchJapanGovernmentDebtIMF(),
+      fetchIMFInterestRates()
+    ]);
+    console.log('🌍 IMF fetch complete.');
+    
 // Merge FRED data with World Bank data for comprehensive USA coverage
 console.log('📊 Starting data merge for USA...');
 console.log('📊 FRED Interest Rates data points:', usaData.interestRates.length);
 console.log('📊 World Bank Interest Rates data points:', interestRatesResult.status === 'fulfilled' ? interestRatesResult.value.length : 0);
 
-// First merge World Bank data with FRED USA data, then merge with policy rates for all countries
-const interestRatesWithFRED = mergeUSADataFromFRED(
+// Multi-source fallback for interest rates: World Bank → FRED(USA) → Policy Rates(All) → IMF(All)
+let interestRatesWithFRED = mergeUSADataFromFRED(
   interestRatesResult.status === 'fulfilled' ? interestRatesResult.value : [],
   usaData.interestRates
 );
-const interestRatesComplete = mergePolicyRates(interestRatesWithFRED, policyRatesData);
+
+// Merge policy rates from FRED for international coverage
+let interestRatesWithPolicy = mergePolicyRates(interestRatesWithFRED, policyRatesData);
+
+// Fill remaining gaps with IMF interest rate data
+const interestRatesComplete = Object.keys(imfInterestRates).length > 0
+  ? mergeAlternativeSource(interestRatesWithPolicy, imfInterestRates, 'IMF')
+  : interestRatesWithPolicy;
 
 const completeData = {
   interestRates: interestRatesComplete,
@@ -645,10 +727,30 @@ const completeData = {
         unemploymentRatesResult.status === 'fulfilled' ? unemploymentRatesResult.value : [],
         usaData.unemploymentRates
       ),
-      governmentDebt: mergeUSADataFromFRED(
-        governmentDebtResult.status === 'fulfilled' ? governmentDebtResult.value : [],
-        usaData.governmentDebt
-      ),
+      governmentDebt: (() => {
+        // Multi-source fallback for government debt: World Bank → USA(FRED) → OECD(Japan) → IMF(All)
+        let govDebt = mergeUSADataFromFRED(
+          governmentDebtResult.status === 'fulfilled' ? governmentDebtResult.value : [],
+          usaData.governmentDebt
+        );
+        
+        // Add Japan data from OECD if available
+        if (oecdJapanDebt.length > 0) {
+          govDebt = mergeAlternativeSource(govDebt, { Japan: oecdJapanDebt }, 'OECD');
+        }
+        
+        // Fill remaining gaps with IMF data
+        if (Object.keys(imfGovDebt).length > 0) {
+          govDebt = mergeAlternativeSource(govDebt, imfGovDebt, 'IMF');
+        }
+        
+        // Add IMF Japan data as additional fallback
+        if (imfJapanDebt.length > 0 && oecdJapanDebt.length === 0) {
+          govDebt = mergeAlternativeSource(govDebt, { Japan: imfJapanDebt }, 'IMF');
+        }
+        
+        return govDebt;
+      })(),
       inflationRates: mergeUSADataFromFRED(
         inflationRatesResult.status === 'fulfilled' ? inflationRatesResult.value : [],
         usaData.inflationRates
@@ -846,9 +948,11 @@ export function clearDataCache(): void {
   clientCache.clear();
   clearFREDCache();
   clearPolicyRatesCache();
+  clearOECDCache();
+  clearIMFCache();
   // Reset cache version after clearing
   clientCache.set(CacheKeys.cacheVersion(), CURRENT_CACHE_VERSION);
-  console.log('Cleared all cached economic data (World Bank + FRED + Policy Rates)');
+  console.log('Cleared all cached economic data (World Bank + FRED + Policy Rates + OECD + IMF)');
 }
 
 // Export function to get cache age
