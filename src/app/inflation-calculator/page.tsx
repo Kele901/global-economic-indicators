@@ -5,23 +5,40 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import InflationCalculator from '../components/InflationCalculator';
-import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
+import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
 
 const countryFlags: { [key: string]: React.ComponentType<any> } = {
   UK: GB, USA: US, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
   Australia: AU, Mexico: MX, SouthKorea: KR, Spain: ES, Sweden: SE, Switzerland: CH,
   Turkey: TR, Nigeria: NG, China: CN, Russia: RU, Brazil: BR, Chile: CL,
-  Argentina: AR, India: IN, Norway: NO
+  Argentina: AR, India: IN, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
+  Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG
 };
 
 export default function InflationCalculatorPage() {
-  const [isDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cpiData, setCpiData] = useState<any[]>([]);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showUnderstanding, setShowUnderstanding] = useState(false);
   const [showAccuracy, setShowAccuracy] = useState(false);
+
+  useEffect(() => {
+    // Apply theme changes to DOM
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body.classList.remove('dark');
+    }
+    
+    // Dispatch event for other components
+    window.dispatchEvent(new Event('themeChange'));
+  }, [isDarkMode]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -64,12 +81,30 @@ export default function InflationCalculatorPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className={`text-4xl font-bold mb-4 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
-            Multi-Country Inflation Calculator
-          </h1>
-          <p className={`text-lg ${
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4">
+            <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              Multi-Country Inflation Calculator
+            </h1>
+            <div className="flex items-center space-x-2">
+              <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Light</span>
+              <button
+                className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 transition-colors duration-200 ${
+                  isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white transform transition-transform ${
+                  isDarkMode ? 'translate-x-5 sm:translate-x-6' : ''
+                }`} />
+              </button>
+              <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dark</span>
+            </div>
+          </div>
+          <p className={`text-base sm:text-lg ${
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
             See how the value of money has changed over time across different economies. 

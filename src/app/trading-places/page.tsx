@@ -964,6 +964,23 @@ const TradingPlacesPage: React.FC = () => {
     setMounted(true);
   }, []);
 
+  // Handle theme changes
+  useEffect(() => {
+    // Apply theme changes to DOM
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body.classList.remove('dark');
+    }
+    
+    // Dispatch event for other components
+    window.dispatchEvent(new Event('themeChange'));
+  }, [isDarkMode]);
+
   // Merge real data with mock data
   const combinedTradeData = useMemo(() => {
     if (enableRealData && realTradeData.length > 0) {

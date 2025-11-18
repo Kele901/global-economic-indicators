@@ -15,6 +15,22 @@ export default function ComparePage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
 
   useEffect(() => {
+    // Apply theme changes to DOM
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body.classList.remove('dark');
+    }
+    
+    // Dispatch event for other components
+    window.dispatchEvent(new Event('themeChange'));
+  }, [isDarkMode]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const globalData = await fetchGlobalData();

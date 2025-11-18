@@ -52,7 +52,7 @@ const ValueTimelineChart: React.FC<ValueTimelineChartProps> = ({
         }`}>
           <p className="font-semibold mb-1">{data.year}</p>
           <p className="text-sm">
-            Equivalent value: <span className="font-bold">{formatCurrency(data.value, country)}</span>
+            Equivalent value: <span className="font-bold">{formatCurrency(data.value, country, data.year)}</span>
           </p>
         </div>
       );
@@ -134,7 +134,7 @@ const ValueTimelineChart: React.FC<ValueTimelineChartProps> = ({
             isDarkMode ? 'bg-blue-400' : 'bg-blue-600'
           }`}></div>
           <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
-            Original Year: {originalYear} ({formatCurrency(originalAmount, country)})
+            Original Year: {originalYear} ({formatCurrency(originalAmount, country, originalYear)})
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ const ValueTimelineChart: React.FC<ValueTimelineChartProps> = ({
             isDarkMode ? 'bg-green-400' : 'bg-green-600'
           }`}></div>
           <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
-            Target Year: {targetYear} ({formatCurrency(targetValue, country)})
+            Target Year: {targetYear} ({formatCurrency(targetValue, country, targetYear)})
           </span>
         </div>
       </div>

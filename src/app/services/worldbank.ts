@@ -1,6 +1,7 @@
 import axios from "axios";
 import { clientCache, CacheKeys, CURRENT_CACHE_VERSION } from "./clientCache";
 import { fetchUSADataFromFRED, clearFREDCache, type USADataPoint } from "./fred";
+import { fetchAllPolicyRates, clearPolicyRatesCache, type PolicyRateDataPoint } from "./policyRates";
 
 // Type definitions for economic data
 export interface CountryData {
@@ -77,7 +78,8 @@ const INDICATORS = {
 
 // Country codes for major economies
 const COUNTRY_CODES = [
-  'US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'AU', 'MX', 'KR', 'ES', 'SE', 'CH', 'TR', 'NG', 'CN', 'RU', 'BR', 'CL', 'AR', 'IN', 'NO'
+  'US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'AU', 'MX', 'KR', 'ES', 'SE', 'CH', 'TR', 'NG', 'CN', 'RU', 'BR', 'CL', 'AR', 'IN', 'NO',
+  'NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG'
 ];
 
 // Country name mapping
@@ -103,7 +105,15 @@ const COUNTRY_NAMES: { [key: string]: string } = {
   'CL': 'Chile',
   'AR': 'Argentina',
   'IN': 'India',
-  'NO': 'Norway'
+  'NO': 'Norway',
+  'NL': 'Netherlands',
+  'PT': 'Portugal',
+  'BE': 'Belgium',
+  'ID': 'Indonesia',
+  'ZA': 'SouthAfrica',
+  'PL': 'Poland',
+  'SA': 'SaudiArabia',
+  'EG': 'Egypt'
 };
 
 // Function to fetch data with retry logic and exponential backoff
@@ -116,9 +126,7 @@ async function fetchWithRetry(
     try {
       const response = await axios.get(url, {
         timeout: 10000, // 10 second timeout
-        headers: {
-          'User-Agent': 'GlobalEconomicIndicators/1.0'
-        }
+        // Removed User-Agent header - causes browser warnings and is not needed
       });
       
       if (response.status === 200 && response.data) {
@@ -169,7 +177,7 @@ async function fetchIndicatorData(
     if (useCache) {
       const cached = clientCache.get<CountryData[]>(cacheKey);
       if (cached) {
-        console.log(`Using cached data for ${indicator}`);
+        console.log(`✅ Using cached data for ${indicator}`);
         return cached;
       }
     }
@@ -177,24 +185,30 @@ async function fetchIndicatorData(
     const countryString = countries.join(';');
     const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator}?format=json&per_page=1000&date=1960:2024`;
     
-    console.log(`Fetching fresh data for ${indicator}...`);
+    console.log(`🌐 Fetching fresh data for ${indicator}...`);
+    console.log(`📍 API URL: ${url}`);
     const response = await fetchWithRetry(url);
     const data = response[1]; // World Bank returns data in second element
     
     if (!data || !Array.isArray(data)) {
-      console.warn(`No data found for indicator ${indicator}`);
+      console.warn(`⚠️ No data found for indicator ${indicator}`);
       return [];
     }
+
+    console.log(`📦 Received ${data.length} data points for ${indicator}`);
 
     // Group data by year
     const yearData: { [year: string]: CountryData } = {};
     const countriesFound = new Set<string>();
+    const countryCodesFound = new Set<string>();
     
     data.forEach((item: any) => {
       if (item.value !== null && item.date && item.country?.id) {
         const year = parseInt(item.date);
         const countryCode = item.country.id;
         const countryName = COUNTRY_NAMES[countryCode];
+        
+        countryCodesFound.add(countryCode);
         
         if (countryName) {
           countriesFound.add(countryName);
@@ -204,28 +218,43 @@ async function fetchIndicatorData(
           yearData[year][countryName] = item.value;
         } else if (countryCode) {
           // Log unmapped country codes for debugging
-          console.warn(`Unmapped country code: ${countryCode}`);
+          console.warn(`⚠️ Unmapped country code: ${countryCode}`);
         }
       }
     });
 
     const result = Object.values(yearData).sort((a, b) => a.year - b.year);
     
-    // Debug: Log which countries we found data for
-    console.log(`Indicator ${indicator} - Found data for countries:`, Array.from(countriesFound).sort());
+    // Enhanced debug logging
+    console.log(`✅ Indicator ${indicator}:`);
+    console.log(`   - Country codes found: ${Array.from(countryCodesFound).sort().join(', ')}`);
+    console.log(`   - Mapped countries: ${Array.from(countriesFound).sort().join(', ')}`);
+    console.log(`   - Years with data: ${result.length}`);
+    
+    // Check which of our new countries have data
+    const newCountries = ['NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG'];
+    const newCountriesWithData = newCountries.filter(code => countryCodesFound.has(code));
+    const newCountriesWithoutData = newCountries.filter(code => !countryCodesFound.has(code));
+    
+    if (newCountriesWithData.length > 0) {
+      console.log(`   ✅ New countries with data: ${newCountriesWithData.join(', ')}`);
+    }
+    if (newCountriesWithoutData.length > 0) {
+      console.log(`   ❌ New countries without data: ${newCountriesWithoutData.join(', ')}`);
+    }
     
     // Cache the result for 24 hours
     clientCache.set(cacheKey, result, 1000 * 60 * 60 * 24);
     
     return result;
   } catch (error: any) {
-    console.error(`Error fetching data for indicator ${indicator}:`, error.message || error);
+    console.error(`❌ Error fetching data for indicator ${indicator}:`, error.message || error);
     
     // Try to return cached data even if expired as fallback
     const cacheKey = CacheKeys.worldBankIndicator(indicator);
     const staleCache = clientCache.get<CountryData[]>(cacheKey);
     if (staleCache) {
-      console.warn(`Using stale cache for ${indicator} due to API error`);
+      console.warn(`⚠️ Using stale cache for ${indicator} due to API error`);
       return staleCache;
     }
     
@@ -268,6 +297,61 @@ function mergeUSADataFromFRED(
   });
 
   console.log(`FRED merge: Added ${addedCount} new years, updated ${updatedCount} existing years for USA`);
+  
+  return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+}
+
+// Helper function to merge policy rates data into World Bank interest rates
+function mergePolicyRates(
+  worldBankData: CountryData[],
+  policyRatesData: { [country: string]: PolicyRateDataPoint[] }
+): CountryData[] {
+  if (Object.keys(policyRatesData).length === 0) {
+    console.warn('No policy rates data to merge');
+    return worldBankData;
+  }
+
+  // Create a map of existing years
+  const dataMap = new Map<number, CountryData>();
+  worldBankData.forEach(item => {
+    dataMap.set(item.year, { ...item });
+  });
+
+  let totalAdded = 0;
+  let totalUpdated = 0;
+  
+  // Merge policy rates for each country
+  Object.entries(policyRatesData).forEach(([country, data]) => {
+    if (data.length === 0) return;
+    
+    let addedCount = 0;
+    let updatedCount = 0;
+    
+    data.forEach(({ year, value }) => {
+      if (dataMap.has(year)) {
+        const existing = dataMap.get(year)!;
+        // Prefer policy rates over World Bank data (more current)
+        // Only skip if policy rate value already exists
+        if (existing[country] === undefined || existing[country] === null || year >= 2020) {
+          existing[country] = value;
+          updatedCount++;
+        }
+      } else {
+        const newEntry: CountryData = { year };
+        newEntry[country] = value;
+        dataMap.set(year, newEntry);
+        addedCount++;
+      }
+    });
+    
+    if (addedCount > 0 || updatedCount > 0) {
+      console.log(`🏦 Policy rates for ${country}: Added ${addedCount}, updated ${updatedCount} years`);
+      totalAdded += addedCount;
+      totalUpdated += updatedCount;
+    }
+  });
+
+  console.log(`🏦 Total policy rates merge: Added ${totalAdded} new years, updated ${totalUpdated} existing years`);
   
   return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
 }
@@ -517,16 +601,27 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
     const usaData = await fetchUSADataFromFRED();
     console.log('📊 FRED fetch complete. Processing USA data merge...');
     
+    // Fetch policy rates for all countries (more current than World Bank)
+    console.log('🏦 ========================================');
+    console.log('🏦 Fetching Central Bank Policy Rates...');
+    console.log('🏦 ========================================');
+    const policyRatesData = await fetchAllPolicyRates();
+    console.log('🏦 Policy rates fetch complete. Processing merge...');
+    
 // Merge FRED data with World Bank data for comprehensive USA coverage
 console.log('📊 Starting data merge for USA...');
 console.log('📊 FRED Interest Rates data points:', usaData.interestRates.length);
 console.log('📊 World Bank Interest Rates data points:', interestRatesResult.status === 'fulfilled' ? interestRatesResult.value.length : 0);
 
+// First merge World Bank data with FRED USA data, then merge with policy rates for all countries
+const interestRatesWithFRED = mergeUSADataFromFRED(
+  interestRatesResult.status === 'fulfilled' ? interestRatesResult.value : [],
+  usaData.interestRates
+);
+const interestRatesComplete = mergePolicyRates(interestRatesWithFRED, policyRatesData);
+
 const completeData = {
-  interestRates: mergeUSADataFromFRED(
-    interestRatesResult.status === 'fulfilled' ? interestRatesResult.value : [],
-    usaData.interestRates
-  ),
+  interestRates: interestRatesComplete,
       employmentRates: mergeUSADataFromFRED(
         employmentRatesResult.status === 'fulfilled' ? employmentRatesResult.value : [],
         usaData.employmentRates
@@ -735,9 +830,10 @@ const completeData = {
 export function clearDataCache(): void {
   clientCache.clear();
   clearFREDCache();
+  clearPolicyRatesCache();
   // Reset cache version after clearing
   clientCache.set(CacheKeys.cacheVersion(), CURRENT_CACHE_VERSION);
-  console.log('Cleared all cached economic data (World Bank + FRED)');
+  console.log('Cleared all cached economic data (World Bank + FRED + Policy Rates)');
 }
 
 // Export function to get cache age
@@ -754,5 +850,136 @@ export function getCacheAge(): { age: number | null; formatted: string } {
   return {
     age,
     formatted: hours > 0 ? `${hours}h ${minutes}m ago` : `${minutes}m ago`
+  };
+}
+
+// Debug function to test API connectivity for specific countries
+export async function testCountryDataAvailability(countryCodes: string[] = ['NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG']): Promise<void> {
+  console.log('🧪 ========================================');
+  console.log('🧪 Testing data availability for new countries...');
+  console.log('🧪 Testing countries:', countryCodes.join(', '));
+  console.log('🧪 ========================================');
+  
+  const testIndicator = INDICATORS.GDP_GROWTH; // Use GDP growth as test indicator
+  const countryString = countryCodes.join(';');
+  const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${testIndicator}?format=json&per_page=100&date=2020:2024`;
+  
+  console.log('🧪 Test URL:', url);
+  
+  try {
+    const response = await axios.get(url, { timeout: 10000 });
+    const data = response.data[1];
+    
+    if (data && Array.isArray(data)) {
+      console.log(`🧪 ✅ Received ${data.length} data points`);
+      
+      const foundCountries = new Set<string>();
+      data.forEach((item: any) => {
+        if (item.value !== null && item.country?.id) {
+          foundCountries.add(item.country.id);
+        }
+      });
+      
+      console.log('🧪 ✅ Countries with data:', Array.from(foundCountries).sort().join(', '));
+      
+      const missingCountries = countryCodes.filter(code => !foundCountries.has(code));
+      if (missingCountries.length > 0) {
+        console.warn('🧪 ❌ Countries without data:', missingCountries.join(', '));
+      }
+      
+      // Sample data for one country
+      const sampleCountry = data.find((item: any) => countryCodes.includes(item.country?.id));
+      if (sampleCountry) {
+        console.log('🧪 Sample data point:', {
+          country: sampleCountry.country.value,
+          code: sampleCountry.country.id,
+          year: sampleCountry.date,
+          value: sampleCountry.value
+        });
+      }
+      
+      console.log('🧪 ========================================');
+      console.log('🧪 Test Complete!');
+      console.log('🧪 ========================================');
+    } else {
+      console.warn('🧪 ❌ No data returned from API');
+    }
+  } catch (error: any) {
+    console.error('🧪 ❌ Test failed:', error.message);
+    console.error('🧪 Full error:', error);
+  }
+}
+
+// Diagnostic function to check data availability across all indicators
+export async function checkDataAvailability(): Promise<void> {
+  console.log('🔍 ========================================');
+  console.log('🔍 DIAGNOSTIC: Checking Data Availability');
+  console.log('🔍 ========================================');
+  
+  const indicatorsToCheck = [
+    { name: 'Interest Rates', code: INDICATORS.INTEREST_RATE },
+    { name: 'GDP Growth', code: INDICATORS.GDP_GROWTH },
+    { name: 'Inflation', code: INDICATORS.INFLATION_RATE },
+    { name: 'Unemployment', code: INDICATORS.UNEMPLOYMENT_RATE },
+    { name: 'Government Debt', code: INDICATORS.GOVERNMENT_DEBT },
+    { name: 'CPI', code: INDICATORS.CPI },
+    { name: 'GDP per Capita (PPP)', code: INDICATORS.GDP_PER_CAPITA_PPP },
+    { name: 'Life Expectancy', code: INDICATORS.LIFE_EXPECTANCY },
+    { name: 'CO2 Emissions', code: INDICATORS.CO2_EMISSIONS },
+    { name: 'Internet Users', code: INDICATORS.INTERNET_USERS }
+  ];
+  
+  const sampleCountries = ['US', 'GB', 'CN', 'NL', 'EG']; // Sample of old and new countries
+  
+  for (const indicator of indicatorsToCheck) {
+    try {
+      const countryString = sampleCountries.join(';');
+      const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator.code}?format=json&per_page=500&date=2020:2024`;
+      
+      const response = await axios.get(url, { timeout: 10000 });
+      const data = response.data[1];
+      
+      if (data && Array.isArray(data)) {
+        // Find latest year with data
+        const years = new Set<number>();
+        const countriesWithData = new Set<string>();
+        
+        data.forEach((item: any) => {
+          if (item.value !== null && item.date && item.country?.id) {
+            years.add(parseInt(item.date));
+            countriesWithData.add(item.country.id);
+          }
+        });
+        
+        const latestYear = Math.max(...Array.from(years));
+        const has2024 = years.has(2024);
+        const has2023 = years.has(2023);
+        
+        console.log(`📊 ${indicator.name}:`);
+        console.log(`   Latest year: ${latestYear}`);
+        console.log(`   Has 2024 data: ${has2024 ? '✅' : '❌'}`);
+        console.log(`   Has 2023 data: ${has2023 ? '✅' : '❌'}`);
+        console.log(`   Countries with data: ${Array.from(countriesWithData).join(', ')}`);
+      } else {
+        console.warn(`⚠️ ${indicator.name}: No data returned`);
+      }
+    } catch (error: any) {
+      console.error(`❌ ${indicator.name}: Error -`, error.message);
+    }
+  }
+  
+  console.log('🔍 ========================================');
+  console.log('🔍 Diagnostic Complete!');
+  console.log('🔍 ========================================');
+}
+
+// Make test functions available globally for easy debugging in console
+if (typeof window !== 'undefined') {
+  (window as any).testCountryData = testCountryDataAvailability;
+  (window as any).checkDataAvailability = checkDataAvailability;
+  (window as any).clearAppCache = () => {
+    clearDataCache();
+    console.log('✅ Cache cleared! Reloading page...');
+    window.location.reload();
   };
 }

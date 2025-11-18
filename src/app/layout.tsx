@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Script from 'next/script';
 import Navbar from './components/Navbar';
+import ThemeProvider from './components/ThemeProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -46,43 +47,45 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.className} min-h-screen`}>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
+        <ThemeProvider>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
 
-          <main className="flex-grow">
-            {children}
-          </main>
+            <main className="flex-grow">
+              {children}
+            </main>
 
-          <footer className="bg-gray-50 dark:bg-gray-800 mt-8 sm:mt-12">
-            <div className="max-w-4xl mx-auto py-6 sm:py-8 px-3 sm:px-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">About Us</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    We provide comprehensive economic data analysis and visualization, 
-                    helping users understand global economic trends through reliable 
-                    World Bank data.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Data Sources</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    All economic data is sourced from the World Bank's official databases, 
-                    ensuring accuracy and reliability in our analysis.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Legal</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    © {new Date().getFullYear()} Global Economic Indicators.
-                    This site uses cookies for analytics and personalized content.
-                    By using this site, you agree to our privacy policy.
-                  </p>
+            <footer className="bg-gray-50 dark:bg-gray-800 mt-8 sm:mt-12 transition-colors duration-200">
+              <div className="max-w-4xl mx-auto py-6 sm:py-8 px-3 sm:px-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">About Us</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200">
+                      We provide comprehensive economic data analysis and visualization, 
+                      helping users understand global economic trends through reliable 
+                      World Bank data.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">Data Sources</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200">
+                      All economic data is sourced from the World Bank's official databases, 
+                      ensuring accuracy and reliability in our analysis.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">Legal</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200">
+                      © {new Date().getFullYear()} Global Economic Indicators.
+                      This site uses cookies for analytics and personalized content.
+                      By using this site, you agree to our privacy policy.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </footer>
-        </div>
+            </footer>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

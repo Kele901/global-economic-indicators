@@ -158,11 +158,19 @@ const CurrencyHierarchyPage = () => {
   const tier4Currencies = ['MXN', 'BRL', 'INR', 'ZAR', 'RUB', 'TRY'];
 
   useEffect(() => {
-    // Initialize theme on mount
-    if (typeof window !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-      document.body.classList.toggle('dark', isDarkMode);
+    // Apply theme changes to DOM
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body.classList.remove('dark');
     }
+    
+    // Dispatch event for other components
+    window.dispatchEvent(new Event('themeChange'));
   }, [isDarkMode]);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area } from 'recharts';
 import type { CountryData } from '../services/worldbank';
-import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
+import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
 import InfoPanel from './InfoPanel';
@@ -12,14 +12,16 @@ const countryColors = {
   Japan: "#d0ed57", UK: "#83a6ed", Australia: "#ff7300", Mexico: "#e60049", SouthKorea: "#0bb4ff", 
   Spain: "#50e991", Sweden: "#e6d800", Switzerland: "#9b19f5", Turkey: "#dc0ab4", Nigeria: "#00bfa0",
   China: "#b3d4ff", Russia: "#fd7f6f", Brazil: "#7eb0d5", Chile: "#b2e061", Argentina: "#bd7ebe",
-  India: "#ff9ff3", Norway: "#45aaf2"
+  India: "#ff9ff3", Norway: "#45aaf2", Netherlands: "#ff6b35", Portugal: "#004e89", Belgium: "#f7b801",
+  Indonesia: "#06a77d", SouthAfrica: "#d62246", Poland: "#c1292e", SaudiArabia: "#006c35", Egypt: "#c09000"
 };
 
 const countryFlags: { [key: string]: React.ComponentType<any> } = {
   UK: GB, USA: US, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
   Australia: AU, Mexico: MX, SouthKorea: KR, Spain: ES, Sweden: SE, Switzerland: CH,
   Turkey: TR, Nigeria: NG, China: CN, Russia: RU, Brazil: BR, Chile: CL,
-  Argentina: AR, India: IN, Norway: NO
+  Argentina: AR, India: IN, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
+  Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG
 };
 
 interface ComparisonDashboardProps {

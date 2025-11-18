@@ -96,18 +96,18 @@ const Navbar = () => {
         ? 'bg-gray-800 border-gray-700' 
         : 'bg-white border-gray-200'
     }`}>
-      <div className="max-w-4xl mx-auto py-3 sm:py-4 px-3 sm:px-4">
-        <nav className="flex justify-between items-center">
+      <div className="max-w-7xl mx-auto py-3 sm:py-4 px-3 sm:px-4">
+        <nav className="flex items-center">
           {/* Logo/Brand */}
-          <div className={`text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 ${
+          <div className={`text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-6 ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
             Global Economic Indicators
           </div>
 
-          {/* Desktop Navigation - Centered with even spacing */}
-          <div className="hidden md:flex items-center justify-center flex-1 mx-8">
-            <div className="flex items-center justify-center space-x-0">
+          {/* Desktop Navigation - Left aligned */}
+          <div className="hidden md:flex items-center flex-1">
+            <div className="flex items-center space-x-0">
               {navLinks.map((link, index) => (
                 <div key={link.href} className="flex items-center">
                   <a 
@@ -131,13 +131,10 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right side spacer to balance the layout */}
-          <div className="hidden md:block flex-shrink-0 w-0 sm:w-8"></div>
-
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className={`md:hidden p-2 rounded-md transition-colors duration-200 ${
+            className={`md:hidden ml-auto p-2 rounded-md transition-colors duration-200 ${
               isDarkMode 
                 ? 'text-gray-300 hover:text-white hover:bg-gray-700' 
                 : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'

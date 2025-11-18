@@ -146,7 +146,7 @@ export const clientCache = new ClientCache();
 // v1: Initial version with World Bank data only
 // v2: Added FRED integration for US data
 // v3: Added 16 additional economic indicators (GDP per capita PPP, current account, etc.)
-export const CURRENT_CACHE_VERSION = 5;
+export const CURRENT_CACHE_VERSION = 6;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

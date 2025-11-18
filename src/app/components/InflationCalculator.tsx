@@ -3,6 +3,7 @@ import {
   calculateInflation,
   getCountryDateRange,
   getCurrencySymbol,
+  getCurrencyName,
   formatCurrency,
   validateYearSelection,
   InflationCalculation,
@@ -26,8 +27,9 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
     'USA', 'UK', 'Canada', 'France', 'Germany', 'Italy', 'Japan',
     'Australia', 'Mexico', 'SouthKorea', 'Spain', 'Sweden', 'Switzerland',
     'Turkey', 'Nigeria', 'China', 'Russia', 'Brazil', 'Chile', 'Argentina',
-    'India', 'Norway'
-  ];
+    'India', 'Norway', 'Netherlands', 'Portugal', 'Belgium', 'Indonesia',
+    'SouthAfrica', 'Poland', 'SaudiArabia', 'Egypt'
+  ].sort();
 
   const [selectedCountry, setSelectedCountry] = useState('USA');
   const [amount, setAmount] = useState('100');
@@ -122,8 +124,8 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
   const yearOptions = generateYearOptions();
 
   // Get appropriate padding based on currency symbol length
-  const getCurrencyInputPadding = (country: string) => {
-    const symbol = getCurrencySymbol(country);
+  const getCurrencyInputPadding = (country: string, year?: number) => {
+    const symbol = getCurrencySymbol(country, year);
     // For longer symbols (3+ characters), use more padding
     if (symbol.length >= 3) {
       return 'pl-16'; // 4rem
@@ -165,7 +167,10 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
               >
                 {countries.map((country) => (
                   <option key={country} value={country}>
-                    {country === 'SouthKorea' ? 'South Korea' : country}
+                    {country === 'SouthKorea' ? 'South Korea' 
+                      : country === 'SouthAfrica' ? 'South Africa'
+                      : country === 'SaudiArabia' ? 'Saudi Arabia'
+                      : country}
                   </option>
                 ))}
               </select>
@@ -195,7 +200,7 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
               <span className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-lg ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                {getCurrencySymbol(selectedCountry)}
+                {getCurrencySymbol(selectedCountry, parseInt(startYear) || new Date().getFullYear())}
               </span>
               <input
                 type="number"
@@ -203,7 +208,7 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
                 onChange={(e) => setAmount(e.target.value)}
                 min="0.01"
                 step="0.01"
-                className={`w-full ${getCurrencyInputPadding(selectedCountry)} pr-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full ${getCurrencyInputPadding(selectedCountry, parseInt(startYear))} pr-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
                   isDarkMode
                     ? 'bg-gray-700 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
@@ -211,6 +216,11 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
                 placeholder="Enter amount"
               />
             </div>
+            <p className={`text-xs mt-1 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              In {getCurrencyName(selectedCountry, parseInt(startYear))}
+            </p>
           </div>
 
           {/* Start Year */}
@@ -305,6 +315,37 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
       {/* Results Section */}
       {showResults && result && (
         <div className="mt-6 space-y-6">
+          {/* Currency Change Notice */}
+          {result.currencyChanged && (
+            <div className={`p-4 rounded-lg border ${
+              isDarkMode 
+                ? 'bg-blue-900 border-blue-700 text-blue-200' 
+                : 'bg-blue-50 border-blue-200 text-blue-800'
+            }`}>
+              <div className="flex items-start">
+                <svg className="w-5 h-5 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <p className="font-semibold mb-1">Currency Conversion & Inflation Applied</p>
+                  <p className="text-sm mb-2">
+                    {selectedCountry} adopted the Euro in 2002. Your amount was first converted from{' '}
+                    <strong>{getCurrencyName(selectedCountry, result.originalYear)}</strong> ({result.originalCurrency}) to Euros
+                    {result.conversionRate && (
+                      <span> at the official rate of 1 EUR = {result.conversionRate.toLocaleString()} {result.originalCurrency}</span>
+                    )}
+                    , then adjusted for inflation.
+                  </p>
+                  {result.convertedToEuros && result.amountInEuros && (
+                    <p className="text-sm">
+                      <strong>Conversion:</strong> {formatCurrency(result.originalAmount, selectedCountry, result.originalYear)} = €{result.amountInEuros.toFixed(2)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Results Summary */}
           <div className={`p-6 rounded-lg shadow-lg ${
             isDarkMode ? 'bg-gray-800' : 'bg-white'
@@ -328,12 +369,12 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
                 <p className={`text-3xl font-bold mb-1 ${
                   isDarkMode ? 'text-blue-400' : 'text-blue-600'
                 }`}>
-                  {formatCurrency(result.originalAmount, selectedCountry)}
+                  {formatCurrency(result.originalAmount, selectedCountry, result.originalYear)}
                 </p>
                 <p className={`text-sm mb-2 ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
-                  in {result.originalYear}
+                  in {result.originalYear} ({getCurrencyName(selectedCountry, result.originalYear)})
                 </p>
                 <p className={`text-sm ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
@@ -343,12 +384,12 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
                 <p className={`text-3xl font-bold ${
                   isDarkMode ? 'text-green-400' : 'text-green-600'
                 }`}>
-                  {formatCurrency(result.adjustedValue, selectedCountry)}
+                  {formatCurrency(result.adjustedValue, selectedCountry, result.targetYear)}
                 </p>
                 <p className={`text-sm ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
-                  in {result.targetYear}
+                  in {result.targetYear} ({getCurrencyName(selectedCountry, result.targetYear)})
                 </p>
               </div>
 

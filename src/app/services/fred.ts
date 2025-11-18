@@ -3,8 +3,8 @@ import { clientCache, CacheKeys } from "./clientCache";
 
 // FRED Series IDs for US Economic Indicators
 const FRED_SERIES = {
-  INTEREST_RATE: 'INTDSRUSM193N', // Interest Rates, Discount Rate for United States
-  // Alternative: 'FEDFUNDS' - Federal Funds Rate
+  INTEREST_RATE: 'FEDFUNDS', // Federal Funds Effective Rate (most current, updated monthly)
+  // Alternative: 'INTDSRUSM193N' - Interest Rates, Discount Rate for United States
   // Alternative: 'DGS10' - 10-Year Treasury Rate
   UNEMPLOYMENT_RATE: 'UNRATE', // Unemployment Rate
   EMPLOYMENT_RATE: 'EMRATIO', // Employment-Population Ratio

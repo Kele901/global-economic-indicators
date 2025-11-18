@@ -5,7 +5,7 @@ import { fetchGlobalData } from '../services/worldbank';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
-import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO } from 'country-flag-icons/react/3x2';
+import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
 import BulkChartDownload from '../components/BulkChartDownload';
 import ChartDownloadButton from '../components/ChartDownloadButton';
 import InfoPanel from '../components/InfoPanel';
@@ -16,14 +16,16 @@ const countryColors = {
   Japan: "#d0ed57", UK: "#83a6ed", Australia: "#ff7300", Mexico: "#e60049", SouthKorea: "#0bb4ff", 
   Spain: "#50e991", Sweden: "#e6d800", Switzerland: "#9b19f5", Turkey: "#dc0ab4", Nigeria: "#00bfa0",
   China: "#b3d4ff", Russia: "#fd7f6f", Brazil: "#7eb0d5", Chile: "#b2e061", Argentina: "#bd7ebe",
-  India: "#ff9ff3", Norway: "#45aaf2"
+  India: "#ff9ff3", Norway: "#45aaf2", Netherlands: "#ff6b35", Portugal: "#004e89", Belgium: "#f7b801",
+  Indonesia: "#06a77d", SouthAfrica: "#d62246", Poland: "#c1292e", SaudiArabia: "#006c35", Egypt: "#c09000"
 };
 
 const countryFlags: { [key: string]: React.ComponentType<any> } = {
   UK: GB, USA: US, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
   Australia: AU, Mexico: MX, SouthKorea: KR, Spain: ES, Sweden: SE, Switzerland: CH,
   Turkey: TR, Nigeria: NG, China: CN, Russia: RU, Brazil: BR, Chile: CL,
-  Argentina: AR, India: IN, Norway: NO
+  Argentina: AR, India: IN, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
+  Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG
 };
 
 // Essential goods price data (2011-2024)
@@ -958,6 +960,22 @@ export default function InflationPage() {
   const [selectedTokyoTransportation, setSelectedTokyoTransportation] = useState(transportationList.map(u => u.key));
   const [selectedTokyoRestaurant, setSelectedTokyoRestaurant] = useState(restaurantList.map(u => u.key));
   const [selectedTokyoBeverages, setSelectedTokyoBeverages] = useState(beveragesList.map(g => g.key));
+
+  useEffect(() => {
+    // Apply theme changes to DOM
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body.classList.remove('dark');
+    }
+    
+    // Dispatch event for other components
+    window.dispatchEvent(new Event('themeChange'));
+  }, [isDarkMode]);
 
   useEffect(() => {
     const fetchData = async () => {
