@@ -681,22 +681,47 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
     console.log('🏦 Policy rates fetch complete. Processing merge...');
     
     // Fetch OECD data for developed countries (fills gaps for Japan and others)
+    // Make these calls non-blocking - they supplement but don't block main data
     console.log('🏛️ ========================================');
     console.log('🏛️ Fetching OECD Data (Japan Gov Debt)...');
     console.log('🏛️ ========================================');
-    const oecdJapanDebt = await fetchJapanGovernmentDebtOECD();
-    console.log('🏛️ OECD fetch complete.');
+    let oecdJapanDebt: OECDDataPoint[] = [];
+    try {
+      oecdJapanDebt = await fetchJapanGovernmentDebtOECD();
+      console.log('🏛️ OECD fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ OECD fetch failed (non-critical):', error.message);
+      console.log('ℹ️ Continuing without OECD data...');
+    }
     
     // Fetch IMF data for broader coverage
     console.log('🌍 ========================================');
     console.log('🌍 Fetching IMF Data (Government Debt, Interest Rates)...');
     console.log('🌍 ========================================');
-    const [imfGovDebt, imfJapanDebt, imfInterestRates] = await Promise.all([
-      fetchIMFGovernmentDebt(),
-      fetchJapanGovernmentDebtIMF(),
-      fetchIMFInterestRates()
-    ]);
-    console.log('🌍 IMF fetch complete.');
+    let imfGovDebt: { [country: string]: IMFDataPoint[] } = {};
+    let imfJapanDebt: IMFDataPoint[] = [];
+    let imfInterestRates: { [country: string]: IMFDataPoint[] } = {};
+    
+    try {
+      [imfGovDebt, imfJapanDebt, imfInterestRates] = await Promise.all([
+        fetchIMFGovernmentDebt().catch(err => {
+          console.warn('⚠️ IMF Government Debt failed:', err.message);
+          return {};
+        }),
+        fetchJapanGovernmentDebtIMF().catch(err => {
+          console.warn('⚠️ IMF Japan Debt failed:', err.message);
+          return [];
+        }),
+        fetchIMFInterestRates().catch(err => {
+          console.warn('⚠️ IMF Interest Rates failed:', err.message);
+          return {};
+        })
+      ]);
+      console.log('🌍 IMF fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ IMF fetch failed (non-critical):', error.message);
+      console.log('ℹ️ Continuing without IMF data...');
+    }
     
 // Merge FRED data with World Bank data for comprehensive USA coverage
 console.log('📊 Starting data merge for USA...');

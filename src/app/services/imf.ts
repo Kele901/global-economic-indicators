@@ -131,7 +131,13 @@ export async function fetchIMFGovernmentDebt(): Promise<{ [country: string]: IMF
     
     return results;
   } catch (error: any) {
-    console.error('❌ IMF: Error fetching government debt:', error.message);
+    console.error('❌ IMF: Error fetching government debt');
+    console.error('   Error type:', error.name);
+    console.error('   Error message:', error.message);
+    if (error.code === 'ERR_NETWORK' || error.message.includes('CORS')) {
+      console.log('ℹ️ CORS error detected - IMF API may not allow browser requests');
+      console.log('ℹ️ Consider using a backend proxy for IMF data');
+    }
     return {};
   }
 }
@@ -199,7 +205,17 @@ export async function fetchJapanGovernmentDebtIMF(): Promise<IMFDataPoint[]> {
     
     return sortedData;
   } catch (error: any) {
-    console.error('❌ IMF: Error fetching Japan government debt:', error.message);
+    console.error('❌ IMF: Error fetching Japan government debt');
+    console.error('   Error type:', error.name);
+    console.error('   Error message:', error.message);
+    if (error.response) {
+      console.error('   HTTP Status:', error.response.status);
+      console.error('   Response data:', JSON.stringify(error.response.data).substring(0, 200));
+    }
+    if (error.code) {
+      console.error('   Error code:', error.code);
+    }
+    console.log('ℹ️ IMF APIs may have CORS restrictions or data format changes');
     return [];
   }
 }
@@ -285,7 +301,13 @@ export async function fetchIMFInterestRates(): Promise<{ [country: string]: IMFD
     
     return results;
   } catch (error: any) {
-    console.error('❌ IMF: Error fetching interest rates:', error.message);
+    console.error('❌ IMF: Error fetching interest rates');
+    console.error('   Error type:', error.name);
+    console.error('   Error message:', error.message);
+    if (error.code === 'ERR_NETWORK' || error.message.includes('CORS')) {
+      console.log('ℹ️ CORS error detected - IMF API may not allow browser requests');
+      console.log('ℹ️ App will continue with World Bank + FRED + Policy Rates data');
+    }
     return {};
   }
 }

@@ -181,6 +181,8 @@ export async function fetchJapanGovernmentDebtOECD(): Promise<OECDDataPoint[]> {
     // Use OECD.Stat API with JSON format - General government debt as % of GDP
     const url = 'https://stats.oecd.org/SDMX-JSON/data/GOV_DEBT/JPN.GGFL.PC_GDP/all?startTime=1990';
     
+    console.log('🔗 OECD URL:', url);
+    
     const response = await axios.get(url, {
       timeout: 15000,
       headers: {
@@ -232,7 +234,17 @@ export async function fetchJapanGovernmentDebtOECD(): Promise<OECDDataPoint[]> {
     
     return sortedData;
   } catch (error: any) {
-    console.error('❌ OECD: Error fetching Japan government debt:', error.message);
+    console.error('❌ OECD: Error fetching Japan government debt');
+    console.error('   Error type:', error.name);
+    console.error('   Error message:', error.message);
+    if (error.response) {
+      console.error('   HTTP Status:', error.response.status);
+      console.error('   Response data:', error.response.data);
+    }
+    if (error.code) {
+      console.error('   Error code:', error.code);
+    }
+    console.log('ℹ️ OECD APIs may have CORS restrictions or require special access');
     return [];
   }
 }
