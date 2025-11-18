@@ -26,6 +26,53 @@ const INDICATORS = {
   GINI_COEFFICIENT: 'SI.POV.GINI', // Gini index
   RD_SPENDING: 'GB.XPD.RSDV.GD.ZS', // Research and development expenditure (% of GDP)
   ENERGY_CONSUMPTION: 'EG.USE.PCAP.KG.OE', // Energy use (kg of oil equivalent per capita)
+  
+  // Additional Economic Indicators
+  GDP_PER_CAPITA_PPP: 'NY.GDP.PCAP.PP.CD', // GDP per capita, PPP (current international $)
+  CURRENT_ACCOUNT: 'BN.CAB.XOKA.GD.ZS', // Current account balance (% of GDP)
+  GROSS_CAPITAL_FORMATION: 'NE.GDI.TOTL.ZS', // Gross capital formation (% of GDP)
+  RESERVES_MONTHS_IMPORTS: 'FI.RES.TOTL.MO', // Total reserves in months of imports
+  EXCHANGE_RATE: 'PA.NUS.FCRF', // Official exchange rate (LCU per US$, period average)
+  POVERTY_RATE: 'SI.POV.DDAY', // Poverty headcount ratio at $2.15 a day (2017 PPP) (% of population)
+  TERTIARY_ENROLLMENT: 'SE.TER.ENRR', // School enrollment, tertiary (% gross)
+  TAX_REVENUE: 'GC.TAX.TOTL.GD.ZS', // Tax revenue (% of GDP)
+  DOMESTIC_CREDIT: 'FS.AST.PRVT.GD.ZS', // Domestic credit to private sector (% of GDP)
+  EXPORTS: 'NE.EXP.GNFS.ZS', // Exports of goods and services (% of GDP)
+  IMPORTS: 'NE.IMP.GNFS.ZS', // Imports of goods and services (% of GDP)
+  LIFE_EXPECTANCY: 'SP.DYN.LE00.IN', // Life expectancy at birth, total (years)
+  URBAN_POPULATION: 'SP.URB.TOTL.IN.ZS', // Urban population (% of total population)
+  HIGHTECH_EXPORTS: 'TX.VAL.TECH.MF.ZS', // High-technology exports (% of manufactured exports)
+  CO2_EMISSIONS: 'EN.ATM.CO2E.PC', // CO2 emissions (metric tons per capita)
+  NET_MIGRATION: 'SM.POP.NETM', // Net migration
+  
+  // Top 10 High-Impact Additional Indicators
+  LABOR_FORCE_PARTICIPATION: 'SL.TLF.CACT.ZS', // Labor force participation rate (% of total population ages 15+)
+  BUDGET_BALANCE: 'GC.BAL.CASH.GD.ZS', // Cash surplus/deficit (% of GDP)
+  HEALTHCARE_EXPENDITURE: 'SH.XPD.CHEX.GD.ZS', // Current health expenditure (% of GDP)
+  EDUCATION_EXPENDITURE: 'SE.XPD.TOTL.GD.ZS', // Government expenditure on education, total (% of GDP)
+  INTERNET_USERS: 'IT.NET.USER.ZS', // Individuals using the Internet (% of population)
+  YOUTH_UNEMPLOYMENT: 'SL.UEM.1524.ZS', // Unemployment, youth total (% of total labor force ages 15-24)
+  MANUFACTURING_VALUE_ADDED: 'NV.IND.MANF.ZS', // Manufacturing, value added (% of GDP)
+  HOUSEHOLD_CONSUMPTION: 'NE.CON.PETC.ZS', // Household final consumption expenditure (% of GDP)
+  RENEWABLE_ENERGY: 'EG.FEC.RNEW.ZS', // Renewable energy consumption (% of total final energy consumption)
+  FEMALE_LABOR_FORCE: 'SL.TLF.CACT.FE.ZS', // Labor force participation rate, female (% of female population ages 15+)
+  
+  // Advanced Economic & Development Indicators
+  MILITARY_EXPENDITURE: 'MS.MIL.XPND.GD.ZS', // Military expenditure (% of GDP)
+  MARKET_CAPITALIZATION: 'CM.MKT.LCAP.GD.ZS', // Market capitalization of listed domestic companies (% of GDP)
+  SCIENTIFIC_PUBLICATIONS: 'IP.JRN.ARTC.SC', // Scientific and technical journal articles
+  ICT_EXPORTS: 'TX.VAL.ICTG.ZS.UN', // ICT goods exports (% of total goods exports)
+  MOBILE_SUBSCRIPTIONS: 'IT.CEL.SETS.P2', // Mobile cellular subscriptions (per 100 people)
+  PATENT_APPLICATIONS: 'IP.PAT.RESD', // Patent applications, residents
+  SOCIAL_SPENDING: 'per_si_allsi.cov_pop_tot', // Social protection coverage (% of population)
+  PUBLIC_DEBT_SERVICE: 'GC.XPN.INTP.RV.ZS', // Interest payments (% of revenue)
+  SERVICES_VALUE_ADDED: 'NV.SRV.TOTL.ZS', // Services, value added (% of GDP)
+  AGRICULTURAL_VALUE_ADDED: 'NV.AGR.TOTL.ZS', // Agriculture, forestry, and fishing, value added (% of GDP)
+  TRADE_OPENNESS: 'NE.TRD.GNFS.ZS', // Trade (% of GDP) - sum of exports and imports
+  TARIFF_RATE: 'TM.TAX.MRCH.SM.AR.ZS', // Tariff rate, applied, simple mean, all products (%)
+  TOURISM_RECEIPTS: 'ST.INT.RCPT.XP.ZS', // International tourism, receipts (% of total exports)
+  PRIVATE_INVESTMENT: 'NE.GDI.STKB.ZS', // Gross fixed capital formation, private sector (% of GDP)
+  NEW_BUSINESS_DENSITY: 'IC.BUS.NDNS.ZS', // New businesses registered (number per 1,000 people ages 15-64)
 };
 
 // Country codes for major economies
@@ -242,6 +289,47 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   giniCoefficient: CountryData[];
   rdSpending: CountryData[];
   energyConsumption: CountryData[];
+  gdpPerCapitaPPP: CountryData[];
+  currentAccount: CountryData[];
+  grossCapitalFormation: CountryData[];
+  reservesMonthsImports: CountryData[];
+  exchangeRate: CountryData[];
+  povertyRate: CountryData[];
+  tertiaryEnrollment: CountryData[];
+  taxRevenue: CountryData[];
+  domesticCredit: CountryData[];
+  exports: CountryData[];
+  imports: CountryData[];
+  lifeExpectancy: CountryData[];
+  urbanPopulation: CountryData[];
+  hightechExports: CountryData[];
+  co2Emissions: CountryData[];
+  netMigration: CountryData[];
+  laborForceParticipation: CountryData[];
+  budgetBalance: CountryData[];
+  healthcareExpenditure: CountryData[];
+  educationExpenditure: CountryData[];
+  internetUsers: CountryData[];
+  youthUnemployment: CountryData[];
+  manufacturingValueAdded: CountryData[];
+  householdConsumption: CountryData[];
+  renewableEnergy: CountryData[];
+  femaleLaborForce: CountryData[];
+  militaryExpenditure: CountryData[];
+  marketCapitalization: CountryData[];
+  scientificPublications: CountryData[];
+  ictExports: CountryData[];
+  mobileSubscriptions: CountryData[];
+  patentApplications: CountryData[];
+  socialSpending: CountryData[];
+  publicDebtService: CountryData[];
+  servicesValueAdded: CountryData[];
+  agriculturalValueAdded: CountryData[];
+  tradeOpenness: CountryData[];
+  tariffRate: CountryData[];
+  tourismReceipts: CountryData[];
+  privateInvestment: CountryData[];
+  newBusinessDensity: CountryData[];
 }> {
   try {
     // Check cache version - invalidate if outdated
@@ -282,7 +370,48 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.LABOR_PRODUCTIVITY, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.GINI_COEFFICIENT, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.RD_SPENDING, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.ENERGY_CONSUMPTION, COUNTRY_CODES, !forceRefresh)
+      fetchIndicatorData(INDICATORS.ENERGY_CONSUMPTION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.GDP_PER_CAPITA_PPP, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.CURRENT_ACCOUNT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.GROSS_CAPITAL_FORMATION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.RESERVES_MONTHS_IMPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.EXCHANGE_RATE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.POVERTY_RATE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TERTIARY_ENROLLMENT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TAX_REVENUE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.DOMESTIC_CREDIT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.IMPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.LIFE_EXPECTANCY, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.URBAN_POPULATION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.HIGHTECH_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.CO2_EMISSIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.NET_MIGRATION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.LABOR_FORCE_PARTICIPATION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.BUDGET_BALANCE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.HEALTHCARE_EXPENDITURE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.EDUCATION_EXPENDITURE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.INTERNET_USERS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.YOUTH_UNEMPLOYMENT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MANUFACTURING_VALUE_ADDED, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.HOUSEHOLD_CONSUMPTION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.RENEWABLE_ENERGY, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.FEMALE_LABOR_FORCE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MILITARY_EXPENDITURE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MARKET_CAPITALIZATION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.SCIENTIFIC_PUBLICATIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ICT_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MOBILE_SUBSCRIPTIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.PATENT_APPLICATIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.SOCIAL_SPENDING, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.PUBLIC_DEBT_SERVICE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.SERVICES_VALUE_ADDED, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.AGRICULTURAL_VALUE_ADDED, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TRADE_OPENNESS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TARIFF_RATE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TOURISM_RECEIPTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.PRIVATE_INVESTMENT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.NEW_BUSINESS_DENSITY, COUNTRY_CODES, !forceRefresh)
     ]);
 
     // Extract results and track failures
@@ -301,7 +430,48 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       laborProductivityResult,
       giniCoefficientResult,
       rdSpendingResult,
-      energyConsumptionResult
+      energyConsumptionResult,
+      gdpPerCapitaPPPResult,
+      currentAccountResult,
+      grossCapitalFormationResult,
+      reservesMonthsImportsResult,
+      exchangeRateResult,
+      povertyRateResult,
+      tertiaryEnrollmentResult,
+      taxRevenueResult,
+      domesticCreditResult,
+      exportsResult,
+      importsResult,
+      lifeExpectancyResult,
+      urbanPopulationResult,
+      hightechExportsResult,
+      co2EmissionsResult,
+      netMigrationResult,
+      laborForceParticipationResult,
+      budgetBalanceResult,
+      healthcareExpenditureResult,
+      educationExpenditureResult,
+      internetUsersResult,
+      youthUnemploymentResult,
+      manufacturingValueAddedResult,
+      householdConsumptionResult,
+      renewableEnergyResult,
+      femaleLaborForceResult,
+      militaryExpenditureResult,
+      marketCapitalizationResult,
+      scientificPublicationsResult,
+      ictExportsResult,
+      mobileSubscriptionsResult,
+      patentApplicationsResult,
+      socialSpendingResult,
+      publicDebtServiceResult,
+      servicesValueAddedResult,
+      agriculturalValueAddedResult,
+      tradeOpennessResult,
+      tariffRateResult,
+      tourismReceiptsResult,
+      privateInvestmentResult,
+      newBusinessDensityResult
     ] = results;
 
     // Log any failures
@@ -309,7 +479,20 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       'Interest Rates', 'Employment', 'Unemployment', 'Government Debt', 
       'Inflation', 'GDP Growth', 'CPI', 'Population Growth', 'FDI', 
       'Trade Balance', 'Government Spending', 'Labor Productivity', 
-      'Gini Coefficient', 'R&D Spending', 'Energy Consumption'
+      'Gini Coefficient', 'R&D Spending', 'Energy Consumption',
+      'GDP per Capita (PPP)', 'Current Account', 'Gross Capital Formation',
+      'Reserves (Months of Imports)', 'Exchange Rate', 'Poverty Rate',
+      'Tertiary Enrollment', 'Tax Revenue', 'Domestic Credit',
+      'Exports', 'Imports', 'Life Expectancy', 'Urban Population',
+      'High-tech Exports', 'CO2 Emissions', 'Net Migration',
+      'Labor Force Participation', 'Budget Balance', 'Healthcare Expenditure',
+      'Education Expenditure', 'Internet Users', 'Youth Unemployment',
+      'Manufacturing Value Added', 'Household Consumption', 'Renewable Energy',
+      'Female Labor Force Participation', 'Military Expenditure', 'Market Capitalization',
+      'Scientific Publications', 'ICT Exports', 'Mobile Subscriptions',
+      'Patent Applications', 'Social Spending', 'Public Debt Service',
+      'Services Value Added', 'Agricultural Value Added', 'Trade Openness',
+      'Tariff Rate', 'Tourism Receipts', 'Private Investment', 'New Business Density'
     ];
     
     let failedCount = 0;
@@ -396,7 +579,126 @@ const completeData = {
       energyConsumption: mergeUSADataFromFRED(
         energyConsumptionResult.status === 'fulfilled' ? energyConsumptionResult.value : [],
         usaData.energyConsumption
-      )
+      ),
+      gdpPerCapitaPPP: mergeUSADataFromFRED(
+        gdpPerCapitaPPPResult.status === 'fulfilled' ? gdpPerCapitaPPPResult.value : [],
+        usaData.gdpPerCapitaPPP
+      ),
+      currentAccount: mergeUSADataFromFRED(
+        currentAccountResult.status === 'fulfilled' ? currentAccountResult.value : [],
+        usaData.currentAccount
+      ),
+      grossCapitalFormation: mergeUSADataFromFRED(
+        grossCapitalFormationResult.status === 'fulfilled' ? grossCapitalFormationResult.value : [],
+        usaData.grossCapitalFormation
+      ),
+      reservesMonthsImports: mergeUSADataFromFRED(
+        reservesMonthsImportsResult.status === 'fulfilled' ? reservesMonthsImportsResult.value : [],
+        usaData.reservesMonthsImports
+      ),
+      exchangeRate: mergeUSADataFromFRED(
+        exchangeRateResult.status === 'fulfilled' ? exchangeRateResult.value : [],
+        usaData.exchangeRate
+      ),
+      povertyRate: povertyRateResult.status === 'fulfilled' ? povertyRateResult.value : [],
+      tertiaryEnrollment: mergeUSADataFromFRED(
+        tertiaryEnrollmentResult.status === 'fulfilled' ? tertiaryEnrollmentResult.value : [],
+        usaData.tertiaryEnrollment
+      ),
+      taxRevenue: mergeUSADataFromFRED(
+        taxRevenueResult.status === 'fulfilled' ? taxRevenueResult.value : [],
+        usaData.taxRevenue
+      ),
+      domesticCredit: mergeUSADataFromFRED(
+        domesticCreditResult.status === 'fulfilled' ? domesticCreditResult.value : [],
+        usaData.domesticCredit
+      ),
+      exports: mergeUSADataFromFRED(
+        exportsResult.status === 'fulfilled' ? exportsResult.value : [],
+        usaData.exports
+      ),
+      imports: mergeUSADataFromFRED(
+        importsResult.status === 'fulfilled' ? importsResult.value : [],
+        usaData.imports
+      ),
+      lifeExpectancy: lifeExpectancyResult.status === 'fulfilled' ? lifeExpectancyResult.value : [],
+      urbanPopulation: urbanPopulationResult.status === 'fulfilled' ? urbanPopulationResult.value : [],
+      hightechExports: mergeUSADataFromFRED(
+        hightechExportsResult.status === 'fulfilled' ? hightechExportsResult.value : [],
+        usaData.hightechExports
+      ),
+      co2Emissions: mergeUSADataFromFRED(
+        co2EmissionsResult.status === 'fulfilled' ? co2EmissionsResult.value : [],
+        usaData.co2Emissions
+      ),
+      netMigration: netMigrationResult.status === 'fulfilled' ? netMigrationResult.value : [],
+      laborForceParticipation: mergeUSADataFromFRED(
+        laborForceParticipationResult.status === 'fulfilled' ? laborForceParticipationResult.value : [],
+        usaData.laborForceParticipation
+      ),
+      budgetBalance: mergeUSADataFromFRED(
+        budgetBalanceResult.status === 'fulfilled' ? budgetBalanceResult.value : [],
+        usaData.budgetBalance
+      ),
+      healthcareExpenditure: mergeUSADataFromFRED(
+        healthcareExpenditureResult.status === 'fulfilled' ? healthcareExpenditureResult.value : [],
+        usaData.healthcareExpenditure
+      ),
+      educationExpenditure: mergeUSADataFromFRED(
+        educationExpenditureResult.status === 'fulfilled' ? educationExpenditureResult.value : [],
+        usaData.educationExpenditure
+      ),
+      internetUsers: internetUsersResult.status === 'fulfilled' ? internetUsersResult.value : [],
+      youthUnemployment: mergeUSADataFromFRED(
+        youthUnemploymentResult.status === 'fulfilled' ? youthUnemploymentResult.value : [],
+        usaData.youthUnemployment
+      ),
+      manufacturingValueAdded: mergeUSADataFromFRED(
+        manufacturingValueAddedResult.status === 'fulfilled' ? manufacturingValueAddedResult.value : [],
+        usaData.manufacturingValueAdded
+      ),
+      householdConsumption: mergeUSADataFromFRED(
+        householdConsumptionResult.status === 'fulfilled' ? householdConsumptionResult.value : [],
+        usaData.householdConsumption
+      ),
+      renewableEnergy: renewableEnergyResult.status === 'fulfilled' ? renewableEnergyResult.value : [],
+      femaleLaborForce: mergeUSADataFromFRED(
+        femaleLaborForceResult.status === 'fulfilled' ? femaleLaborForceResult.value : [],
+        usaData.femaleLaborForce
+      ),
+      militaryExpenditure: mergeUSADataFromFRED(
+        militaryExpenditureResult.status === 'fulfilled' ? militaryExpenditureResult.value : [],
+        usaData.militaryExpenditure
+      ),
+      marketCapitalization: mergeUSADataFromFRED(
+        marketCapitalizationResult.status === 'fulfilled' ? marketCapitalizationResult.value : [],
+        usaData.marketCapitalization
+      ),
+      scientificPublications: scientificPublicationsResult.status === 'fulfilled' ? scientificPublicationsResult.value : [],
+      ictExports: ictExportsResult.status === 'fulfilled' ? ictExportsResult.value : [],
+      mobileSubscriptions: mobileSubscriptionsResult.status === 'fulfilled' ? mobileSubscriptionsResult.value : [],
+      patentApplications: patentApplicationsResult.status === 'fulfilled' ? patentApplicationsResult.value : [],
+      socialSpending: socialSpendingResult.status === 'fulfilled' ? socialSpendingResult.value : [],
+      publicDebtService: mergeUSADataFromFRED(
+        publicDebtServiceResult.status === 'fulfilled' ? publicDebtServiceResult.value : [],
+        usaData.publicDebtService
+      ),
+      servicesValueAdded: mergeUSADataFromFRED(
+        servicesValueAddedResult.status === 'fulfilled' ? servicesValueAddedResult.value : [],
+        usaData.servicesValueAdded
+      ),
+      agriculturalValueAdded: mergeUSADataFromFRED(
+        agriculturalValueAddedResult.status === 'fulfilled' ? agriculturalValueAddedResult.value : [],
+        usaData.agriculturalValueAdded
+      ),
+      tradeOpenness: tradeOpennessResult.status === 'fulfilled' ? tradeOpennessResult.value : [],
+      tariffRate: tariffRateResult.status === 'fulfilled' ? tariffRateResult.value : [],
+      tourismReceipts: tourismReceiptsResult.status === 'fulfilled' ? tourismReceiptsResult.value : [],
+      privateInvestment: mergeUSADataFromFRED(
+        privateInvestmentResult.status === 'fulfilled' ? privateInvestmentResult.value : [],
+        usaData.privateInvestment
+      ),
+      newBusinessDensity: newBusinessDensityResult.status === 'fulfilled' ? newBusinessDensityResult.value : []
     };
 
     // Debug: Check if USA data exists in merged data

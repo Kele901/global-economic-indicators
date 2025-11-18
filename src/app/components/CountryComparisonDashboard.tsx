@@ -39,6 +39,47 @@ interface ComparisonDashboardProps {
     giniCoefficient: CountryData[];
     rdSpending: CountryData[];
     energyConsumption: CountryData[];
+    gdpPerCapitaPPP: CountryData[];
+    currentAccount: CountryData[];
+    grossCapitalFormation: CountryData[];
+    reservesMonthsImports: CountryData[];
+    exchangeRate: CountryData[];
+    povertyRate: CountryData[];
+    tertiaryEnrollment: CountryData[];
+    taxRevenue: CountryData[];
+    domesticCredit: CountryData[];
+    exports: CountryData[];
+    imports: CountryData[];
+    lifeExpectancy: CountryData[];
+    urbanPopulation: CountryData[];
+    hightechExports: CountryData[];
+    co2Emissions: CountryData[];
+    netMigration: CountryData[];
+    laborForceParticipation: CountryData[];
+    budgetBalance: CountryData[];
+    healthcareExpenditure: CountryData[];
+    educationExpenditure: CountryData[];
+    internetUsers: CountryData[];
+    youthUnemployment: CountryData[];
+    manufacturingValueAdded: CountryData[];
+    householdConsumption: CountryData[];
+    renewableEnergy: CountryData[];
+    femaleLaborForce: CountryData[];
+    militaryExpenditure: CountryData[];
+    marketCapitalization: CountryData[];
+    scientificPublications: CountryData[];
+    ictExports: CountryData[];
+    mobileSubscriptions: CountryData[];
+    patentApplications: CountryData[];
+    socialSpending: CountryData[];
+    publicDebtService: CountryData[];
+    servicesValueAdded: CountryData[];
+    agriculturalValueAdded: CountryData[];
+    tradeOpenness: CountryData[];
+    tariffRate: CountryData[];
+    tourismReceipts: CountryData[];
+    privateInvestment: CountryData[];
+    newBusinessDensity: CountryData[];
   };
   isDarkMode: boolean;
 }
@@ -61,6 +102,47 @@ interface ComparisonMetricProps {
     giniCoefficient: CountryData[];
     rdSpending: CountryData[];
     energyConsumption: CountryData[];
+    gdpPerCapitaPPP: CountryData[];
+    currentAccount: CountryData[];
+    grossCapitalFormation: CountryData[];
+    reservesMonthsImports: CountryData[];
+    exchangeRate: CountryData[];
+    povertyRate: CountryData[];
+    tertiaryEnrollment: CountryData[];
+    taxRevenue: CountryData[];
+    domesticCredit: CountryData[];
+    exports: CountryData[];
+    imports: CountryData[];
+    lifeExpectancy: CountryData[];
+    urbanPopulation: CountryData[];
+    hightechExports: CountryData[];
+    co2Emissions: CountryData[];
+    netMigration: CountryData[];
+    laborForceParticipation: CountryData[];
+    budgetBalance: CountryData[];
+    healthcareExpenditure: CountryData[];
+    educationExpenditure: CountryData[];
+    internetUsers: CountryData[];
+    youthUnemployment: CountryData[];
+    manufacturingValueAdded: CountryData[];
+    householdConsumption: CountryData[];
+    renewableEnergy: CountryData[];
+    femaleLaborForce: CountryData[];
+    militaryExpenditure: CountryData[];
+    marketCapitalization: CountryData[];
+    scientificPublications: CountryData[];
+    ictExports: CountryData[];
+    mobileSubscriptions: CountryData[];
+    patentApplications: CountryData[];
+    socialSpending: CountryData[];
+    publicDebtService: CountryData[];
+    servicesValueAdded: CountryData[];
+    agriculturalValueAdded: CountryData[];
+    tradeOpenness: CountryData[];
+    tariffRate: CountryData[];
+    tourismReceipts: CountryData[];
+    privateInvestment: CountryData[];
+    newBusinessDensity: CountryData[];
   };
   metricKey: keyof ComparisonMetricProps['data'];
   countries: string[];
@@ -268,6 +350,19 @@ const StatComparison = ({
   format = (v: number) => `${v.toFixed(1)}%`
 }: StatComparisonProps) => {
   const latest = metric[metric.length - 1];
+  
+  // Handle empty metric data
+  if (!latest) {
+    return (
+      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          No data available for this indicator
+        </div>
+      </div>
+    );
+  }
+  
   const sorted = [...countries].sort((a, b) => (Number(latest[b]) || 0) - (Number(latest[a]) || 0));
 
   return (
@@ -347,7 +442,7 @@ const CorrelationMatrix = ({
   isDarkMode: boolean;
 }) => {
   const correlations = useMemo(() => {
-    const matrix: { country1: string; country2: string; gdp: number; inflation: number }[] = [];
+    const matrix: { country1: string; country2: string; gdp: number; inflation: number; employment: number; lifeExpectancy: number }[] = [];
     
     for (let i = 0; i < countries.length; i++) {
       for (let j = i + 1; j < countries.length; j++) {
@@ -358,12 +453,18 @@ const CorrelationMatrix = ({
         const gdpData2 = data.gdpGrowth.map(d => Number(d[country2]) || 0).filter(v => v !== 0);
         const inflationData1 = data.inflationRates.map(d => Number(d[country1]) || 0).filter(v => v !== 0);
         const inflationData2 = data.inflationRates.map(d => Number(d[country2]) || 0).filter(v => v !== 0);
+        const employmentData1 = data.employmentRates.map(d => Number(d[country1]) || 0).filter(v => v !== 0);
+        const employmentData2 = data.employmentRates.map(d => Number(d[country2]) || 0).filter(v => v !== 0);
+        const lifeExpectancyData1 = data.lifeExpectancy.map(d => Number(d[country1]) || 0).filter(v => v !== 0);
+        const lifeExpectancyData2 = data.lifeExpectancy.map(d => Number(d[country2]) || 0).filter(v => v !== 0);
         
         matrix.push({
           country1,
           country2,
           gdp: calculateCorrelation(gdpData1, gdpData2),
-          inflation: calculateCorrelation(inflationData1, inflationData2)
+          inflation: calculateCorrelation(inflationData1, inflationData2),
+          employment: calculateCorrelation(employmentData1, employmentData2),
+          lifeExpectancy: calculateCorrelation(lifeExpectancyData1, lifeExpectancyData2)
         });
       }
     }
@@ -374,7 +475,7 @@ const CorrelationMatrix = ({
     <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
       <h3 className="text-lg font-semibold mb-4">Economic Correlations</h3>
       <div className="space-y-4">
-        {correlations.map(({ country1, country2, gdp, inflation }) => {
+        {correlations.map(({ country1, country2, gdp, inflation, employment, lifeExpectancy }) => {
           const Flag1 = countryFlags[country1];
           const Flag2 = countryFlags[country2];
           
@@ -398,6 +499,18 @@ const CorrelationMatrix = ({
                   <span className="text-gray-500 dark:text-gray-400">Inflation Correlation: </span>
                   <span className={inflation > 0.5 ? 'text-green-500' : inflation < -0.5 ? 'text-red-500' : ''}>
                     {(inflation * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Employment Correlation: </span>
+                  <span className={employment > 0.5 ? 'text-green-500' : employment < -0.5 ? 'text-red-500' : ''}>
+                    {(employment * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Life Expectancy Correlation: </span>
+                  <span className={lifeExpectancy > 0.5 ? 'text-green-500' : lifeExpectancy < -0.5 ? 'text-red-500' : ''}>
+                    {(lifeExpectancy * 100).toFixed(1)}%
                   </span>
                 </div>
               </div>
@@ -545,7 +658,9 @@ const EconomicRadarChart = ({
         fdi: Number(data.fdi[data.fdi.length - 1][country]) || 0,
         tradeBalance: Number(data.tradeBalance[data.tradeBalance.length - 1][country]) || 0,
         governmentSpending: Number(data.governmentSpending[data.governmentSpending.length - 1][country]) || 0,
-        gini: Number(data.giniCoefficient[data.giniCoefficient.length - 1][country]) || 0
+        gini: Number(data.giniCoefficient[data.giniCoefficient.length - 1][country]) || 0,
+        gdpPerCapita: Number(data.gdpPerCapitaPPP[data.gdpPerCapitaPPP.length - 1][country]) || 0,
+        lifeExpectancy: Number(data.lifeExpectancy[data.lifeExpectancy.length - 1][country]) || 0
       };
       
       // Normalize values to 0-100 scale for radar chart
@@ -558,7 +673,9 @@ const EconomicRadarChart = ({
         fdi: Math.min(Math.max((latest.fdi + 5) * 10, 0), 100), // -5% to +5% -> 0-100
         tradeBalance: Math.min(Math.max((latest.tradeBalance + 10) * 5, 0), 100), // -10% to +10% -> 0-100
         governmentSpending: Math.min(Math.max((latest.governmentSpending - 10) * 2, 0), 100), // 10-60% -> 0-100
-        gini: Math.min(Math.max((1 - latest.gini) * 100, 0), 100) // 1-0 -> 0-100 (inverted)
+        gini: Math.min(Math.max((1 - latest.gini) * 100, 0), 100), // 1-0 -> 0-100 (inverted)
+        gdpPerCapita: Math.min(Math.max((latest.gdpPerCapita / 1000), 0), 100), // $0-100k -> 0-100
+        lifeExpectancy: Math.min(Math.max((latest.lifeExpectancy - 40) * 2.5, 0), 100) // 40-80 years -> 0-100
       };
     });
   }, [data, countries]);
@@ -574,7 +691,9 @@ const EconomicRadarChart = ({
     { metric: 'FDI', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.fdi }), {}) },
     { metric: 'Trade Balance', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.tradeBalance }), {}) },
     { metric: 'Government Spending', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.governmentSpending }), {}) },
-    { metric: 'Income Equality', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.gini }), {}) }
+    { metric: 'Income Equality', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.gini }), {}) },
+    { metric: 'GDP per Capita', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.gdpPerCapita }), {}) },
+    { metric: 'Life Expectancy', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.lifeExpectancy }), {}) }
   ];
 
   return (
@@ -663,7 +782,48 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
       laborProductivity: filterByTimeRange(data.laborProductivity),
       giniCoefficient: filterByTimeRange(data.giniCoefficient),
       rdSpending: filterByTimeRange(data.rdSpending),
-      energyConsumption: filterByTimeRange(data.energyConsumption)
+      energyConsumption: filterByTimeRange(data.energyConsumption),
+      gdpPerCapitaPPP: filterByTimeRange(data.gdpPerCapitaPPP),
+      currentAccount: filterByTimeRange(data.currentAccount),
+      grossCapitalFormation: filterByTimeRange(data.grossCapitalFormation),
+      reservesMonthsImports: filterByTimeRange(data.reservesMonthsImports),
+      exchangeRate: filterByTimeRange(data.exchangeRate),
+      povertyRate: filterByTimeRange(data.povertyRate),
+      tertiaryEnrollment: filterByTimeRange(data.tertiaryEnrollment),
+      taxRevenue: filterByTimeRange(data.taxRevenue),
+      domesticCredit: filterByTimeRange(data.domesticCredit),
+      exports: filterByTimeRange(data.exports),
+      imports: filterByTimeRange(data.imports),
+      lifeExpectancy: filterByTimeRange(data.lifeExpectancy),
+      urbanPopulation: filterByTimeRange(data.urbanPopulation),
+      hightechExports: filterByTimeRange(data.hightechExports),
+      co2Emissions: filterByTimeRange(data.co2Emissions),
+      netMigration: filterByTimeRange(data.netMigration),
+      laborForceParticipation: filterByTimeRange(data.laborForceParticipation),
+      budgetBalance: filterByTimeRange(data.budgetBalance),
+      healthcareExpenditure: filterByTimeRange(data.healthcareExpenditure),
+      educationExpenditure: filterByTimeRange(data.educationExpenditure),
+      internetUsers: filterByTimeRange(data.internetUsers),
+      youthUnemployment: filterByTimeRange(data.youthUnemployment),
+      manufacturingValueAdded: filterByTimeRange(data.manufacturingValueAdded),
+      householdConsumption: filterByTimeRange(data.householdConsumption),
+      renewableEnergy: filterByTimeRange(data.renewableEnergy),
+      femaleLaborForce: filterByTimeRange(data.femaleLaborForce),
+      militaryExpenditure: filterByTimeRange(data.militaryExpenditure),
+      marketCapitalization: filterByTimeRange(data.marketCapitalization),
+      scientificPublications: filterByTimeRange(data.scientificPublications),
+      ictExports: filterByTimeRange(data.ictExports),
+      mobileSubscriptions: filterByTimeRange(data.mobileSubscriptions),
+      patentApplications: filterByTimeRange(data.patentApplications),
+      socialSpending: filterByTimeRange(data.socialSpending),
+      publicDebtService: filterByTimeRange(data.publicDebtService),
+      servicesValueAdded: filterByTimeRange(data.servicesValueAdded),
+      agriculturalValueAdded: filterByTimeRange(data.agriculturalValueAdded),
+      tradeOpenness: filterByTimeRange(data.tradeOpenness),
+      tariffRate: filterByTimeRange(data.tariffRate),
+      tourismReceipts: filterByTimeRange(data.tourismReceipts),
+      privateInvestment: filterByTimeRange(data.privateInvestment),
+      newBusinessDensity: filterByTimeRange(data.newBusinessDensity)
     };
   }, [data, selectedPeriod]);
 
@@ -841,6 +1001,245 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
               yDomain={[-2, 5]}
               valueFormatter={(value) => `${value.toFixed(2)}%`}
             />
+            <ComparisonMetric
+              title="Labor Force Participation Rate (%)"
+              data={filteredData}
+              metricKey="laborForceParticipation"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[30, 90]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Budget Balance (% of GDP)"
+              data={filteredData}
+              metricKey="budgetBalance"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[-20, 10]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Healthcare Expenditure (% of GDP)"
+              data={filteredData}
+              metricKey="healthcareExpenditure"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 20]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Education Expenditure (% of GDP)"
+              data={filteredData}
+              metricKey="educationExpenditure"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 10]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Internet Users (% of population)"
+              data={filteredData}
+              metricKey="internetUsers"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 100]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Youth Unemployment Rate (%)"
+              data={filteredData}
+              metricKey="youthUnemployment"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 60]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Manufacturing Value Added (% of GDP)"
+              data={filteredData}
+              metricKey="manufacturingValueAdded"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 40]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Household Consumption (% of GDP)"
+              data={filteredData}
+              metricKey="householdConsumption"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[30, 90]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Renewable Energy Consumption (%)"
+              data={filteredData}
+              metricKey="renewableEnergy"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 100]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Female Labor Force Participation (%)"
+              data={filteredData}
+              metricKey="femaleLaborForce"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[20, 80]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Military Expenditure (% of GDP)"
+              data={filteredData}
+              metricKey="militaryExpenditure"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 10]}
+              valueFormatter={(value) => `${value.toFixed(2)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Market Capitalization (% of GDP)"
+              data={filteredData}
+              metricKey="marketCapitalization"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 300]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Scientific Publications"
+              data={filteredData}
+              metricKey="scientificPublications"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 500000]}
+              valueFormatter={(value) => value.toLocaleString()}
+              chartType="bar"
+            />
+            <ComparisonMetric
+              title="ICT Exports (% of goods exports)"
+              data={filteredData}
+              metricKey="ictExports"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 40]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Mobile Subscriptions (per 100 people)"
+              data={filteredData}
+              metricKey="mobileSubscriptions"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 200]}
+              valueFormatter={(value) => value.toFixed(1)}
+            />
+            <ComparisonMetric
+              title="Patent Applications"
+              data={filteredData}
+              metricKey="patentApplications"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 600000]}
+              valueFormatter={(value) => value.toLocaleString()}
+              chartType="bar"
+            />
+            <ComparisonMetric
+              title="Social Protection Coverage (%)"
+              data={filteredData}
+              metricKey="socialSpending"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 100]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Public Debt Service (% of revenue)"
+              data={filteredData}
+              metricKey="publicDebtService"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 40]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Services Sector (% of GDP)"
+              data={filteredData}
+              metricKey="servicesValueAdded"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[30, 90]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Agriculture Sector (% of GDP)"
+              data={filteredData}
+              metricKey="agriculturalValueAdded"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 50]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Trade Openness (% of GDP)"
+              data={filteredData}
+              metricKey="tradeOpenness"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 400]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Average Tariff Rate (%)"
+              data={filteredData}
+              metricKey="tariffRate"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 20]}
+              valueFormatter={(value) => `${value.toFixed(2)}%`}
+            />
+            <ComparisonMetric
+              title="Tourism Receipts (% of exports)"
+              data={filteredData}
+              metricKey="tourismReceipts"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 30]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Private Sector Investment (% of GDP)"
+              data={filteredData}
+              metricKey="privateInvestment"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 40]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="New Business Density (per 1,000 people)"
+              data={filteredData}
+              metricKey="newBusinessDensity"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 30]}
+              valueFormatter={(value) => value.toFixed(2)}
+              chartType="bar"
+            />
           </div>
 
           {selectedCountries.length >= 2 && (
@@ -911,6 +1310,174 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
               data={filteredData}
               isDarkMode={isDarkMode}
               format={(v: number) => v.toFixed(3)}
+            />
+            <StatComparison
+              title="Latest GDP per Capita (PPP)"
+              countries={selectedCountries}
+              metric={filteredData.gdpPerCapitaPPP}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `$${v.toLocaleString()}`}
+            />
+            <StatComparison
+              title="Latest Tax Revenue (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.taxRevenue}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Life Expectancy"
+              countries={selectedCountries}
+              metric={filteredData.lifeExpectancy}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)} years`}
+            />
+            <StatComparison
+              title="Latest CO2 Emissions (per capita)"
+              countries={selectedCountries}
+              metric={filteredData.co2Emissions}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(2)} tons`}
+            />
+            <StatComparison
+              title="Latest Current Account (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.currentAccount}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Urban Population (%)"
+              countries={selectedCountries}
+              metric={filteredData.urbanPopulation}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Military Expenditure (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.militaryExpenditure}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(2)}%`}
+            />
+            <StatComparison
+              title="Latest Market Capitalization (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.marketCapitalization}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Scientific Publications"
+              countries={selectedCountries}
+              metric={filteredData.scientificPublications}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => v.toLocaleString()}
+            />
+            <StatComparison
+              title="Latest ICT Exports (% of goods exports)"
+              countries={selectedCountries}
+              metric={filteredData.ictExports}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Mobile Subscriptions (per 100 people)"
+              countries={selectedCountries}
+              metric={filteredData.mobileSubscriptions}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => v.toFixed(1)}
+            />
+            <StatComparison
+              title="Latest Patent Applications"
+              countries={selectedCountries}
+              metric={filteredData.patentApplications}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => v.toLocaleString()}
+            />
+            <StatComparison
+              title="Latest Social Protection Coverage (%)"
+              countries={selectedCountries}
+              metric={filteredData.socialSpending}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Public Debt Service (% of revenue)"
+              countries={selectedCountries}
+              metric={filteredData.publicDebtService}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Services Sector (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.servicesValueAdded}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Agriculture Sector (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.agriculturalValueAdded}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Trade Openness (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.tradeOpenness}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Tariff Rate (%)"
+              countries={selectedCountries}
+              metric={filteredData.tariffRate}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(2)}%`}
+            />
+            <StatComparison
+              title="Latest Tourism Receipts (% of exports)"
+              countries={selectedCountries}
+              metric={filteredData.tourismReceipts}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Private Investment (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.privateInvestment}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest New Business Density (per 1,000 people)"
+              countries={selectedCountries}
+              metric={filteredData.newBusinessDensity}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => v.toFixed(2)}
             />
           </div>
 

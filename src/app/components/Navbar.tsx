@@ -86,7 +86,8 @@ const Navbar = () => {
     { href: "/economic-gravity", label: "Economic Gravity" },
     { href: "/trading-places", label: "Trading Places" },
     { href: "/compare", label: "Compare Countries" },
-    { href: "/inflation", label: "Inflation" }
+    { href: "/inflation", label: "Inflation" },
+    { href: "/inflation-calculator", label: "Inflation Calculator" }
   ];
 
   return (

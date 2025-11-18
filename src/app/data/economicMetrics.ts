@@ -416,6 +416,517 @@ export const economicMetrics: { [key: string]: EconomicMetricInfo } = {
     frequency: 'Quarterly',
     units: 'Similarity Index (0-100)',
     relatedMetrics: ['GDP Growth', 'Inflation Rate', 'FDI', 'Trade Balance', 'Government Spending', 'Labor Productivity', 'Gini Coefficient']
+  },
+
+  // Labor Market Indicators
+  laborForceParticipation: {
+    title: 'Labor Force Participation Rate',
+    description: 'The percentage of the working-age population (15+) that is economically active, either employed or actively seeking employment.',
+    formula: 'Labor Force Participation = (Labor Force / Working-Age Population) × 100',
+    interpretation: 'Higher rates indicate greater economic activity and productive capacity. Rates vary by demographics, culture, and economic development level.',
+    implications: [
+      'Affects overall economic output and tax revenue',
+      'Influences consumer spending and demand',
+      'Impacts pension and social security systems',
+      'Reflects gender equality and social policies',
+      'Affects long-term economic growth potential'
+    ],
+    dataSource: 'National Labor Offices, World Bank',
+    frequency: 'Quarterly',
+    units: 'Percentage (%)',
+    relatedMetrics: ['Employment Rate', 'Unemployment Rate', 'GDP Growth', 'Population Growth']
+  },
+
+  youthUnemployment: {
+    title: 'Youth Unemployment Rate',
+    description: 'The unemployment rate among youth aged 15-24, a key indicator of labor market health and future economic prospects.',
+    formula: 'Youth Unemployment = (Unemployed Youth / Youth Labor Force) × 100',
+    interpretation: 'Youth unemployment is typically 2-3 times higher than overall unemployment. High levels can indicate education-job mismatches and future economic challenges.',
+    implications: [
+      'Affects long-term career prospects and earnings',
+      'Influences social stability and cohesion',
+      'Impacts consumer spending and economic growth',
+      'Affects education and training policy',
+      'Influences migration patterns'
+    ],
+    dataSource: 'National Labor Offices, ILO, World Bank',
+    frequency: 'Quarterly',
+    units: 'Percentage (%)',
+    relatedMetrics: ['Unemployment Rate', 'Education Expenditure', 'GDP Growth', 'Labor Force Participation']
+  },
+
+  femaleLaborForce: {
+    title: 'Female Labor Force Participation Rate',
+    description: 'The percentage of female working-age population (15+) that is economically active, reflecting gender equality in labor markets.',
+    formula: 'Female Participation = (Female Labor Force / Female Working-Age Population) × 100',
+    interpretation: 'Higher rates indicate better gender equality and economic utilization of human capital. OECD average is around 65%.',
+    implications: [
+      'Reflects gender equality and social development',
+      'Affects household income and consumer spending',
+      'Influences economic growth and productivity',
+      'Impacts family structure and birth rates',
+      'Affects policy on childcare and parental leave'
+    ],
+    dataSource: 'National Labor Offices, World Bank, ILO',
+    frequency: 'Quarterly',
+    units: 'Percentage (%)',
+    relatedMetrics: ['Labor Force Participation', 'GDP Growth', 'Education Expenditure', 'Social Spending']
+  },
+
+  // Fiscal Indicators
+  budgetBalance: {
+    title: 'Budget Balance (Fiscal Surplus/Deficit)',
+    description: 'Government cash surplus or deficit as a percentage of GDP, indicating fiscal health.',
+    formula: 'Budget Balance = (Government Revenue - Government Expenditure) / GDP × 100',
+    interpretation: 'Positive values indicate surplus, negative values indicate deficit. Deficits above 3% of GDP are generally considered concerning.',
+    implications: [
+      'Affects government debt levels and sustainability',
+      'Influences interest rates and borrowing costs',
+      'Impacts currency strength and investor confidence',
+      'Affects future tax and spending policies',
+      'Influences economic stimulus capacity'
+    ],
+    dataSource: 'National Treasuries, IMF, World Bank',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Government Debt', 'Tax Revenue', 'Government Spending', 'Interest Rate']
+  },
+
+  healthcareExpenditure: {
+    title: 'Healthcare Expenditure',
+    description: 'Current health expenditure as a percentage of GDP, indicating investment in public health.',
+    formula: 'Healthcare Expenditure = (Total Health Spending / GDP) × 100',
+    interpretation: 'OECD average is around 9% of GDP. Higher spending doesn\'t always correlate with better outcomes, efficiency matters.',
+    implications: [
+      'Affects public health and life expectancy',
+      'Influences government budget and fiscal policy',
+      'Impacts economic productivity and labor supply',
+      'Affects insurance markets and private sector',
+      'Influences pharmaceutical and healthcare industries'
+    ],
+    dataSource: 'WHO, OECD, World Bank',
+    frequency: 'Annually',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Life Expectancy', 'Government Spending', 'GDP Growth', 'Population Growth']
+  },
+
+  educationExpenditure: {
+    title: 'Education Expenditure',
+    description: 'Government expenditure on education as a percentage of GDP, reflecting investment in human capital.',
+    formula: 'Education Expenditure = (Government Education Spending / GDP) × 100',
+    interpretation: 'UNESCO recommends 4-6% of GDP. Higher spending supports long-term economic growth through skilled workforce development.',
+    implications: [
+      'Affects long-term economic growth and productivity',
+      'Influences workforce quality and innovation',
+      'Impacts social mobility and inequality',
+      'Affects future employment and wage levels',
+      'Influences technological advancement'
+    ],
+    dataSource: 'UNESCO, OECD, World Bank',
+    frequency: 'Annually',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Labor Productivity', 'GDP Growth', 'Unemployment Rate', 'R&D Spending']
+  },
+
+  militaryExpenditure: {
+    title: 'Military Expenditure',
+    description: 'Military expenditure as a percentage of GDP, indicating defense spending priorities.',
+    formula: 'Military Expenditure = (Defense Spending / GDP) × 100',
+    interpretation: 'Global average is around 2% of GDP. Higher levels reflect security concerns, geopolitical tensions, or defense industry presence.',
+    implications: [
+      'Affects fiscal space for other government priorities',
+      'Influences geopolitical relationships and alliances',
+      'Impacts defense industry and employment',
+      'Affects government debt and fiscal sustainability',
+      'Influences international security dynamics'
+    ],
+    dataSource: 'SIPRI, World Bank, National Defense Ministries',
+    frequency: 'Annually',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Government Spending', 'Budget Balance', 'GDP Growth', 'Government Debt']
+  },
+
+  publicDebtService: {
+    title: 'Public Debt Service',
+    description: 'Interest payments as a percentage of government revenue, indicating debt burden.',
+    formula: 'Debt Service = (Interest Payments / Government Revenue) × 100',
+    interpretation: 'Higher levels reduce fiscal flexibility and crowd out other spending. Above 20% is considered very high.',
+    implications: [
+      'Reduces funds available for public services',
+      'Affects government credit rating and borrowing costs',
+      'Influences fiscal policy flexibility',
+      'Impacts future tax and spending decisions',
+      'Affects economic growth potential'
+    ],
+    dataSource: 'National Treasuries, IMF, World Bank',
+    frequency: 'Quarterly',
+    units: 'Percentage of Revenue (%)',
+    relatedMetrics: ['Government Debt', 'Interest Rate', 'Budget Balance', 'Tax Revenue']
+  },
+
+  socialSpending: {
+    title: 'Social Protection Coverage',
+    description: 'Percentage of population covered by social protection programs, indicating social safety net strength.',
+    formula: 'Coverage = (Population Covered by Social Programs / Total Population) × 100',
+    interpretation: 'Higher coverage indicates stronger social safety nets. Developed countries typically have 80%+ coverage.',
+    implications: [
+      'Affects poverty levels and income inequality',
+      'Influences economic security and consumer confidence',
+      'Impacts government fiscal sustainability',
+      'Affects social stability and cohesion',
+      'Influences political outcomes and policy'
+    ],
+    dataSource: 'ILO, World Bank, National Social Security Agencies',
+    frequency: 'Annually',
+    units: 'Percentage (%)',
+    relatedMetrics: ['Government Spending', 'Poverty Rate', 'Gini Coefficient', 'Unemployment Rate']
+  },
+
+  taxRevenue: {
+    title: 'Tax Revenue',
+    description: 'Tax revenue as a percentage of GDP, indicating government fiscal capacity.',
+    formula: 'Tax Revenue = (Total Tax Collection / GDP) × 100',
+    interpretation: 'OECD average is around 34% of GDP. Higher levels indicate greater public sector role and service provision capacity.',
+    implications: [
+      'Determines government spending capacity',
+      'Affects economic incentives and behavior',
+      'Influences income distribution',
+      'Impacts business investment decisions',
+      'Affects fiscal sustainability'
+    ],
+    dataSource: 'National Tax Authorities, OECD, IMF',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Government Spending', 'Budget Balance', 'GDP Growth', 'Gini Coefficient']
+  },
+
+  // Technology & Innovation
+  internetUsers: {
+    title: 'Internet Users',
+    description: 'Percentage of population with internet access, indicating digital connectivity and technological advancement.',
+    formula: 'Internet Users = (People with Internet Access / Total Population) × 100',
+    interpretation: 'Higher penetration indicates digital economy development. Above 80% is considered high connectivity.',
+    implications: [
+      'Affects digital economy and e-commerce growth',
+      'Influences education and information access',
+      'Impacts productivity and innovation',
+      'Affects social connectivity and communication',
+      'Influences digital divide and inequality'
+    ],
+    dataSource: 'ITU, World Bank, National Telecommunications Authorities',
+    frequency: 'Annually',
+    units: 'Percentage (%)',
+    relatedMetrics: ['GDP Growth', 'Education Expenditure', 'Mobile Subscriptions', 'Innovation']
+  },
+
+  mobileSubscriptions: {
+    title: 'Mobile Cellular Subscriptions',
+    description: 'Mobile cellular subscriptions per 100 people, indicating telecommunications infrastructure and adoption.',
+    formula: 'Mobile Subscriptions = (Total Mobile Subscriptions / Population) × 100',
+    interpretation: 'Can exceed 100% due to multiple subscriptions per person. Indicates connectivity and digital economy development.',
+    implications: [
+      'Enables mobile commerce and digital payments',
+      'Affects communication and business efficiency',
+      'Influences economic development and inclusion',
+      'Impacts social connectivity and information access',
+      'Affects telecommunications industry growth'
+    ],
+    dataSource: 'ITU, World Bank, National Telecommunications Authorities',
+    frequency: 'Annually',
+    units: 'Per 100 people',
+    relatedMetrics: ['Internet Users', 'GDP Growth', 'Digital Economy', 'Innovation']
+  },
+
+  scientificPublications: {
+    title: 'Scientific and Technical Publications',
+    description: 'Number of scientific and technical journal articles published, indicating research output and innovation capacity.',
+    formula: 'Publications = Total peer-reviewed scientific articles published',
+    interpretation: 'Higher numbers indicate strong research capacity and innovation ecosystem. Leading countries publish 100,000+ annually.',
+    implications: [
+      'Reflects research and innovation capacity',
+      'Affects technological advancement and competitiveness',
+      'Influences talent attraction and retention',
+      'Impacts economic growth potential',
+      'Affects international scientific standing'
+    ],
+    dataSource: 'Scopus, Web of Science, UNESCO',
+    frequency: 'Annually',
+    units: 'Number of articles',
+    relatedMetrics: ['R&D Spending', 'Patent Applications', 'Education Expenditure', 'GDP Growth']
+  },
+
+  patentApplications: {
+    title: 'Patent Applications',
+    description: 'Number of patent applications filed by residents, reflecting innovation and intellectual property creation.',
+    formula: 'Patent Applications = Total patents filed by domestic residents',
+    interpretation: 'Higher numbers indicate strong innovation activity. Leading countries file hundreds of thousands annually.',
+    implications: [
+      'Reflects innovation and technological advancement',
+      'Affects future economic competitiveness',
+      'Influences intellectual property value',
+      'Impacts technology sector development',
+      'Affects long-term economic growth'
+    ],
+    dataSource: 'WIPO, National Patent Offices',
+    frequency: 'Annually',
+    units: 'Number of applications',
+    relatedMetrics: ['R&D Spending', 'Scientific Publications', 'High-Tech Exports', 'GDP Growth']
+  },
+
+  // Trade & International
+  ictExports: {
+    title: 'ICT Goods Exports',
+    description: 'Information and communications technology goods exports as a percentage of total goods exports.',
+    formula: 'ICT Exports = (ICT Goods Exports / Total Goods Exports) × 100',
+    interpretation: 'Higher percentages indicate strong tech sector and export competitiveness. Leading exporters have 15-30%.',
+    implications: [
+      'Reflects technological competitiveness',
+      'Affects trade balance and currency strength',
+      'Influences high-tech employment',
+      'Impacts innovation ecosystem',
+      'Affects economic growth and development'
+    ],
+    dataSource: 'UN Comtrade, WTO, World Bank',
+    frequency: 'Annually',
+    units: 'Percentage of goods exports (%)',
+    relatedMetrics: ['High-Tech Exports', 'Trade Balance', 'Innovation', 'GDP Growth']
+  },
+
+  tradeOpenness: {
+    title: 'Trade Openness',
+    description: 'Sum of exports and imports as a percentage of GDP, measuring economic openness to international trade.',
+    formula: 'Trade Openness = ((Exports + Imports) / GDP) × 100',
+    interpretation: 'Higher values indicate greater integration with global economy. Small open economies often exceed 100%.',
+    implications: [
+      'Affects economic growth and diversification',
+      'Influences vulnerability to external shocks',
+      'Impacts currency stability',
+      'Affects domestic industry competitiveness',
+      'Influences policy autonomy'
+    ],
+    dataSource: 'WTO, World Bank, National Statistics',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Trade Balance', 'Exports', 'Imports', 'Exchange Rate']
+  },
+
+  tariffRate: {
+    title: 'Average Tariff Rate',
+    description: 'Simple mean of applied tariff rates on all products, indicating trade policy restrictiveness.',
+    formula: 'Tariff Rate = Average of all product-level tariff rates',
+    interpretation: 'Lower rates indicate freer trade policies. WTO members average 3-5% for developed countries, higher for developing.',
+    implications: [
+      'Affects consumer prices and inflation',
+      'Influences international trade flows',
+      'Impacts domestic industry protection',
+      'Affects trade negotiations and agreements',
+      'Influences economic efficiency and growth'
+    ],
+    dataSource: 'WTO, World Bank, National Customs Authorities',
+    frequency: 'Annually',
+    units: 'Percentage (%)',
+    relatedMetrics: ['Trade Balance', 'Trade Openness', 'Inflation Rate', 'Consumer Prices']
+  },
+
+  tourismReceipts: {
+    title: 'Tourism Receipts',
+    description: 'International tourism receipts as a percentage of total exports, showing tourism sector importance.',
+    formula: 'Tourism Receipts = (Tourism Revenue / Total Exports) × 100',
+    interpretation: 'Higher percentages indicate tourism-dependent economies. Small island nations often have 30%+.',
+    implications: [
+      'Affects foreign exchange earnings',
+      'Influences employment in services sector',
+      'Impacts seasonal economic patterns',
+      'Affects infrastructure development',
+      'Influences vulnerability to external shocks'
+    ],
+    dataSource: 'UNWTO, World Bank, National Tourism Boards',
+    frequency: 'Quarterly',
+    units: 'Percentage of exports (%)',
+    relatedMetrics: ['Services Value Added', 'Trade Balance', 'Employment Rate', 'Exchange Rate']
+  },
+
+  // Financial & Investment
+  marketCapitalization: {
+    title: 'Market Capitalization',
+    description: 'Market capitalization of listed domestic companies as a percentage of GDP, reflecting stock market depth.',
+    formula: 'Market Cap = (Total Listed Company Value / GDP) × 100',
+    interpretation: 'Higher values indicate developed capital markets. Developed markets often exceed 100% of GDP.',
+    implications: [
+      'Reflects financial market development',
+      'Affects capital availability for businesses',
+      'Influences investment opportunities',
+      'Impacts wealth distribution',
+      'Affects economic growth financing'
+    ],
+    dataSource: 'Stock Exchanges, World Bank, World Federation of Exchanges',
+    frequency: 'Daily (reported quarterly)',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['FDI', 'GDP Growth', 'Interest Rate', 'Private Investment']
+  },
+
+  privateInvestment: {
+    title: 'Private Sector Investment',
+    description: 'Gross fixed capital formation by private sector as a percentage of GDP, reflecting private investment activity.',
+    formula: 'Private Investment = (Private Gross Capital Formation / GDP) × 100',
+    interpretation: 'Higher levels indicate business confidence and economic dynamism. Typically 15-25% of GDP in developed economies.',
+    implications: [
+      'Drives future economic growth and productivity',
+      'Reflects business confidence',
+      'Affects employment creation',
+      'Influences technological advancement',
+      'Impacts long-term competitiveness'
+    ],
+    dataSource: 'National Statistical Offices, World Bank',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['GDP Growth', 'Interest Rate', 'Market Capitalization', 'FDI']
+  },
+
+  // Economic Structure
+  servicesValueAdded: {
+    title: 'Services Sector Value Added',
+    description: 'Services sector\'s contribution to GDP as a percentage, indicating economic structure.',
+    formula: 'Services = (Services Sector Output / GDP) × 100',
+    interpretation: 'Typically 50-75% in developed economies. Higher levels indicate post-industrial economy development.',
+    implications: [
+      'Reflects economic development stage',
+      'Affects employment structure',
+      'Influences productivity and growth patterns',
+      'Impacts trade patterns and competitiveness',
+      'Affects economic resilience'
+    ],
+    dataSource: 'National Statistical Offices, World Bank',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Manufacturing Value Added', 'Agriculture Value Added', 'GDP Growth', 'Employment Rate']
+  },
+
+  agriculturalValueAdded: {
+    title: 'Agricultural Sector Value Added',
+    description: 'Agriculture, forestry, and fishing sector\'s contribution to GDP as a percentage.',
+    formula: 'Agriculture = (Agricultural Sector Output / GDP) × 100',
+    interpretation: 'Typically <5% in developed economies, >20% in developing. Lower levels indicate economic development.',
+    implications: [
+      'Reflects economic development level',
+      'Affects food security and rural livelihoods',
+      'Influences environmental sustainability',
+      'Impacts trade patterns',
+      'Affects urbanization trends'
+    ],
+    dataSource: 'National Statistical Offices, World Bank, FAO',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Services Value Added', 'Manufacturing Value Added', 'Population Growth', 'Rural Development']
+  },
+
+  manufacturingValueAdded: {
+    title: 'Manufacturing Value Added',
+    description: 'Manufacturing sector\'s contribution to GDP as a percentage, indicating industrial capacity.',
+    formula: 'Manufacturing = (Manufacturing Sector Output / GDP) × 100',
+    interpretation: 'Typically 10-25% in industrialized economies. Higher levels indicate strong industrial base.',
+    implications: [
+      'Reflects industrialization and development level',
+      'Affects employment and wage levels',
+      'Influences export competitiveness',
+      'Impacts technological advancement',
+      'Affects economic diversification'
+    ],
+    dataSource: 'National Statistical Offices, World Bank, UNIDO',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['Services Value Added', 'Agriculture Value Added', 'Exports', 'Labor Productivity']
+  },
+
+  householdConsumption: {
+    title: 'Household Consumption',
+    description: 'Household final consumption expenditure as a percentage of GDP, reflecting consumer spending patterns.',
+    formula: 'Household Consumption = (Consumer Spending / GDP) × 100',
+    interpretation: 'Typically 50-70% of GDP. Higher levels indicate consumer-driven economies.',
+    implications: [
+      'Drives economic growth in consumer economies',
+      'Affects retail and service sectors',
+      'Influences import demand',
+      'Impacts inflation and monetary policy',
+      'Reflects living standards and confidence'
+    ],
+    dataSource: 'National Statistical Offices, World Bank',
+    frequency: 'Quarterly',
+    units: 'Percentage of GDP (%)',
+    relatedMetrics: ['GDP Growth', 'Employment Rate', 'Inflation Rate', 'Consumer Confidence']
+  },
+
+  newBusinessDensity: {
+    title: 'New Business Density',
+    description: 'New businesses registered per 1,000 people ages 15-64, indicating entrepreneurial activity.',
+    formula: 'Business Density = (New Business Registrations / Working-Age Population in thousands)',
+    interpretation: 'Higher values indicate entrepreneurial dynamism. Developed economies typically have 5-15 per 1,000.',
+    implications: [
+      'Reflects entrepreneurial ecosystem strength',
+      'Affects job creation and innovation',
+      'Influences economic dynamism and competition',
+      'Impacts productivity and efficiency',
+      'Affects long-term economic growth'
+    ],
+    dataSource: 'World Bank Doing Business, National Business Registries',
+    frequency: 'Annually',
+    units: 'Per 1,000 people ages 15-64',
+    relatedMetrics: ['GDP Growth', 'Unemployment Rate', 'Private Investment', 'Innovation']
+  },
+
+  renewableEnergy: {
+    title: 'Renewable Energy Consumption',
+    description: 'Renewable energy consumption as a percentage of total final energy consumption, indicating sustainability efforts.',
+    formula: 'Renewable Energy = (Renewable Energy Consumption / Total Energy Consumption) × 100',
+    interpretation: 'Higher percentages indicate greater sustainability. Leading countries exceed 40-50%.',
+    implications: [
+      'Affects environmental sustainability and climate goals',
+      'Influences energy security and independence',
+      'Impacts energy costs and economic competitiveness',
+      'Affects investment in clean technology',
+      'Influences international climate commitments'
+    ],
+    dataSource: 'IEA, World Bank, National Energy Agencies',
+    frequency: 'Annually',
+    units: 'Percentage (%)',
+    relatedMetrics: ['Energy Consumption', 'CO2 Emissions', 'GDP Growth', 'Technology Investment']
+  },
+
+  // Additional metrics that were already in UI
+  cpiData: {
+    title: 'Consumer Price Index',
+    description: 'A measure of the average change over time in the prices paid by urban consumers for a market basket of consumer goods and services.',
+    formula: 'CPI = (Cost of Market Basket in Current Year / Cost of Market Basket in Base Year) × 100',
+    interpretation: 'Rising CPI indicates inflation, falling CPI indicates deflation. Base year CPI is typically set to 100.',
+    implications: [
+      'Primary measure of inflation for consumers',
+      'Affects interest rate decisions by central banks',
+      'Influences wage negotiations and social security adjustments',
+      'Impacts purchasing power and consumer spending',
+      'Affects investment returns and asset allocation'
+    ],
+    dataSource: 'National Statistical Offices, World Bank',
+    frequency: 'Monthly',
+    units: 'Index (base year = 100)',
+    relatedMetrics: ['Inflation Rate', 'Interest Rate', 'Wage Growth', 'Consumer Spending']
+  },
+
+  unemploymentRates: {
+    title: 'Unemployment Rate',
+    description: 'The percentage of the labor force that is jobless and actively seeking employment.',
+    formula: 'Unemployment Rate = (Unemployed People / Labor Force) × 100',
+    interpretation: 'Lower rates indicate a stronger job market and economy. Very low rates may lead to wage inflation, while high rates suggest economic weakness.',
+    implications: [
+      'Indicates labor market health and economic strength',
+      'Affects consumer spending and economic growth',
+      'Influences wage levels and inflation',
+      'Impacts government social spending and tax revenue',
+      'Affects political stability and social cohesion'
+    ],
+    dataSource: 'National Labor Offices, World Bank',
+    frequency: 'Monthly',
+    units: 'Percentage (%)',
+    relatedMetrics: ['GDP Growth', 'Interest Rate', 'Wage Growth', 'Consumer Confidence']
   }
 };
 

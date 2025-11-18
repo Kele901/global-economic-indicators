@@ -19,6 +19,38 @@ const FRED_SERIES = {
   GOVERNMENT_SPENDING: 'GCEC1', // Government Consumption Expenditures
   RD_SPENDING: 'Y694RC1Q027SBEA', // Research and Development Expenditures
   ENERGY_CONSUMPTION: 'ENEUC', // Energy Consumption
+  
+  // Additional Economic Indicators
+  GDP_PER_CAPITA: 'A939RC0Q052SBEA', // Real gross domestic product per capita
+  CURRENT_ACCOUNT: 'NETFI', // Net Capital Account, Flow (USD)
+  GROSS_CAPITAL_FORMATION: 'GPDI', // Gross Private Domestic Investment
+  RESERVES: 'TRESEGUSM052N', // Total Reserves excluding Gold for United States
+  EXCHANGE_RATE_INDEX: 'DTWEXBGS', // Trade Weighted U.S. Dollar Index: Broad, Goods and Services
+  TERTIARY_ENROLLMENT: 'SCAINTTLNVUSA', // School enrollment, tertiary (% gross) for United States
+  TAX_REVENUE: 'FGRECPT', // Federal Government Current Tax Receipts
+  DOMESTIC_CREDIT: 'DPSACBW027SBOG', // Domestic Private Sector Credit
+  EXPORTS: 'EXPGS', // Exports of Goods and Services
+  IMPORTS: 'IMPGS', // Imports of Goods and Services
+  HIGHTECH_EXPORTS: 'IQ', // High-tech Industry Production Index (proxy)
+  CO2_EMISSIONS: 'EQEMCO2USCA', // CO2 Emissions (metric tons per capita) for United States
+  
+  // Top 10 High-Impact Additional Indicators
+  LABOR_FORCE_PARTICIPATION: 'CIVPART', // Labor Force Participation Rate
+  BUDGET_BALANCE: 'FYFSGDA188S', // Federal Surplus or Deficit as Percent of GDP
+  HEALTHCARE_EXPENDITURE: 'DHLCRG3Q086SBEA', // Personal consumption expenditures: Health care (chain-type quantity index)
+  EDUCATION_EXPENDITURE: 'G160191A027NBEA', // Government total expenditures: Education
+  YOUTH_UNEMPLOYMENT: 'LNS14000012', // Unemployment Rate - 16-19 yrs.
+  MANUFACTURING_VALUE_ADDED: 'VAPGDPMA', // Value Added by Private Industries: Manufacturing as a Percentage of GDP
+  HOUSEHOLD_CONSUMPTION: 'DPCERG3A086NBEA', // Personal Consumption Expenditures
+  FEMALE_LABOR_FORCE: 'LNS11300002', // Labor Force Participation Rate - Women
+  
+  // Advanced Economic & Development Indicators
+  MILITARY_EXPENDITURE: 'FDEFX', // Federal Defense Consumption Expenditures
+  MARKET_CAPITALIZATION: 'DDDM01USA156NWDB', // Market capitalization of listed domestic companies (% of GDP) for United States
+  PUBLIC_DEBT_SERVICE: 'A091RC1Q027SBEA', // Federal government: Interest payments
+  SERVICES_VALUE_ADDED: 'VAPGDPSE', // Value Added by Private Industries: Services as a Percentage of GDP
+  AGRICULTURAL_VALUE_ADDED: 'VAPGDPAG', // Value Added by Private Industries: Agriculture as a Percentage of GDP
+  PRIVATE_INVESTMENT: 'GPDI', // Gross Private Domestic Investment
 };
 
 interface FREDObservation {
@@ -136,6 +168,32 @@ export async function fetchUSADataFromFRED(): Promise<{
   laborProductivity: USADataPoint[];
   rdSpending: USADataPoint[];
   energyConsumption: USADataPoint[];
+  gdpPerCapitaPPP: USADataPoint[];
+  currentAccount: USADataPoint[];
+  grossCapitalFormation: USADataPoint[];
+  reservesMonthsImports: USADataPoint[];
+  exchangeRate: USADataPoint[];
+  tertiaryEnrollment: USADataPoint[];
+  taxRevenue: USADataPoint[];
+  domesticCredit: USADataPoint[];
+  exports: USADataPoint[];
+  imports: USADataPoint[];
+  hightechExports: USADataPoint[];
+  co2Emissions: USADataPoint[];
+  laborForceParticipation: USADataPoint[];
+  budgetBalance: USADataPoint[];
+  healthcareExpenditure: USADataPoint[];
+  educationExpenditure: USADataPoint[];
+  youthUnemployment: USADataPoint[];
+  manufacturingValueAdded: USADataPoint[];
+  householdConsumption: USADataPoint[];
+  femaleLaborForce: USADataPoint[];
+  militaryExpenditure: USADataPoint[];
+  marketCapitalization: USADataPoint[];
+  publicDebtService: USADataPoint[];
+  servicesValueAdded: USADataPoint[];
+  agriculturalValueAdded: USADataPoint[];
+  privateInvestment: USADataPoint[];
 }> {
   try {
     console.log('🇺🇸 ========================================');
@@ -157,7 +215,33 @@ export async function fetchUSADataFromFRED(): Promise<{
       fetchFREDSeries(FRED_SERIES.GOVERNMENT_SPENDING),
       fetchFREDSeries(FRED_SERIES.LABOR_PRODUCTIVITY),
       fetchFREDSeries(FRED_SERIES.RD_SPENDING),
-      fetchFREDSeries(FRED_SERIES.ENERGY_CONSUMPTION)
+      fetchFREDSeries(FRED_SERIES.ENERGY_CONSUMPTION),
+      fetchFREDSeries(FRED_SERIES.GDP_PER_CAPITA),
+      fetchFREDSeries(FRED_SERIES.CURRENT_ACCOUNT),
+      fetchFREDSeries(FRED_SERIES.GROSS_CAPITAL_FORMATION),
+      fetchFREDSeries(FRED_SERIES.RESERVES),
+      fetchFREDSeries(FRED_SERIES.EXCHANGE_RATE_INDEX),
+      fetchFREDSeries(FRED_SERIES.TERTIARY_ENROLLMENT),
+      fetchFREDSeries(FRED_SERIES.TAX_REVENUE),
+      fetchFREDSeries(FRED_SERIES.DOMESTIC_CREDIT),
+      fetchFREDSeries(FRED_SERIES.EXPORTS),
+      fetchFREDSeries(FRED_SERIES.IMPORTS),
+      fetchFREDSeries(FRED_SERIES.HIGHTECH_EXPORTS),
+      fetchFREDSeries(FRED_SERIES.CO2_EMISSIONS),
+      fetchFREDSeries(FRED_SERIES.LABOR_FORCE_PARTICIPATION),
+      fetchFREDSeries(FRED_SERIES.BUDGET_BALANCE),
+      fetchFREDSeries(FRED_SERIES.HEALTHCARE_EXPENDITURE),
+      fetchFREDSeries(FRED_SERIES.EDUCATION_EXPENDITURE),
+      fetchFREDSeries(FRED_SERIES.YOUTH_UNEMPLOYMENT),
+      fetchFREDSeries(FRED_SERIES.MANUFACTURING_VALUE_ADDED),
+      fetchFREDSeries(FRED_SERIES.HOUSEHOLD_CONSUMPTION),
+      fetchFREDSeries(FRED_SERIES.FEMALE_LABOR_FORCE),
+      fetchFREDSeries(FRED_SERIES.MILITARY_EXPENDITURE),
+      fetchFREDSeries(FRED_SERIES.MARKET_CAPITALIZATION),
+      fetchFREDSeries(FRED_SERIES.PUBLIC_DEBT_SERVICE),
+      fetchFREDSeries(FRED_SERIES.SERVICES_VALUE_ADDED),
+      fetchFREDSeries(FRED_SERIES.AGRICULTURAL_VALUE_ADDED),
+      fetchFREDSeries(FRED_SERIES.PRIVATE_INVESTMENT)
     ]);
 
     const [
@@ -174,7 +258,33 @@ export async function fetchUSADataFromFRED(): Promise<{
       governmentSpending,
       laborProductivity,
       rdSpending,
-      energyConsumption
+      energyConsumption,
+      gdpPerCapitaPPP,
+      currentAccount,
+      grossCapitalFormation,
+      reservesMonthsImports,
+      exchangeRate,
+      tertiaryEnrollment,
+      taxRevenue,
+      domesticCredit,
+      exports,
+      imports,
+      hightechExports,
+      co2Emissions,
+      laborForceParticipation,
+      budgetBalance,
+      healthcareExpenditure,
+      educationExpenditure,
+      youthUnemployment,
+      manufacturingValueAdded,
+      householdConsumption,
+      femaleLaborForce,
+      militaryExpenditure,
+      marketCapitalization,
+      publicDebtService,
+      servicesValueAdded,
+      agriculturalValueAdded,
+      privateInvestment
     ] = results.map(result => result.status === 'fulfilled' ? result.value : []);
 
     const elapsedTime = Date.now() - startTime;
@@ -196,7 +306,33 @@ export async function fetchUSADataFromFRED(): Promise<{
       governmentSpending,
       laborProductivity,
       rdSpending,
-      energyConsumption
+      energyConsumption,
+      gdpPerCapitaPPP,
+      currentAccount,
+      grossCapitalFormation,
+      reservesMonthsImports,
+      exchangeRate,
+      tertiaryEnrollment,
+      taxRevenue,
+      domesticCredit,
+      exports,
+      imports,
+      hightechExports,
+      co2Emissions,
+      laborForceParticipation,
+      budgetBalance,
+      healthcareExpenditure,
+      educationExpenditure,
+      youthUnemployment,
+      manufacturingValueAdded,
+      householdConsumption,
+      femaleLaborForce,
+      militaryExpenditure,
+      marketCapitalization,
+      publicDebtService,
+      servicesValueAdded,
+      agriculturalValueAdded,
+      privateInvestment
     };
   } catch (error) {
     console.error('Critical error fetching US data from FRED:', error);
@@ -214,7 +350,33 @@ export async function fetchUSADataFromFRED(): Promise<{
       governmentSpending: [],
       laborProductivity: [],
       rdSpending: [],
-      energyConsumption: []
+      energyConsumption: [],
+      gdpPerCapitaPPP: [],
+      currentAccount: [],
+      grossCapitalFormation: [],
+      reservesMonthsImports: [],
+      exchangeRate: [],
+      tertiaryEnrollment: [],
+      taxRevenue: [],
+      domesticCredit: [],
+      exports: [],
+      imports: [],
+      hightechExports: [],
+      co2Emissions: [],
+      laborForceParticipation: [],
+      budgetBalance: [],
+      healthcareExpenditure: [],
+      educationExpenditure: [],
+      youthUnemployment: [],
+      manufacturingValueAdded: [],
+      householdConsumption: [],
+      femaleLaborForce: [],
+      militaryExpenditure: [],
+      marketCapitalization: [],
+      publicDebtService: [],
+      servicesValueAdded: [],
+      agriculturalValueAdded: [],
+      privateInvestment: []
     };
   }
 }
