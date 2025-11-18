@@ -231,6 +231,21 @@ async function fetchIndicatorData(
     console.log(`   - Mapped countries: ${Array.from(countriesFound).sort().join(', ')}`);
     console.log(`   - Years with data: ${result.length}`);
     
+    // Check if Japan has data
+    if (countryCodesFound.has('JP')) {
+      // Count how many years have Japan data
+      const japanYears = result.filter(yearData => yearData.Japan !== undefined && yearData.Japan !== null);
+      console.log(`   🇯🇵 Japan: ✅ HAS DATA (${japanYears.length} years)`);
+      
+      // Log sample Japan data point
+      if (japanYears.length > 0) {
+        const latestJapanData = japanYears[japanYears.length - 1];
+        console.log(`   🇯🇵 Japan latest: ${latestJapanData.year} = ${latestJapanData.Japan}`);
+      }
+    } else {
+      console.warn(`   🇯🇵 Japan: ❌ NO DATA - This indicator may not be available for Japan`);
+    }
+    
     // Check which of our new countries have data
     const newCountries = ['NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG'];
     const newCountriesWithData = newCountries.filter(code => countryCodesFound.has(code));
@@ -973,10 +988,82 @@ export async function checkDataAvailability(): Promise<void> {
   console.log('🔍 ========================================');
 }
 
+// Diagnostic function to test Japan data specifically
+export async function testJapanData(): Promise<void> {
+  console.log('🇯🇵 ========================================');
+  console.log('🇯🇵 Testing Data Availability for Japan (JP)');
+  console.log('🇯🇵 ========================================');
+  
+  const japanTests = [
+    { name: 'GDP Growth', code: INDICATORS.GDP_GROWTH },
+    { name: 'Interest Rates (World Bank)', code: INDICATORS.INTEREST_RATE },
+    { name: 'Inflation', code: INDICATORS.INFLATION_RATE },
+    { name: 'Unemployment', code: INDICATORS.UNEMPLOYMENT_RATE },
+    { name: 'CPI', code: INDICATORS.CPI },
+    { name: 'Government Debt', code: INDICATORS.GOVERNMENT_DEBT },
+    { name: 'Population Growth', code: INDICATORS.POPULATION_GROWTH }
+  ];
+  
+  for (const test of japanTests) {
+    try {
+      const url = `${WORLD_BANK_BASE_URL}/JP/indicator/${test.code}?format=json&per_page=500&date=1960:2024`;
+      console.log(`\n📊 Testing: ${test.name}`);
+      console.log(`   URL: ${url}`);
+      
+      const response = await axios.get(url, { timeout: 10000 });
+      const data = response.data[1];
+      
+      if (data && Array.isArray(data)) {
+        const validData = data.filter((item: any) => item.value !== null);
+        const years = validData.map((item: any) => parseInt(item.date));
+        const latestYear = Math.max(...years);
+        const earliestYear = Math.min(...years);
+        
+        console.log(`   ✅ ${test.name}:`);
+        console.log(`      - Total data points: ${validData.length}`);
+        console.log(`      - Date range: ${earliestYear} - ${latestYear}`);
+        console.log(`      - Latest value: ${validData[validData.length - 1]?.value}`);
+        console.log(`      - Sample (2020): ${validData.find((d: any) => d.date === '2020')?.value || 'N/A'}`);
+      } else {
+        console.warn(`   ❌ ${test.name}: No data returned from World Bank API`);
+      }
+    } catch (error: any) {
+      console.error(`   ❌ ${test.name}: Error -`, error.message);
+    }
+  }
+  
+  console.log('\n🇯🇵 ========================================');
+  console.log('🇯🇵 Testing Policy Rates (FRED) for Japan...');
+  console.log('🇯🇵 ========================================');
+  
+  // Test policy rates from FRED
+  try {
+    const policyRates = await fetchAllPolicyRates();
+    if (policyRates.Japan && policyRates.Japan.length > 0) {
+      const japanPolicyData = policyRates.Japan;
+      const latestYear = japanPolicyData[japanPolicyData.length - 1];
+      console.log(`\n✅ Japan Policy Rates (FRED):`);
+      console.log(`   - Total data points: ${japanPolicyData.length}`);
+      console.log(`   - Latest year: ${latestYear.year}`);
+      console.log(`   - Latest value: ${latestYear.value}%`);
+      console.log(`   - This should supplement World Bank data after 2017!`);
+    } else {
+      console.warn(`\n❌ No policy rate data found for Japan from FRED`);
+    }
+  } catch (error: any) {
+    console.error(`\n❌ Error fetching policy rates:`, error.message);
+  }
+  
+  console.log('\n🇯🇵 ========================================');
+  console.log('🇯🇵 Japan Data Test Complete!');
+  console.log('🇯🇵 ========================================');
+}
+
 // Make test functions available globally for easy debugging in console
 if (typeof window !== 'undefined') {
   (window as any).testCountryData = testCountryDataAvailability;
   (window as any).checkDataAvailability = checkDataAvailability;
+  (window as any).testJapanData = testJapanData;
   (window as any).clearAppCache = () => {
     clearDataCache();
     console.log('✅ Cache cleared! Reloading page...');
