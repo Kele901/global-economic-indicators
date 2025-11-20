@@ -146,7 +146,9 @@ export const clientCache = new ClientCache();
 // v1: Initial version with World Bank data only
 // v2: Added FRED integration for US data
 // v3: Added 16 additional economic indicators (GDP per capita PPP, current account, etc.)
-export const CURRENT_CACHE_VERSION = 6;
+// v4: Added BIS (Bank for International Settlements) integration
+// v5: Enhanced OECD integration with policy rates
+export const CURRENT_CACHE_VERSION = 7;
 
 // Export cache key generators for consistency
 export const CacheKeys = {
@@ -155,5 +157,26 @@ export const CacheKeys = {
   tradeData: (countries: string[]) => `trade_${countries.sort().join('_')}`,
   forexRates: () => 'forex_rates',
   lastUpdate: () => 'last_update_timestamp',
-  cacheVersion: () => 'cache_version'
+  cacheVersion: () => 'cache_version',
+  
+  // BIS cache keys
+  bisPolicyRates: () => 'bis_policy_rates',
+  bisJapanPolicyRates: () => 'bis_japan_policy_rates',
+  
+  // OECD cache keys
+  oecdPolicyRates: () => 'oecd_policy_rates',
+  oecdJapanPolicyRates: () => 'oecd_japan_policy_rates',
+  oecdGovernmentDebt: () => 'oecd_government_debt',
+  oecdJapanGovernmentDebt: () => 'oecd_japan_gov_debt',
+  
+  // IMF cache keys
+  imfGovernmentDebt: () => 'imf_government_debt',
+  imfJapanGovernmentDebt: () => 'imf_japan_gov_debt',
+  imfInterestRates: () => 'imf_interest_rates',
+  
+  // FRED cache keys
+  fredSeries: (seriesId: string) => `fred_${seriesId}`,
+  
+  // Policy rates cache keys
+  policyRate: (country: string) => `policy_rate_${country}`,
 };

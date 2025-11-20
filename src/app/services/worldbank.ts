@@ -2,8 +2,9 @@ import axios from "axios";
 import { clientCache, CacheKeys, CURRENT_CACHE_VERSION } from "./clientCache";
 import { fetchUSADataFromFRED, clearFREDCache, type USADataPoint } from "./fred";
 import { fetchAllPolicyRates, clearPolicyRatesCache, type PolicyRateDataPoint } from "./policyRates";
-import { fetchJapanGovernmentDebtOECD, clearOECDCache, type OECDDataPoint } from "./oecd";
+import { fetchJapanGovernmentDebtOECD, fetchOECDPolicyRates, fetchJapanPolicyRatesOECD, clearOECDCache, type OECDDataPoint } from "./oecd";
 import { fetchJapanGovernmentDebtIMF, fetchIMFGovernmentDebt, fetchIMFInterestRates, clearIMFCache, type IMFDataPoint } from "./imf";
+import { fetchBISPolicyRates, fetchJapanPolicyRatesBIS, clearBISCache, type BISDataPoint } from "./bis";
 
 // Type definitions for economic data
 export interface CountryData {
@@ -673,25 +674,53 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
     const usaData = await fetchUSADataFromFRED();
     console.log('📊 FRED fetch complete. Processing USA data merge...');
     
-    // Fetch policy rates for all countries (more current than World Bank)
+    // Fetch policy rates from multiple sources for comprehensive coverage
+    // Priority: BIS > OECD > FRED > IMF
+    
+    // 1. BIS - Bank for International Settlements (best coverage for policy rates)
     console.log('🏦 ========================================');
-    console.log('🏦 Fetching Central Bank Policy Rates...');
+    console.log('🏦 BIS: Fetching Central Bank Policy Rates...');
+    console.log('🏦 ========================================');
+    let bisPolicyRates: { [country: string]: BISDataPoint[] } = {};
+    try {
+      bisPolicyRates = await fetchBISPolicyRates();
+      console.log('🏦 BIS policy rates fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ BIS fetch failed (non-critical):', error.message);
+      console.log('ℹ️ Continuing without BIS data...');
+    }
+    
+    // 2. OECD - Organisation for Economic Co-operation and Development
+    console.log('🏛️ ========================================');
+    console.log('🏛️ OECD: Fetching Policy Rates...');
+    console.log('🏛️ ========================================');
+    let oecdPolicyRates: { [country: string]: OECDDataPoint[] } = {};
+    try {
+      oecdPolicyRates = await fetchOECDPolicyRates();
+      console.log('🏛️ OECD policy rates fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ OECD policy rates fetch failed (non-critical):', error.message);
+      console.log('ℹ️ Continuing without OECD policy rates...');
+    }
+    
+    // 3. FRED - Federal Reserve Economic Data (international OECD data via FRED)
+    console.log('🏦 ========================================');
+    console.log('🏦 FRED: Fetching Central Bank Policy Rates...');
     console.log('🏦 ========================================');
     const policyRatesData = await fetchAllPolicyRates();
-    console.log('🏦 Policy rates fetch complete. Processing merge...');
+    console.log('🏦 FRED policy rates fetch complete. Processing merge...');
     
-    // Fetch OECD data for developed countries (fills gaps for Japan and others)
-    // Make these calls non-blocking - they supplement but don't block main data
+    // Fetch OECD government debt data for Japan and others
     console.log('🏛️ ========================================');
-    console.log('🏛️ Fetching OECD Data (Japan Gov Debt)...');
+    console.log('🏛️ OECD: Fetching Government Debt...');
     console.log('🏛️ ========================================');
     let oecdJapanDebt: OECDDataPoint[] = [];
     try {
       oecdJapanDebt = await fetchJapanGovernmentDebtOECD();
-      console.log('🏛️ OECD fetch complete.');
+      console.log('🏛️ OECD government debt fetch complete.');
     } catch (error: any) {
-      console.warn('⚠️ OECD fetch failed (non-critical):', error.message);
-      console.log('ℹ️ Continuing without OECD data...');
+      console.warn('⚠️ OECD government debt fetch failed (non-critical):', error.message);
+      console.log('ℹ️ Continuing without OECD government debt...');
     }
     
     // Fetch IMF data for broader coverage
@@ -728,19 +757,37 @@ console.log('📊 Starting data merge for USA...');
 console.log('📊 FRED Interest Rates data points:', usaData.interestRates.length);
 console.log('📊 World Bank Interest Rates data points:', interestRatesResult.status === 'fulfilled' ? interestRatesResult.value.length : 0);
 
-// Multi-source fallback for interest rates: World Bank → FRED(USA) → Policy Rates(All) → IMF(All)
+// Multi-source fallback for interest rates with priority order:
+// World Bank → FRED(USA) → BIS → OECD → FRED Policy Rates → IMF
+console.log('🔄 Merging interest rates from multiple sources...');
 let interestRatesWithFRED = mergeUSADataFromFRED(
   interestRatesResult.status === 'fulfilled' ? interestRatesResult.value : [],
   usaData.interestRates
 );
+console.log('✅ FRED USA data merged');
 
-// Merge policy rates from FRED for international coverage
-let interestRatesWithPolicy = mergePolicyRates(interestRatesWithFRED, policyRatesData);
+// Priority 1: BIS policy rates (most authoritative for central bank rates)
+let interestRatesWithBIS = Object.keys(bisPolicyRates).length > 0
+  ? mergeAlternativeSource(interestRatesWithFRED, bisPolicyRates, 'BIS')
+  : interestRatesWithFRED;
+console.log(`✅ BIS data merged (${Object.keys(bisPolicyRates).length} countries)`);
 
-// Fill remaining gaps with IMF interest rate data
+// Priority 2: OECD policy rates (high quality for developed economies)
+let interestRatesWithOECD = Object.keys(oecdPolicyRates).length > 0
+  ? mergeAlternativeSource(interestRatesWithBIS, oecdPolicyRates, 'OECD')
+  : interestRatesWithBIS;
+console.log(`✅ OECD data merged (${Object.keys(oecdPolicyRates).length} countries)`);
+
+// Priority 3: FRED policy rates (OECD data via FRED)
+let interestRatesWithPolicy = mergePolicyRates(interestRatesWithOECD, policyRatesData);
+console.log('✅ FRED policy rates merged');
+
+// Priority 4: IMF interest rates (fills remaining gaps)
 const interestRatesComplete = Object.keys(imfInterestRates).length > 0
   ? mergeAlternativeSource(interestRatesWithPolicy, imfInterestRates, 'IMF')
   : interestRatesWithPolicy;
+console.log('✅ IMF data merged');
+console.log('🎉 Interest rates merging complete!');
 
 const completeData = {
   interestRates: interestRatesComplete,
@@ -972,12 +1019,13 @@ const completeData = {
 export function clearDataCache(): void {
   clientCache.clear();
   clearFREDCache();
+  clearBISCache();
   clearPolicyRatesCache();
   clearOECDCache();
   clearIMFCache();
   // Reset cache version after clearing
   clientCache.set(CacheKeys.cacheVersion(), CURRENT_CACHE_VERSION);
-  console.log('Cleared all cached economic data (World Bank + FRED + Policy Rates + OECD + IMF)');
+  console.log('Cleared all cached economic data (World Bank + FRED + BIS + OECD + Policy Rates + IMF)');
 }
 
 // Export function to get cache age
