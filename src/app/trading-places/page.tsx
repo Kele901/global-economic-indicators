@@ -1638,6 +1638,10 @@ const TradingPlacesPage: React.FC = () => {
                           setSelectedCountriesForComparison([]);
                         } else {
                           setComparisonMode('selected');
+                          // Automatically enable historical view when entering compare mode
+                          if (!showHistoricalView) {
+                            setShowHistoricalView(true);
+                          }
                         }
                       }}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -1985,17 +1989,34 @@ const TradingPlacesPage: React.FC = () => {
               {comparisonMode === 'selected' && selectedCountriesForComparison.length >= 2 && Object.keys(historicalTrends).length === 0 && (
                 <div className={`mt-6 p-6 rounded-lg ${isDarkMode ? 'bg-yellow-900/30 border-yellow-500' : 'bg-yellow-50 border-yellow-300'} border-l-4`}>
                   <div className="flex items-start space-x-3">
-                    <span className="text-2xl">ℹ️</span>
+                    <span className="text-2xl">{historicalLoading ? '⏳' : 'ℹ️'}</span>
                     <div>
-                      <h3 className="font-semibold text-yellow-600 dark:text-yellow-400">Comparison Data Not Available</h3>
-                      <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Historical trade data hasn't been loaded yet. Please ensure:
-                      </p>
-                      <ul className={`text-sm mt-2 list-disc list-inside ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <li>You've enabled "Show Historical Trends" above</li>
-                        <li>The historical data has finished loading</li>
-                        <li>You're using Live Data mode</li>
-                      </ul>
+                      <h3 className="font-semibold text-yellow-600 dark:text-yellow-400">
+                        {historicalLoading ? 'Loading Comparison Data...' : 'Comparison Data Not Available'}
+                      </h3>
+                      {historicalLoading ? (
+                        <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          Please wait while we fetch historical trade data from World Bank and UN Comtrade...
+                        </p>
+                      ) : (
+                        <>
+                          <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            Historical trade data hasn't been loaded yet. Please ensure:
+                          </p>
+                          <ul className={`text-sm mt-2 list-disc list-inside ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <li>You've enabled <strong>Live Data</strong> at the top of the page</li>
+                            <li>You've clicked <strong>"Show Historical Trends"</strong> button above</li>
+                            <li>Wait for the data to finish loading (this may take 10-30 seconds)</li>
+                          </ul>
+                          {!enableRealData && (
+                            <div className={`mt-3 p-3 rounded ${isDarkMode ? 'bg-red-900/30' : 'bg-red-100'}`}>
+                              <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
+                                ⚠️ Live Data is currently disabled. Enable it to use the comparison feature.
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
