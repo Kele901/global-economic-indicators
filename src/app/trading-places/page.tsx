@@ -1731,7 +1731,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['US', 'CN']);
+                              setSelectedCountriesForComparison(['USA', 'CHN']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
@@ -1745,7 +1745,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['US', 'CN', 'JP', 'DE']);
+                              setSelectedCountriesForComparison(['USA', 'CHN', 'JPN', 'DEU']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
@@ -1759,7 +1759,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['BR', 'RU', 'IN', 'CN', 'SA']);
+                              setSelectedCountriesForComparison(['BRA', 'RUS', 'IND', 'CHN', 'SAU']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-yellow-500 hover:bg-yellow-600'
