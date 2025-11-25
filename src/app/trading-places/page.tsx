@@ -1721,10 +1721,13 @@ const TradingPlacesPage: React.FC = () => {
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                          Select countries to compare (2-4 recommended):
+                          Select countries to compare or use quick presets:
                         </label>
-                        <div className="flex flex-wrap items-center gap-2">
-                          {/* Quick Select Presets */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 w-full sm:w-auto">
+                          {/* Quick Select Presets - Popular Comparisons */}
+                          <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} col-span-full`}>
+                            Popular:
+                          </div>
                           <button
                             onClick={() => {
                               if (!enableRealData) {
@@ -1751,8 +1754,13 @@ const TradingPlacesPage: React.FC = () => {
                               isDarkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
                             } text-white`}
                           >
-                            Top 4
+                            Top 4 Exporters
                           </button>
+
+                          {/* Trade Blocs */}
+                          <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} col-span-full mt-2`}>
+                            Trade Blocs:
+                          </div>
                           <button
                             onClick={() => {
                               if (!enableRealData) {
@@ -1766,6 +1774,109 @@ const TradingPlacesPage: React.FC = () => {
                             } text-white`}
                           >
                             BRICS
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['USA', 'CAN', 'MEX']);
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'
+                            } text-white`}
+                          >
+                            USMCA
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['USA', 'CAN', 'GBR', 'DEU', 'JPN']);
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'
+                            } text-white`}
+                          >
+                            G7 (5 of 7)
+                          </button>
+
+                          {/* Regional Groupings */}
+                          <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} col-span-full mt-2`}>
+                            Regions:
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['CHN', 'JPN', 'KOR', 'IND']);
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'
+                            } text-white`}
+                          >
+                            Asia Major
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['USA', 'CAN', 'MEX', 'BRA']);
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'
+                            } text-white`}
+                          >
+                            Americas
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['DEU', 'GBR']);
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'
+                            } text-white`}
+                          >
+                            EU Major
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['SAU', 'RUS']);
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-orange-600 hover:bg-orange-700' : 'bg-orange-500 hover:bg-orange-600'
+                            } text-white`}
+                          >
+                            Energy Producers
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['AUS', 'CAN', 'BRA', 'RUS']);
+                            }}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-500 hover:bg-emerald-600'
+                            } text-white`}
+                          >
+                            Resource Rich
                           </button>
                           {selectedCountriesForComparison.length > 0 && (
                             <button
