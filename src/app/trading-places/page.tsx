@@ -1859,9 +1859,15 @@ const TradingPlacesPage: React.FC = () => {
               </div>
 
               {/* Side-by-Side Comparison Table */}
-              {comparisonMode === 'selected' && selectedCountriesForComparison.length >= 2 && (
+              {comparisonMode === 'selected' && selectedCountriesForComparison.length >= 2 && Object.keys(historicalTrends).length > 0 && (
                 <div className={`mt-6 p-6 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'}`}>
-                  <h3 className="text-xl font-bold mb-4">Direct Comparison</h3>
+                  <h3 className="text-xl font-bold mb-4">
+                    Direct Comparison
+                    <span className={`text-sm font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      ({selectedCountriesForComparison.length} countries)
+                    </span>
+                  </h3>
+                  
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
@@ -1891,9 +1897,13 @@ const TradingPlacesPage: React.FC = () => {
                             const trend = historicalTrends[countryCode];
                             return (
                               <td key={countryCode} className="text-center p-3">
-                                <span className={`font-semibold ${trend?.exportGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                  {trend?.exportGrowthTotal > 0 ? '+' : ''}{trend?.exportGrowthTotal.toFixed(1)}%
-                                </span>
+                                {trend && typeof trend.exportGrowthTotal === 'number' ? (
+                                  <span className={`font-semibold ${trend.exportGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {trend.exportGrowthTotal > 0 ? '+' : ''}{trend.exportGrowthTotal.toFixed(1)}%
+                                  </span>
+                                ) : (
+                                  <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>No data</span>
+                                )}
                               </td>
                             );
                           })}
@@ -1906,9 +1916,13 @@ const TradingPlacesPage: React.FC = () => {
                             const trend = historicalTrends[countryCode];
                             return (
                               <td key={countryCode} className="text-center p-3">
-                                <span className={`font-semibold ${trend?.importGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                  {trend?.importGrowthTotal > 0 ? '+' : ''}{trend?.importGrowthTotal.toFixed(1)}%
-                                </span>
+                                {trend && typeof trend.importGrowthTotal === 'number' ? (
+                                  <span className={`font-semibold ${trend.importGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {trend.importGrowthTotal > 0 ? '+' : ''}{trend.importGrowthTotal.toFixed(1)}%
+                                  </span>
+                                ) : (
+                                  <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>No data</span>
+                                )}
                               </td>
                             );
                           })}
@@ -1921,7 +1935,10 @@ const TradingPlacesPage: React.FC = () => {
                             const trend = historicalTrends[countryCode];
                             return (
                               <td key={countryCode} className="text-center p-3 font-semibold">
-                                ${trend?.averageExports.toFixed(1)}B
+                                {trend && typeof trend.averageExports === 'number' 
+                                  ? `$${trend.averageExports.toFixed(1)}B`
+                                  : <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>No data</span>
+                                }
                               </td>
                             );
                           })}
@@ -1934,7 +1951,10 @@ const TradingPlacesPage: React.FC = () => {
                             const trend = historicalTrends[countryCode];
                             return (
                               <td key={countryCode} className="text-center p-3 font-semibold">
-                                ${trend?.averageImports.toFixed(1)}B
+                                {trend && typeof trend.averageImports === 'number'
+                                  ? `$${trend.averageImports.toFixed(1)}B`
+                                  : <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>No data</span>
+                                }
                               </td>
                             );
                           })}
@@ -1947,13 +1967,36 @@ const TradingPlacesPage: React.FC = () => {
                             const trend = historicalTrends[countryCode];
                             return (
                               <td key={countryCode} className="text-center p-3 font-semibold">
-                                {trend?.yearsWithData}
+                                {trend && typeof trend.yearsWithData === 'number'
+                                  ? trend.yearsWithData
+                                  : <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>No data</span>
+                                }
                               </td>
                             );
                           })}
                         </tr>
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Message when comparison mode is active but no data */}
+              {comparisonMode === 'selected' && selectedCountriesForComparison.length >= 2 && Object.keys(historicalTrends).length === 0 && (
+                <div className={`mt-6 p-6 rounded-lg ${isDarkMode ? 'bg-yellow-900/30 border-yellow-500' : 'bg-yellow-50 border-yellow-300'} border-l-4`}>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl">ℹ️</span>
+                    <div>
+                      <h3 className="font-semibold text-yellow-600 dark:text-yellow-400">Comparison Data Not Available</h3>
+                      <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Historical trade data hasn't been loaded yet. Please ensure:
+                      </p>
+                      <ul className={`text-sm mt-2 list-disc list-inside ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <li>You've enabled "Show Historical Trends" above</li>
+                        <li>The historical data has finished loading</li>
+                        <li>You're using Live Data mode</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               )}
