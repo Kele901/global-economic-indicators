@@ -1796,13 +1796,13 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['USA', 'CAN', 'GBR', 'DEU', 'JPN']);
+                              setSelectedCountriesForComparison(['DEU', 'FRA', 'ITA', 'ESP']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'
                             } text-white`}
                           >
-                            G7 (5 of 7)
+                            European Union
                           </button>
 
                           {/* Regional Groupings */}
@@ -1843,7 +1843,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['DEU', 'GBR']);
+                              setSelectedCountriesForComparison(['DEU', 'FRA', 'ITA', 'ESP']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'
