@@ -703,6 +703,7 @@ const TradingPlacesPage: React.FC = () => {
   const [showHistoricalView, setShowHistoricalView] = useState(false);
   const [customStartYear, setCustomStartYear] = useState<number>(1960);
   const [customEndYear, setCustomEndYear] = useState<number>(2023);
+  const [showAllCountries, setShowAllCountries] = useState(false);
 
   // Regional Trade Blocs Data
   const tradeBlocs = {
@@ -1608,20 +1609,50 @@ const TradingPlacesPage: React.FC = () => {
 
             {/* Country-Specific Historical Trends */}
             <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-              <h2 className="text-2xl font-bold mb-4">
-                Country Trade Trends 
-                {availableYearRange && (
-                  <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    ({availableYearRange.min}-{availableYearRange.max})
-                  </span>
-                )}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(historicalTrends).slice(0, 4).map(([countryCode, trend]: [string, any]) => (
-                  <div key={countryCode} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'}`}>
-                    <h3 className="text-lg font-semibold mb-2">
-                      {mockTradeData.countries.find(c => c.code === countryCode)?.name || countryCode}
-                    </h3>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    Country Trade Trends 
+                    {availableYearRange && (
+                      <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        ({availableYearRange.min}-{availableYearRange.max})
+                      </span>
+                    )}
+                  </h2>
+                  <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Showing {showAllCountries ? Object.keys(historicalTrends).length : Math.min(6, Object.keys(historicalTrends).length)} of {Object.keys(historicalTrends).length} countries (sorted by export volume)
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAllCountries(!showAllCountries)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isDarkMode
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  {showAllCountries ? 'Show Less' : `Show All Countries`}
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.entries(historicalTrends)
+                  .sort(([, trendA]: [string, any], [, trendB]: [string, any]) => 
+                    trendB.averageExports - trendA.averageExports // Sort by export volume
+                  )
+                  .slice(0, showAllCountries ? Object.keys(historicalTrends).length : 6)
+                  .map(([countryCode, trend]: [string, any]) => {
+                    const FlagComponent = countryFlags[countryCode];
+                    const country = mockTradeData.countries.find(c => c.code === countryCode);
+                    return (
+                    <div key={countryCode} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'} hover:shadow-lg transition-shadow`}>
+                      <div className="flex items-center space-x-2 mb-3">
+                        {FlagComponent && (
+                          <FlagComponent className="w-8 h-6 rounded shadow-sm" />
+                        )}
+                        <h3 className="text-lg font-semibold">
+                          {country?.name || countryCode}
+                        </h3>
+                      </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Export Growth:</span>
@@ -1675,7 +1706,8 @@ const TradingPlacesPage: React.FC = () => {
                       </ResponsiveContainer>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
