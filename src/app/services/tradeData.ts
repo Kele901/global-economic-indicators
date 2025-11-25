@@ -48,7 +48,69 @@ class TradeDataService {
   private readonly OECD_BASE = 'https://stats.oecd.org/SDMX-JSON/data';
 
   /**
-   * Fetch comprehensive trade data from World Bank
+   * Fetch historical trade data across multiple years from World Bank
+   */
+  async fetchHistoricalTradeData(countryCodes: string[], startYear: number = 2015, endYear: number = 2023): Promise<{ [year: number]: TradeMetrics[] }> {
+    try {
+      const cacheKey = `historical-trade-${countryCodes.join('-')}-${startYear}-${endYear}`;
+      const cached = apiCache.get(cacheKey);
+      if (cached) return cached;
+
+      const indicators = {
+        exports: 'NE.EXP.GNFS.CD',
+        imports: 'NE.IMP.GNFS.CD',
+        gdp: 'NY.GDP.MKTP.CD',
+        population: 'SP.POP.TOTL'
+      };
+
+      const countryString = countryCodes.join(';');
+      
+      const fetchWithRetry = async (url: string, retries = 3): Promise<any> => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const data = await response.json();
+            return data;
+          } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          }
+        }
+      };
+
+      const requests = Object.entries(indicators).map(async ([key, indicator]) => {
+        try {
+          const data = await fetchWithRetry(
+            `${this.WORLD_BANK_BASE}/country/${countryString}/indicator/${indicator}?format=json&date=${startYear}:${endYear}&per_page=2000`
+          );
+          return { [key]: data[1] || [] };
+        } catch (error) {
+          console.warn(`Failed to fetch ${key} data:`, error);
+          return { [key]: [] };
+        }
+      });
+
+      const responses = await Promise.all(requests);
+      const combinedData = responses.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+      // Process data keeping all years
+      const historicalData = this.processWorldBankHistoricalData(combinedData as WorldBankResponse);
+      
+      apiCache.set(cacheKey, historicalData);
+      console.log('Fetched historical trade data:', Object.keys(historicalData).length, 'years');
+      
+      return historicalData;
+    } catch (error) {
+      console.error('Error fetching historical trade data:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Fetch comprehensive trade data from World Bank (most recent year)
    */
   async fetchWorldBankTradeData(countryCodes: string[], startYear: number = 2020): Promise<TradeMetrics[]> {
     try {
@@ -223,6 +285,62 @@ class TradeDataService {
   }
 
   /**
+   * Fetch historical trade partner data from UN Comtrade for multiple years
+   */
+  async fetchHistoricalComtradeData(countryCode: string, startYear: number = 2015, endYear: number = 2022): Promise<{ [year: number]: any[] }> {
+    try {
+      const cacheKey = `comtrade-historical-${countryCode}-${startYear}-${endYear}`;
+      const cached = apiCache.get(cacheKey);
+      if (cached) return cached;
+
+      const historicalData: { [year: number]: any[] } = {};
+      const yearsToFetch = [];
+      
+      // Generate array of years to fetch
+      for (let year = endYear; year >= startYear && yearsToFetch.length < 5; year--) {
+        yearsToFetch.push(year);
+      }
+
+      // Fetch data for each year (with rate limiting consideration)
+      for (const year of yearsToFetch) {
+        try {
+          const response = await fetch(
+            `${this.COMTRADE_BASE}/C/A/${year}?reporterCode=${countryCode}&partnerCode=all&cmdCode=TOTAL&flowCode=X,M&format=json&maxRecords=20`,
+            {
+              headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'TradingPlacesApp/1.0'
+              }
+            }
+          );
+          
+          if (!response.ok) {
+            if (response.status === 429) {
+              console.warn('Comtrade rate limit reached, stopping historical fetch');
+              break;
+            }
+            continue;
+          }
+
+          const data: ComtradeResponse = await response.json();
+          historicalData[year] = this.processComtradeData(data);
+          
+          // Rate limiting: wait 1 second between requests
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.warn(`Failed to fetch Comtrade data for ${year}:`, error);
+        }
+      }
+
+      apiCache.set(cacheKey, historicalData);
+      return historicalData;
+    } catch (error) {
+      console.error('Error fetching historical Comtrade data:', error);
+      return {};
+    }
+  }
+
+  /**
    * Fetch detailed trade partner data from UN Comtrade
    */
   async fetchComtradePartnerData(countryCode: string, year: number = 2022): Promise<any[]> {
@@ -313,6 +431,65 @@ class TradeDataService {
       console.error('Error fetching tariff data:', error);
       return this.getRealTariffPatterns(countryCode);
     }
+  }
+
+  /**
+   * Process World Bank historical data keeping all years
+   */
+  private processWorldBankHistoricalData(data: WorldBankResponse): { [year: number]: TradeMetrics[] } {
+    const yearData: { [year: number]: { [countryCode: string]: Partial<TradeMetrics> } } = {};
+
+    // Process each indicator
+    Object.entries(data).forEach(([indicator, values]) => {
+      values.forEach(item => {
+        if (!item.value) return;
+
+        const countryCode = item.countryiso3code;
+        const year = parseInt(item.date);
+        
+        if (!yearData[year]) {
+          yearData[year] = {};
+        }
+        
+        if (!yearData[year][countryCode]) {
+          yearData[year][countryCode] = {
+            country: item.country.value,
+            countryCode: item.countryiso3code,
+            year: year
+          };
+        }
+
+        switch (indicator) {
+          case 'exports':
+            yearData[year][countryCode].exports = item.value / 1e9;
+            break;
+          case 'imports':
+            yearData[year][countryCode].imports = item.value / 1e9;
+            break;
+          case 'gdp':
+            yearData[year][countryCode].gdp = item.value / 1e12;
+            break;
+          case 'population':
+            yearData[year][countryCode].population = item.value / 1e6;
+            break;
+        }
+      });
+    });
+
+    // Convert to final format with calculated metrics
+    const result: { [year: number]: TradeMetrics[] } = {};
+    
+    Object.entries(yearData).forEach(([year, countries]) => {
+      result[parseInt(year)] = Object.values(countries)
+        .filter(country => country.exports && country.imports && country.gdp)
+        .map(country => ({
+          ...country,
+          tradeBalance: (country.exports! - country.imports!),
+          tradeIntensity: ((country.exports! + country.imports!) / country.gdp!) * 100
+        } as TradeMetrics));
+    });
+
+    return result;
   }
 
   /**
@@ -571,6 +748,110 @@ class TradeDataService {
     } catch (error) {
       console.error('Error fetching trade war updates:', error);
       return [];
+    }
+  }
+
+  /**
+   * Fetch comprehensive historical trade data from multiple sources
+   * Combines World Bank, UN Comtrade for a complete picture
+   */
+  async fetchComprehensiveHistoricalData(
+    countryCodes: string[], 
+    startYear: number = 2015, 
+    endYear: number = 2023
+  ): Promise<{
+    yearlyData: { [year: number]: TradeMetrics[] };
+    trends: { [countryCode: string]: any };
+    globalTrends: any;
+  }> {
+    try {
+      console.log(`Fetching comprehensive historical data for ${countryCodes.length} countries from ${startYear} to ${endYear}`);
+      
+      // Fetch World Bank historical data (primary source)
+      const worldBankHistorical = await this.fetchHistoricalTradeData(countryCodes, startYear, endYear);
+      
+      // Calculate trends for each country
+      const trends: { [countryCode: string]: any } = {};
+      
+      countryCodes.forEach(code => {
+        const mappedCode = COUNTRY_MAPPINGS[code] || code;
+        const countryYearlyData: any[] = [];
+        
+        // Collect data for this country across all years
+        Object.entries(worldBankHistorical).forEach(([year, countries]) => {
+          const countryData = countries.find(c => c.countryCode === mappedCode);
+          if (countryData) {
+            countryYearlyData.push({
+              year: parseInt(year),
+              exports: countryData.exports,
+              imports: countryData.imports,
+              tradeBalance: countryData.tradeBalance,
+              gdp: countryData.gdp,
+              tradeIntensity: countryData.tradeIntensity
+            });
+          }
+        });
+        
+        // Sort by year
+        countryYearlyData.sort((a, b) => a.year - b.year);
+        
+        // Calculate trend statistics
+        if (countryYearlyData.length > 1) {
+          const firstYear = countryYearlyData[0];
+          const lastYear = countryYearlyData[countryYearlyData.length - 1];
+          
+          trends[code] = {
+            data: countryYearlyData,
+            exportGrowthTotal: firstYear.exports > 0 
+              ? ((lastYear.exports - firstYear.exports) / firstYear.exports) * 100 
+              : 0,
+            importGrowthTotal: firstYear.imports > 0 
+              ? ((lastYear.imports - firstYear.imports) / firstYear.imports) * 100 
+              : 0,
+            averageExports: countryYearlyData.reduce((sum, d) => sum + d.exports, 0) / countryYearlyData.length,
+            averageImports: countryYearlyData.reduce((sum, d) => sum + d.imports, 0) / countryYearlyData.length,
+            yearsWithData: countryYearlyData.length
+          };
+        }
+      });
+      
+      // Calculate global trends
+      const globalTrends = {
+        totalYears: Object.keys(worldBankHistorical).length,
+        yearRange: { start: startYear, end: endYear },
+        totalWorldTradeByYear: {} as { [year: number]: number },
+        topExportersByYear: {} as { [year: number]: string[] }
+      };
+      
+      Object.entries(worldBankHistorical).forEach(([year, countries]) => {
+        const totalTrade = countries.reduce((sum, c) => sum + c.exports + c.imports, 0);
+        globalTrends.totalWorldTradeByYear[parseInt(year)] = totalTrade;
+        
+        const topExporters = countries
+          .sort((a, b) => b.exports - a.exports)
+          .slice(0, 5)
+          .map(c => c.country);
+        globalTrends.topExportersByYear[parseInt(year)] = topExporters;
+      });
+      
+      console.log('Historical data fetched successfully:', {
+        years: Object.keys(worldBankHistorical).length,
+        countries: countryCodes.length,
+        trendsCalculated: Object.keys(trends).length
+      });
+      
+      return {
+        yearlyData: worldBankHistorical,
+        trends,
+        globalTrends
+      };
+    } catch (error) {
+      console.error('Error fetching comprehensive historical data:', error);
+      return {
+        yearlyData: {},
+        trends: {},
+        globalTrends: { totalYears: 0, yearRange: { start: startYear, end: endYear }, totalWorldTradeByYear: {}, topExportersByYear: {} }
+      };
     }
   }
 }

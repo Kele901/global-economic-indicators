@@ -201,3 +201,109 @@ export class RateLimiter {
 }
 
 export const rateLimiter = new RateLimiter();
+
+// Hook for fetching historical trade data
+interface UseHistoricalTradeDataOptions {
+  countries: string[];
+  startYear?: number;
+  endYear?: number;
+  enableRealData: boolean;
+}
+
+interface HistoricalTradeDataState {
+  yearlyData: { [year: number]: any[] };
+  trends: { [countryCode: string]: any };
+  globalTrends: any;
+  loading: boolean;
+  error: string | null;
+  lastUpdated: string | null;
+}
+
+export const useHistoricalTradeData = ({ 
+  countries, 
+  startYear = 2015,
+  endYear = 2023,
+  enableRealData = false
+}: UseHistoricalTradeDataOptions) => {
+  const [state, setState] = useState<HistoricalTradeDataState>({
+    yearlyData: {},
+    trends: {},
+    globalTrends: null,
+    loading: false,
+    error: null,
+    lastUpdated: null
+  });
+
+  const fetchHistoricalData = useCallback(async () => {
+    if (!enableRealData) return;
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      // Check cache first
+      const cacheKey = `historical-trade-data-${countries.join('-')}-${startYear}-${endYear}`;
+      const cachedData = apiCache.get(cacheKey);
+      
+      if (cachedData) {
+        setState({
+          ...cachedData,
+          loading: false,
+          error: null
+        });
+        return;
+      }
+
+      // Fetch comprehensive historical data
+      const historicalData = await tradeDataService.fetchComprehensiveHistoricalData(
+        countries.map(code => COUNTRY_MAPPINGS[code] || code),
+        startYear,
+        endYear
+      );
+
+      const lastUpdated = new Date().toISOString();
+
+      // Cache the results
+      apiCache.set(cacheKey, { 
+        yearlyData: historicalData.yearlyData,
+        trends: historicalData.trends,
+        globalTrends: historicalData.globalTrends,
+        lastUpdated 
+      });
+
+      setState({
+        yearlyData: historicalData.yearlyData,
+        trends: historicalData.trends,
+        globalTrends: historicalData.globalTrends,
+        loading: false,
+        error: null,
+        lastUpdated
+      });
+
+    } catch (error) {
+      console.error('Error fetching historical trade data:', error);
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch historical data'
+      }));
+    }
+  }, [countries, startYear, endYear, enableRealData]);
+
+  // Fetch data when enabled
+  useEffect(() => {
+    if (enableRealData) {
+      fetchHistoricalData();
+    }
+  }, [fetchHistoricalData, enableRealData]);
+
+  const refreshData = useCallback(() => {
+    const cacheKey = `historical-trade-data-${countries.join('-')}-${startYear}-${endYear}`;
+    apiCache.clear();
+    fetchHistoricalData();
+  }, [fetchHistoricalData, countries, startYear, endYear]);
+
+  return {
+    ...state,
+    refreshData
+  };
+};

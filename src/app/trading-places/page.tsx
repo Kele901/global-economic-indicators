@@ -22,7 +22,7 @@ import RealDataToggle from '../components/RealDataToggle';
 import DataSourceIndicator from '../components/DataSourceIndicator';
 import DataSourceBreakdown from '../components/DataSourceBreakdown';
 import InfoPanel from '../components/InfoPanel';
-import { useTradeData } from '../hooks/useTradeData';
+import { useTradeData, useHistoricalTradeData } from '../hooks/useTradeData';
 import { COUNTRY_MAPPINGS } from '../services/tradeData';
 import { 
   US, CN, DE, JP, GB, IN, BR, KR, CA, AU, MX, RU, SA,
@@ -699,6 +699,8 @@ const TradingPlacesPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [enableRealData, setEnableRealData] = useLocalStorage('enableRealData', false);
   const [mounted, setMounted] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<number>(2023);
+  const [showHistoricalView, setShowHistoricalView] = useState(false);
 
   // Regional Trade Blocs Data
   const tradeBlocs = {
@@ -958,6 +960,21 @@ const TradingPlacesPage: React.FC = () => {
     countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA'],
     enableRealData,
     refreshInterval: 3600000 // 1 hour
+  });
+
+  // Historical data integration
+  const {
+    yearlyData: historicalYearlyData,
+    trends: historicalTrends,
+    globalTrends: historicalGlobalTrends,
+    loading: historicalLoading,
+    error: historicalError,
+    refreshData: refreshHistoricalData
+  } = useHistoricalTradeData({
+    countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA'],
+    startYear: 2015,
+    endYear: 2023,
+    enableRealData: enableRealData && showHistoricalView
   });
 
   // Handle hydration
@@ -1288,6 +1305,72 @@ const TradingPlacesPage: React.FC = () => {
           isDarkMode={isDarkMode}
         />
 
+        {/* Historical Data Controls */}
+        {enableRealData && (
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-md`}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setShowHistoricalView(!showHistoricalView)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    showHistoricalView
+                      ? isDarkMode
+                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      : isDarkMode
+                      ? 'bg-gray-600 text-white hover:bg-gray-500'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {showHistoricalView ? 'Hide' : 'Show'} Historical Trends (2015-2023)
+                </button>
+                
+                {showHistoricalView && (
+                  <>
+                    {historicalLoading && (
+                      <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Loading historical data...
+                      </span>
+                    )}
+                    {historicalError && (
+                      <span className="text-sm text-red-500">
+                        Error: {historicalError}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {showHistoricalView && !historicalLoading && Object.keys(historicalYearlyData).length > 0 && (
+                <div className="flex items-center space-x-3">
+                  <Calendar className="w-5 h-5" />
+                  <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Select Year:
+                  </label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                    className={`px-3 py-2 rounded-lg border ${
+                      isDarkMode 
+                        ? 'bg-gray-600 border-gray-500 text-white' 
+                        : 'bg-white border-gray-300 text-gray-900'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  >
+                    {Object.keys(historicalYearlyData)
+                      .map(Number)
+                      .sort((a, b) => b - a)
+                      .map(year => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Global Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className={`p-4 sm:p-6 rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-blue-50 text-gray-800'}`}>
@@ -1350,6 +1433,158 @@ const TradingPlacesPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Historical Trends Section */}
+        {showHistoricalView && !historicalLoading && Object.keys(historicalYearlyData).length > 0 && (
+          <div className="space-y-6">
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+              <h2 className="text-2xl font-bold mb-4">Global Trade Volume Over Time</h2>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={Object.entries(historicalGlobalTrends?.totalWorldTradeByYear || {})
+                      .sort(([yearA], [yearB]) => Number(yearA) - Number(yearB))
+                      .map(([year, trade]) => ({
+                        year: Number(year),
+                        'World Trade Volume ($T)': Number(trade.toFixed(2))
+                      }))
+                    }
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                    <XAxis 
+                      dataKey="year" 
+                      stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                    />
+                    <YAxis 
+                      stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                        border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                        borderRadius: '0.5rem',
+                        color: isDarkMode ? '#ffffff' : '#000000'
+                      }}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="World Trade Volume ($T)" 
+                      stroke="#3b82f6" 
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Country-Specific Historical Trends */}
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+              <h2 className="text-2xl font-bold mb-4">Country Trade Trends (2015-2023)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Object.entries(historicalTrends).slice(0, 4).map(([countryCode, trend]: [string, any]) => (
+                  <div key={countryCode} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'}`}>
+                    <h3 className="text-lg font-semibold mb-2">
+                      {mockTradeData.countries.find(c => c.code === countryCode)?.name || countryCode}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Export Growth:</span>
+                        <span className={`font-semibold ${trend.exportGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {trend.exportGrowthTotal > 0 ? '+' : ''}{trend.exportGrowthTotal.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Import Growth:</span>
+                        <span className={`font-semibold ${trend.importGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {trend.importGrowthTotal > 0 ? '+' : ''}{trend.importGrowthTotal.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Avg Exports:</span>
+                        <span className="font-semibold">${trend.averageExports.toFixed(1)}B</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Avg Imports:</span>
+                        <span className="font-semibold">${trend.averageImports.toFixed(1)}B</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Years with Data:</span>
+                        <span className="font-semibold">{trend.yearsWithData}</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 h-40">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={trend.data}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                          <XAxis 
+                            dataKey="year" 
+                            stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                            style={{ fontSize: '0.75rem' }}
+                          />
+                          <YAxis 
+                            stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                            style={{ fontSize: '0.75rem' }}
+                          />
+                          <Tooltip 
+                            contentStyle={{
+                              backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                              border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                              borderRadius: '0.5rem',
+                              fontSize: '0.75rem'
+                            }}
+                          />
+                          <Line type="monotone" dataKey="exports" stroke="#10b981" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="imports" stroke="#ef4444" strokeWidth={2} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Year-Specific Data View */}
+            {historicalYearlyData[selectedYear] && (
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+                <h2 className="text-2xl font-bold mb-4">Trade Data for {selectedYear}</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className={`border-b-2 ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                        <th className="text-left p-3">Country</th>
+                        <th className="text-right p-3">Exports ($B)</th>
+                        <th className="text-right p-3">Imports ($B)</th>
+                        <th className="text-right p-3">Trade Balance ($B)</th>
+                        <th className="text-right p-3">GDP ($T)</th>
+                        <th className="text-right p-3">Trade Intensity (%)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historicalYearlyData[selectedYear]
+                        .sort((a, b) => b.exports - a.exports)
+                        .map((country: any) => (
+                          <tr key={country.countryCode} className={`border-b ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                            <td className="p-3 font-medium">{country.country}</td>
+                            <td className="text-right p-3">${country.exports.toFixed(1)}</td>
+                            <td className="text-right p-3">${country.imports.toFixed(1)}</td>
+                            <td className={`text-right p-3 font-semibold ${country.tradeBalance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                              ${country.tradeBalance.toFixed(1)}
+                            </td>
+                            <td className="text-right p-3">${country.gdp.toFixed(2)}</td>
+                            <td className="text-right p-3">{country.tradeIntensity.toFixed(1)}%</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Country List */}
