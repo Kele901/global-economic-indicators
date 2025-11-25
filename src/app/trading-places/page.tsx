@@ -704,6 +704,8 @@ const TradingPlacesPage: React.FC = () => {
   const [customStartYear, setCustomStartYear] = useState<number>(1960);
   const [customEndYear, setCustomEndYear] = useState<number>(2023);
   const [showAllCountries, setShowAllCountries] = useState(false);
+  const [selectedCountriesForComparison, setSelectedCountriesForComparison] = useState<string[]>([]);
+  const [comparisonMode, setComparisonMode] = useState<'all' | 'selected'>('all');
 
   // Regional Trade Blocs Data
   const tradeBlocs = {
@@ -1609,37 +1611,183 @@ const TradingPlacesPage: React.FC = () => {
 
             {/* Country-Specific Historical Trends */}
             <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-                <div>
-                  <h2 className="text-2xl font-bold">
-                    Country Trade Trends 
-                    {availableYearRange && (
-                      <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        ({availableYearRange.min}-{availableYearRange.max})
-                      </span>
+              <div className="flex flex-col gap-4 mb-6">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-2xl font-bold">
+                      Country Trade Trends 
+                      {availableYearRange && (
+                        <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          ({availableYearRange.min}-{availableYearRange.max})
+                        </span>
+                      )}
+                    </h2>
+                    <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {comparisonMode === 'selected' && selectedCountriesForComparison.length > 0
+                        ? `Comparing ${selectedCountriesForComparison.length} selected countries`
+                        : `Showing ${showAllCountries ? Object.keys(historicalTrends).length : Math.min(6, Object.keys(historicalTrends).length)} of ${Object.keys(historicalTrends).length} countries (sorted by export volume)`
+                      }
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => {
+                        if (comparisonMode === 'selected') {
+                          setComparisonMode('all');
+                          setSelectedCountriesForComparison([]);
+                        } else {
+                          setComparisonMode('selected');
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        comparisonMode === 'selected'
+                          ? isDarkMode
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                            : 'bg-purple-500 text-white hover:bg-purple-600'
+                          : isDarkMode
+                          ? 'bg-gray-600 text-white hover:bg-gray-500'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {comparisonMode === 'selected' ? '✓ Compare Mode' : 'Compare Countries'}
+                    </button>
+                    {comparisonMode === 'all' && (
+                      <button
+                        onClick={() => setShowAllCountries(!showAllCountries)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          isDarkMode
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                        }`}
+                      >
+                        {showAllCountries ? 'Show Less' : `Show All Countries`}
+                      </button>
                     )}
-                  </h2>
-                  <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Showing {showAllCountries ? Object.keys(historicalTrends).length : Math.min(6, Object.keys(historicalTrends).length)} of {Object.keys(historicalTrends).length} countries (sorted by export volume)
-                  </p>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setShowAllCountries(!showAllCountries)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isDarkMode
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-blue-500 text-white hover:bg-blue-600'
-                  }`}
-                >
-                  {showAllCountries ? 'Show Less' : `Show All Countries`}
-                </button>
+
+                {/* Country Selection Dropdown */}
+                {comparisonMode === 'selected' && (
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'}`}>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                          Select countries to compare (2-4 recommended):
+                        </label>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Quick Select Presets */}
+                          <button
+                            onClick={() => setSelectedCountriesForComparison(['US', 'CN'])}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                            } text-white`}
+                          >
+                            US vs China
+                          </button>
+                          <button
+                            onClick={() => setSelectedCountriesForComparison(['US', 'CN', 'JP', 'DE'])}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
+                            } text-white`}
+                          >
+                            Top 4
+                          </button>
+                          <button
+                            onClick={() => setSelectedCountriesForComparison(['BR', 'RU', 'IN', 'CN', 'SA'])}
+                            className={`text-xs px-2 py-1 rounded ${
+                              isDarkMode ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-yellow-500 hover:bg-yellow-600'
+                            } text-white`}
+                          >
+                            BRICS
+                          </button>
+                          {selectedCountriesForComparison.length > 0 && (
+                            <button
+                              onClick={() => setSelectedCountriesForComparison([])}
+                              className={`text-xs px-3 py-1 rounded ${
+                                isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'
+                              } text-white`}
+                            >
+                              Clear All
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Country Selection Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                        {Object.keys(historicalTrends)
+                          .sort((a, b) => {
+                            const countryA = mockTradeData.countries.find(c => c.code === a);
+                            const countryB = mockTradeData.countries.find(c => c.code === b);
+                            return (countryA?.name || a).localeCompare(countryB?.name || b);
+                          })
+                          .map(countryCode => {
+                            const country = mockTradeData.countries.find(c => c.code === countryCode);
+                            const FlagComponent = countryFlags[countryCode];
+                            const isSelected = selectedCountriesForComparison.includes(countryCode);
+                            
+                            return (
+                              <button
+                                key={countryCode}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedCountriesForComparison(prev => prev.filter(c => c !== countryCode));
+                                  } else {
+                                    setSelectedCountriesForComparison(prev => [...prev, countryCode]);
+                                  }
+                                }}
+                                className={`flex items-center space-x-2 p-2 rounded-lg border-2 transition-all ${
+                                  isSelected
+                                    ? isDarkMode
+                                      ? 'border-purple-500 bg-purple-600/30 text-white'
+                                      : 'border-purple-500 bg-purple-50 text-purple-900'
+                                    : isDarkMode
+                                    ? 'border-gray-500 bg-gray-700 text-gray-300 hover:border-gray-400'
+                                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                                }`}
+                              >
+                                {FlagComponent && (
+                                  <FlagComponent className="w-6 h-4 rounded shadow-sm flex-shrink-0" />
+                                )}
+                                <span className="text-xs truncate">{country?.name || countryCode}</span>
+                                {isSelected && <span className="text-green-500 font-bold">✓</span>}
+                              </button>
+                            );
+                          })}
+                      </div>
+
+                      {/* Selection Info */}
+                      <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} flex items-center justify-between`}>
+                        <span>
+                          {selectedCountriesForComparison.length === 0 && 'Select at least 1 country'}
+                          {selectedCountriesForComparison.length === 1 && '1 country selected'}
+                          {selectedCountriesForComparison.length > 1 && selectedCountriesForComparison.length <= 4 && `${selectedCountriesForComparison.length} countries selected - Good for comparison!`}
+                          {selectedCountriesForComparison.length > 4 && `${selectedCountriesForComparison.length} countries selected - Consider selecting fewer for clearer comparison`}
+                        </span>
+                        {selectedCountriesForComparison.length > 0 && (
+                          <span className={isDarkMode ? 'text-purple-400' : 'text-purple-600'}>
+                            ← Click countries to toggle selection
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.entries(historicalTrends)
+                  .filter(([countryCode]) => {
+                    // In comparison mode, only show selected countries
+                    if (comparisonMode === 'selected') {
+                      return selectedCountriesForComparison.length === 0 || selectedCountriesForComparison.includes(countryCode);
+                    }
+                    return true;
+                  })
                   .sort(([, trendA]: [string, any], [, trendB]: [string, any]) => 
                     trendB.averageExports - trendA.averageExports // Sort by export volume
                   )
-                  .slice(0, showAllCountries ? Object.keys(historicalTrends).length : 6)
+                  .slice(0, comparisonMode === 'selected' ? selectedCountriesForComparison.length : (showAllCountries ? Object.keys(historicalTrends).length : 6))
                   .map(([countryCode, trend]: [string, any]) => {
                     const FlagComponent = countryFlags[countryCode];
                     const country = mockTradeData.countries.find(c => c.code === countryCode);
@@ -1709,6 +1857,106 @@ const TradingPlacesPage: React.FC = () => {
                   );
                 })}
               </div>
+
+              {/* Side-by-Side Comparison Table */}
+              {comparisonMode === 'selected' && selectedCountriesForComparison.length >= 2 && (
+                <div className={`mt-6 p-6 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'}`}>
+                  <h3 className="text-xl font-bold mb-4">Direct Comparison</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className={`border-b-2 ${isDarkMode ? 'border-gray-500' : 'border-gray-300'}`}>
+                          <th className="text-left p-3 font-semibold">Metric</th>
+                          {selectedCountriesForComparison.map(countryCode => {
+                            const country = mockTradeData.countries.find(c => c.code === countryCode);
+                            const FlagComponent = countryFlags[countryCode];
+                            return (
+                              <th key={countryCode} className="text-center p-3">
+                                <div className="flex flex-col items-center space-y-1">
+                                  {FlagComponent && (
+                                    <FlagComponent className="w-8 h-6 rounded shadow-sm" />
+                                  )}
+                                  <span className="text-sm font-semibold">{country?.name || countryCode}</span>
+                                </div>
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* Export Growth */}
+                        <tr className={`border-b ${isDarkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                          <td className={`p-3 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Export Growth</td>
+                          {selectedCountriesForComparison.map(countryCode => {
+                            const trend = historicalTrends[countryCode];
+                            return (
+                              <td key={countryCode} className="text-center p-3">
+                                <span className={`font-semibold ${trend?.exportGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                  {trend?.exportGrowthTotal > 0 ? '+' : ''}{trend?.exportGrowthTotal.toFixed(1)}%
+                                </span>
+                              </td>
+                            );
+                          })}
+                        </tr>
+
+                        {/* Import Growth */}
+                        <tr className={`border-b ${isDarkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                          <td className={`p-3 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Import Growth</td>
+                          {selectedCountriesForComparison.map(countryCode => {
+                            const trend = historicalTrends[countryCode];
+                            return (
+                              <td key={countryCode} className="text-center p-3">
+                                <span className={`font-semibold ${trend?.importGrowthTotal > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                  {trend?.importGrowthTotal > 0 ? '+' : ''}{trend?.importGrowthTotal.toFixed(1)}%
+                                </span>
+                              </td>
+                            );
+                          })}
+                        </tr>
+
+                        {/* Average Exports */}
+                        <tr className={`border-b ${isDarkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                          <td className={`p-3 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Avg Exports</td>
+                          {selectedCountriesForComparison.map(countryCode => {
+                            const trend = historicalTrends[countryCode];
+                            return (
+                              <td key={countryCode} className="text-center p-3 font-semibold">
+                                ${trend?.averageExports.toFixed(1)}B
+                              </td>
+                            );
+                          })}
+                        </tr>
+
+                        {/* Average Imports */}
+                        <tr className={`border-b ${isDarkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                          <td className={`p-3 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Avg Imports</td>
+                          {selectedCountriesForComparison.map(countryCode => {
+                            const trend = historicalTrends[countryCode];
+                            return (
+                              <td key={countryCode} className="text-center p-3 font-semibold">
+                                ${trend?.averageImports.toFixed(1)}B
+                              </td>
+                            );
+                          })}
+                        </tr>
+
+                        {/* Years with Data */}
+                        <tr className={`border-b ${isDarkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                          <td className={`p-3 font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Years with Data</td>
+                          {selectedCountriesForComparison.map(countryCode => {
+                            const trend = historicalTrends[countryCode];
+                            return (
+                              <td key={countryCode} className="text-center p-3 font-semibold">
+                                {trend?.yearsWithData}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Year-Specific Data View */}
