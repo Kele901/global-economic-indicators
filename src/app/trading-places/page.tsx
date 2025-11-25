@@ -23,6 +23,7 @@ import DataSourceIndicator from '../components/DataSourceIndicator';
 import DataSourceBreakdown from '../components/DataSourceBreakdown';
 import InfoPanel from '../components/InfoPanel';
 import { useTradeData } from '../hooks/useTradeData';
+import { COUNTRY_MAPPINGS } from '../services/tradeData';
 import { 
   US, CN, DE, JP, GB, IN, BR, KR, CA, AU, MX, RU, SA,
   FR, IT, ES, ID, TH, SG, MY, AR, UY, PY
@@ -984,59 +985,126 @@ const TradingPlacesPage: React.FC = () => {
   // Merge real data with mock data
   const combinedTradeData = useMemo(() => {
     if (enableRealData && realTradeData.length > 0) {
-      // Merge real data with mock data structure
-      return {
-        countries: mockTradeData.countries.map(mockCountry => {
-          const realCountryData = realTradeData.find(real => 
-            real.countryCode === mockCountry.code || 
-            real.country?.toLowerCase() === mockCountry.name.toLowerCase()
-          );
+      // Log the incoming real data for debugging
+      console.log('Real Trade Data received:', realTradeData.map(r => ({
+        code: r.code,
+        countryCode: r.countryCode,
+        country: r.country,
+        exports: r.exports,
+        imports: r.imports
+      })));
 
-          if (realCountryData) {
-            return {
-              ...mockCountry,
-              totalExports: realCountryData.exports || mockCountry.totalExports,
-              totalImports: realCountryData.imports || mockCountry.totalImports,
-              tradeBalance: realCountryData.tradeBalance || mockCountry.tradeBalance,
-              gdp: realCountryData.gdp || mockCountry.gdp,
-              population: realCountryData.population || mockCountry.population,
-              tradeIntensity: realCountryData.tradeIntensity || mockCountry.tradeIntensity,
-              diversificationIndex: realCountryData.diversificationIndex || mockCountry.diversificationIndex,
-              // Use real data for categories if available, otherwise keep mock
-              topExports: realCountryData.topExports && realCountryData.topExports.length > 0 
-                ? realCountryData.topExports 
-                : mockCountry.topExports,
-              topImports: realCountryData.topImports && realCountryData.topImports.length > 0 
-                ? realCountryData.topImports 
-                : mockCountry.topImports,
-              tradePartners: realCountryData.tradingPartners && realCountryData.tradingPartners.length > 0
-                ? realCountryData.tradingPartners 
-                : mockCountry.tradePartners,
-              // Use real growth rates and diversification if available
-              exportGrowth: realCountryData.exportGrowth !== undefined 
-                ? realCountryData.exportGrowth 
-                : mockCountry.exportGrowth,
-              importGrowth: realCountryData.importGrowth !== undefined 
-                ? realCountryData.importGrowth 
-                : mockCountry.importGrowth
-            };
-          }
-          return mockCountry;
-        }),
+      // First, merge real data with mock data for each country
+      const mergedCountries = mockTradeData.countries.map(mockCountry => {
+        const realCountryData = realTradeData.find(real => 
+          real.code === mockCountry.code || // Match by 2-letter code (e.g., US)
+          real.countryCode === mockCountry.code || // Match by code field
+          real.countryCode === COUNTRY_MAPPINGS[mockCountry.code] || // Match by mapped 3-letter code (e.g., USA)
+          real.country?.toLowerCase() === mockCountry.name.toLowerCase() // Match by country name
+        );
+
+        if (realCountryData) {
+          console.log(`Matched ${mockCountry.code} (${mockCountry.name}) with real data:`, {
+            exports: realCountryData.exports,
+            imports: realCountryData.imports,
+            totalExports: realCountryData.exports || mockCountry.totalExports,
+            totalImports: realCountryData.imports || mockCountry.totalImports
+          });
+          return {
+            ...mockCountry,
+            // Use real data if it exists and is a valid number, otherwise use mock data
+            totalExports: (typeof realCountryData.exports === 'number' && realCountryData.exports > 0) 
+              ? realCountryData.exports 
+              : mockCountry.totalExports,
+            totalImports: (typeof realCountryData.imports === 'number' && realCountryData.imports > 0) 
+              ? realCountryData.imports 
+              : mockCountry.totalImports,
+            tradeBalance: (typeof realCountryData.tradeBalance === 'number') 
+              ? realCountryData.tradeBalance 
+              : mockCountry.tradeBalance,
+            gdp: (typeof realCountryData.gdp === 'number' && realCountryData.gdp > 0) 
+              ? realCountryData.gdp 
+              : mockCountry.gdp,
+            population: (typeof realCountryData.population === 'number' && realCountryData.population > 0) 
+              ? realCountryData.population 
+              : mockCountry.population,
+            tradeIntensity: (typeof realCountryData.tradeIntensity === 'number' && realCountryData.tradeIntensity > 0) 
+              ? realCountryData.tradeIntensity 
+              : mockCountry.tradeIntensity,
+            diversificationIndex: (typeof realCountryData.diversificationIndex === 'number') 
+              ? realCountryData.diversificationIndex 
+              : mockCountry.diversificationIndex,
+            // Use real data for categories if available, otherwise keep mock
+            topExports: realCountryData.topExports && realCountryData.topExports.length > 0 
+              ? realCountryData.topExports 
+              : mockCountry.topExports,
+            topImports: realCountryData.topImports && realCountryData.topImports.length > 0 
+              ? realCountryData.topImports 
+              : mockCountry.topImports,
+            tradePartners: realCountryData.tradingPartners && realCountryData.tradingPartners.length > 0
+              ? realCountryData.tradingPartners 
+              : mockCountry.tradePartners,
+            // Use real growth rates if available
+            exportGrowth: (typeof realCountryData.exportGrowth === 'number') 
+              ? realCountryData.exportGrowth 
+              : mockCountry.exportGrowth,
+            importGrowth: (typeof realCountryData.importGrowth === 'number') 
+              ? realCountryData.importGrowth 
+              : mockCountry.importGrowth
+          };
+        }
+        return mockCountry;
+      });
+
+      // Calculate global stats from the merged country data
+      const totalWorldTrade = mergedCountries.reduce((sum, country) => 
+        sum + (country.totalExports || 0) + (country.totalImports || 0), 0
+      );
+
+      // Get top trading nations by exports
+      const topTradingNations = mergedCountries
+        .filter(country => country.totalExports > 0)
+        .sort((a, b) => b.totalExports - a.totalExports)
+        .slice(0, 5)
+        .map(country => country.name);
+
+      // Calculate average trade intensity
+      const validTradeIntensities = mergedCountries
+        .filter(country => country.tradeIntensity > 0)
+        .map(country => country.tradeIntensity);
+      const averageTradeIntensity = validTradeIntensities.length > 0
+        ? validTradeIntensities.reduce((sum, val) => sum + val, 0) / validTradeIntensities.length
+        : mockTradeData.globalStats.tradeMetrics.averageTradeIntensity;
+
+      // Calculate global trade growth
+      const validGrowthRates = mergedCountries
+        .filter(country => country.exportGrowth !== undefined && country.importGrowth !== undefined)
+        .map(country => (country.exportGrowth + country.importGrowth) / 2);
+      const globalTradeGrowth = validGrowthRates.length > 0
+        ? validGrowthRates.reduce((sum, val) => sum + val, 0) / validGrowthRates.length
+        : mockTradeData.globalStats.tradeMetrics.globalTradeGrowth;
+
+      // Log for debugging
+      console.log('Trading Places - Real Data:', {
+        realDataCount: realTradeData.length,
+        mergedCountriesCount: mergedCountries.length,
+        totalWorldTrade,
+        topTradingNations,
+        averageTradeIntensity,
+        globalTradeGrowth
+      });
+
+      return {
+        countries: mergedCountries,
         globalStats: {
           ...mockTradeData.globalStats,
-          // Calculate real global stats if we have real data
-          totalWorldTrade: enableRealData && realTradeData.length > 0 
-            ? realTradeData.reduce((sum, country) => 
-                sum + (country.exports || 0) + (country.imports || 0), 0
-              )
-            : mockTradeData.globalStats.totalWorldTrade,
-          topTradingNations: enableRealData && realTradeData.length > 0
-            ? realTradeData
-                .sort((a, b) => (b.exports || 0) - (a.exports || 0))
-                .slice(0, 5)
-                .map(country => country.country || 'Unknown')
-            : mockTradeData.globalStats.topTradingNations
+          totalWorldTrade: totalWorldTrade > 0 ? totalWorldTrade : mockTradeData.globalStats.totalWorldTrade,
+          topTradingNations: topTradingNations.length > 0 ? topTradingNations : mockTradeData.globalStats.topTradingNations,
+          tradeMetrics: {
+            ...mockTradeData.globalStats.tradeMetrics,
+            averageTradeIntensity,
+            globalTradeGrowth
+          }
         }
       };
     }
@@ -1226,7 +1294,11 @@ const TradingPlacesPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>World Trade Volume</p>
-                <p className="text-xl sm:text-2xl font-bold">{formatNumber(combinedTradeData.globalStats.totalWorldTrade, 'T')}</p>
+                {loading && enableRealData ? (
+                  <p className="text-xl sm:text-2xl font-bold">Loading...</p>
+                ) : (
+                  <p className="text-xl sm:text-2xl font-bold">{formatNumber(combinedTradeData.globalStats.totalWorldTrade, 'T')}</p>
+                )}
                 <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Growth: {formatPercentage(combinedTradeData.globalStats.tradeMetrics.globalTradeGrowth)} {isRealData && enableRealData ? '(Live)' : '(Demo)'}
                 </p>
@@ -1239,7 +1311,11 @@ const TradingPlacesPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Top Exporter</p>
-                <p className="text-lg sm:text-xl font-bold">{combinedTradeData.globalStats.topTradingNations[0]}</p>
+                {loading && enableRealData ? (
+                  <p className="text-lg sm:text-xl font-bold">Loading...</p>
+                ) : (
+                  <p className="text-lg sm:text-xl font-bold">{combinedTradeData.globalStats.topTradingNations[0]}</p>
+                )}
                 <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Trade Intensity: {formatPercentage(combinedTradeData.globalStats.tradeMetrics.averageTradeIntensity)}
                 </p>

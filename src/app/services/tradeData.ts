@@ -317,49 +317,80 @@ class TradeDataService {
 
   /**
    * Process World Bank data into our format
+   * Groups by country and uses the most recent year's data
    */
   private processWorldBankData(data: WorldBankResponse): TradeMetrics[] {
-    const countries: { [key: string]: Partial<TradeMetrics> } = {};
+    // First, group all data by country and year
+    const countryYearData: { [key: string]: { [year: number]: Partial<TradeMetrics> } } = {};
 
     // Process each indicator
     Object.entries(data).forEach(([indicator, values]) => {
       values.forEach(item => {
         if (!item.value) return;
 
-        const key = item.countryiso3code;
-        if (!countries[key]) {
-          countries[key] = {
+        const countryCode = item.countryiso3code;
+        const year = parseInt(item.date);
+        
+        if (!countryYearData[countryCode]) {
+          countryYearData[countryCode] = {};
+        }
+        
+        if (!countryYearData[countryCode][year]) {
+          countryYearData[countryCode][year] = {
             country: item.country.value,
             countryCode: item.countryiso3code,
-            year: parseInt(item.date)
+            year: year
           };
         }
 
         switch (indicator) {
           case 'exports':
-            countries[key].exports = item.value / 1e9; // Convert to billions
+            countryYearData[countryCode][year].exports = item.value / 1e9; // Convert to billions
             break;
           case 'imports':
-            countries[key].imports = item.value / 1e9;
+            countryYearData[countryCode][year].imports = item.value / 1e9;
             break;
           case 'gdp':
-            countries[key].gdp = item.value / 1e12; // Convert to trillions
+            countryYearData[countryCode][year].gdp = item.value / 1e12; // Convert to trillions
             break;
           case 'population':
-            countries[key].population = item.value / 1e6; // Convert to millions
+            countryYearData[countryCode][year].population = item.value / 1e6; // Convert to millions
             break;
         }
       });
     });
 
-    // Calculate derived metrics
-    return Object.values(countries)
-      .filter(country => country.exports && country.imports && country.gdp)
-      .map(country => ({
-        ...country,
-        tradeBalance: (country.exports! - country.imports!),
-        tradeIntensity: ((country.exports! + country.imports!) / country.gdp!) * 100
-      } as TradeMetrics));
+    // For each country, get the most recent year with complete data
+    const countries: TradeMetrics[] = [];
+    
+    Object.entries(countryYearData).forEach(([countryCode, yearData]) => {
+      // Sort years in descending order (most recent first)
+      const years = Object.keys(yearData).map(Number).sort((a, b) => b - a);
+      
+      // Find the most recent year with complete data (exports, imports, and GDP)
+      for (const year of years) {
+        const data = yearData[year];
+        if (data.exports && data.imports && data.gdp) {
+          countries.push({
+            ...data,
+            tradeBalance: (data.exports - data.imports),
+            tradeIntensity: ((data.exports + data.imports) / data.gdp) * 100
+          } as TradeMetrics);
+          break; // Use the first (most recent) complete data
+        }
+      }
+    });
+
+    console.log('Processed World Bank data:', countries.map(c => ({
+      country: c.country,
+      countryCode: c.countryCode,
+      year: c.year,
+      exports: c.exports,
+      imports: c.imports,
+      gdp: c.gdp
+    })));
+
+    return countries;
   }
 
   /**
