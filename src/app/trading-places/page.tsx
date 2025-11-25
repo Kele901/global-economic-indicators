@@ -1005,6 +1005,21 @@ const TradingPlacesPage: React.FC = () => {
     window.dispatchEvent(new Event('themeChange'));
   }, [isDarkMode]);
 
+  // Debug logging for comparison feature
+  useEffect(() => {
+    if (comparisonMode === 'selected' && selectedCountriesForComparison.length >= 2) {
+      console.log('Comparison Debug:', {
+        selectedCountries: selectedCountriesForComparison,
+        historicalTrendsKeys: Object.keys(historicalTrends),
+        historicalTrendsLength: Object.keys(historicalTrends).length,
+        enableRealData,
+        showHistoricalView,
+        historicalLoading,
+        sampleTrend: historicalTrends[selectedCountriesForComparison[0]]
+      });
+    }
+  }, [comparisonMode, selectedCountriesForComparison, historicalTrends, enableRealData, showHistoricalView, historicalLoading]);
+
   // Merge real data with mock data
   const combinedTradeData = useMemo(() => {
     if (enableRealData && realTradeData.length > 0) {
@@ -1310,6 +1325,27 @@ const TradingPlacesPage: React.FC = () => {
           onRefresh={refreshData}
           isDarkMode={isDarkMode}
         />
+
+        {/* Alert when Compare Mode needs Live Data */}
+        {comparisonMode === 'selected' && !enableRealData && (
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-red-900/30 border-red-500' : 'bg-red-50 border-red-300'} border-l-4`}>
+            <div className="flex items-start space-x-3">
+              <span className="text-2xl">🔒</span>
+              <div>
+                <h3 className="font-semibold text-red-600 dark:text-red-400">Live Data Required for Comparison</h3>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  The country comparison feature requires real historical data from World Bank and UN Comtrade.
+                </p>
+                <button
+                  onClick={() => setEnableRealData(true)}
+                  className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Enable Live Data Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Historical Data Controls */}
         {enableRealData && (
@@ -1637,6 +1673,11 @@ const TradingPlacesPage: React.FC = () => {
                           setComparisonMode('all');
                           setSelectedCountriesForComparison([]);
                         } else {
+                          // Check if Live Data is enabled before entering compare mode
+                          if (!enableRealData) {
+                            alert('⚠️ Please enable "Live Data" first!\n\nThe comparison feature requires real historical trade data from World Bank and UN Comtrade.\n\n1. Click the "Live Data" toggle at the top of the page\n2. Then click "Compare Countries" again');
+                            return;
+                          }
                           setComparisonMode('selected');
                           // Automatically enable historical view when entering compare mode
                           if (!showHistoricalView) {
@@ -1653,8 +1694,11 @@ const TradingPlacesPage: React.FC = () => {
                           ? 'bg-gray-600 text-white hover:bg-gray-500'
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}
+                      disabled={!enableRealData && comparisonMode !== 'selected'}
+                      title={!enableRealData ? 'Enable Live Data first' : ''}
                     >
                       {comparisonMode === 'selected' ? '✓ Compare Mode' : 'Compare Countries'}
+                      {!enableRealData && comparisonMode !== 'selected' && ' 🔒'}
                     </button>
                     {comparisonMode === 'all' && (
                       <button
@@ -1682,7 +1726,13 @@ const TradingPlacesPage: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-2">
                           {/* Quick Select Presets */}
                           <button
-                            onClick={() => setSelectedCountriesForComparison(['US', 'CN'])}
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['US', 'CN']);
+                            }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
                             } text-white`}
@@ -1690,7 +1740,13 @@ const TradingPlacesPage: React.FC = () => {
                             US vs China
                           </button>
                           <button
-                            onClick={() => setSelectedCountriesForComparison(['US', 'CN', 'JP', 'DE'])}
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['US', 'CN', 'JP', 'DE']);
+                            }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
                             } text-white`}
@@ -1698,7 +1754,13 @@ const TradingPlacesPage: React.FC = () => {
                             Top 4
                           </button>
                           <button
-                            onClick={() => setSelectedCountriesForComparison(['BR', 'RU', 'IN', 'CN', 'SA'])}
+                            onClick={() => {
+                              if (!enableRealData) {
+                                alert('Please enable Live Data first to use comparison features!');
+                                return;
+                              }
+                              setSelectedCountriesForComparison(['BR', 'RU', 'IN', 'CN', 'SA']);
+                            }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-yellow-500 hover:bg-yellow-600'
                             } text-white`}
