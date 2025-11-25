@@ -57,6 +57,28 @@ const countryFlags: { [key: string]: React.ComponentType<any> } = {
   PY: PY
 };
 
+// Reverse mapping: 3-letter codes to 2-letter codes for flag lookup
+const REVERSE_COUNTRY_MAPPINGS: { [key: string]: string } = {
+  USA: 'US',
+  CHN: 'CN',
+  DEU: 'DE',
+  JPN: 'JP',
+  GBR: 'GB',
+  IND: 'IN',
+  BRA: 'BR',
+  KOR: 'KR',
+  CAN: 'CA',
+  AUS: 'AU',
+  MEX: 'MX',
+  RUS: 'RU',
+  SAU: 'SA',
+  FRA: 'FR',
+  ITA: 'IT',
+  ESP: 'ES',
+  IDN: 'ID',
+  TUR: 'TR'
+};
+
 // Enhanced mock trade data with more countries and metrics
 const mockTradeData = {
   countries: [
@@ -2027,7 +2049,8 @@ const TradingPlacesPage: React.FC = () => {
                           })
                           .map(countryCode => {
                             const country = mockTradeData.countries.find(c => c.code === countryCode);
-                            const FlagComponent = countryFlags[countryCode];
+                            const twoLetterCode = REVERSE_COUNTRY_MAPPINGS[countryCode] || countryCode;
+                            const FlagComponent = countryFlags[twoLetterCode];
                             const isSelected = selectedCountriesForComparison.includes(countryCode);
                             
                             return (
@@ -2092,7 +2115,8 @@ const TradingPlacesPage: React.FC = () => {
                   )
                   .slice(0, comparisonMode === 'selected' ? selectedCountriesForComparison.length : (showAllCountries ? Object.keys(historicalTrends).length : 6))
                   .map(([countryCode, trend]: [string, any]) => {
-                    const FlagComponent = countryFlags[countryCode];
+                    const twoLetterCode = REVERSE_COUNTRY_MAPPINGS[countryCode] || countryCode;
+                    const FlagComponent = countryFlags[twoLetterCode];
                     const country = mockTradeData.countries.find(c => c.code === countryCode);
                     return (
                     <div key={countryCode} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'} hover:shadow-lg transition-shadow`}>
@@ -2178,7 +2202,8 @@ const TradingPlacesPage: React.FC = () => {
                           <th className="text-left p-3 font-semibold">Metric</th>
                           {selectedCountriesForComparison.map(countryCode => {
                             const country = mockTradeData.countries.find(c => c.code === countryCode);
-                            const FlagComponent = countryFlags[countryCode];
+                            const twoLetterCode = REVERSE_COUNTRY_MAPPINGS[countryCode] || countryCode;
+                            const FlagComponent = countryFlags[twoLetterCode];
                             return (
                               <th key={countryCode} className="text-center p-3">
                                 <div className="flex flex-col items-center space-y-1">
