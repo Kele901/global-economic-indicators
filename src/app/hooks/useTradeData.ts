@@ -217,11 +217,12 @@ interface HistoricalTradeDataState {
   loading: boolean;
   error: string | null;
   lastUpdated: string | null;
+  availableYearRange: { min: number; max: number } | null;
 }
 
 export const useHistoricalTradeData = ({ 
   countries, 
-  startYear = 2015,
+  startYear = 1960, // World Bank data typically starts from 1960
   endYear = 2023,
   enableRealData = false
 }: UseHistoricalTradeDataOptions) => {
@@ -231,7 +232,8 @@ export const useHistoricalTradeData = ({
     globalTrends: null,
     loading: false,
     error: null,
-    lastUpdated: null
+    lastUpdated: null,
+    availableYearRange: null
   });
 
   const fetchHistoricalData = useCallback(async () => {
@@ -262,11 +264,18 @@ export const useHistoricalTradeData = ({
 
       const lastUpdated = new Date().toISOString();
 
+      // Determine available year range from fetched data
+      const availableYears = Object.keys(historicalData.yearlyData).map(Number).sort((a, b) => a - b);
+      const availableYearRange = availableYears.length > 0 
+        ? { min: availableYears[0], max: availableYears[availableYears.length - 1] }
+        : null;
+
       // Cache the results
       apiCache.set(cacheKey, { 
         yearlyData: historicalData.yearlyData,
         trends: historicalData.trends,
         globalTrends: historicalData.globalTrends,
+        availableYearRange,
         lastUpdated 
       });
 
@@ -274,6 +283,7 @@ export const useHistoricalTradeData = ({
         yearlyData: historicalData.yearlyData,
         trends: historicalData.trends,
         globalTrends: historicalData.globalTrends,
+        availableYearRange,
         loading: false,
         error: null,
         lastUpdated

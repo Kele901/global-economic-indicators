@@ -49,8 +49,9 @@ class TradeDataService {
 
   /**
    * Fetch historical trade data across multiple years from World Bank
+   * World Bank data is available from 1960 onwards for most indicators
    */
-  async fetchHistoricalTradeData(countryCodes: string[], startYear: number = 2015, endYear: number = 2023): Promise<{ [year: number]: TradeMetrics[] }> {
+  async fetchHistoricalTradeData(countryCodes: string[], startYear: number = 1960, endYear: number = 2023): Promise<{ [year: number]: TradeMetrics[] }> {
     try {
       const cacheKey = `historical-trade-${countryCodes.join('-')}-${startYear}-${endYear}`;
       const cached = apiCache.get(cacheKey);
@@ -754,10 +755,11 @@ class TradeDataService {
   /**
    * Fetch comprehensive historical trade data from multiple sources
    * Combines World Bank, UN Comtrade for a complete picture
+   * World Bank maintains trade data from 1960 to present
    */
   async fetchComprehensiveHistoricalData(
     countryCodes: string[], 
-    startYear: number = 2015, 
+    startYear: number = 1960, 
     endYear: number = 2023
   ): Promise<{
     yearlyData: { [year: number]: TradeMetrics[] };

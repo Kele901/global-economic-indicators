@@ -701,6 +701,8 @@ const TradingPlacesPage: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(2023);
   const [showHistoricalView, setShowHistoricalView] = useState(false);
+  const [customStartYear, setCustomStartYear] = useState<number>(1960);
+  const [customEndYear, setCustomEndYear] = useState<number>(2023);
 
   // Regional Trade Blocs Data
   const tradeBlocs = {
@@ -962,18 +964,19 @@ const TradingPlacesPage: React.FC = () => {
     refreshInterval: 3600000 // 1 hour
   });
 
-  // Historical data integration
+  // Historical data integration (fetching from 1960 - earliest World Bank data)
   const {
     yearlyData: historicalYearlyData,
     trends: historicalTrends,
     globalTrends: historicalGlobalTrends,
     loading: historicalLoading,
     error: historicalError,
+    availableYearRange,
     refreshData: refreshHistoricalData
   } = useHistoricalTradeData({
     countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA'],
-    startYear: 2015,
-    endYear: 2023,
+    startYear: customStartYear,
+    endYear: customEndYear,
     enableRealData: enableRealData && showHistoricalView
   });
 
@@ -1308,63 +1311,160 @@ const TradingPlacesPage: React.FC = () => {
         {/* Historical Data Controls */}
         {enableRealData && (
           <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-md`}>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setShowHistoricalView(!showHistoricalView)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    showHistoricalView
-                      ? isDarkMode
-                        ? 'bg-purple-600 text-white hover:bg-purple-700'
-                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                      : isDarkMode
-                      ? 'bg-gray-600 text-white hover:bg-gray-500'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {showHistoricalView ? 'Hide' : 'Show'} Historical Trends (2015-2023)
-                </button>
-                
-                {showHistoricalView && (
-                  <>
-                    {historicalLoading && (
-                      <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Loading historical data...
-                      </span>
-                    )}
-                    {historicalError && (
-                      <span className="text-sm text-red-500">
-                        Error: {historicalError}
-                      </span>
-                    )}
-                  </>
+            <div className="flex flex-col gap-4">
+              {/* Main Controls */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setShowHistoricalView(!showHistoricalView)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      showHistoricalView
+                        ? isDarkMode
+                          ? 'bg-purple-600 text-white hover:bg-purple-700'
+                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        : isDarkMode
+                        ? 'bg-gray-600 text-white hover:bg-gray-500'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {showHistoricalView ? 'Hide' : 'Show'} Historical Trends
+                  </button>
+                  
+                  {showHistoricalView && (
+                    <>
+                      {historicalLoading && (
+                        <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          Loading historical data...
+                        </span>
+                      )}
+                      {historicalError && (
+                        <span className="text-sm text-red-500">
+                          Error: {historicalError}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {showHistoricalView && !historicalLoading && Object.keys(historicalYearlyData).length > 0 && (
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="w-5 h-5" />
+                    <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      View Year:
+                    </label>
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(Number(e.target.value))}
+                      className={`px-3 py-2 rounded-lg border ${
+                        isDarkMode 
+                          ? 'bg-gray-600 border-gray-500 text-white' 
+                          : 'bg-white border-gray-300 text-gray-900'
+                      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      {Object.keys(historicalYearlyData)
+                        .map(Number)
+                        .sort((a, b) => b - a)
+                        .map(year => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
                 )}
               </div>
 
-              {showHistoricalView && !historicalLoading && Object.keys(historicalYearlyData).length > 0 && (
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-5 h-5" />
-                  <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Select Year:
-                  </label>
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(Number(e.target.value))}
-                    className={`px-3 py-2 rounded-lg border ${
-                      isDarkMode 
-                        ? 'bg-gray-600 border-gray-500 text-white' 
-                        : 'bg-white border-gray-300 text-gray-900'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              {/* Date Range Selector */}
+              {showHistoricalView && !historicalLoading && (
+                <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-lg ${
+                  isDarkMode ? 'bg-gray-600' : 'bg-gray-50'
+                }`}>
+                  <div className="flex items-center space-x-3">
+                    <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Date Range:
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        min="1960"
+                        max={customEndYear}
+                        value={customStartYear}
+                        onChange={(e) => setCustomStartYear(Number(e.target.value))}
+                        className={`w-20 px-2 py-1 rounded border ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-500 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      />
+                      <span>to</span>
+                      <input
+                        type="number"
+                        min={customStartYear}
+                        max="2023"
+                        value={customEndYear}
+                        onChange={(e) => setCustomEndYear(Number(e.target.value))}
+                        className={`w-20 px-2 py-1 rounded border ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-500 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={refreshHistoricalData}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      isDarkMode
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
                   >
-                    {Object.keys(historicalYearlyData)
-                      .map(Number)
-                      .sort((a, b) => b - a)
-                      .map(year => (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
-                      ))}
-                  </select>
+                    Apply Range
+                  </button>
+
+                  {availableYearRange && (
+                    <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Available data: {availableYearRange.min} - {availableYearRange.max} 
+                      <span className="ml-2">({availableYearRange.max - availableYearRange.min + 1} years)</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setCustomStartYear(1960);
+                        setCustomEndYear(2023);
+                      }}
+                      className={`px-3 py-1 rounded text-xs ${
+                        isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+                      }`}
+                    >
+                      Full Range (1960-2023)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCustomStartYear(2010);
+                        setCustomEndYear(2023);
+                      }}
+                      className={`px-3 py-1 rounded text-xs ${
+                        isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+                      }`}
+                    >
+                      Last 10 Years
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCustomStartYear(2000);
+                        setCustomEndYear(2023);
+                      }}
+                      className={`px-3 py-1 rounded text-xs ${
+                        isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+                      }`}
+                    >
+                      21st Century
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1437,8 +1537,33 @@ const TradingPlacesPage: React.FC = () => {
         {/* Historical Trends Section */}
         {showHistoricalView && !historicalLoading && Object.keys(historicalYearlyData).length > 0 && (
           <div className="space-y-6">
+            {/* Data Range Info Banner */}
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/30 border-blue-500' : 'bg-blue-50 border-blue-300'} border-l-4`}>
+              <div className="flex items-start space-x-3">
+                <Calendar className="w-5 h-5 mt-0.5 text-blue-500" />
+                <div>
+                  <h3 className="font-semibold text-blue-600 dark:text-blue-400">Historical Trade Data</h3>
+                  <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Displaying {Object.keys(historicalYearlyData).length} years of trade data 
+                    {availableYearRange && ` from ${availableYearRange.min} to ${availableYearRange.max}`}.
+                    Data sourced from World Bank, UN Comtrade, and OECD databases.
+                  </p>
+                  <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    📊 World Bank trade statistics are available from 1960 onwards. Earlier data may be incomplete for some countries.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-              <h2 className="text-2xl font-bold mb-4">Global Trade Volume Over Time</h2>
+              <h2 className="text-2xl font-bold mb-4">
+                Global Trade Volume Over Time 
+                {availableYearRange && (
+                  <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    ({availableYearRange.min}-{availableYearRange.max})
+                  </span>
+                )}
+              </h2>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -1446,7 +1571,7 @@ const TradingPlacesPage: React.FC = () => {
                       .sort(([yearA], [yearB]) => Number(yearA) - Number(yearB))
                       .map(([year, trade]) => ({
                         year: Number(year),
-                        'World Trade Volume ($T)': Number(trade.toFixed(2))
+                        'World Trade Volume ($T)': Math.round((Number(trade) + Number.EPSILON) * 100) / 100
                       }))
                     }
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
@@ -1483,7 +1608,14 @@ const TradingPlacesPage: React.FC = () => {
 
             {/* Country-Specific Historical Trends */}
             <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-              <h2 className="text-2xl font-bold mb-4">Country Trade Trends (2015-2023)</h2>
+              <h2 className="text-2xl font-bold mb-4">
+                Country Trade Trends 
+                {availableYearRange && (
+                  <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    ({availableYearRange.min}-{availableYearRange.max})
+                  </span>
+                )}
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.entries(historicalTrends).slice(0, 4).map(([countryCode, trend]: [string, any]) => (
                   <div key={countryCode} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-600' : 'bg-gray-50'}`}>
