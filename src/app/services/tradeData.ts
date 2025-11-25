@@ -875,7 +875,12 @@ export const COUNTRY_MAPPINGS = {
   AU: 'AUS',
   MX: 'MEX',
   RU: 'RUS',
-  SA: 'SAU'
+  SA: 'SAU',
+  FR: 'FRA',
+  IT: 'ITA',
+  ES: 'ESP',
+  ID: 'IDN',
+  TR: 'TUR'
 };
 
 // API rate limiting and caching utilities

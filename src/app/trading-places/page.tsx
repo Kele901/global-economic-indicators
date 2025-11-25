@@ -26,7 +26,7 @@ import { useTradeData, useHistoricalTradeData } from '../hooks/useTradeData';
 import { COUNTRY_MAPPINGS } from '../services/tradeData';
 import { 
   US, CN, DE, JP, GB, IN, BR, KR, CA, AU, MX, RU, SA,
-  FR, IT, ES, ID, TH, SG, MY, AR, UY, PY
+  FR, IT, ES, ID, TR, TH, SG, MY, AR, UY, PY
 } from 'country-flag-icons/react/3x2';
 
 // Flag component mapping
@@ -48,6 +48,7 @@ const countryFlags: { [key: string]: React.ComponentType<any> } = {
   IT: IT,
   ES: ES,
   ID: ID,
+  TR: TR,
   TH: TH,
   SG: SG,
   MY: MY,
@@ -962,7 +963,7 @@ const TradingPlacesPage: React.FC = () => {
     isRealData,
     refreshData
   } = useTradeData({
-    countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA'],
+    countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA', 'FR', 'IT', 'ES', 'ID', 'TR'],
     enableRealData,
     refreshInterval: 3600000 // 1 hour
   });
@@ -977,7 +978,7 @@ const TradingPlacesPage: React.FC = () => {
     availableYearRange,
     refreshData: refreshHistoricalData
   } = useHistoricalTradeData({
-    countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA'],
+    countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA', 'FR', 'IT', 'ES', 'ID', 'TR'],
     startYear: customStartYear,
     endYear: customEndYear,
     enableRealData: enableRealData && showHistoricalView
