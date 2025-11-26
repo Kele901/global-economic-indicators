@@ -99,10 +99,15 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto py-3 sm:py-4 px-3 sm:px-4">
         <nav className="flex items-center">
           {/* Logo/Brand */}
-          <div className={`text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-6 ${
+          <div className={`flex items-center space-x-3 text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-6 ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
-            Global Economic Indicators
+            <img 
+              src="/logo.png" 
+              alt="Global Economic Indicators Logo" 
+              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+            />
+            <span>Global Economic Indicators</span>
           </div>
 
           {/* Desktop Navigation - Left aligned */}
