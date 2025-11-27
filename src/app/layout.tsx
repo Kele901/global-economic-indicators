@@ -4,6 +4,7 @@ import './globals.css';
 import Script from 'next/script';
 import Navbar from './components/Navbar';
 import ThemeProvider from './components/ThemeProvider';
+import CookieConsent from './components/CookieConsent';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -75,16 +76,30 @@ export default function RootLayout({
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">Legal</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200 mb-3">
                       © {new Date().getFullYear()} Global Economic Indicators.
                       This site uses cookies for analytics and personalized content.
-                      By using this site, you agree to our privacy policy.
                     </p>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm">
+                      <a 
+                        href="/privacy" 
+                        className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200"
+                      >
+                        Privacy Policy
+                      </a>
+                      <a 
+                        href="/terms" 
+                        className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200"
+                      >
+                        Terms of Service
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
             </footer>
           </div>
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>
