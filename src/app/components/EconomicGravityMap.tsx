@@ -72,6 +72,7 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
   const [position, setPosition] = useState({ coordinates: [20, 30] as [number, number], zoom: 1 });
   const [tooltipContent, setTooltipContent] = useState<HistoricalPoint | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [hoveredPoint, setHoveredPoint] = useState<HistoricalPoint | null>(null);
 
   // Handle zoom
   const handleZoomIn = useCallback(() => {
@@ -97,25 +98,84 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
   const trailLines = useMemo(() => {
     const lines: { from: [number, number]; to: [number, number]; key: string }[] = [];
     
+    // Helper function to calculate waypoints dynamically based on route
+    const calculateWaypoints = (
+      fromLon: number,
+      fromLat: number,
+      toLon: number,
+      toLat: number
+    ): [number, number][] => {
+      // Normalize longitudes to [0, 360] for easier calculation
+      const normalizeLon = (lon: number) => lon < 0 ? lon + 360 : lon;
+      const denormalizeLon = (lon: number) => lon > 180 ? lon - 360 : lon;
+      
+      const fromLonNorm = normalizeLon(fromLon);
+      const toLonNorm = normalizeLon(toLon);
+      
+      // Calculate both eastward and westward distances
+      const eastwardDist = toLonNorm >= fromLonNorm
+        ? toLonNorm - fromLonNorm
+        : (360 - fromLonNorm) + toLonNorm;
+      const westwardDist = 360 - eastwardDist;
+      
+      // Determine which direction is shorter
+      const goEastward = eastwardDist <= westwardDist;
+      const totalDist = Math.min(eastwardDist, westwardDist);
+      
+      // Calculate number of waypoints needed (aim for ~30-40 degree segments)
+      const numWaypoints = Math.max(3, Math.min(5, Math.ceil(totalDist / 35)));
+      
+      const waypoints: [number, number][] = [[fromLon, fromLat]];
+      
+      for (let i = 1; i <= numWaypoints; i++) {
+        const t = i / (numWaypoints + 1); // Interpolation factor [0, 1]
+        
+        let currentLonNorm: number;
+        if (goEastward) {
+          // Eastward route
+          if (toLonNorm >= fromLonNorm) {
+            currentLonNorm = fromLonNorm + (eastwardDist * t);
+          } else {
+            // Crossing date line eastward
+            currentLonNorm = (fromLonNorm + (eastwardDist * t)) % 360;
+          }
+        } else {
+          // Westward route
+          if (fromLonNorm >= toLonNorm) {
+            currentLonNorm = fromLonNorm - (westwardDist * t);
+          } else {
+            // Crossing date line westward
+            currentLonNorm = (fromLonNorm - (westwardDist * t) + 360) % 360;
+          }
+        }
+        
+        // Denormalize back to [-180, 180]
+        const currentLon = denormalizeLon(currentLonNorm);
+        
+        // Interpolate latitude
+        const currentLat = fromLat + ((toLat - fromLat) * t);
+        
+        waypoints.push([currentLon, currentLat]);
+      }
+      
+      waypoints.push([toLon, toLat]);
+      return waypoints;
+    };
+    
     for (let i = 0; i < historicalData.length - 1; i++) {
       const from = historicalData[i];
       const to = historicalData[i + 1];
       
-      // Calculate longitude difference
-      const lonDiff = Math.abs(to.lon - from.lon);
+      // Calculate longitude difference (accounting for date line crossing)
+      const lonDiff1 = Math.abs(to.lon - from.lon);
+      const lonDiff2 = 360 - lonDiff1; // Alternative path around the globe
+      const lonDiff = Math.min(lonDiff1, lonDiff2);
       
       // For lines that span more than 100 degrees longitude,
       // add intermediate waypoints to avoid Mercator projection artifacts
       if (lonDiff > 100) {
-        // Create waypoints going eastward (Atlantic -> Europe -> Asia route)
-        const waypoints: [number, number][] = [
-          [from.lon, from.lat],
-          [-30, 45],    // Mid-Atlantic
-          [0, 48],      // Western Europe
-          [40, 45],     // Eastern Europe
-          [75, 40],     // Central Asia
-          [to.lon, to.lat],
-        ];
+        // Calculate waypoints dynamically based on actual route
+        const waypoints = calculateWaypoints(from.lon, from.lat, to.lon, to.lat);
         
         // Create line segments between waypoints
         for (let j = 0; j < waypoints.length - 1; j++) {
@@ -215,6 +275,7 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
             {/* Historical point markers */}
             {historicalData.map((point, index) => {
               const isSelected = selectedPoint?.year === point.year;
+              const isHovered = hoveredPoint?.year === point.year;
               const markerSize = isSelected ? 12 : 8;
               
               return (
@@ -222,8 +283,14 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
                   key={point.year}
                   coordinates={[point.lon, point.lat]}
                   onClick={() => onSelectPoint(isSelected ? null : point)}
-                  onMouseEnter={() => setTooltipContent(point)}
-                  onMouseLeave={() => setTooltipContent(null)}
+                  onMouseEnter={() => {
+                    setTooltipContent(point);
+                    setHoveredPoint(point);
+                  }}
+                  onMouseLeave={() => {
+                    setTooltipContent(null);
+                    setHoveredPoint(null);
+                  }}
                   style={{
                     default: { cursor: 'pointer' },
                     hover: { cursor: 'pointer' },
@@ -274,6 +341,28 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
                   >
                     {index + 1}
                   </text>
+                  
+                  {/* Label text - only visible on hover */}
+                  {isHovered && (
+                    <text
+                      x={15 / position.zoom}
+                      y={4 / position.zoom}
+                      style={{
+                        fontFamily: 'system-ui',
+                        fontSize: `${11 / position.zoom}px`,
+                        fontWeight: 'bold',
+                        fill: colors.markerSelected,
+                        pointerEvents: 'none',
+                        opacity: 1,
+                        textShadow: isDarkMode 
+                          ? '1px 1px 2px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8)' 
+                          : '1px 1px 2px rgba(255,255,255,0.9), -1px -1px 2px rgba(255,255,255,0.9)',
+                        transition: 'all 0.2s ease-out',
+                      }}
+                    >
+                      {point.center}
+                    </text>
+                  )}
                 </Marker>
               );
             })}
@@ -330,6 +419,38 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
         } backdrop-blur-sm sm:hidden`}>
           👆 Pinch to zoom • Drag to pan
         </div>
+        
+        {/* Hover Tooltip - positioned inside map container */}
+        {tooltipContent && hoveredPoint && (
+          <div 
+            className={`absolute top-4 left-1/2 transform -translate-x-1/2 pointer-events-none z-50 transition-all duration-200 ${
+              isDarkMode ? 'bg-gray-800/95' : 'bg-white/95'
+            } border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} rounded-lg shadow-xl p-3 max-w-xs backdrop-blur-sm`}
+          >
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${colors.marker}`} />
+                <h4 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {tooltipContent.center}
+                </h4>
+              </div>
+              <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                {tooltipContent.label}
+              </p>
+              <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} line-clamp-2`}>
+                {tooltipContent.description}
+              </p>
+              <div className={`mt-2 pt-2 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className="font-semibold">Cities:</span> {tooltipContent.details.mainCities}
+                </p>
+                <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className="font-semibold">Trade:</span> {tooltipContent.details.keyTrade}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Selected Point Info Card */}
