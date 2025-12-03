@@ -1,25 +1,29 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import InfoPanel from '../components/InfoPanel';
 import { economicMetrics } from '../data/economicMetrics';
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-  Marker,
-  Line as MapLine,
-  ZoomableGroup,
-} from 'react-simple-maps';
+import dynamic from 'next/dynamic';
+import type { HistoricalPoint } from '../components/EconomicGravityMap';
 
-// World map topology URL
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+// Dynamically import the map component to avoid SSR issues
+const EconomicGravityMap = dynamic(
+  () => import('../components/EconomicGravityMap'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full aspect-video bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
+      </div>
+    )
+  }
+);
 
 // Historical economic centers of gravity (approximate coordinates and data)
-const historicalData = [
+const historicalData: HistoricalPoint[] = [
   { 
     year: -2000, 
     label: '2000 BCE', 
@@ -206,11 +210,11 @@ const ThemeToggle = ({ isDarkMode, onToggle }: { isDarkMode: boolean; onToggle: 
     <button
       onClick={onToggle}
       className={`
-        fixed top-4 right-4 p-2 rounded-full z-50
+        fixed top-4 right-4 p-2 rounded-full 
         transition-all duration-300 ease-in-out
         ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}
         border ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}
-        shadow-lg
+        shadow-lg z-50
       `}
       aria-label="Toggle dark mode"
     >
@@ -223,282 +227,9 @@ const ThemeToggle = ({ isDarkMode, onToggle }: { isDarkMode: boolean; onToggle: 
   );
 };
 
-// Memoized Geography component for performance
-const MemoizedGeography = memo(({ geo, isDarkMode }: { geo: any; isDarkMode: boolean }) => (
-  <Geography
-    geography={geo}
-    fill={isDarkMode ? '#374151' : '#d1d5db'}
-    stroke={isDarkMode ? '#4b5563' : '#9ca3af'}
-    strokeWidth={0.5}
-    style={{
-      default: { outline: 'none' },
-      hover: { outline: 'none', fill: isDarkMode ? '#4b5563' : '#9ca3af' },
-      pressed: { outline: 'none' }
-    }}
-  />
-));
-MemoizedGeography.displayName = 'MemoizedGeography';
-
-// Mobile-friendly info tooltip
-interface TooltipProps {
-  point: typeof historicalData[0];
-  isDarkMode: boolean;
-  onClose: () => void;
-}
-
-const InfoTooltip = ({ point, isDarkMode, onClose }: TooltipProps) => {
-  return (
-    <div 
-      className={`fixed inset-x-4 bottom-4 sm:absolute sm:inset-auto sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-full sm:mt-2 z-50 p-4 rounded-xl shadow-2xl border backdrop-blur-sm max-w-sm mx-auto ${
-        isDarkMode 
-          ? 'bg-gray-800/95 border-gray-700 text-white' 
-          : 'bg-white/95 border-gray-200 text-gray-900'
-      }`}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <button 
-        onClick={onClose}
-        className={`absolute top-2 right-2 p-1 rounded-full ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      
-      <div className="pr-6">
-        <h3 className="font-bold text-lg mb-1">{point.center}</h3>
-        <p className={`text-sm mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>{point.label}</p>
-        <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{point.description}</p>
-        
-        <div className="space-y-2 text-xs">
-          <div className="flex">
-            <span className={`font-semibold w-24 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Major Cities:</span>
-            <span>{point.details.mainCities}</span>
-          </div>
-          <div className="flex">
-            <span className={`font-semibold w-24 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Key Trade:</span>
-            <span>{point.details.keyTrade}</span>
-          </div>
-          <div className="flex">
-            <span className={`font-semibold w-24 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Innovations:</span>
-            <span>{point.details.innovations}</span>
-          </div>
-          <div className="flex">
-            <span className={`font-semibold w-24 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Economy:</span>
-            <span>{point.details.economicSystem}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Interactive World Map Component
-interface WorldMapProps {
-  isDarkMode: boolean;
-  selectedPoint: typeof historicalData[0] | null;
-  onPointSelect: (point: typeof historicalData[0] | null) => void;
-}
-
-const WorldMap = ({ isDarkMode, selectedPoint, onPointSelect }: WorldMapProps) => {
-  const [position, setPosition] = useState({ coordinates: [20, 30] as [number, number], zoom: 1 });
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const handleZoomIn = useCallback(() => {
-    if (position.zoom >= 4) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom * 1.5 }));
-  }, [position.zoom]);
-
-  const handleZoomOut = useCallback(() => {
-    if (position.zoom <= 1) return;
-    setPosition(pos => ({ ...pos, zoom: pos.zoom / 1.5 }));
-  }, [position.zoom]);
-
-  const handleReset = useCallback(() => {
-    setPosition({ coordinates: [20, 30], zoom: 1 });
-  }, []);
-
-  const handleMoveEnd = useCallback((position: { coordinates: [number, number]; zoom: number }) => {
-    setPosition(position);
-  }, []);
-
-  return (
-    <div className="relative w-full">
-      {/* Zoom Controls */}
-      <div className={`absolute top-2 right-2 sm:top-4 sm:right-4 z-20 flex flex-col gap-1 sm:gap-2 ${
-        isDarkMode ? 'text-white' : 'text-gray-700'
-      }`}>
-        <button
-          onClick={handleZoomIn}
-          className={`p-1.5 sm:p-2 rounded-lg shadow-lg transition-all ${
-            isDarkMode 
-              ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' 
-              : 'bg-white hover:bg-gray-100 border border-gray-200'
-          }`}
-          aria-label="Zoom in"
-        >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        </button>
-        <button
-          onClick={handleZoomOut}
-          className={`p-1.5 sm:p-2 rounded-lg shadow-lg transition-all ${
-            isDarkMode 
-              ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' 
-              : 'bg-white hover:bg-gray-100 border border-gray-200'
-          }`}
-          aria-label="Zoom out"
-        >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-          </svg>
-        </button>
-        <button
-          onClick={handleReset}
-          className={`p-1.5 sm:p-2 rounded-lg shadow-lg transition-all ${
-            isDarkMode 
-              ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' 
-              : 'bg-white hover:bg-gray-100 border border-gray-200'
-          }`}
-          aria-label="Reset view"
-        >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Map Container */}
-      <div className={`w-full rounded-xl overflow-hidden ${
-        isDarkMode ? 'bg-gray-900' : 'bg-blue-50'
-      }`}>
-        <ComposableMap
-          projection="geoMercator"
-          projectionConfig={{
-            scale: 130,
-            center: [20, 30]
-          }}
-          style={{
-            width: '100%',
-            height: 'auto',
-          }}
-        >
-          <ZoomableGroup
-            zoom={position.zoom}
-            center={position.coordinates}
-            onMoveEnd={handleMoveEnd}
-            minZoom={1}
-            maxZoom={4}
-          >
-            {/* Ocean background */}
-            <rect x="-200" y="-200" width="1200" height="800" fill={isDarkMode ? '#1e3a5f' : '#bfdbfe'} />
-            
-            {/* Countries */}
-            <Geographies geography={geoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => (
-                  <MemoizedGeography key={geo.rsmKey} geo={geo} isDarkMode={isDarkMode} />
-                ))
-              }
-            </Geographies>
-
-            {/* Trail lines connecting historical points */}
-            {historicalData.map((point, index) => {
-              const nextPoint = historicalData[index + 1];
-              if (!nextPoint) return null;
-              
-              return (
-                <MapLine
-                  key={`line-${point.year}`}
-                  from={[point.lon, point.lat]}
-                  to={[nextPoint.lon, nextPoint.lat]}
-                  stroke={isDarkMode ? '#60a5fa' : '#3b82f6'}
-                  strokeWidth={2 / position.zoom}
-                  strokeDasharray="5,5"
-                  strokeLinecap="round"
-                  opacity={0.6}
-                />
-              );
-            })}
-
-            {/* Markers for each historical point */}
-            {historicalData.map((point, index) => {
-              const isSelected = selectedPoint?.year === point.year;
-              const markerSize = isSelected ? 12 : 8;
-              
-              return (
-                <Marker
-                  key={`marker-${point.year}`}
-                  coordinates={[point.lon, point.lat]}
-                  onClick={() => onPointSelect(isSelected ? null : point)}
-                >
-                  {/* Outer glow for selected */}
-                  {isSelected && (
-                    <circle
-                      r={16 / position.zoom}
-                      fill={isDarkMode ? '#60a5fa' : '#3b82f6'}
-                      opacity={0.3}
-                      className="animate-pulse"
-                    />
-                  )}
-                  {/* Main marker */}
-                  <circle
-                    r={markerSize / position.zoom}
-                    fill={isDarkMode ? '#60a5fa' : '#3b82f6'}
-                    stroke={isDarkMode ? '#1e3a8a' : '#1d4ed8'}
-                    strokeWidth={2 / position.zoom}
-                    style={{ cursor: 'pointer' }}
-                  />
-                  {/* Index number */}
-                  <text
-                    textAnchor="middle"
-                    y={4 / position.zoom}
-                    style={{
-                      fontFamily: 'system-ui',
-                      fontSize: `${10 / position.zoom}px`,
-                      fill: '#fff',
-                      fontWeight: 'bold',
-                      pointerEvents: 'none'
-                    }}
-                  >
-                    {index + 1}
-                  </text>
-                </Marker>
-              );
-            })}
-          </ZoomableGroup>
-        </ComposableMap>
-      </div>
-
-      {/* Selected Point Info Tooltip - Mobile Friendly */}
-      {selectedPoint && (
-        <InfoTooltip 
-          point={selectedPoint} 
-          isDarkMode={isDarkMode} 
-          onClose={() => onPointSelect(null)} 
-        />
-      )}
-
-      {/* Instructions */}
-      <div className={`mt-3 text-xs sm:text-sm text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-        <span className="hidden sm:inline">Click on markers to see details • Drag to pan • Scroll to zoom</span>
-        <span className="sm:hidden">Tap markers for details • Pinch to zoom • Drag to pan</span>
-      </div>
-    </div>
-  );
-};
-
 const EconomicGravityPage = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
-  const [selectedPoint, setSelectedPoint] = useState<(typeof historicalData)[0] | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<HistoricalPoint | null>(null);
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 
   const toggleDarkMode = () => {
@@ -531,119 +262,86 @@ const EconomicGravityPage = () => {
   };
 
   return (
-    <div className={`w-full max-w-6xl mx-auto p-3 sm:p-4 ${themeColors.text} ${themeColors.background} min-h-screen`}>
+    <div className={`w-full max-w-6xl mx-auto p-4 ${themeColors.text} ${themeColors.background} min-h-screen`}>
       <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
       
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold mb-2">Economic Center of Gravity Through History</h1>
-          <p className={`text-sm sm:text-base ${themeColors.textSecondary} max-w-xl`}>
+          <h1 className="text-2xl font-bold mb-2">Economic Center of Gravity Through History</h1>
+          <p className={`${themeColors.textSecondary} max-w-xl`}>
             Tracking the shift of global economic power from ancient civilizations to modern times. Explore how economic dominance has moved across continents and empires throughout human history.
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Light</span>
+          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
           <button
             className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
             onClick={() => setIsDarkMode(!isDarkMode)}
           >
             <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
           </button>
-          <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Dark</span>
+          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
         </div>
       </div>
 
-      {/* World Map Visualization */}
-      <div className={`mb-8 sm:mb-12 p-4 sm:p-6 rounded-2xl relative ${
+      {/* World Map Visualization - NEW RESPONSIVE MAP */}
+      <div className={`mb-12 p-4 sm:p-6 rounded-2xl relative ${
         isDarkMode 
           ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700' 
           : 'bg-gradient-to-br from-white via-gray-50 to-white border border-gray-100'
       }`}>
-        <h2 className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
-          Global Economic Center of Gravity
-        </h2>
-        
-        {/* Info Panel */}
-        <div className="absolute top-4 right-4 z-10 hidden lg:block">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+          <h2 className={`text-xl sm:text-2xl font-bold flex items-center ${themeColors.text}`}>
+            <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
+            Global Economic Center of Gravity
+          </h2>
+          {/* Info Panel for Economic Center of Gravity */}
           <InfoPanel
             metric={economicMetrics.economicCenterOfGravity}
             isDarkMode={isDarkMode}
-            position="top-right"
-            size="large"
+            position="inline"
+            size="small"
           />
         </div>
         
-        {/* Responsive World Map */}
-        <WorldMap 
-          isDarkMode={isDarkMode}
+        {/* Responsive Interactive Map */}
+        <EconomicGravityMap
+          historicalData={historicalData}
           selectedPoint={selectedPoint}
-          onPointSelect={setSelectedPoint}
+          onSelectPoint={setSelectedPoint}
+          isDarkMode={isDarkMode}
         />
-
-        {/* Timeline Legend - Mobile Friendly */}
-        <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl ${isDarkMode ? 'bg-gray-800/50' : 'bg-gray-100/50'}`}>
-          <h4 className={`text-sm font-semibold mb-3 ${themeColors.text}`}>Timeline Reference</h4>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 text-xs">
-            {historicalData.slice(0, 6).map((point, index) => (
-              <button
-                key={point.year}
-                onClick={() => setSelectedPoint(point)}
-                className={`p-2 rounded-lg text-center transition-all ${
-                  selectedPoint?.year === point.year
-                    ? isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
-                    : isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-50'
-                } border ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}
-              >
-                <div className="font-bold">{index + 1}</div>
-                <div className="truncate">{point.label}</div>
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 text-xs mt-2">
-            {historicalData.slice(6).map((point, index) => (
-              <button
-                key={point.year}
-                onClick={() => setSelectedPoint(point)}
-                className={`p-2 rounded-lg text-center transition-all ${
-                  selectedPoint?.year === point.year
-                    ? isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
-                    : isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-50'
-                } border ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}
-              >
-                <div className="font-bold">{index + 7}</div>
-                <div className="truncate">{point.label}</div>
-              </button>
-            ))}
-          </div>
+        
+        <div className={`mt-4 text-sm ${themeColors.textSecondary} italic`}>
+          Click on any numbered marker to see details. Use the buttons or pinch/scroll to zoom. The trail shows the movement of economic power over time.
         </div>
       </div>
 
       {/* Timeline Visualization */}
-      <div className={`p-4 sm:p-8 rounded-2xl mb-8 sm:mb-12 relative ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow} backdrop-blur-sm`}>
+      <div className={`p-4 sm:p-8 rounded-2xl mb-12 relative ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow} backdrop-blur-sm`}>
         <h2 className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
+          <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
           Historical Timeline
         </h2>
         
-        <p className={`text-xs sm:text-sm mb-4 sm:mb-6 ${themeColors.textSecondary} max-w-2xl`}>
+        <p className={`text-sm mb-6 ${themeColors.textSecondary} max-w-2xl`}>
           Track the shifting balance of global economic power across continents and time periods. 
           The chart shows the relative share of global GDP by region, revealing how economic 
           dominance has moved from ancient civilizations to modern economic powerhouses.
         </p>
         <div className="h-[300px] sm:h-[400px] md:h-[500px] relative">
           {/* Info Panel for GDP Share by Region */}
-          <div className="hidden lg:block">
+          <div className="absolute top-0 right-0 z-10">
             <InfoPanel
               metric={economicMetrics.gdpShareByRegion}
               isDarkMode={isDarkMode}
-              position="top-right"
-              size="medium"
+              position="inline"
+              size="small"
             />
           </div>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={gdpShareData} margin={{ top: 20, right: 10, left: 0, bottom: 60 }}>
+            <LineChart data={gdpShareData} margin={{ top: 20, right: 20, left: 0, bottom: 60 }}>
               {/* Define gradients for enhanced visual appeal */}
               <defs>
                 <linearGradient id="asiaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -684,7 +382,7 @@ const EconomicGravityPage = () => {
                 textAnchor="end"
                 height={60}
                 tick={{ 
-                  fontSize: 9, 
+                  fontSize: 10, 
                   fill: isDarkMode ? '#9ca3af' : '#6b7280',
                   fontWeight: 500
                 }}
@@ -716,6 +414,18 @@ const EconomicGravityPage = () => {
                   strokeWidth: 1
                 }}
                 width={35}
+                label={{ 
+                  value: 'GDP Share (%)', 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  style: { 
+                    textAnchor: 'middle', 
+                    fill: isDarkMode ? '#9ca3af' : '#6b7280',
+                    fontSize: 11,
+                    fontWeight: 600
+                  },
+                  offset: 10
+                }}
               />
               
               {/* Enhanced tooltip with better styling and information */}
@@ -727,11 +437,11 @@ const EconomicGravityPage = () => {
                   boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
                   color: isDarkMode ? '#e5e7eb' : '#374151',
                   fontSize: '12px',
-                  padding: '10px 14px'
+                  padding: '12px 16px'
                 }}
                 labelStyle={{
                   fontWeight: 600,
-                  marginBottom: '6px',
+                  marginBottom: '8px',
                   color: isDarkMode ? '#60a5fa' : '#3b82f6'
                 }}
                 formatter={(value: number, name: string) => [
@@ -747,7 +457,6 @@ const EconomicGravityPage = () => {
                 wrapperStyle={{
                   paddingBottom: '10px',
                   fontSize: '11px',
-                  color: isDarkMode ? '#9ca3af' : '#6b7280',
                   fontWeight: 500
                 }}
                 iconType="circle"
@@ -760,187 +469,305 @@ const EconomicGravityPage = () => {
                 dataKey="Asia" 
                 stroke="#f97316" 
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#f97316', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 1 }}
-                activeDot={{ r: 6, fill: '#f97316', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 2 }}
+                dot={{ 
+                  r: 3, 
+                  fill: '#f97316',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 6, 
+                  fill: '#f97316',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <Line 
                 type="monotone" 
                 dataKey="Europe" 
                 stroke="#3b82f6" 
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#3b82f6', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 1 }}
-                activeDot={{ r: 6, fill: '#3b82f6', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 2 }}
+                dot={{ 
+                  r: 3, 
+                  fill: '#3b82f6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 6, 
+                  fill: '#3b82f6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <Line 
                 type="monotone" 
                 dataKey="Americas" 
                 stroke="#22c55e" 
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#22c55e', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 1 }}
-                activeDot={{ r: 6, fill: '#22c55e', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 2 }}
+                dot={{ 
+                  r: 3, 
+                  fill: '#22c55e',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 6, 
+                  fill: '#22c55e',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <Line 
                 type="monotone" 
                 dataKey="Africa" 
                 stroke="#eab308" 
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#eab308', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 1 }}
-                activeDot={{ r: 6, fill: '#eab308', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 2 }}
+                dot={{ 
+                  r: 3, 
+                  fill: '#eab308',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 6, 
+                  fill: '#eab308',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <Line 
                 type="monotone" 
                 dataKey="Oceania" 
                 stroke="#8b5cf6" 
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#8b5cf6', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 1 }}
-                activeDot={{ r: 6, fill: '#8b5cf6', stroke: isDarkMode ? '#1f2937' : '#ffffff', strokeWidth: 2 }}
+                dot={{ 
+                  r: 3, 
+                  fill: '#8b5cf6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                activeDot={{ 
+                  r: 6, 
+                  fill: '#8b5cf6',
+                  stroke: isDarkMode ? '#1f2937' : '#ffffff',
+                  strokeWidth: 2
+                }}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
         
         {/* Timeline insights and analysis */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-          <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
             <div className="flex items-center mb-2">
               <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
-              <h4 className={`font-semibold text-xs sm:text-sm ${themeColors.text}`}>Ancient Era</h4>
+              <h4 className={`font-semibold text-sm ${themeColors.text}`}>Ancient Era</h4>
             </div>
             <p className={`text-xs ${themeColors.textSecondary}`}>
-              Asia dominated with advanced agriculture and early civilizations
+              Asia dominated with advanced agriculture, trade networks, and early civilizations
             </p>
             <div className="mt-2 text-xs text-orange-500 font-medium">
               Peak: 60-70% of global GDP
             </div>
           </div>
-          <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
             <div className="flex items-center mb-2">
               <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-              <h4 className={`font-semibold text-xs sm:text-sm ${themeColors.text}`}>Medieval Period</h4>
+              <h4 className={`font-semibold text-sm ${themeColors.text}`}>Medieval Period</h4>
             </div>
             <p className={`text-xs ${themeColors.textSecondary}`}>
-              Europe rose through trade, banking, and maritime exploration
+              Europe began its rise through trade, banking, and maritime exploration
             </p>
             <div className="mt-2 text-xs text-blue-500 font-medium">
               Peak: 40-50% of global GDP
             </div>
           </div>
-          <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300 sm:col-span-2 md:col-span-1`}>
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${themeColors.border} hover:shadow-md transition-all duration-300`}>
             <div className="flex items-center mb-2">
               <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-              <h4 className={`font-semibold text-xs sm:text-sm ${themeColors.text}`}>Modern Era</h4>
+              <h4 className={`font-semibold text-sm ${themeColors.text}`}>Modern Era</h4>
             </div>
             <p className={`text-xs ${themeColors.textSecondary}`}>
-              Americas emerged through industrialization and innovation
+              Americas emerged as economic powerhouses through industrialization
             </p>
             <div className="mt-2 text-xs text-green-500 font-medium">
               Peak: 25-30% of global GDP
             </div>
           </div>
         </div>
+        
+        {/* Enhanced chart statistics */}
+        <div className={`mt-6 p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'} border`}>
+          <h4 className={`font-semibold text-sm mb-3 ${themeColors.text} flex items-center`}>
+            <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Key Economic Shifts
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div className="text-center">
+              <div className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>2000 BCE</div>
+              <div className={themeColors.textSecondary}>Asia: 70%</div>
+            </div>
+            <div className="text-center">
+              <div className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>500 CE</div>
+              <div className={themeColors.textSecondary}>Asia: 65%</div>
+            </div>
+            <div className="text-center">
+              <div className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>1500 CE</div>
+              <div className={themeColors.textSecondary}>Europe: 45%</div>
+            </div>
+            <div className="text-center">
+              <div className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>2000 CE</div>
+              <div className={themeColors.textSecondary}>Americas: 28%</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Historical Points - Mobile Optimized Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-        {historicalData.map((point) => (
-          <div
-            key={point.year}
-            className={`p-4 sm:p-6 rounded-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1 border ${themeColors.border} ${
-              selectedPoint?.year === point.year
-                ? `bg-gradient-to-br ${themeColors.selectedCardBg} shadow-lg`
-                : `${themeColors.cardBg} hover:${themeColors.cardHoverBg}`
-            }`}
-            onClick={() => setSelectedPoint(point)}
-          >
-            <div className="flex items-center mb-2 sm:mb-3">
-              <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
-              <h3 className={`text-base sm:text-lg font-bold ${themeColors.text}`}>{point.label}</h3>
-            </div>
-            <p className={`text-xs sm:text-sm mb-2 sm:mb-3 font-medium ${themeColors.accent}`}>
-              {point.center}
-            </p>
-            <p className={`text-xs sm:text-sm ${themeColors.textTertiary}`}>
-              {point.description}
-            </p>
-          </div>
-        ))}
+      {/* Historical Points - Compact Grid */}
+      <div className={`mb-12 p-4 sm:p-6 rounded-2xl ${themeColors.cardBg} border ${themeColors.border}`}>
+        <h2 className={`text-xl sm:text-2xl font-bold mb-6 flex items-center ${themeColors.text}`}>
+          <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
+          Historical Economic Centers
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {historicalData.map((point, index) => (
+            <button
+              key={point.year}
+              className={`p-4 rounded-xl text-left transition-all duration-300 transform hover:-translate-y-1 border ${themeColors.border} ${
+                selectedPoint?.year === point.year
+                  ? `bg-gradient-to-br ${themeColors.selectedCardBg} shadow-lg ring-2 ring-blue-500`
+                  : `${themeColors.cardBg} hover:shadow-md`
+              }`}
+              onClick={() => setSelectedPoint(selectedPoint?.year === point.year ? null : point)}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
+                  selectedPoint?.year === point.year 
+                    ? 'bg-amber-500 text-white' 
+                    : isDarkMode ? 'bg-blue-500 text-white' : 'bg-blue-500 text-white'
+                }`}>
+                  {index + 1}
+                </span>
+                <div>
+                  <h3 className={`text-sm font-bold ${themeColors.text}`}>{point.center}</h3>
+                  <p className={`text-xs ${themeColors.textTertiary}`}>{point.label}</p>
+                </div>
+              </div>
+              <p className={`text-xs ${themeColors.textSecondary} line-clamp-2`}>
+                {point.description}
+              </p>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Detailed Analysis */}
-      <div className={`p-4 sm:p-8 rounded-2xl mb-8 sm:mb-12 ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow}`}>
+      <div className={`p-4 sm:p-8 rounded-2xl mb-12 ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow}`}>
         <h2 className={`text-xl sm:text-2xl font-bold mb-6 sm:mb-8 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
+          <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
           Historical Analysis
         </h2>
         <div className="space-y-6 sm:space-y-8">
           {[
             {
               title: 'Ancient Period (2000 BCE - 500 BCE)',
-              content: 'The economic center began in Mesopotamia with the development of sophisticated agricultural systems and irrigation networks. Sumerian city-states pioneered the first writing systems for trade records and contracts.',
+              content: 'The economic center began in Mesopotamia with the development of sophisticated agricultural systems and irrigation networks. Sumerian city-states pioneered the first writing systems for trade records and contracts. The rise of Bronze Age civilizations established long-distance trade networks, while innovations like the potter\'s wheel and metallurgy spurred economic growth.',
               events: [
                 '3000 BCE: Development of cuneiform writing system',
-                '2500 BCE: Great Pyramid construction',
-                '1750 BCE: Code of Hammurabi standardizes laws',
-                '600 BCE: First standardized currency'
+                '2500 BCE: Great Pyramid construction demonstrates economic organization',
+                '1750 BCE: Code of Hammurabi standardizes commercial laws',
+                '600 BCE: Introduction of Lydian coins'
               ]
             },
             {
               title: 'Classical Period (500 BCE - 500 CE)',
-              content: 'This era saw unprecedented economic integration under major empires. The Roman Empire created a vast economic network with standardized currency, banking systems, and trade laws.',
+              content: 'This era saw unprecedented economic integration under major empires. The Roman Empire created a vast economic network with standardized currency, banking systems, and trade laws. The Silk Road emerged as a crucial East-West trade artery, connecting Roman markets with Han Dynasty China.',
               events: [
                 '500 BCE: Athens emerges as trading power',
-                '200 BCE: Han Dynasty establishes Silk Road',
-                '27 BCE: Augustus establishes Roman economy',
+                '330 BCE: Alexander\'s conquests create vast network',
+                '27 BCE: Augustus establishes Roman economic system',
                 '100 CE: Peak of Roman trade network'
               ]
             },
             {
               title: 'Medieval Period (500 CE - 1500 CE)',
-              content: 'The Islamic Golden Age transformed the economic landscape, with Baghdad becoming a global center of trade, science, and innovation. Muslim merchants pioneered new financial instruments.',
+              content: 'The Islamic Golden Age transformed the economic landscape, with Baghdad becoming a global center of trade, science, and innovation. In Europe, Italian city-states like Venice and Florence pioneered modern banking practices.',
               events: [
-                '750 CE: Baghdad established as trade hub',
+                '750 CE: Abbasid Caliphate establishes Baghdad as trade hub',
                 '1000 CE: Song Dynasty introduces paper money',
                 '1200 CE: Formation of Hanseatic League',
-                '1450 CE: Medici Bank pioneers banking'
+                '1450 CE: Medici Bank pioneers modern banking'
               ]
             },
             {
               title: 'Modern Period (1500 CE - Present)',
-              content: 'The age of exploration shifted power to Western Europe. The Industrial Revolution transformed production methods. The Digital Revolution and globalization have shifted gravity toward East Asia.',
+              content: 'The age of exploration shifted economic power to Western Europe. The Industrial Revolution transformed production methods. The 20th century brought American economic dominance. The Digital Revolution and globalization have recently shifted economic gravity toward East Asia.',
               events: [
-                '1602: Dutch East India Company founded',
-                '1776: Industrial Revolution begins',
-                '1944: Bretton Woods system established',
-                '1978: China begins market reforms'
+                '1602: Dutch East India Company creates first stock market',
+                '1776: Industrial Revolution begins in Britain',
+                '1944: Bretton Woods monetary system established',
+                '1978: China begins market reforms',
+                '2020: Digital acceleration due to pandemic'
               ]
             }
           ].map((period, index) => (
-            <div 
+            <details 
               key={index}
-              className={`p-4 sm:p-6 rounded-xl transition-all duration-300 border ${themeColors.border} ${themeColors.cardBg}`}
+              className={`group rounded-xl border ${themeColors.border} ${themeColors.cardBg} overflow-hidden`}
             >
-              <h3 className={`text-lg sm:text-xl font-bold mb-3 sm:mb-4 ${themeColors.text}`}>{period.title}</h3>
-              <p className={`text-xs sm:text-sm ${themeColors.textSecondary} mb-4 sm:mb-6`}>{period.content}</p>
-              <div className={`mt-4 border-t ${themeColors.border} pt-4`}>
-                <h4 className={`text-sm sm:text-base font-semibold mb-2 sm:mb-3 ${themeColors.text}`}>Key Events:</h4>
-                <ul className={`list-disc pl-5 space-y-1 sm:space-y-2 text-xs sm:text-sm ${themeColors.textSecondary}`}>
-                  {period.events.map((event, i) => (
-                    <li key={i}>{event}</li>
-                  ))}
-                </ul>
+              <summary className={`p-4 sm:p-6 cursor-pointer list-none flex items-center justify-between ${
+                isDarkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
+              } transition-colors`}>
+                <h3 className={`text-base sm:text-xl font-bold ${themeColors.text}`}>{period.title}</h3>
+                <svg 
+                  className={`w-5 h-5 ${themeColors.textSecondary} transition-transform group-open:rotate-180`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div className={`px-4 sm:px-6 pb-4 sm:pb-6 border-t ${themeColors.border}`}>
+                <p className={`${themeColors.textSecondary} mt-4 mb-4 text-sm`}>{period.content}</p>
+                <div>
+                  <h4 className={`text-sm sm:text-base font-semibold mb-3 ${themeColors.text}`}>Key Economic Events:</h4>
+                  <ul className={`space-y-2 text-sm ${themeColors.textSecondary}`}>
+                    {period.events.map((event, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></span>
+                        {event}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
+            </details>
           ))}
         </div>
       </div>
 
       {/* Methodology Note */}
       <div className={`p-4 sm:p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-        <h3 className={`text-base sm:text-lg font-bold mb-3 sm:mb-4 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 ${themeColors.accent}`} />
+        <h3 className={`text-base sm:text-lg font-bold mb-4 flex items-center ${themeColors.text}`}>
+          <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
           Methodology Note
         </h3>
-        <p className={`text-xs sm:text-sm ${themeColors.textTertiary}`}>
+        <p className={`text-sm ${themeColors.textTertiary}`}>
           This visualization is based on historical economic data and research from various academic sources.
           GDP shares are approximated for ancient periods where exact data is unavailable.
           Modern period data (1500 CE onwards) is derived from economic historians' estimates and World Bank data.
