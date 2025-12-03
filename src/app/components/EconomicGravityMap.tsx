@@ -95,15 +95,43 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
 
   // Generate trail lines between consecutive points
   const trailLines = useMemo(() => {
-    const lines = [];
+    const lines: { from: [number, number]; to: [number, number]; key: string }[] = [];
+    
     for (let i = 0; i < historicalData.length - 1; i++) {
       const from = historicalData[i];
       const to = historicalData[i + 1];
-      lines.push({
-        from: [from.lon, from.lat] as [number, number],
-        to: [to.lon, to.lat] as [number, number],
-        key: `trail-${from.year}-${to.year}`,
-      });
+      
+      // Calculate longitude difference
+      const lonDiff = Math.abs(to.lon - from.lon);
+      
+      // For lines that span more than 100 degrees longitude,
+      // add intermediate waypoints to avoid Mercator projection artifacts
+      if (lonDiff > 100) {
+        // Create waypoints going eastward (Atlantic -> Europe -> Asia route)
+        const waypoints: [number, number][] = [
+          [from.lon, from.lat],
+          [-30, 45],    // Mid-Atlantic
+          [0, 48],      // Western Europe
+          [40, 45],     // Eastern Europe
+          [75, 40],     // Central Asia
+          [to.lon, to.lat],
+        ];
+        
+        // Create line segments between waypoints
+        for (let j = 0; j < waypoints.length - 1; j++) {
+          lines.push({
+            from: waypoints[j],
+            to: waypoints[j + 1],
+            key: `trail-${from.year}-${to.year}-segment-${j}`,
+          });
+        }
+      } else {
+        lines.push({
+          from: [from.lon, from.lat] as [number, number],
+          to: [to.lon, to.lat] as [number, number],
+          key: `trail-${from.year}-${to.year}`,
+        });
+      }
     }
     return lines;
   }, [historicalData]);
@@ -196,7 +224,11 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
                   onClick={() => onSelectPoint(isSelected ? null : point)}
                   onMouseEnter={() => setTooltipContent(point)}
                   onMouseLeave={() => setTooltipContent(null)}
-                  style={{ cursor: 'pointer' }}
+                  style={{
+                    default: { cursor: 'pointer' },
+                    hover: { cursor: 'pointer' },
+                    pressed: { cursor: 'pointer' },
+                  }}
                 >
                   {/* Outer glow for selected */}
                   {isSelected && (

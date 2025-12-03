@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import InfoPanel from '../components/InfoPanel';
 import { economicMetrics } from '../data/economicMetrics';
 import dynamic from 'next/dynamic';
@@ -205,40 +204,10 @@ const gdpShareData = historicalData.map(point => ({
   Oceania: point.year <= 1500 ? 0 : 2
 }));
 
-const ThemeToggle = ({ isDarkMode, onToggle }: { isDarkMode: boolean; onToggle: () => void }) => {
-  return (
-    <button
-      onClick={onToggle}
-      className={`
-        fixed top-4 right-4 p-2 rounded-full 
-        transition-all duration-300 ease-in-out
-        ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}
-        border ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}
-        shadow-lg z-50
-      `}
-      aria-label="Toggle dark mode"
-    >
-      {isDarkMode ? (
-        <SunIcon className="w-6 h-6 text-yellow-400" />
-      ) : (
-        <MoonIcon className="w-6 h-6 text-gray-600" />
-      )}
-    </button>
-  );
-};
-
 const EconomicGravityPage = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [selectedPoint, setSelectedPoint] = useState<HistoricalPoint | null>(null);
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // Dispatch theme change event for navbar synchronization
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('themeChange'));
-    }
-  };
 
   // Dispatch theme change event when isDarkMode changes
   useEffect(() => {
@@ -263,8 +232,6 @@ const EconomicGravityPage = () => {
 
   return (
     <div className={`w-full max-w-6xl mx-auto p-4 ${themeColors.text} ${themeColors.background} min-h-screen`}>
-      <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
-      
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -300,7 +267,7 @@ const EconomicGravityPage = () => {
           <InfoPanel
             metric={economicMetrics.economicCenterOfGravity}
             isDarkMode={isDarkMode}
-            position="inline"
+            position="top-right"
             size="small"
           />
         </div>
@@ -336,7 +303,7 @@ const EconomicGravityPage = () => {
             <InfoPanel
               metric={economicMetrics.gdpShareByRegion}
               isDarkMode={isDarkMode}
-              position="inline"
+              position="top-right"
               size="small"
             />
           </div>
