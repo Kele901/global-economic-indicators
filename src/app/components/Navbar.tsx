@@ -84,6 +84,7 @@ const Navbar = () => {
     { href: "/", label: "Dashboard" },
     { href: "/currency-hierarchy", label: "Currency Hierarchy" },
     { href: "/economic-gravity", label: "Economic Gravity" },
+    { href: "/economic-cycles", label: "Economic Cycles" },
     { href: "/trading-places", label: "Trading Places" },
     { href: "/compare", label: "Compare Countries" },
     { href: "/inflation", label: "Inflation" },

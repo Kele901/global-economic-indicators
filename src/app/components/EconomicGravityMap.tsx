@@ -186,11 +186,11 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
           });
         }
       } else {
-        lines.push({
-          from: [from.lon, from.lat] as [number, number],
-          to: [to.lon, to.lat] as [number, number],
-          key: `trail-${from.year}-${to.year}`,
-        });
+      lines.push({
+        from: [from.lon, from.lat] as [number, number],
+        to: [to.lon, to.lat] as [number, number],
+        key: `trail-${from.year}-${to.year}`,
+      });
       }
     }
     return lines;
