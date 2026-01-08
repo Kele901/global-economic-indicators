@@ -305,42 +305,40 @@ const CyclePhaseIndicator: React.FC<CyclePhaseIndicatorProps> = ({ isDarkMode })
         </div>
 
         {/* Historical Phase Reference */}
-        <div className={`mt-6 p-4 rounded-lg border ${
-          isDarkMode ? 'bg-gray-900/30 border-gray-700' : 'bg-gray-50 border-gray-200'
-        }`}>
+        <div className="mt-6">
           <h4 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
             Dalio&apos;s Long-Term Debt Cycle Phases
           </h4>
           <div className="flex flex-wrap gap-2">
             {debtCyclePhases
               .filter(p => p.cycleType === 'long_term')
-              .map(phase => {
+              .map((phase, index) => {
                 const isCurrent = currentPhase?.id === phase.id;
+                // Color palette for each phase
+                const phaseColors = [
+                  { light: 'border-green-400 text-green-700', dark: 'border-green-500 text-green-400' },      // Recovery
+                  { light: 'border-emerald-400 text-emerald-700', dark: 'border-emerald-500 text-emerald-400' }, // Expansion
+                  { light: 'border-red-400 text-red-700', dark: 'border-red-500 text-red-400' },              // Shock
+                  { light: 'border-blue-400 text-blue-700', dark: 'border-blue-500 text-blue-400' },          // Moderation
+                  { light: 'border-purple-400 text-purple-700', dark: 'border-purple-500 text-purple-400' },  // Crisis/QE
+                  { light: 'border-amber-400 text-amber-700', dark: 'border-amber-500 text-amber-400' },      // Pandemic
+                  { light: 'border-orange-400 text-orange-700', dark: 'border-orange-500 text-orange-400' },  // Normalization
+                ];
+                const colorSet = phaseColors[index % phaseColors.length];
+                
                 return (
-                  <div
+                  <span
                     key={phase.id}
-                    className={`px-3 py-2 rounded-lg text-xs transition-all ${
-                      isCurrent
-                        ? 'ring-2 ring-blue-500 ring-offset-2'
-                        : ''
-                    } ${isDarkMode ? 'ring-offset-gray-800' : 'ring-offset-gray-50'}`}
-                    style={{
-                      backgroundColor: `${getPhaseColor(phase.phase)}${isCurrent ? '40' : '15'}`,
-                      borderLeft: `3px solid ${getPhaseColor(phase.phase)}`
-                    }}
+                    className={`text-xs px-3 py-1.5 rounded-lg border ${
+                      isDarkMode 
+                        ? `bg-gray-800 ${colorSet.dark}` 
+                        : `bg-white ${colorSet.light}`
+                    } ${isCurrent ? 'font-semibold ring-2 ring-offset-1 ' + (isDarkMode ? 'ring-white/30' : 'ring-gray-400/50') : ''}`}
                   >
-                    <div className="font-semibold" style={{ color: getPhaseColor(phase.phase) }}>
-                      {phase.name}
-                    </div>
-                    <div className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {phase.startYear}-{phase.endYear > 2025 ? 'Present' : phase.endYear}
-                    </div>
-                    {isCurrent && (
-                      <div className={`text-[10px] mt-1 font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                        ← We Are Here
-                      </div>
-                    )}
-                  </div>
+                    {phase.name}
+                    <span className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}> ({phase.startYear}-{phase.endYear > 2025 ? 'now' : phase.endYear})</span>
+                    {isCurrent && <span className="ml-1">←</span>}
+                  </span>
                 );
               })}
           </div>

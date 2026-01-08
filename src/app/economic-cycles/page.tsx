@@ -167,18 +167,10 @@ const EconomicCyclesPage = () => {
         {activeSection === 'overview' && (
           <div className="space-y-8">
             {/* Intro Quote */}
-            <div className={`p-6 rounded-xl border-l-4 ${
-              isDarkMode 
-                ? 'bg-gray-800/50 border-blue-500' 
-                : 'bg-blue-50 border-blue-500'
-            }`}>
-              <blockquote className={`text-lg italic ${themeColors.textSecondary}`}>
-                &quot;History doesn&apos;t repeat itself, but it often rhymes.&quot;
-              </blockquote>
-              <cite className={`text-sm ${themeColors.textTertiary} mt-2 block`}>
-                — Often attributed to Mark Twain
-              </cite>
-            </div>
+            <p className={`text-center italic ${themeColors.textSecondary}`}>
+              &quot;History doesn&apos;t repeat itself, but it often rhymes.&quot;
+              <span className={`text-sm ${themeColors.textTertiary} ml-2`}>— Mark Twain</span>
+            </p>
 
             {/* Current Cycle Phase */}
             <CyclePhaseIndicator isDarkMode={isDarkMode} />
@@ -420,15 +412,15 @@ const EconomicCyclesPage = () => {
         {/* Section: Debt Cycles */}
         {activeSection === 'debt' && (
           <div className="space-y-8">
-            <div className={`p-6 rounded-xl border-l-4 ${
+            <div className={`px-4 py-3 rounded-lg border ${
               isDarkMode 
-                ? 'bg-gray-800/50 border-purple-500' 
-                : 'bg-purple-50 border-purple-500'
+                ? 'bg-gray-800 border-purple-500 text-purple-400' 
+                : 'bg-white border-purple-400 text-purple-700'
             }`}>
-              <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+              <h3 className="font-semibold">
                 Dalio&apos;s Debt Cycle Framework
               </h3>
-              <p className={`${themeColors.textSecondary}`}>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 Long-term debt cycles last 50-75 years, while short-term business cycles 
                 last 5-10 years. The current long-term cycle began after WWII and may be 
                 reaching its late stages.

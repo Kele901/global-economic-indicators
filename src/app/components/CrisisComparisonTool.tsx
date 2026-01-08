@@ -368,21 +368,14 @@ const CrisisComparisonTool: React.FC<CrisisComparisonToolProps> = ({ isDarkMode 
       <div className="p-6">
         {/* Top Match Alert */}
         {topComparison && topComparison.similarityScore > 50 && (
-          <div className={`mb-6 p-4 rounded-lg border-l-4 ${
+          <div className={`mb-6 px-4 py-3 rounded-lg border ${
             topComparison.similarityScore > 70
-              ? isDarkMode ? 'bg-red-900/30 border-red-500' : 'bg-red-50 border-red-500'
+              ? isDarkMode ? 'bg-gray-800 border-red-500' : 'bg-white border-red-400'
               : topComparison.similarityScore > 50
-                ? isDarkMode ? 'bg-amber-900/30 border-amber-500' : 'bg-amber-50 border-amber-500'
-                : isDarkMode ? 'bg-blue-900/30 border-blue-500' : 'bg-blue-50 border-blue-500'
+                ? isDarkMode ? 'bg-gray-800 border-amber-500' : 'bg-white border-amber-400'
+                : isDarkMode ? 'bg-gray-800 border-blue-500' : 'bg-white border-blue-400'
           }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <svg className={`w-5 h-5 ${
-                topComparison.similarityScore > 70 ? 'text-red-500' : 'text-amber-500'
-              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-                />
-              </svg>
+            <div className="flex items-center gap-2">
               <span className={`font-semibold ${
                 topComparison.similarityScore > 70 
                   ? isDarkMode ? 'text-red-400' : 'text-red-700'
@@ -391,7 +384,7 @@ const CrisisComparisonTool: React.FC<CrisisComparisonToolProps> = ({ isDarkMode 
                 {topComparison.similarityScore}% Similar to {topComparison.crisis.name}
               </span>
             </div>
-            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               Current economic conditions show significant parallels to pre-crisis conditions 
               of the {topComparison.crisis.year} {getCrisisTypeLabel(topComparison.crisis.type).toLowerCase()}.
             </p>

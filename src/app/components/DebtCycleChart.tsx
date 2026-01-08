@@ -479,24 +479,35 @@ const DebtCycleChart: React.FC<DebtCycleChartProps> = ({
           LONG-TERM DEBT CYCLE PHASES
         </h4>
         <div className="flex flex-wrap gap-2">
-          {longTermPhases.map(phase => (
-            <button
-              key={phase.id}
-              onClick={() => onSelectPhase?.(selectedPhase?.id === phase.id ? null : phase)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                selectedPhase?.id === phase.id
-                  ? 'ring-2 ring-offset-2 ring-blue-500'
-                  : ''
-              } ${isDarkMode ? 'ring-offset-gray-800' : 'ring-offset-white'}`}
-              style={{
-                backgroundColor: `${getPhaseColor(phase.phase)}20`,
-                color: getPhaseColor(phase.phase),
-                borderLeft: `3px solid ${getPhaseColor(phase.phase)}`
-              }}
-            >
-              {phase.name} ({phase.startYear}-{Math.min(phase.endYear, 2026)})
-            </button>
-          ))}
+          {longTermPhases.map((phase, index) => {
+            // Color palette matching CyclePhaseIndicator
+            const phaseColors = [
+              { light: 'border-green-400 text-green-700', dark: 'border-green-500 text-green-400' },
+              { light: 'border-emerald-400 text-emerald-700', dark: 'border-emerald-500 text-emerald-400' },
+              { light: 'border-red-400 text-red-700', dark: 'border-red-500 text-red-400' },
+              { light: 'border-blue-400 text-blue-700', dark: 'border-blue-500 text-blue-400' },
+              { light: 'border-purple-400 text-purple-700', dark: 'border-purple-500 text-purple-400' },
+              { light: 'border-amber-400 text-amber-700', dark: 'border-amber-500 text-amber-400' },
+              { light: 'border-orange-400 text-orange-700', dark: 'border-orange-500 text-orange-400' },
+            ];
+            const colorSet = phaseColors[index % phaseColors.length];
+            const isSelected = selectedPhase?.id === phase.id;
+            
+            return (
+              <button
+                key={phase.id}
+                onClick={() => onSelectPhase?.(isSelected ? null : phase)}
+                className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${
+                  isDarkMode 
+                    ? `bg-gray-800 ${colorSet.dark}` 
+                    : `bg-white ${colorSet.light}`
+                } ${isSelected ? 'font-semibold ring-2 ring-offset-1 ' + (isDarkMode ? 'ring-white/30' : 'ring-gray-400/50') : ''}`}
+              >
+                {phase.name}
+                <span className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}> ({phase.startYear}-{phase.endYear > 2025 ? 'now' : phase.endYear})</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
