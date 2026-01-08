@@ -1,11 +1,32 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import AdSense from '../components/AdSense';
 import { calculateCurrencyPairs } from '../services/forex';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import InfoPanel from '../components/InfoPanel';
 import { economicMetrics } from '../data/economicMetrics';
+
+// Dynamically import new components to avoid SSR issues with charts
+const HistoricalRateChart = dynamic(() => import('../components/HistoricalRateChart'), { ssr: false });
+const CurrencyStrengthIndex = dynamic(() => import('../components/CurrencyStrengthIndex'), { ssr: false });
+const CentralBankRatesPanel = dynamic(() => import('../components/CentralBankRatesPanel'), { ssr: false });
+const CurrencyCorrelationMatrix = dynamic(() => import('../components/CurrencyCorrelationMatrix'), { ssr: false });
+const ReserveCurrencyChart = dynamic(() => import('../components/ReserveCurrencyChart'), { ssr: false });
+const SafeHavenIndicator = dynamic(() => import('../components/SafeHavenIndicator'), { ssr: false });
+const REERDisplay = dynamic(() => import('../components/REERDisplay'), { ssr: false });
+const EconomicCalendar = dynamic(() => import('../components/EconomicCalendar'), { ssr: false });
+const CurrencyRegimeInfo = dynamic(() => import('../components/CurrencyRegimeInfo'), { ssr: false });
+
+// Tab configuration
+type TabId = 'hierarchy' | 'history' | 'strength' | 'central-banks' | 'correlation' | 'reserves' | 'safe-haven' | 'valuation' | 'calendar' | 'regimes';
+
+interface Tab {
+  id: TabId;
+  label: string;
+  icon: string;
+}
 
 interface CurrencyInfo {
   code: string;
@@ -140,7 +161,21 @@ const currencyData: { [key: string]: CurrencyInfo } = {
   }
 };
 
+const navigationTabs: Tab[] = [
+  { id: 'hierarchy', label: 'Currency Hierarchy', icon: '🏦' },
+  { id: 'history', label: 'Historical Rates', icon: '📈' },
+  { id: 'strength', label: 'Strength Index', icon: '💪' },
+  { id: 'central-banks', label: 'Central Banks', icon: '🏛️' },
+  { id: 'correlation', label: 'Correlation', icon: '🔗' },
+  { id: 'reserves', label: 'Reserve Status', icon: '🌐' },
+  { id: 'safe-haven', label: 'Safe Haven', icon: '🛡️' },
+  { id: 'valuation', label: 'Valuation (REER)', icon: '⚖️' },
+  { id: 'calendar', label: 'Economic Calendar', icon: '📅' },
+  { id: 'regimes', label: 'Regimes', icon: '🔄' },
+];
+
 const CurrencyHierarchyPage = () => {
+  const [activeTab, setActiveTab] = useState<TabId>('hierarchy');
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [hoveredCurrency, setHoveredCurrency] = useState<string | null>(null);
@@ -472,38 +507,40 @@ const CurrencyHierarchyPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Global Currency Hierarchy</h1>
         <div className="flex items-center space-x-4">
-          {/* Live Exchange Rate Controls */}
-          <div className="flex items-center space-x-2">
-            <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              Refresh:
-            </span>
-            <select
-              value={refreshInterval / 1000 / 60}
-              onChange={(e) => handleRefreshIntervalChange(parseInt(e.target.value) * 60 * 1000)}
-              className={`px-2 py-1 rounded border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
-            >
-              <option value={1}>1 min</option>
-              <option value={5}>5 min</option>
-              <option value={15}>15 min</option>
-              <option value={30}>30 min</option>
-            </select>
-            <button
-              onClick={handleManualRefresh}
-              disabled={loading}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                loading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : isDarkMode 
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                    : 'bg-blue-500 hover:bg-blue-600 text-white'
-              }`}
-            >
-              {loading ? 'Refreshing...' : 'Refresh Now'}
-            </button>
-          </div>
+          {/* Live Exchange Rate Controls - only show on hierarchy tab */}
+          {activeTab === 'hierarchy' && (
+            <div className="flex items-center space-x-2">
+              <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                Refresh:
+              </span>
+              <select
+                value={refreshInterval / 1000 / 60}
+                onChange={(e) => handleRefreshIntervalChange(parseInt(e.target.value) * 60 * 1000)}
+                className={`px-2 py-1 rounded border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
+              >
+                <option value={1}>1 min</option>
+                <option value={5}>5 min</option>
+                <option value={15}>15 min</option>
+                <option value={30}>30 min</option>
+              </select>
+              <button
+                onClick={handleManualRefresh}
+                disabled={loading}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  loading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : isDarkMode 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                }`}
+              >
+                {loading ? 'Refreshing...' : 'Refresh Now'}
+              </button>
+            </div>
+          )}
           
-          {/* Last Updated Indicator */}
-          {lastUpdated && (
+          {/* Last Updated Indicator - only show on hierarchy tab */}
+          {activeTab === 'hierarchy' && lastUpdated && (
             <div className={`text-xs ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
               <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
               Live: {formatLastUpdated(lastUpdated)}
@@ -523,9 +560,30 @@ const CurrencyHierarchyPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Tab Navigation */}
+      <div className={`flex flex-wrap gap-2 mb-6 p-1 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+        {navigationTabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.id
+                ? isDarkMode
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-500 text-white'
+                : isDarkMode
+                  ? 'text-gray-400 hover:text-white'
+                  : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            {tab.icon} {tab.label}
+          </button>
+        ))}
+      </div>
       
-      {/* Loading and Error States */}
-      {loading && (
+      {/* Loading and Error States - only show on hierarchy tab */}
+      {activeTab === 'hierarchy' && loading && (
         <div className={`mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-50 text-blue-800'}`}>
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
@@ -533,7 +591,7 @@ const CurrencyHierarchyPage = () => {
           </div>
         </div>
       )}
-      {error && (
+      {activeTab === 'hierarchy' && error && (
         <div className={`mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-red-900 text-red-200' : 'bg-red-50 text-red-800'}`}>
           <div className="flex items-center space-x-2">
             <span>⚠️ {error}</span>
@@ -550,6 +608,22 @@ const CurrencyHierarchyPage = () => {
           </div>
         </div>
       )}
+
+      {/* Render tab content based on active tab */}
+      {activeTab === 'history' && <HistoricalRateChart isDarkMode={isDarkMode} />}
+      {activeTab === 'strength' && <CurrencyStrengthIndex isDarkMode={isDarkMode} />}
+      {activeTab === 'central-banks' && <CentralBankRatesPanel isDarkMode={isDarkMode} />}
+      {activeTab === 'correlation' && <CurrencyCorrelationMatrix isDarkMode={isDarkMode} />}
+      {activeTab === 'reserves' && <ReserveCurrencyChart isDarkMode={isDarkMode} />}
+      {activeTab === 'safe-haven' && <SafeHavenIndicator isDarkMode={isDarkMode} />}
+      {activeTab === 'valuation' && <REERDisplay isDarkMode={isDarkMode} />}
+      {activeTab === 'calendar' && <EconomicCalendar isDarkMode={isDarkMode} />}
+      {activeTab === 'regimes' && <CurrencyRegimeInfo isDarkMode={isDarkMode} />}
+
+      {/* Hierarchy Tab Content */}
+      {activeTab === 'hierarchy' && (
+        <>
+          {/* Existing hierarchy content */}
       
       <div className={`w-full overflow-x-auto relative rounded-lg shadow-lg p-4 transition-colors duration-200 ${
         isDarkMode 
@@ -1291,6 +1365,8 @@ const CurrencyHierarchyPage = () => {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
 
       <div className="mt-8">
