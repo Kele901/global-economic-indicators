@@ -1417,8 +1417,32 @@ const TradingPlacesPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 text-gray-900">
         <div className="w-full max-w-7xl mx-auto p-4 space-y-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          {/* Static content that renders immediately */}
+          <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-xl bg-blue-500">
+              <Globe className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Trading Places</h1>
+              <p className="text-sm text-gray-600">Global Trade Data & Statistics</p>
+            </div>
+          </div>
+          
+          {/* Static intro content visible during loading */}
+          <div className="rounded-lg p-4 sm:p-6 bg-blue-50">
+            <h2 className="text-lg font-semibold mb-3">Global Trade Analysis Dashboard</h2>
+            <p className="text-sm mb-4">
+              Explore international trade flows, import/export statistics, and trade relationships between 
+              the world's major economies. Our data covers bilateral trade, trade balances, commodity breakdowns, 
+              and historical trends from official UN Comtrade and World Bank sources.
+            </p>
+          </div>
+          
+          {/* Loading indicator with meaningful text */}
+          <div className="flex flex-col items-center justify-center h-48">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-lg font-medium text-gray-700">Loading Trade Data</p>
+            <p className="text-sm text-gray-500">Fetching global trade statistics...</p>
           </div>
         </div>
       </div>
@@ -1461,7 +1485,44 @@ const TradingPlacesPage: React.FC = () => {
           </div>
         </div>
 
-        <AdSense />
+        {/* Static intro content - always visible for SEO and AdSense compliance */}
+        <div className={`rounded-lg p-4 sm:p-6 ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+          <h2 className="text-lg font-semibold mb-3">Global Trade Analysis Dashboard</h2>
+          <p className="text-sm mb-4">
+            Explore international trade flows, import/export statistics, and trade relationships between 
+            the world's major economies. Our data covers bilateral trade, trade balances, commodity breakdowns, 
+            and historical trends from official UN Comtrade and World Bank sources.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
+            <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-600' : 'bg-white'}`}>
+              <div className="font-medium mb-1">Trade Metrics</div>
+              <ul className="space-y-1 opacity-80">
+                <li>• Export/Import volumes</li>
+                <li>• Trade balance analysis</li>
+                <li>• Market concentration</li>
+              </ul>
+            </div>
+            <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-600' : 'bg-white'}`}>
+              <div className="font-medium mb-1">Country Coverage</div>
+              <ul className="space-y-1 opacity-80">
+                <li>• 50+ major economies</li>
+                <li>• Bilateral trade flows</li>
+                <li>• Regional trade blocs</li>
+              </ul>
+            </div>
+            <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-600' : 'bg-white'}`}>
+              <div className="font-medium mb-1">Data Sources</div>
+              <ul className="space-y-1 opacity-80">
+                <li>• UN Comtrade Database</li>
+                <li>• World Bank indicators</li>
+                <li>• IMF trade statistics</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Only show ads when content is ready */}
+        <AdSense show={mounted && !loading} />
 
         {/* Real Data Toggle */}
         <RealDataToggle
@@ -4648,7 +4709,8 @@ const TradingPlacesPage: React.FC = () => {
           </div>
         </div>
 
-        <AdSense />
+        {/* Only show ads when content is ready */}
+        <AdSense show={mounted && !loading} />
       </div>
     </div>
   );

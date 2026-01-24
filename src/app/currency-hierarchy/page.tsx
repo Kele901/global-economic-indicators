@@ -504,8 +504,13 @@ const CurrencyHierarchyPage = () => {
 
   return (
     <div className={`w-full max-w-6xl mx-auto p-4 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Global Currency Hierarchy</h1>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h1 className="text-2xl font-bold">Global Currency Hierarchy</h1>
+          <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Explore the tiered structure of global currencies, from reserve currencies to regional and local ones
+          </p>
+        </div>
         <div className="flex items-center space-x-4">
           {/* Live Exchange Rate Controls - only show on hierarchy tab */}
           {activeTab === 'hierarchy' && (
@@ -557,6 +562,29 @@ const CurrencyHierarchyPage = () => {
               <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
             </button>
             <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Static intro content - always visible for SEO */}
+      <div className={`rounded-lg p-4 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+        <p className="text-sm mb-3">
+          The global currency hierarchy reflects the relative importance and stability of different currencies 
+          in international trade, finance, and reserves. Understanding this structure helps explain exchange 
+          rate dynamics and international monetary relationships.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
+            <span className="font-semibold text-blue-500">Tier 1:</span> Global Reserve (USD)
+          </div>
+          <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
+            <span className="font-semibold text-orange-500">Tier 2:</span> Major Currencies
+          </div>
+          <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
+            <span className="font-semibold text-green-500">Tier 3:</span> Regional Currencies
+          </div>
+          <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
+            <span className="font-semibold text-red-500">Tier 4:</span> Local Currencies
           </div>
         </div>
       </div>
@@ -1369,8 +1397,9 @@ const CurrencyHierarchyPage = () => {
         </>
       )}
 
+      {/* Only show ads when exchange rates have loaded */}
       <div className="mt-8">
-        <AdSense />
+        <AdSense show={Object.keys(exchangeRates).length > 0} />
       </div>
     </div>
   );

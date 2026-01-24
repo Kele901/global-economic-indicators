@@ -1365,9 +1365,9 @@ const GlobalInterestRateApp = () => {
               data={data}
               isDarkMode={isDarkMode}
             />
-            {/* Middle Ad Placement */}
+            {/* Middle Ad Placement - only show when data is loaded */}
             <div className="my-8">
-              <AdSense />
+              <AdSense show={!loading && data.interestRates.length > 0} />
             </div>
           </>
         )}
@@ -1971,7 +1971,8 @@ const GlobalInterestRateApp = () => {
             </ul>
           </div>
         </div>
-        <AdSense />
+        {/* Bottom ad - only show when data is loaded */}
+        <AdSense show={!loading && data.interestRates.length > 0} />
         <div className={`mt-4 sm:mt-6 p-4 sm:p-6 rounded-lg ${isDarkMode ? 'bg-gray-800 border border-gray-700 shadow-lg' : 'bg-white border border-gray-200'}`}>
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3 dark:text-white">Updates and Maintenance</h3>
           <p className="text-sm sm:text-base md:text-lg dark:text-white text-gray-700">

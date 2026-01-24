@@ -8,11 +8,20 @@ declare global {
   }
 }
 
-const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
+interface AdSenseProps {
+  className?: string;
+  /** Only render ads when content is ready - helps with AdSense policy compliance */
+  show?: boolean;
+}
+
+const AdSense: React.FC<AdSenseProps> = ({ className = '', show = true }) => {
   const adRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
   
   useEffect(() => {
+    // Only initialize ads when show is true and component is mounted
+    if (!show) return;
+    
     try {
       if (typeof window !== 'undefined' && adRef.current && !hasInitialized.current) {
         // Initialize adsbygoogle array if it doesn't exist
@@ -28,7 +37,12 @@ const AdSense: React.FC<{ className?: string }> = ({ className = '' }) => {
     } catch (err) {
       console.error('AdSense error:', err);
     }
-  }, []);
+  }, [show]);
+
+  // Don't render anything if show is false - prevents ads on pages without content
+  if (!show) {
+    return null;
+  }
 
   return (
     <div 
