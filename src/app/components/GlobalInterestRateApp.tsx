@@ -9,6 +9,7 @@ import AdSense from './AdSense';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
 import DataStatusIndicator from './DataStatusIndicator';
+import LoadingSpinner from './LoadingSpinner';
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -97,12 +98,6 @@ const CustomTooltip = ({ active, payload, label, isDarkMode }: any) => {
 
   return null;
 };
-
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center h-[300px] sm:h-[400px]">
-    <div className="animate-spin rounded-full h-24 w-24 sm:h-32 sm:w-32 border-b-2 border-blue-500"></div>
-  </div>
-);
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <div className="flex justify-center items-center h-[300px] sm:h-[400px] text-red-500 text-center px-4">
@@ -1046,7 +1041,38 @@ const GlobalInterestRateApp = () => {
     return (
       <div className="w-full max-w-4xl mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Global Economic Indicators</h1>
-        <LoadingSpinner />
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          Comprehensive economic data for 30+ countries across 50+ indicators
+        </p>
+        
+        {/* Static intro content visible during loading */}
+        <div className="rounded-lg p-4 sm:p-6 mb-6 bg-blue-50 dark:bg-gray-800">
+          <h2 className="text-lg font-semibold mb-3">Explore Global Economic Data</h2>
+          <p className="text-sm mb-4">
+            Our dashboard provides access to key economic indicators including interest rates, GDP growth, 
+            inflation, unemployment, trade balances, and many more metrics. Data is sourced from the 
+            World Bank, IMF, OECD, and Federal Reserve.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div className="p-2 rounded bg-white dark:bg-gray-700">
+              <span className="font-semibold">30+</span> Countries
+            </div>
+            <div className="p-2 rounded bg-white dark:bg-gray-700">
+              <span className="font-semibold">50+</span> Indicators
+            </div>
+            <div className="p-2 rounded bg-white dark:bg-gray-700">
+              <span className="font-semibold">60+</span> Years of Data
+            </div>
+            <div className="p-2 rounded bg-white dark:bg-gray-700">
+              <span className="font-semibold">5</span> Data Sources
+            </div>
+          </div>
+        </div>
+        
+        <LoadingSpinner 
+          message="Loading Economic Indicators"
+          subtitle="Fetching the latest data from World Bank, IMF, OECD, and other trusted sources..."
+        />
       </div>
     );
   }
