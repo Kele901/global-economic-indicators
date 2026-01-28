@@ -867,6 +867,53 @@ const parisClothingShoesData = [
   { year: 2024, jeans: 100.11, dress: 43.48, nike: 102.59, leather: 136.19 },
 ];
 
+// Cost of Living Index data (2026) - Representative sample from major global cities
+// Source: Numbeo Cost of Living Index (https://www.numbeo.com/cost-of-living/rankings.jsp)
+const costOfLivingData = [
+  { rank: 1, city: 'Zurich', country: 'Switzerland', colIndex: 118.5, rentIndex: 70.6, colPlusRent: 97.1, groceriesIndex: 115.4, restaurantIndex: 121.0, purchasingPower: 164.4 },
+  { rank: 2, city: 'Geneva', country: 'Switzerland', colIndex: 116.5, rentIndex: 65.1, colPlusRent: 93.6, groceriesIndex: 114.3, restaurantIndex: 121.8, purchasingPower: 158.5 },
+  { rank: 3, city: 'Basel', country: 'Switzerland', colIndex: 112.4, rentIndex: 49.6, colPlusRent: 84.4, groceriesIndex: 110.4, restaurantIndex: 114.9, purchasingPower: 183.7 },
+  { rank: 7, city: 'New York, NY', country: 'United States', colIndex: 100.0, rentIndex: 100.0, colPlusRent: 100.0, groceriesIndex: 100.0, restaurantIndex: 100.0, purchasingPower: 100.0 },
+  { rank: 8, city: 'Reykjavik', country: 'Iceland', colIndex: 98.9, rentIndex: 50.1, colPlusRent: 77.1, groceriesIndex: 105.2, restaurantIndex: 109.3, purchasingPower: 109.0 },
+  { rank: 10, city: 'San Francisco, CA', country: 'United States', colIndex: 97.6, rentIndex: 80.5, colPlusRent: 90.0, groceriesIndex: 103.2, restaurantIndex: 109.2, purchasingPower: 151.0 },
+  { rank: 13, city: 'Oslo', country: 'Norway', colIndex: 90.2, rentIndex: 39.3, colPlusRent: 67.5, groceriesIndex: 90.7, restaurantIndex: 99.1, purchasingPower: 110.8 },
+  { rank: 14, city: 'Singapore', country: 'Singapore', colIndex: 87.7, rentIndex: 73.1, colPlusRent: 81.2, groceriesIndex: 77.3, restaurantIndex: 55.5, purchasingPower: 105.5 },
+  { rank: 15, city: 'London', country: 'United Kingdom', colIndex: 87.5, rentIndex: 70.1, colPlusRent: 79.7, groceriesIndex: 68.9, restaurantIndex: 89.7, purchasingPower: 117.5 },
+  { rank: 20, city: 'Copenhagen', country: 'Denmark', colIndex: 85.7, rentIndex: 46.1, colPlusRent: 68.0, groceriesIndex: 78.3, restaurantIndex: 99.9, purchasingPower: 136.9 },
+  { rank: 28, city: 'Amsterdam', country: 'Netherlands', colIndex: 82.6, rentIndex: 60.0, colPlusRent: 72.5, groceriesIndex: 71.5, restaurantIndex: 91.8, purchasingPower: 129.9 },
+  { rank: 42, city: 'Paris', country: 'France', colIndex: 78.6, rentIndex: 43.5, colPlusRent: 62.9, groceriesIndex: 77.9, restaurantIndex: 75.2, purchasingPower: 118.0 },
+  { rank: 47, city: 'Dublin', country: 'Ireland', colIndex: 76.7, rentIndex: 59.7, colPlusRent: 69.1, groceriesIndex: 71.7, restaurantIndex: 89.2, purchasingPower: 114.6 },
+  { rank: 52, city: 'Munich', country: 'Germany', colIndex: 76.1, rentIndex: 45.4, colPlusRent: 62.4, groceriesIndex: 63.5, restaurantIndex: 81.9, purchasingPower: 142.7 },
+  { rank: 60, city: 'Sydney', country: 'Australia', colIndex: 75.1, rentIndex: 53.8, colPlusRent: 65.6, groceriesIndex: 79.2, restaurantIndex: 69.6, purchasingPower: 117.1 },
+  { rank: 69, city: 'Vienna', country: 'Austria', colIndex: 73.9, rentIndex: 29.6, colPlusRent: 54.2, groceriesIndex: 74.0, restaurantIndex: 75.0, purchasingPower: 133.5 },
+  { rank: 75, city: 'Milan', country: 'Italy', colIndex: 73.1, rentIndex: 41.4, colPlusRent: 58.9, groceriesIndex: 70.3, restaurantIndex: 78.2, purchasingPower: 83.5 },
+  { rank: 115, city: 'Berlin', country: 'Germany', colIndex: 70.0, rentIndex: 36.2, colPlusRent: 54.9, groceriesIndex: 63.0, restaurantIndex: 68.1, purchasingPower: 126.1 },
+  { rank: 145, city: 'Seoul', country: 'South Korea', colIndex: 68.2, rentIndex: 23.0, colPlusRent: 48.0, groceriesIndex: 81.4, restaurantIndex: 42.6, purchasingPower: 130.0 },
+  { rank: 160, city: 'Toronto', country: 'Canada', colIndex: 67.5, rentIndex: 40.6, colPlusRent: 55.5, groceriesIndex: 71.1, restaurantIndex: 69.2, purchasingPower: 121.2 },
+  { rank: 172, city: 'Brisbane', country: 'Australia', colIndex: 64.8, rentIndex: 38.5, colPlusRent: 53.1, groceriesIndex: 76.6, restaurantIndex: 66.5, purchasingPower: 145.3 },
+  { rank: 195, city: 'Madrid', country: 'Spain', colIndex: 60.0, rentIndex: 36.2, colPlusRent: 49.4, groceriesIndex: 56.1, restaurantIndex: 63.4, purchasingPower: 104.1 },
+  { rank: 200, city: 'Prague', country: 'Czech Republic', colIndex: 59.6, rentIndex: 32.0, colPlusRent: 47.3, groceriesIndex: 52.9, restaurantIndex: 50.5, purchasingPower: 94.2 },
+  { rank: 205, city: 'Barcelona', country: 'Spain', colIndex: 59.2, rentIndex: 36.0, colPlusRent: 48.9, groceriesIndex: 56.0, restaurantIndex: 63.8, purchasingPower: 95.1 },
+  { rank: 222, city: 'Lisbon', country: 'Portugal', colIndex: 54.2, rentIndex: 38.6, colPlusRent: 47.2, groceriesIndex: 50.1, restaurantIndex: 53.1, purchasingPower: 60.9 },
+  { rank: 223, city: 'Tokyo', country: 'Japan', colIndex: 54.2, rentIndex: 25.8, colPlusRent: 41.5, groceriesIndex: 62.9, restaurantIndex: 35.4, purchasingPower: 117.8 },
+  { rank: 237, city: 'Warsaw', country: 'Poland', colIndex: 53.5, rentIndex: 28.5, colPlusRent: 42.3, groceriesIndex: 46.4, restaurantIndex: 52.5, purchasingPower: 98.9 },
+  { rank: 244, city: 'Budapest', country: 'Hungary', colIndex: 51.1, rentIndex: 20.3, colPlusRent: 37.3, groceriesIndex: 47.8, restaurantIndex: 50.5, purchasingPower: 84.9 },
+  { rank: 255, city: 'Buenos Aires', country: 'Argentina', colIndex: 48.8, rentIndex: 16.3, colPlusRent: 34.3, groceriesIndex: 46.6, restaurantIndex: 63.1, purchasingPower: 45.4 },
+  { rank: 260, city: 'Moscow', country: 'Russia', colIndex: 47.5, rentIndex: 34.1, colPlusRent: 41.5, groceriesIndex: 40.7, restaurantIndex: 47.3, purchasingPower: 81.4 },
+  { rank: 275, city: 'Istanbul', country: 'Turkey', colIndex: 43.8, rentIndex: 21.8, colPlusRent: 34.0, groceriesIndex: 41.7, restaurantIndex: 46.8, purchasingPower: 59.8 },
+  { rank: 285, city: 'Bangkok', country: 'Thailand', colIndex: 41.4, rentIndex: 19.6, colPlusRent: 31.6, groceriesIndex: 45.2, restaurantIndex: 29.2, purchasingPower: 50.9 },
+  { rank: 295, city: 'Shanghai', country: 'China', colIndex: 38.8, rentIndex: 23.2, colPlusRent: 31.8, groceriesIndex: 38.1, restaurantIndex: 26.0, purchasingPower: 96.0 },
+  { rank: 300, city: 'Sao Paulo', country: 'Brazil', colIndex: 36.8, rentIndex: 16.4, colPlusRent: 27.7, groceriesIndex: 37.3, restaurantIndex: 33.6, purchasingPower: 53.4 },
+  { rank: 310, city: 'Mumbai', country: 'India', colIndex: 26.3, rentIndex: 18.5, colPlusRent: 22.9, groceriesIndex: 25.8, restaurantIndex: 24.6, purchasingPower: 61.2 },
+  { rank: 320, city: 'Cairo', country: 'Egypt', colIndex: 23.2, rentIndex: 5.7, colPlusRent: 15.4, groceriesIndex: 23.4, restaurantIndex: 22.6, purchasingPower: 23.4 },
+];
+
+// Tab type for inflation page
+type InflationTab = 'inflation' | 'cost-of-living';
+
+// City tab type for Cost of Living section
+type CityTab = 'overview' | 'london' | 'paris' | 'tokyo' | 'newYork';
+
 export default function InflationPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -874,6 +921,10 @@ export default function InflationPage() {
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["USA", "UK", "Germany"]);
   const [selectedPeriod, setSelectedPeriod] = useState<'5y' | '10y' | 'all'>('all');
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [activeTab, setActiveTab] = useState<InflationTab>('inflation');
+  const [colSortField, setColSortField] = useState<string>('rank');
+  const [colSortDirection, setColSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [selectedCityTab, setSelectedCityTab] = useState<CityTab>('overview');
   const inflationChartRef = useRef<HTMLDivElement>(null);
   const londonGoodsChartRef = useRef<HTMLDivElement>(null);
   const londonProduceChartRef = useRef<HTMLDivElement>(null);
@@ -1014,6 +1065,31 @@ export default function InflationPage() {
     );
   };
 
+  // Sort cost of living data - useMemo must be before early returns (React hooks rule)
+  const sortedCostOfLivingData = useMemo(() => {
+    const sorted = [...costOfLivingData].sort((a, b) => {
+      const aVal = a[colSortField as keyof typeof a];
+      const bVal = b[colSortField as keyof typeof b];
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return colSortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return colSortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return 0;
+    });
+    return sorted;
+  }, [colSortField, colSortDirection]);
+
+  const handleColSort = (field: string) => {
+    if (colSortField === field) {
+      setColSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setColSortField(field);
+      setColSortDirection('asc');
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -1026,9 +1102,9 @@ export default function InflationPage() {
       <div className="w-full max-w-5xl mx-auto p-4 space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Global Inflation Rates</h1>
+            <h1 className="text-2xl font-bold mb-2">Inflation & Cost of Living</h1>
             <p className="text-gray-600 dark:text-gray-300 max-w-xl">
-              Track and compare inflation rates across countries. Inflation measures the rate at which the general level of prices for goods and services is rising, eroding purchasing power.
+              Track inflation rates across countries and explore cost of living indices for major cities worldwide.
             </p>
           </div>
           <div className="flex items-center space-x-2">
@@ -1044,6 +1120,33 @@ export default function InflationPage() {
           </div>
         </div>
 
+        {/* Tab Navigation */}
+        <div className={`flex gap-2 p-1 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+          <button
+            onClick={() => setActiveTab('inflation')}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === 'inflation'
+                ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 shadow')
+                : (isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200')
+            }`}
+          >
+            Inflation Rates
+          </button>
+          <button
+            onClick={() => setActiveTab('cost-of-living')}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === 'cost-of-living'
+                ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 shadow')
+                : (isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200')
+            }`}
+          >
+            Cost of Living Index
+          </button>
+        </div>
+
+        {/* Inflation Tab Content */}
+        {activeTab === 'inflation' && (
+        <>
         {/* Country Selector */}
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
@@ -3883,6 +3986,1851 @@ export default function InflationPage() {
             </div>
           </div>
         </div>
+        </>
+        )}
+
+        {/* Cost of Living Tab Content */}
+        {activeTab === 'cost-of-living' && (
+          <div className="space-y-6">
+            {/* Introduction */}
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+              <h2 className="text-xl font-bold mb-3">Cost of Living Index by City 2026</h2>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+                The Cost of Living Index compares the relative cost of living across cities worldwide, using New York City as the baseline (index = 100). 
+                A city with an index of 80 means it is 20% cheaper than New York, while an index of 120 means it is 20% more expensive.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <span className="font-semibold">Cost of Living Index:</span> Relative indicator of consumer goods prices including groceries, restaurants, transportation, and utilities (excluding rent)
+                </div>
+                <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <span className="font-semibold">Rent Index:</span> Estimation of apartment rent prices compared to New York City
+                </div>
+                <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <span className="font-semibold">Purchasing Power:</span> Relative purchasing power in buying goods and services based on average net salary
+                </div>
+              </div>
+            </div>
+
+            {/* City Tabs Navigation */}
+            <div className={`flex flex-wrap gap-2 p-2 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+              {[
+                { id: 'overview' as CityTab, label: 'Overview', flag: null },
+                { id: 'london' as CityTab, label: 'London', flag: '🇬🇧' },
+                { id: 'paris' as CityTab, label: 'Paris', flag: '🇫🇷' },
+                { id: 'tokyo' as CityTab, label: 'Tokyo', flag: '🇯🇵' },
+                { id: 'newYork' as CityTab, label: 'New York', flag: '🇺🇸' },
+              ].map(city => (
+                <button
+                  key={city.id}
+                  onClick={() => setSelectedCityTab(city.id)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                    selectedCityTab === city.id
+                      ? isDarkMode
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'bg-blue-500 text-white shadow-lg'
+                      : isDarkMode
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {city.flag && <span>{city.flag}</span>}
+                  {city.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Overview Tab - Data Table */}
+            {selectedCityTab === 'overview' && (
+            <>
+            {/* Data Table */}
+            <div className={`rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow overflow-hidden`}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className={isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}>
+                    <tr>
+                      {[
+                        { key: 'rank', label: 'Rank' },
+                        { key: 'city', label: 'City' },
+                        { key: 'country', label: 'Country' },
+                        { key: 'colIndex', label: 'Cost of Living' },
+                        { key: 'rentIndex', label: 'Rent Index' },
+                        { key: 'colPlusRent', label: 'COL + Rent' },
+                        { key: 'groceriesIndex', label: 'Groceries' },
+                        { key: 'restaurantIndex', label: 'Restaurant' },
+                        { key: 'purchasingPower', label: 'Purchasing Power' },
+                      ].map(col => (
+                        <th
+                          key={col.key}
+                          onClick={() => handleColSort(col.key)}
+                          className={`px-4 py-3 text-left font-semibold cursor-pointer hover:bg-opacity-80 transition-colors ${
+                            colSortField === col.key ? (isDarkMode ? 'text-blue-400' : 'text-blue-600') : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-1">
+                            {col.label}
+                            {colSortField === col.key && (
+                              <span>{colSortDirection === 'asc' ? ' ↑' : ' ↓'}</span>
+                            )}
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {sortedCostOfLivingData.map((row, idx) => (
+                      <tr 
+                        key={row.rank} 
+                        className={`${idx % 2 === 0 ? (isDarkMode ? 'bg-gray-800' : 'bg-white') : (isDarkMode ? 'bg-gray-750' : 'bg-gray-50')} hover:bg-opacity-80`}
+                      >
+                        <td className="px-4 py-3 font-medium">{row.rank}</td>
+                        <td className="px-4 py-3 font-medium">{row.city}</td>
+                        <td className="px-4 py-3">{row.country}</td>
+                        <td className={`px-4 py-3 ${row.colIndex >= 100 ? 'text-red-500' : row.colIndex >= 70 ? 'text-yellow-500' : 'text-green-500'}`}>
+                          {row.colIndex.toFixed(1)}
+                        </td>
+                        <td className={`px-4 py-3 ${row.rentIndex >= 50 ? 'text-red-500' : row.rentIndex >= 30 ? 'text-yellow-500' : 'text-green-500'}`}>
+                          {row.rentIndex.toFixed(1)}
+                        </td>
+                        <td className="px-4 py-3">{row.colPlusRent.toFixed(1)}</td>
+                        <td className="px-4 py-3">{row.groceriesIndex.toFixed(1)}</td>
+                        <td className="px-4 py-3">{row.restaurantIndex.toFixed(1)}</td>
+                        <td className={`px-4 py-3 ${row.purchasingPower >= 120 ? 'text-green-500' : row.purchasingPower >= 80 ? 'text-yellow-500' : 'text-red-500'}`}>
+                          {row.purchasingPower.toFixed(1)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Key Insights */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+                <h3 className="text-lg font-bold mb-3">Most Expensive Cities</h3>
+                <ul className={`space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <li><span className="font-semibold">Zurich, Switzerland</span> - Highest cost of living index (118.5)</li>
+                  <li><span className="font-semibold">Geneva, Switzerland</span> - Second highest (116.5)</li>
+                  <li><span className="font-semibold">New York, USA</span> - Baseline city for comparison (100.0)</li>
+                  <li><span className="font-semibold">San Francisco, USA</span> - Tech hub with high costs (97.6)</li>
+                </ul>
+              </div>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+                <h3 className="text-lg font-bold mb-3">Best Purchasing Power</h3>
+                <ul className={`space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <li><span className="font-semibold">Basel, Switzerland</span> - Highest purchasing power (183.7)</li>
+                  <li><span className="font-semibold">Zurich, Switzerland</span> - High salaries offset costs (164.4)</li>
+                  <li><span className="font-semibold">San Francisco, USA</span> - Strong tech salaries (151.0)</li>
+                  <li><span className="font-semibold">Brisbane, Australia</span> - Good value for money (145.3)</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Data Source Attribution */}
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'} border`}>
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                <span className="font-semibold">Data Source:</span> This data is sourced from{' '}
+                <a 
+                  href="https://www.numbeo.com/cost-of-living/rankings.jsp" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline"
+                >
+                  Numbeo Cost of Living Index 2026
+                </a>
+                . Numbeo is the world&apos;s largest cost of living database, powered by user-contributed data. 
+                This table shows a representative sample of major global cities. Visit Numbeo for the complete dataset with 400+ cities.
+              </p>
+            </div>
+            </>
+            )}
+
+            {/* London Tab Content */}
+            {selectedCityTab === 'london' && (
+              <div className={`rounded-xl shadow-lg p-6 ${isDarkMode ? 'bg-[#151a23]' : 'bg-gray-50'} transition-colors duration-200`}> 
+                <h2 className="text-2xl font-bold mb-2">London Cost of Living</h2>
+                <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
+                  Explore detailed price trends for essential goods, produce, protein, housing, and more in London. All values are in <span className='font-semibold'>GBP (£)</span> and reflect market averages from 2011-2024.
+                </p>
+                
+                {/* London Essential Goods Chart */}
+                <div 
+                  ref={londonGoodsChartRef}
+                  data-chart-container
+                  data-chart-title="London Essential Goods Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Essential Goods Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={londonGoodsChartRef.current}
+                      chartRef={londonGoodsChartRef}
+                      chartData={{
+                        title: "London Essential Goods Prices",
+                        data: essentialGoodsData,
+                        type: 'line',
+                        countries: selectedGoods
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average prices of key goods (in GBP) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {goodsList.map(good => {
+                      const isSelected = selectedGoods.includes(good.key);
+                      return (
+                        <button
+                          key={good.key}
+                          onClick={() => setSelectedGoods(prev =>
+                            isSelected ? prev.filter(k => k !== good.key) : [...prev, good.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: good.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: good.color }} />
+                          {good.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={essentialGoodsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `£${v.toFixed(2)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `£${value?.toFixed(2)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {goodsList.filter(good => selectedGoods.includes(good.key)).map(good => (
+                          <Line key={good.key} type="monotone" dataKey={good.key} name={good.label} stroke={good.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* London Produce Chart */}
+                <div 
+                  ref={londonProduceChartRef}
+                  data-chart-container
+                  data-chart-title="London Produce Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Fruit & Vegetable Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={londonProduceChartRef.current}
+                      chartRef={londonProduceChartRef}
+                      chartData={{
+                        title: "London Produce Prices",
+                        data: produceData,
+                        type: 'line',
+                        countries: selectedProduce
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average prices of fruits and vegetables (in GBP) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {produceList.map(item => {
+                      const isSelected = selectedProduce.includes(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedProduce(prev =>
+                            isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: item.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={produceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `£${v.toFixed(2)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `£${value?.toFixed(2)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {produceList.filter(item => selectedProduce.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* London Rent Chart */}
+                <div 
+                  ref={londonRentChartRef}
+                  data-chart-container
+                  data-chart-title="London Apartment Rental Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Apartment Rental Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={londonRentChartRef.current}
+                      chartRef={londonRentChartRef}
+                      chartData={{
+                        title: "London Apartment Rental Prices",
+                        data: rentData,
+                        type: 'line',
+                        countries: selectedRent
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly rental prices (in GBP) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {rentList.map(item => {
+                      const isSelected = selectedRent.includes(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedRent(prev =>
+                            isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: item.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={rentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `£${v.toFixed(0)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `£${value?.toFixed(0)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {rentList.filter(item => selectedRent.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* London Salary Chart */}
+                <div 
+                  ref={londonSalaryChartRef}
+                  data-chart-container
+                  data-chart-title="London Average Net Salary"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Average Monthly Net Salary (After Tax)</h3>
+                    <ChartDownloadButton
+                      chartElement={londonSalaryChartRef.current}
+                      chartRef={londonSalaryChartRef}
+                      chartData={{
+                        title: "London Average Net Salary",
+                        data: salaryData,
+                        type: 'line',
+                        countries: ['salary']
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly net salary after tax (in GBP) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={salaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `£${v.toFixed(0)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `£${value?.toFixed(0)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        <Line type="monotone" dataKey="salary" name="Monthly Net Salary" stroke="#6366f1" strokeWidth={2.5} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* London Transportation Chart */}
+                <div 
+                  ref={londonTransportationChartRef}
+                  data-chart-container
+                  data-chart-title="London Transportation Costs"
+                  className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Transportation Costs Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={londonTransportationChartRef.current}
+                      chartRef={londonTransportationChartRef}
+                      chartData={{
+                        title: "London Transportation Costs",
+                        data: transportationData,
+                        type: 'line',
+                        countries: selectedTransportation
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average transportation costs (in GBP) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {transportationList.map(item => {
+                      const isSelected = selectedTransportation.includes(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedTransportation(prev =>
+                            isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: item.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={transportationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `£${v.toFixed(2)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `£${value?.toFixed(2)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {transportationList.filter(item => selectedTransportation.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Paris Tab Content */}
+            {selectedCityTab === 'paris' && (
+              <div className={`rounded-xl shadow-lg p-6 ${isDarkMode ? 'bg-[#151a23]' : 'bg-gray-50'} transition-colors duration-200`}> 
+                <h2 className="text-2xl font-bold mb-2">Paris Cost of Living</h2>
+                <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
+                  Explore detailed price trends for essential goods, produce, protein, housing, and more in Paris. All values are in <span className='font-semibold'>EUR (€)</span> and reflect market averages from 2011-2024.
+                </p>
+                
+                {/* Paris Essential Goods Chart */}
+                <div 
+                  ref={parisGoodsChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Essential Goods Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Essential Goods Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisGoodsChartRef.current}
+                      chartRef={parisGoodsChartRef}
+                      chartData={{
+                        title: "Paris Essential Goods Prices",
+                        data: parisEssentialGoodsData,
+                        type: 'line',
+                        countries: selectedParisGoods
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average prices of key goods (in EUR) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {goodsList.map(good => {
+                      const isSelected = selectedParisGoods.includes(good.key);
+                      return (
+                        <button
+                          key={good.key}
+                          onClick={() => setSelectedParisGoods(prev =>
+                            isSelected ? prev.filter(k => k !== good.key) : [...prev, good.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: good.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: good.color }} />
+                          {good.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisEssentialGoodsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(2)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `€${value?.toFixed(2)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {goodsList.filter(good => selectedParisGoods.includes(good.key)).map(good => (
+                          <Line key={good.key} type="monotone" dataKey={good.key} name={good.label} stroke={good.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Rent Chart */}
+                <div 
+                  ref={parisRentChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Apartment Rental Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Apartment Rental Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisRentChartRef.current}
+                      chartRef={parisRentChartRef}
+                      chartData={{
+                        title: "Paris Apartment Rental Prices",
+                        data: parisRentData,
+                        type: 'line',
+                        countries: selectedParisRent
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly rental prices (in EUR) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {rentList.map(item => {
+                      const isSelected = selectedParisRent.includes(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedParisRent(prev =>
+                            isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: item.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisRentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(0)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `€${value?.toFixed(0)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {rentList.filter(item => selectedParisRent.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Salary Chart */}
+                <div 
+                  ref={parisSalaryChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Average Net Salary"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Average Monthly Net Salary (After Tax)</h3>
+                    <ChartDownloadButton
+                      chartElement={parisSalaryChartRef.current}
+                      chartRef={parisSalaryChartRef}
+                      chartData={{
+                        title: "Paris Average Net Salary",
+                        data: parisSalaryData,
+                        type: 'line',
+                        countries: ['salary']
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly net salary after tax (in EUR) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisSalaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(0)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `€${value?.toFixed(0)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        <Line type="monotone" dataKey="salary" name="Monthly Net Salary" stroke="#6366f1" strokeWidth={2.5} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Produce Chart */}
+                <div 
+                  ref={parisProduceChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Produce Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Fruit & Vegetable Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisProduceChartRef.current}
+                      chartRef={parisProduceChartRef}
+                      chartData={{ title: "Paris Produce Prices", data: parisProduceData, type: 'line', countries: selectedParisProduce }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average prices of fruits and vegetables (in EUR) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {produceList.map(item => {
+                      const isSelected = selectedParisProduce.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedParisProduce(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisProduceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(2)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `€${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {produceList.filter(item => selectedParisProduce.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Protein Chart */}
+                <div 
+                  ref={parisProteinChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Protein & Specialty Items"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Protein & Specialty Items Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisProteinChartRef.current}
+                      chartRef={parisProteinChartRef}
+                      chartData={{ title: "Paris Protein & Specialty Items", data: parisProteinData, type: 'line', countries: selectedParisProtein }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average prices of protein and specialty items (in EUR) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {proteinList.map(item => {
+                      const isSelected = selectedParisProtein.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedParisProtein(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisProteinData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(2)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `€${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {proteinList.filter(item => selectedParisProtein.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Transportation Chart */}
+                <div 
+                  ref={parisTransportationChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Transportation Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Transportation Costs Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisTransportationChartRef.current}
+                      chartRef={parisTransportationChartRef}
+                      chartData={{ title: "Paris Transportation Costs", data: parisTransportationData, type: 'line', countries: selectedParisTransportation }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average transportation costs (in EUR) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {transportationList.map(item => {
+                      const isSelected = selectedParisTransportation.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedParisTransportation(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisTransportationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(2)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `€${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {transportationList.filter(item => selectedParisTransportation.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Utilities Chart */}
+                <div 
+                  ref={parisUtilitiesChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Utilities Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Utilities Costs Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisUtilitiesChartRef.current}
+                      chartRef={parisUtilitiesChartRef}
+                      chartData={{ title: "Paris Utilities Costs", data: parisUtilitiesData, type: 'line', countries: selectedParisUtilities }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average monthly utilities costs (in EUR) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {utilitiesList.map(item => {
+                      const isSelected = selectedParisUtilities.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedParisUtilities(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisUtilitiesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `€${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {utilitiesList.filter(item => selectedParisUtilities.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Sports & Leisure Chart */}
+                <div 
+                  ref={parisSportsLeisureChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Sports & Leisure Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Sports & Leisure Costs Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisSportsLeisureChartRef.current}
+                      chartRef={parisSportsLeisureChartRef}
+                      chartData={{ title: "Paris Sports & Leisure Costs", data: parisSportsLeisureData, type: 'line', countries: selectedParisSportsLeisure }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average sports and leisure costs (in EUR) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {sportsLeisureList.map(item => {
+                      const isSelected = selectedParisSportsLeisure.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedParisSportsLeisure(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisSportsLeisureData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `€${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {sportsLeisureList.filter(item => selectedParisSportsLeisure.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Paris Clothing & Shoes Chart */}
+                <div 
+                  ref={parisClothingShoesChartRef}
+                  data-chart-container
+                  data-chart-title="Paris Clothing & Shoes Prices"
+                  className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Clothing & Shoes Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={parisClothingShoesChartRef.current}
+                      chartRef={parisClothingShoesChartRef}
+                      chartData={{ title: "Paris Clothing & Shoes Prices", data: parisClothingShoesData, type: 'line', countries: selectedParisClothingShoes }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average clothing and shoes prices (in EUR) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {clothingShoesList.map(item => {
+                      const isSelected = selectedParisClothingShoes.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedParisClothingShoes(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={parisClothingShoesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `€${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `€${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {clothingShoesList.filter(item => selectedParisClothingShoes.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tokyo Tab Content */}
+            {selectedCityTab === 'tokyo' && (
+              <div className={`rounded-xl shadow-lg p-6 ${isDarkMode ? 'bg-[#151a23]' : 'bg-gray-50'} transition-colors duration-200`}> 
+                <h2 className="text-2xl font-bold mb-2">Tokyo Cost of Living</h2>
+                <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
+                  Explore detailed price trends for essential goods, produce, protein, housing, and more in Tokyo. All values are in <span className='font-semibold'>JPY (¥)</span> and reflect market averages from 2011-2024.
+                </p>
+                
+                {/* Tokyo Essential Goods Chart */}
+                <div 
+                  ref={tokyoGoodsChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Essential Goods Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Essential Goods Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={tokyoGoodsChartRef.current}
+                      chartRef={tokyoGoodsChartRef}
+                      chartData={{
+                        title: "Tokyo Essential Goods Prices",
+                        data: tokyoEssentialGoodsData,
+                        type: 'line',
+                        countries: selectedTokyoGoods
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average prices of key goods (in JPY) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {goodsList.map(good => {
+                      const isSelected = selectedTokyoGoods.includes(good.key);
+                      return (
+                        <button
+                          key={good.key}
+                          onClick={() => setSelectedTokyoGoods(prev =>
+                            isSelected ? prev.filter(k => k !== good.key) : [...prev, good.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: good.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: good.color }} />
+                          {good.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoEssentialGoodsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${v.toFixed(0)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `¥${value?.toFixed(0)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {goodsList.filter(good => selectedTokyoGoods.includes(good.key)).map(good => (
+                          <Line key={good.key} type="monotone" dataKey={good.key} name={good.label} stroke={good.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Rent Chart */}
+                <div 
+                  ref={tokyoRentChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Apartment Rental Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Apartment Rental Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={tokyoRentChartRef.current}
+                      chartRef={tokyoRentChartRef}
+                      chartData={{
+                        title: "Tokyo Apartment Rental Prices",
+                        data: tokyoRentData,
+                        type: 'line',
+                        countries: selectedTokyoRent
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly rental prices (in JPY) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {rentList.map(item => {
+                      const isSelected = selectedTokyoRent.includes(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedTokyoRent(prev =>
+                            isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: item.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoRentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${(v/1000).toFixed(0)}k`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `¥${value?.toLocaleString()}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {rentList.filter(item => selectedTokyoRent.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Salary Chart */}
+                <div 
+                  ref={tokyoSalaryChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Average Net Salary"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Average Monthly Net Salary (After Tax)</h3>
+                    <ChartDownloadButton
+                      chartElement={tokyoSalaryChartRef.current}
+                      chartRef={tokyoSalaryChartRef}
+                      chartData={{
+                        title: "Tokyo Average Net Salary",
+                        data: tokyoSalaryData,
+                        type: 'line',
+                        countries: ['salary']
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly net salary after tax (in JPY) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoSalaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${(v/1000).toFixed(0)}k`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `¥${value?.toLocaleString()}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        <Line type="monotone" dataKey="salary" name="Monthly Net Salary" stroke="#6366f1" strokeWidth={2.5} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Produce Chart */}
+                <div 
+                  ref={tokyoProduceChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Produce Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Fruit & Vegetable Prices Over the Years</h3>
+                    <ChartDownloadButton chartElement={tokyoProduceChartRef.current} chartRef={tokyoProduceChartRef} chartData={{ title: "Tokyo Produce Prices", data: tokyoProduceData, type: 'line', countries: selectedTokyoProduce }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average prices of fruits and vegetables (in JPY) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {produceList.map(item => {
+                      const isSelected = selectedTokyoProduce.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedTokyoProduce(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoProduceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `¥${value?.toLocaleString()}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {produceList.filter(item => selectedTokyoProduce.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Protein Chart */}
+                <div 
+                  ref={tokyoProteinChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Protein & Specialty Items"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Protein & Specialty Items Over the Years</h3>
+                    <ChartDownloadButton chartElement={tokyoProteinChartRef.current} chartRef={tokyoProteinChartRef} chartData={{ title: "Tokyo Protein & Specialty Items", data: tokyoProteinData, type: 'line', countries: selectedTokyoProtein }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average prices of protein and specialty items (in JPY) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {proteinList.map(item => {
+                      const isSelected = selectedTokyoProtein.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedTokyoProtein(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoProteinData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `¥${value?.toLocaleString()}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {proteinList.filter(item => selectedTokyoProtein.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Transportation Chart */}
+                <div 
+                  ref={tokyoTransportationChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Transportation Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Transportation Costs Over the Years</h3>
+                    <ChartDownloadButton chartElement={tokyoTransportationChartRef.current} chartRef={tokyoTransportationChartRef} chartData={{ title: "Tokyo Transportation Costs", data: tokyoTransportationData, type: 'line', countries: selectedTokyoTransportation }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average transportation costs (in JPY) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {transportationList.map(item => {
+                      const isSelected = selectedTokyoTransportation.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedTokyoTransportation(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoTransportationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `¥${value?.toLocaleString()}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {transportationList.filter(item => selectedTokyoTransportation.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Utilities Chart */}
+                <div 
+                  ref={tokyoUtilitiesChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Utilities Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Utilities Costs Over the Years</h3>
+                    <ChartDownloadButton chartElement={tokyoUtilitiesChartRef.current} chartRef={tokyoUtilitiesChartRef} chartData={{ title: "Tokyo Utilities Costs", data: tokyoUtilitiesData, type: 'line', countries: selectedTokyoUtilities }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average monthly utilities costs (in JPY) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {utilitiesList.map(item => {
+                      const isSelected = selectedTokyoUtilities.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedTokyoUtilities(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoUtilitiesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `¥${value?.toLocaleString()}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {utilitiesList.filter(item => selectedTokyoUtilities.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Sports & Leisure Chart */}
+                <div 
+                  ref={tokyoSportsLeisureChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Sports & Leisure Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Sports & Leisure Costs Over the Years</h3>
+                    <ChartDownloadButton chartElement={tokyoSportsLeisureChartRef.current} chartRef={tokyoSportsLeisureChartRef} chartData={{ title: "Tokyo Sports & Leisure Costs", data: tokyoSportsLeisureData, type: 'line', countries: selectedTokyoSportsLeisure }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average sports and leisure costs (in JPY) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {sportsLeisureList.map(item => {
+                      const isSelected = selectedTokyoSportsLeisure.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedTokyoSportsLeisure(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoSportsLeisureData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `¥${value?.toLocaleString()}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {sportsLeisureList.filter(item => selectedTokyoSportsLeisure.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Tokyo Clothing & Shoes Chart */}
+                <div 
+                  ref={tokyoClothingShoesChartRef}
+                  data-chart-container
+                  data-chart-title="Tokyo Clothing & Shoes Prices"
+                  className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Clothing & Shoes Prices Over the Years</h3>
+                    <ChartDownloadButton chartElement={tokyoClothingShoesChartRef.current} chartRef={tokyoClothingShoesChartRef} chartData={{ title: "Tokyo Clothing & Shoes Prices", data: tokyoClothingShoesData, type: 'line', countries: selectedTokyoClothingShoes }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average clothing and shoes prices (in JPY) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {clothingShoesList.map(item => {
+                      const isSelected = selectedTokyoClothingShoes.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedTokyoClothingShoes(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={tokyoClothingShoesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `¥${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `¥${value?.toLocaleString()}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {clothingShoesList.filter(item => selectedTokyoClothingShoes.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* New York Tab Content */}
+            {selectedCityTab === 'newYork' && (
+              <div className={`rounded-xl shadow-lg p-6 ${isDarkMode ? 'bg-[#151a23]' : 'bg-gray-50'} transition-colors duration-200`}> 
+                <h2 className="text-2xl font-bold mb-2">New York Cost of Living</h2>
+                <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
+                  Explore detailed price trends for essential goods, produce, protein, housing, and more in New York. All values are in <span className='font-semibold'>USD ($)</span> and reflect market averages from 2011-2024.
+                </p>
+                
+                {/* New York Essential Goods Chart */}
+                <div 
+                  ref={newYorkGoodsChartRef}
+                  data-chart-container
+                  data-chart-title="New York Essential Goods Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Essential Goods Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={newYorkGoodsChartRef.current}
+                      chartRef={newYorkGoodsChartRef}
+                      chartData={{
+                        title: "New York Essential Goods Prices",
+                        data: newYorkEssentialGoodsData,
+                        type: 'line',
+                        countries: selectedNewYorkGoods
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average prices of key goods (in USD) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {goodsList.map(good => {
+                      const isSelected = selectedNewYorkGoods.includes(good.key);
+                      return (
+                        <button
+                          key={good.key}
+                          onClick={() => setSelectedNewYorkGoods(prev =>
+                            isSelected ? prev.filter(k => k !== good.key) : [...prev, good.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: good.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: good.color }} />
+                          {good.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkEssentialGoodsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(2)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `$${value?.toFixed(2)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {goodsList.filter(good => selectedNewYorkGoods.includes(good.key)).map(good => (
+                          <Line key={good.key} type="monotone" dataKey={good.key} name={good.label} stroke={good.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Rent Chart */}
+                <div 
+                  ref={newYorkRentChartRef}
+                  data-chart-container
+                  data-chart-title="New York Apartment Rental Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Apartment Rental Prices Over the Years</h3>
+                    <ChartDownloadButton
+                      chartElement={newYorkRentChartRef.current}
+                      chartRef={newYorkRentChartRef}
+                      chartData={{
+                        title: "New York Apartment Rental Prices",
+                        data: newYorkRentData,
+                        type: 'line',
+                        countries: selectedNewYorkRent
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly rental prices (in USD) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {rentList.map(item => {
+                      const isSelected = selectedNewYorkRent.includes(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedNewYorkRent(prev =>
+                            isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key]
+                          )}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150
+                            ${isSelected
+                              ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400')
+                              : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}
+                          `}
+                          style={{ borderColor: item.color }}
+                        >
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkRentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(0)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `$${value?.toFixed(0)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {rentList.filter(item => selectedNewYorkRent.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Salary Chart */}
+                <div 
+                  ref={newYorkSalaryChartRef}
+                  data-chart-container
+                  data-chart-title="New York Average Net Salary"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Average Monthly Net Salary (After Tax)</h3>
+                    <ChartDownloadButton
+                      chartElement={newYorkSalaryChartRef.current}
+                      chartRef={newYorkSalaryChartRef}
+                      chartData={{
+                        title: "New York Average Net Salary",
+                        data: newYorkSalaryData,
+                        type: 'line',
+                        countries: ['salary']
+                      }}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Average monthly net salary after tax (in USD) from 2011 to 2024.
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkSalaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(0)}`} />
+                        <Tooltip
+                          contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
+                          labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
+                          formatter={(value: number) => `$${value?.toFixed(0)}`}
+                          labelFormatter={label => `Year: ${label}`}
+                        />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        <Line type="monotone" dataKey="salary" name="Monthly Net Salary" stroke="#6366f1" strokeWidth={2.5} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Produce Chart */}
+                <div 
+                  ref={newYorkProduceChartRef}
+                  data-chart-container
+                  data-chart-title="New York Produce Prices"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Fruit & Vegetable Prices Over the Years</h3>
+                    <ChartDownloadButton chartElement={newYorkProduceChartRef.current} chartRef={newYorkProduceChartRef} chartData={{ title: "New York Produce Prices", data: newYorkProduceData, type: 'line', countries: selectedNewYorkProduce }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average prices of fruits and vegetables (in USD) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {produceList.map(item => {
+                      const isSelected = selectedNewYorkProduce.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedNewYorkProduce(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkProduceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(2)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `$${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {produceList.filter(item => selectedNewYorkProduce.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Protein Chart */}
+                <div 
+                  ref={newYorkProteinChartRef}
+                  data-chart-container
+                  data-chart-title="New York Protein & Specialty Items"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Protein & Specialty Items Over the Years</h3>
+                    <ChartDownloadButton chartElement={newYorkProteinChartRef.current} chartRef={newYorkProteinChartRef} chartData={{ title: "New York Protein & Specialty Items", data: newYorkProteinData, type: 'line', countries: selectedNewYorkProtein }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average prices of protein and specialty items (in USD) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {proteinList.map(item => {
+                      const isSelected = selectedNewYorkProtein.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedNewYorkProtein(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkProteinData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(2)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `$${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {proteinList.filter(item => selectedNewYorkProtein.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Transportation Chart */}
+                <div 
+                  ref={newYorkTransportationChartRef}
+                  data-chart-container
+                  data-chart-title="New York Transportation Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Transportation Costs Over the Years</h3>
+                    <ChartDownloadButton chartElement={newYorkTransportationChartRef.current} chartRef={newYorkTransportationChartRef} chartData={{ title: "New York Transportation Costs", data: newYorkTransportationData, type: 'line', countries: selectedNewYorkTransportation }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average transportation costs (in USD) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {transportationList.map(item => {
+                      const isSelected = selectedNewYorkTransportation.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedNewYorkTransportation(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkTransportationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(2)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `$${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {transportationList.filter(item => selectedNewYorkTransportation.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Utilities Chart */}
+                <div 
+                  ref={newYorkUtilitiesChartRef}
+                  data-chart-container
+                  data-chart-title="New York Utilities Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Utilities Costs Over the Years</h3>
+                    <ChartDownloadButton chartElement={newYorkUtilitiesChartRef.current} chartRef={newYorkUtilitiesChartRef} chartData={{ title: "New York Utilities Costs", data: newYorkUtilitiesData, type: 'line', countries: selectedNewYorkUtilities }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average monthly utilities costs (in USD) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {utilitiesList.map(item => {
+                      const isSelected = selectedNewYorkUtilities.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedNewYorkUtilities(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkUtilitiesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `$${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {utilitiesList.filter(item => selectedNewYorkUtilities.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Sports & Leisure Chart */}
+                <div 
+                  ref={newYorkSportsLeisureChartRef}
+                  data-chart-container
+                  data-chart-title="New York Sports & Leisure Costs"
+                  className={`rounded-lg shadow p-4 mb-6 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Sports & Leisure Costs Over the Years</h3>
+                    <ChartDownloadButton chartElement={newYorkSportsLeisureChartRef.current} chartRef={newYorkSportsLeisureChartRef} chartData={{ title: "New York Sports & Leisure Costs", data: newYorkSportsLeisureData, type: 'line', countries: selectedNewYorkSportsLeisure }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average sports and leisure costs (in USD) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {sportsLeisureList.map(item => {
+                      const isSelected = selectedNewYorkSportsLeisure.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedNewYorkSportsLeisure(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkSportsLeisureData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `$${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {sportsLeisureList.filter(item => selectedNewYorkSportsLeisure.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* New York Clothing & Shoes Chart */}
+                <div 
+                  ref={newYorkClothingShoesChartRef}
+                  data-chart-container
+                  data-chart-title="New York Clothing & Shoes Prices"
+                  className={`rounded-lg shadow p-4 ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold">Clothing & Shoes Prices Over the Years</h3>
+                    <ChartDownloadButton chartElement={newYorkClothingShoesChartRef.current} chartRef={newYorkClothingShoesChartRef} chartData={{ title: "New York Clothing & Shoes Prices", data: newYorkClothingShoesData, type: 'line', countries: selectedNewYorkClothingShoes }} variant="outline" size="sm" />
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Average clothing and shoes prices (in USD) from 2011 to 2024.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {clothingShoesList.map(item => {
+                      const isSelected = selectedNewYorkClothingShoes.includes(item.key);
+                      return (
+                        <button key={item.key} onClick={() => setSelectedNewYorkClothingShoes(prev => isSelected ? prev.filter(k => k !== item.key) : [...prev, item.key])}
+                          className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors duration-150 ${isSelected ? (isDarkMode ? 'bg-blue-600 text-white border-blue-500' : 'bg-blue-100 text-blue-900 border-blue-400') : (isDarkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200')}`}
+                          style={{ borderColor: item.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ background: item.color }} />{item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={newYorkClothingShoesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
+                        <YAxis stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} tickFormatter={v => `$${v.toFixed(0)}`} />
+                        <Tooltip contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }} labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }} formatter={(value: number) => `$${value?.toFixed(2)}`} labelFormatter={label => `Year: ${label}`} />
+                        <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: 15 }} />
+                        {clothingShoesList.filter(item => selectedNewYorkClothingShoes.includes(item.key)).map(item => (
+                          <Line key={item.key} type="monotone" dataKey={item.key} name={item.label} stroke={item.color} strokeWidth={2.5} dot={false} />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
