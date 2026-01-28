@@ -10,6 +10,20 @@ import BulkChartDownload from '../components/BulkChartDownload';
 import ChartDownloadButton from '../components/ChartDownloadButton';
 import InfoPanel from '../components/InfoPanel';
 import { economicMetrics } from '../data/economicMetrics';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the map component to avoid SSR issues
+const GlobalEconomicMap = dynamic(
+  () => import('../components/GlobalEconomicMap'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full aspect-video bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center min-h-[400px]">
+        <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
+      </div>
+    )
+  }
+);
 
 const countryColors = {
   USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
@@ -909,7 +923,7 @@ const costOfLivingData = [
 ];
 
 // Tab type for inflation page
-type InflationTab = 'inflation' | 'cost-of-living';
+type InflationTab = 'inflation' | 'cost-of-living' | 'world-map';
 
 // City tab type for Cost of Living section
 type CityTab = 'overview' | 'london' | 'paris' | 'tokyo' | 'newYork';
@@ -1141,6 +1155,16 @@ export default function InflationPage() {
             }`}
           >
             Cost of Living Index
+          </button>
+          <button
+            onClick={() => setActiveTab('world-map')}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === 'world-map'
+                ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 shadow')
+                : (isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200')
+            }`}
+          >
+            World Map
           </button>
         </div>
 
@@ -5829,6 +5853,58 @@ export default function InflationPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* World Map Tab Content */}
+        {activeTab === 'world-map' && (
+          <div className="space-y-6">
+            {/* Introduction */}
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+              <h2 className="text-xl font-bold mb-3">Global Economic Map</h2>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+                Explore inflation rates by country and cost of living by city on an interactive world map. 
+                Toggle between views to compare economic conditions across the globe.
+              </p>
+              <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p><strong>Inflation View:</strong> Countries are colored based on their annual inflation rate, from green (low) to red (high).</p>
+                <p className="mt-1"><strong>Cost of Living View:</strong> City markers show relative cost of living index where New York City = 100.</p>
+                <p className="mt-1"><strong>Both View:</strong> See both country inflation and city cost of living data together.</p>
+              </div>
+            </div>
+
+            {/* World Map Component */}
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+              <GlobalEconomicMap 
+                isDarkMode={isDarkMode} 
+                inflationData={data?.inflationRates || []}
+              />
+            </div>
+
+            {/* Key Insights */}
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+              <h3 className="text-lg font-bold mb-4">Key Insights</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <h4 className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Developed Economies</h4>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Generally maintain low to moderate inflation (2-5%) with high cost of living in major cities like Zurich, New York, and London.
+                  </p>
+                </div>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <h4 className={`font-semibold mb-2 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>Emerging Markets</h4>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Often experience higher inflation rates but offer lower cost of living, making cities like Mumbai, Cairo, and Jakarta more affordable.
+                  </p>
+                </div>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <h4 className={`font-semibold mb-2 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>High Inflation Countries</h4>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Countries like Turkey and Argentina face significant inflation challenges, impacting purchasing power and economic stability.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
