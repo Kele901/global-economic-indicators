@@ -71,9 +71,6 @@ const CyclePhaseIndicator: React.FC<CyclePhaseIndicatorProps> = ({ isDarkMode })
     };
   }, []);
 
-  // Determine gauge position (0-180 degrees)
-  const gaugeRotation = (cycleAssessment.riskScore / 100) * 180;
-
   const getIndicatorStatus = (indicator: CycleIndicator) => {
     const value = indicator.currentValue;
     const isInverted = indicator.name.includes('Yield');
@@ -112,72 +109,74 @@ const CyclePhaseIndicator: React.FC<CyclePhaseIndicatorProps> = ({ isDarkMode })
       <div className="p-6">
         {/* Main Gauge and Phase Display */}
         <div className="flex flex-col lg:flex-row items-center gap-8">
-          {/* Semicircle Gauge */}
-          <div className="relative flex-shrink-0">
-            <svg viewBox="0 0 200 120" className="w-64 h-40">
-              {/* Background arc */}
-              <path
-                d="M 20 100 A 80 80 0 0 1 180 100"
-                fill="none"
-                stroke={isDarkMode ? '#374151' : '#e5e7eb'}
-                strokeWidth="16"
-                strokeLinecap="round"
-              />
-              
-              {/* Gradient segments */}
-              <defs>
-                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#22c55e" />
-                  <stop offset="33%" stopColor="#3b82f6" />
-                  <stop offset="66%" stopColor="#f59e0b" />
-                  <stop offset="100%" stopColor="#ef4444" />
-                </linearGradient>
-              </defs>
-              
-              {/* Colored arc */}
-              <path
-                d="M 20 100 A 80 80 0 0 1 180 100"
-                fill="none"
-                stroke="url(#gaugeGradient)"
-                strokeWidth="16"
-                strokeLinecap="round"
-                opacity={0.8}
-              />
+          {/* Horizontal Bar Gauge */}
+          <div className="relative flex-shrink-0 w-72">
+            {/* Label above needle */}
+            <div 
+              className="relative h-8 mb-1"
+              style={{ paddingLeft: `${cycleAssessment.riskScore}%` }}
+            >
+              <div 
+                className="absolute transform -translate-x-1/2 text-center"
+                style={{ left: `${cycleAssessment.riskScore}%` }}
+              >
+                <span 
+                  className="text-lg font-bold"
+                  style={{ color: cycleAssessment.color }}
+                >
+                  {cycleAssessment.riskScore}
+                </span>
+              </div>
+            </div>
+            
+            {/* Horizontal bar with segments */}
+            <div className="relative">
+              <div className="flex h-8 rounded overflow-hidden">
+                {/* Green - Early (0-25%) */}
+                <div 
+                  className="h-full" 
+                  style={{ width: '25%', backgroundColor: '#22c55e' }}
+                />
+                {/* Yellow - Mid (25-50%) */}
+                <div 
+                  className="h-full" 
+                  style={{ width: '25%', backgroundColor: '#eab308' }}
+                />
+                {/* Orange - Late (50-75%) */}
+                <div 
+                  className="h-full" 
+                  style={{ width: '25%', backgroundColor: '#f59e0b' }}
+                />
+                {/* Red - Crisis (75-100%) */}
+                <div 
+                  className="h-full" 
+                  style={{ width: '25%', backgroundColor: '#ef4444' }}
+                />
+              </div>
               
               {/* Needle */}
-              <g transform={`rotate(${gaugeRotation - 90}, 100, 100)`}>
-                <line
-                  x1="100"
-                  y1="100"
-                  x2="100"
-                  y2="35"
-                  stroke={cycleAssessment.color}
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="8"
-                  fill={cycleAssessment.color}
-                />
-              </g>
-              
-              {/* Labels */}
-              <text x="15" y="115" className="text-[10px]" fill={isDarkMode ? '#9ca3af' : '#6b7280'}>Early</text>
-              <text x="170" y="115" className="text-[10px]" fill={isDarkMode ? '#9ca3af' : '#6b7280'}>Crisis</text>
-            </svg>
-            
-            {/* Center Label */}
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-center">
               <div 
-                className="text-2xl font-bold"
+                className="absolute top-0 w-0.5 h-8 bg-gray-900 dark:bg-white transform -translate-x-1/2"
+                style={{ left: `${cycleAssessment.riskScore}%` }}
+              />
+            </div>
+            
+            {/* Scale labels */}
+            <div className="flex justify-between mt-2">
+              <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>0</span>
+              <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>25</span>
+              <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>50</span>
+              <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>75</span>
+              <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>100</span>
+            </div>
+            
+            {/* Phase label below */}
+            <div className="text-center mt-3">
+              <div 
+                className="text-lg font-semibold"
                 style={{ color: cycleAssessment.color }}
               >
                 {cycleAssessment.label}
-              </div>
-              <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                Risk Score: {cycleAssessment.riskScore}%
               </div>
             </div>
           </div>
