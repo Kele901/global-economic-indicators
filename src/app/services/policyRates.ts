@@ -3,25 +3,26 @@ import { clientCache } from "./clientCache";
 
 // FRED Series IDs for Central Bank Policy Rates (More Current Data)
 // These are typically updated monthly and have more recent data than World Bank
+// Using IRSTCI01 (Call Money/Interbank Rate) series which are more widely available
 const POLICY_RATE_SERIES: { [country: string]: string } = {
   USA: 'FEDFUNDS', // Federal Funds Effective Rate
-  Canada: 'IRSTCI01CAM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Canada
-  UK: 'IRSTCB01GBM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for United Kingdom
-  Japan: 'IRSTCB01JPM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Japan
-  Australia: 'IRSTCB01AUM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Australia
-  SouthKorea: 'IRSTCB01KRM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for South Korea
-  Switzerland: 'IRSTCB01CHM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Switzerland
-  Sweden: 'IRSTCB01SEM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Sweden
-  Norway: 'IRSTCB01NOM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Norway
-  Mexico: 'IRSTCB01MXM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Mexico
-  Brazil: 'IRSTCB01BRM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Brazil
-  China: 'IRSTCB01CNM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for China
-  India: 'IRSTCB01INM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for India
-  Russia: 'IRSTCB01RUM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Russia
-  Turkey: 'IRSTCB01TRM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Turkey
-  SouthAfrica: 'IRSTCB01ZAM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for South Africa
-  Indonesia: 'IRSTCB01IDM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Indonesia
-  Poland: 'IRSTCB01PLM156N', // Immediate Rates: Less than 24 Hours: Central Bank Rates for Poland
+  Canada: 'IRSTCI01CAM156N', // Immediate Rates: Call Money/Interbank Rate for Canada
+  UK: 'IRSTCI01GBM156N', // Immediate Rates: Call Money/Interbank Rate for United Kingdom
+  Japan: 'IRSTCI01JPM156N', // Immediate Rates: Call Money/Interbank Rate for Japan
+  Australia: 'IRSTCI01AUM156N', // Immediate Rates: Call Money/Interbank Rate for Australia
+  SouthKorea: 'IRSTCI01KRM156N', // Immediate Rates: Call Money/Interbank Rate for South Korea
+  Switzerland: 'IRSTCI01CHM156N', // Immediate Rates: Call Money/Interbank Rate for Switzerland
+  Sweden: 'IRSTCI01SEM156N', // Immediate Rates: Call Money/Interbank Rate for Sweden
+  Norway: 'IRSTCI01NOM156N', // Immediate Rates: Call Money/Interbank Rate for Norway
+  Mexico: 'IRSTCI01MXM156N', // Immediate Rates: Call Money/Interbank Rate for Mexico
+  Brazil: 'IRSTCI01BRM156N', // Immediate Rates: Call Money/Interbank Rate for Brazil
+  China: 'IRSTCI01CNM156N', // Immediate Rates: Call Money/Interbank Rate for China
+  India: 'IRSTCI01INM156N', // Immediate Rates: Call Money/Interbank Rate for India
+  Russia: 'IRSTCI01RUM156N', // Immediate Rates: Call Money/Interbank Rate for Russia
+  Turkey: 'IRSTCI01TRM156N', // Immediate Rates: Call Money/Interbank Rate for Turkey
+  SouthAfrica: 'IRSTCI01ZAM156N', // Immediate Rates: Call Money/Interbank Rate for South Africa
+  Indonesia: 'IRSTCI01IDM156N', // Immediate Rates: Call Money/Interbank Rate for Indonesia
+  Poland: 'IRSTCI01PLM156N', // Immediate Rates: Call Money/Interbank Rate for Poland
   // Note: Some countries may not have FRED series available
   // Eurozone countries (France, Germany, Italy, Spain, Netherlands, Portugal, Belgium) use ECB rate
   France: 'ECBDFR', // ECB Deposit Facility Rate (applies to all Eurozone)

@@ -18,7 +18,7 @@ const FRED_SERIES = {
   LABOR_PRODUCTIVITY: 'OPHNFB', // Nonfarm Business Sector: Real Output Per Hour
   GOVERNMENT_SPENDING: 'GCEC1', // Government Consumption Expenditures
   RD_SPENDING: 'Y694RC1Q027SBEA', // Research and Development Expenditures
-  ENERGY_CONSUMPTION: 'ENEUC', // Energy Consumption
+  ENERGY_CONSUMPTION: 'TOTALENUSA', // Total Energy Consumption (Quadrillion BTU)
   
   // Additional Economic Indicators
   GDP_PER_CAPITA: 'A939RC0Q052SBEA', // Real gross domestic product per capita
@@ -26,13 +26,13 @@ const FRED_SERIES = {
   GROSS_CAPITAL_FORMATION: 'GPDI', // Gross Private Domestic Investment
   RESERVES: 'TRESEGUSM052N', // Total Reserves excluding Gold for United States
   EXCHANGE_RATE_INDEX: 'DTWEXBGS', // Trade Weighted U.S. Dollar Index: Broad, Goods and Services
-  TERTIARY_ENROLLMENT: 'SCAINTTLNVUSA', // School enrollment, tertiary (% gross) for United States
+  TERTIARY_ENROLLMENT: 'BARTERICMP25UPZSUSA', // Population age 25+ with tertiary schooling (Barro-Lee)
   TAX_REVENUE: 'FGRECPT', // Federal Government Current Tax Receipts
   DOMESTIC_CREDIT: 'DPSACBW027SBOG', // Domestic Private Sector Credit
   EXPORTS: 'EXPGS', // Exports of Goods and Services
   IMPORTS: 'IMPGS', // Imports of Goods and Services
   HIGHTECH_EXPORTS: 'IQ', // High-tech Industry Production Index (proxy)
-  CO2_EMISSIONS: 'EQEMCO2USCA', // CO2 Emissions (metric tons per capita) for United States
+  CO2_EMISSIONS: 'EMISSCO2TOTVTTTOUSA', // Total CO2 Emissions From All Sectors, All Fuels (Million Metric Tons)
   
   // Top 10 High-Impact Additional Indicators
   LABOR_FORCE_PARTICIPATION: 'CIVPART', // Labor Force Participation Rate
@@ -48,9 +48,21 @@ const FRED_SERIES = {
   MILITARY_EXPENDITURE: 'FDEFX', // Federal Defense Consumption Expenditures
   MARKET_CAPITALIZATION: 'DDDM01USA156NWDB', // Market capitalization of listed domestic companies (% of GDP) for United States
   PUBLIC_DEBT_SERVICE: 'A091RC1Q027SBEA', // Federal government: Interest payments
-  SERVICES_VALUE_ADDED: 'VAPGDPSE', // Value Added by Private Industries: Services as a Percentage of GDP
-  AGRICULTURAL_VALUE_ADDED: 'VAPGDPAG', // Value Added by Private Industries: Agriculture as a Percentage of GDP
+  SERVICES_VALUE_ADDED: 'VAPGDPSPI', // Value Added by Private Services-Producing Industries as a Percentage of GDP
+  AGRICULTURAL_VALUE_ADDED: 'VAPGDPAFH', // Value Added by Agriculture, Forestry, Fishing, and Hunting as a Percentage of GDP
   PRIVATE_INVESTMENT: 'GPDI', // Gross Private Domestic Investment
+  
+  // Technology & Innovation Indicators
+  PATENTS_TOTAL: 'PATENTUSALLTOTAL', // Total Patents Originating in the United States
+  PATENTS_ALL: 'PATENTALLALLTOTAL', // Total Patents Granted (All Origins)
+  RD_REAL: 'Y694RX1Q020SBEA', // Real Gross Domestic Product: Research and Development
+  RD_PRIVATE: 'Y006RC1Q027SBEA', // Private R&D Investment
+  RD_GOVERNMENT: 'Y057RC1Q027SBEA', // Government R&D Investment
+  ADVANCED_TECH_EXPORTS: 'EXP0007', // U.S. Exports of Advance Technology Products
+  ICT_SERVICES_EXPORTS: 'ITXTCIM133S', // Telecommunications, Computer, and Information Services Exports
+  STEM_EMPLOYMENT: 'CES6054000001', // Employment in Professional, Scientific, and Technical Services
+  COMPUTER_EMPLOYMENT: 'CES5051200001', // Employment in Computer Systems Design and Related Services
+  INTERNET_SUBSCRIPTIONS: 'ITNETUSERP2USA', // Internet Users (% of population)
 };
 
 interface FREDObservation {
@@ -387,5 +399,101 @@ export function clearFREDCache(): void {
     clientCache.delete(`fred_${seriesId}`);
   });
   console.log('Cleared all FRED cached data');
+}
+
+// US Technology Data from FRED
+export interface USATechData {
+  patentsGranted: USADataPoint[];
+  patentsTotal: USADataPoint[];
+  rdSpending: USADataPoint[];
+  rdPrivate: USADataPoint[];
+  rdGovernment: USADataPoint[];
+  advancedTechExports: USADataPoint[];
+  ictServicesExports: USADataPoint[];
+  stemEmployment: USADataPoint[];
+  computerEmployment: USADataPoint[];
+  internetUsers: USADataPoint[];
+}
+
+// Fetch US Technology data from FRED
+export async function fetchUSATechDataFromFRED(): Promise<USATechData> {
+  try {
+    console.log('🔬🇺🇸 ========================================');
+    console.log('🔬🇺🇸 FRED API: Fetching US Technology Data');
+    console.log('🔬🇺🇸 ========================================');
+    const startTime = Date.now();
+    
+    const results = await Promise.allSettled([
+      fetchFREDSeries(FRED_SERIES.PATENTS_TOTAL),
+      fetchFREDSeries(FRED_SERIES.PATENTS_ALL),
+      fetchFREDSeries(FRED_SERIES.RD_SPENDING),
+      fetchFREDSeries(FRED_SERIES.RD_PRIVATE),
+      fetchFREDSeries(FRED_SERIES.RD_GOVERNMENT),
+      fetchFREDSeries(FRED_SERIES.ADVANCED_TECH_EXPORTS),
+      fetchFREDSeries(FRED_SERIES.ICT_SERVICES_EXPORTS),
+      fetchFREDSeries(FRED_SERIES.STEM_EMPLOYMENT),
+      fetchFREDSeries(FRED_SERIES.COMPUTER_EMPLOYMENT),
+      fetchFREDSeries(FRED_SERIES.INTERNET_SUBSCRIPTIONS)
+    ]);
+
+    const [
+      patentsGranted,
+      patentsTotal,
+      rdSpending,
+      rdPrivate,
+      rdGovernment,
+      advancedTechExports,
+      ictServicesExports,
+      stemEmployment,
+      computerEmployment,
+      internetUsers
+    ] = results.map(result => result.status === 'fulfilled' ? result.value : []);
+
+    const elapsedTime = Date.now() - startTime;
+    const failedCount = results.filter(r => r.status === 'rejected').length;
+    const successCount = results.filter(r => r.status === 'fulfilled').length;
+    
+    console.log(`🔬🇺🇸 FRED Tech: Fetched in ${elapsedTime}ms (${successCount} success, ${failedCount} failures)`);
+    
+    // Log data availability
+    console.log('🔬🇺🇸 Data availability:');
+    console.log(`   - Patents (US): ${patentsGranted.length} years`);
+    console.log(`   - Patents (All): ${patentsTotal.length} years`);
+    console.log(`   - R&D Spending: ${rdSpending.length} years`);
+    console.log(`   - R&D Private: ${rdPrivate.length} years`);
+    console.log(`   - R&D Government: ${rdGovernment.length} years`);
+    console.log(`   - Advanced Tech Exports: ${advancedTechExports.length} years`);
+    console.log(`   - ICT Services Exports: ${ictServicesExports.length} years`);
+    console.log(`   - STEM Employment: ${stemEmployment.length} years`);
+    console.log(`   - Computer Employment: ${computerEmployment.length} years`);
+    console.log(`   - Internet Users: ${internetUsers.length} years`);
+
+    return {
+      patentsGranted,
+      patentsTotal,
+      rdSpending,
+      rdPrivate,
+      rdGovernment,
+      advancedTechExports,
+      ictServicesExports,
+      stemEmployment,
+      computerEmployment,
+      internetUsers
+    };
+  } catch (error) {
+    console.error('Critical error fetching US tech data from FRED:', error);
+    return {
+      patentsGranted: [],
+      patentsTotal: [],
+      rdSpending: [],
+      rdPrivate: [],
+      rdGovernment: [],
+      advancedTechExports: [],
+      ictServicesExports: [],
+      stemEmployment: [],
+      computerEmployment: [],
+      internetUsers: []
+    };
+  }
 }
 

@@ -434,6 +434,312 @@ export function clearOECDCache(): void {
   clientCache.delete('oecd_japan_gov_debt');
   clientCache.delete('oecd_policy_rates');
   clientCache.delete('oecd_japan_policy_rates');
+  clientCache.delete('oecd_rd_spending');
+  clientCache.delete('oecd_researchers');
+  clientCache.delete('oecd_patents');
+  clientCache.delete('oecd_hightech_exports');
   console.log('✅ Cleared OECD cached data');
+}
+
+// ============================================
+// OECD Technology & Innovation Data
+// ============================================
+
+// Extended country mapping including non-OECD countries with partner data
+const TECH_COUNTRY_CODE_MAP: { [key: string]: string } = {
+  ...COUNTRY_CODE_MAP,
+  // Additional countries that may have data in OECD datasets
+  China: 'CHN',
+  Russia: 'RUS',
+  Brazil: 'BRA',
+  India: 'IND',
+  Indonesia: 'IDN',
+  SouthAfrica: 'ZAF',
+  Argentina: 'ARG',
+  SaudiArabia: 'SAU',
+  Nigeria: 'NGA',
+  Egypt: 'EGY',
+};
+
+// Reverse mapping for OECD codes to our country names
+const OECD_TO_COUNTRY_NAME: { [key: string]: string } = Object.fromEntries(
+  Object.entries(TECH_COUNTRY_CODE_MAP).map(([name, code]) => [code, name])
+);
+
+export interface OECDTechData {
+  rdSpending: { [country: string]: OECDDataPoint[] };
+  researchers: { [country: string]: OECDDataPoint[] };
+  patents: { [country: string]: OECDDataPoint[] };
+  hightechExports: { [country: string]: OECDDataPoint[] };
+}
+
+/**
+ * Fetch R&D Expenditure as % of GDP from OECD
+ * Dataset: MSTI_PUB - Main Science and Technology Indicators
+ */
+export async function fetchOECDRDSpending(): Promise<{ [country: string]: OECDDataPoint[] }> {
+  try {
+    const cacheKey = 'oecd_rd_spending';
+    const cached = clientCache.get<{ [country: string]: OECDDataPoint[] }>(cacheKey);
+    
+    if (cached) {
+      console.log('✅ Using cached OECD R&D spending data');
+      return cached;
+    }
+
+    console.log('🔬🏛️ ========================================');
+    console.log('🔬🏛️ OECD: Fetching R&D Expenditure (% GDP)...');
+    console.log('🔬🏛️ ========================================');
+    
+    const results: { [country: string]: OECDDataPoint[] } = {};
+    const countries = Object.keys(TECH_COUNTRY_CODE_MAP);
+    
+    for (const country of countries) {
+      try {
+        const oecdCode = TECH_COUNTRY_CODE_MAP[country];
+        
+        // OECD MSTI dataset - GERD as % of GDP
+        // Using the OECD API route
+        const url = `/api/oecd?dataset=OECD.STI.STP,DSD_MSTI@DF_MSTI,1.0/${oecdCode}.A.GERD.GDP_PPP.._T._T._T&startPeriod=1990`;
+        
+        const response = await axios.get(url, { timeout: 15000 });
+        
+        if (response.data?.data?.dataSets?.[0]?.observations) {
+          const observations = response.data.data.dataSets[0].observations;
+          const structure = response.data.data.structure;
+          
+          const timeDimension = structure.dimensions?.observation?.find((d: any) => 
+            d.id === 'TIME_PERIOD'
+          );
+          
+          if (timeDimension?.values) {
+            const data: OECDDataPoint[] = [];
+            
+            Object.entries(observations).forEach(([key, observation]: [string, any]) => {
+              const value = observation[0];
+              if (value !== null && !isNaN(value)) {
+                const timeIndex = parseInt(key.split(':').pop() || '0');
+                const timePeriod = timeDimension.values[timeIndex]?.id;
+                
+                if (timePeriod) {
+                  const year = parseInt(timePeriod);
+                  if (!isNaN(year)) {
+                    data.push({ country, year, value: Number(value) });
+                  }
+                }
+              }
+            });
+            
+            if (data.length > 0) {
+              results[country] = data.sort((a, b) => a.year - b.year);
+              console.log(`✅ OECD R&D: ${country} - ${data.length} years`);
+            }
+          }
+        }
+      } catch (error: any) {
+        if (error.response?.status !== 404 && error.response?.status !== 400) {
+          console.warn(`⚠️ OECD R&D: Could not fetch ${country} -`, error.message);
+        }
+      }
+      
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    clientCache.set(cacheKey, results, 1000 * 60 * 60 * 24);
+    
+    console.log(`🔬🏛️ OECD: R&D data fetched for ${Object.keys(results).length} countries`);
+    
+    return results;
+  } catch (error: any) {
+    console.error('❌ OECD: Error fetching R&D spending:', error.message);
+    return {};
+  }
+}
+
+/**
+ * Fetch Researchers per thousand employed from OECD
+ */
+export async function fetchOECDResearchers(): Promise<{ [country: string]: OECDDataPoint[] }> {
+  try {
+    const cacheKey = 'oecd_researchers';
+    const cached = clientCache.get<{ [country: string]: OECDDataPoint[] }>(cacheKey);
+    
+    if (cached) {
+      console.log('✅ Using cached OECD researchers data');
+      return cached;
+    }
+
+    console.log('🔬🏛️ ========================================');
+    console.log('🔬🏛️ OECD: Fetching Researchers data...');
+    console.log('🔬🏛️ ========================================');
+    
+    const results: { [country: string]: OECDDataPoint[] } = {};
+    const countries = Object.keys(TECH_COUNTRY_CODE_MAP);
+    
+    for (const country of countries) {
+      try {
+        const oecdCode = TECH_COUNTRY_CODE_MAP[country];
+        
+        // OECD MSTI dataset - Researchers FTE per thousand employment
+        const url = `/api/oecd?dataset=OECD.STI.STP,DSD_MSTI@DF_MSTI,1.0/${oecdCode}.A.RESEARCHER.FTE_THSD_EMPL.._T._T._T&startPeriod=1990`;
+        
+        const response = await axios.get(url, { timeout: 15000 });
+        
+        if (response.data?.data?.dataSets?.[0]?.observations) {
+          const observations = response.data.data.dataSets[0].observations;
+          const structure = response.data.data.structure;
+          
+          const timeDimension = structure.dimensions?.observation?.find((d: any) => 
+            d.id === 'TIME_PERIOD'
+          );
+          
+          if (timeDimension?.values) {
+            const data: OECDDataPoint[] = [];
+            
+            Object.entries(observations).forEach(([key, observation]: [string, any]) => {
+              const value = observation[0];
+              if (value !== null && !isNaN(value)) {
+                const timeIndex = parseInt(key.split(':').pop() || '0');
+                const timePeriod = timeDimension.values[timeIndex]?.id;
+                
+                if (timePeriod) {
+                  const year = parseInt(timePeriod);
+                  if (!isNaN(year)) {
+                    // Convert per thousand employed to per million people (approximate)
+                    // Assuming ~50% employment rate, multiply by ~500
+                    data.push({ country, year, value: Number(value) * 500 });
+                  }
+                }
+              }
+            });
+            
+            if (data.length > 0) {
+              results[country] = data.sort((a, b) => a.year - b.year);
+              console.log(`✅ OECD Researchers: ${country} - ${data.length} years`);
+            }
+          }
+        }
+      } catch (error: any) {
+        if (error.response?.status !== 404 && error.response?.status !== 400) {
+          console.warn(`⚠️ OECD Researchers: Could not fetch ${country} -`, error.message);
+        }
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    clientCache.set(cacheKey, results, 1000 * 60 * 60 * 24);
+    
+    console.log(`🔬🏛️ OECD: Researchers data fetched for ${Object.keys(results).length} countries`);
+    
+    return results;
+  } catch (error: any) {
+    console.error('❌ OECD: Error fetching researchers:', error.message);
+    return {};
+  }
+}
+
+/**
+ * Fetch Patent applications from OECD
+ */
+export async function fetchOECDPatents(): Promise<{ [country: string]: OECDDataPoint[] }> {
+  try {
+    const cacheKey = 'oecd_patents';
+    const cached = clientCache.get<{ [country: string]: OECDDataPoint[] }>(cacheKey);
+    
+    if (cached) {
+      console.log('✅ Using cached OECD patents data');
+      return cached;
+    }
+
+    console.log('🔬🏛️ ========================================');
+    console.log('🔬🏛️ OECD: Fetching Patent applications...');
+    console.log('🔬🏛️ ========================================');
+    
+    const results: { [country: string]: OECDDataPoint[] } = {};
+    const countries = Object.keys(TECH_COUNTRY_CODE_MAP);
+    
+    for (const country of countries) {
+      try {
+        const oecdCode = TECH_COUNTRY_CODE_MAP[country];
+        
+        // OECD Patent statistics - Patent applications
+        const url = `/api/oecd?dataset=OECD.STI.STP,DSD_MSTI@DF_MSTI,1.0/${oecdCode}.A.PATENT.TOTAL.._T._T._T&startPeriod=1990`;
+        
+        const response = await axios.get(url, { timeout: 15000 });
+        
+        if (response.data?.data?.dataSets?.[0]?.observations) {
+          const observations = response.data.data.dataSets[0].observations;
+          const structure = response.data.data.structure;
+          
+          const timeDimension = structure.dimensions?.observation?.find((d: any) => 
+            d.id === 'TIME_PERIOD'
+          );
+          
+          if (timeDimension?.values) {
+            const data: OECDDataPoint[] = [];
+            
+            Object.entries(observations).forEach(([key, observation]: [string, any]) => {
+              const value = observation[0];
+              if (value !== null && !isNaN(value)) {
+                const timeIndex = parseInt(key.split(':').pop() || '0');
+                const timePeriod = timeDimension.values[timeIndex]?.id;
+                
+                if (timePeriod) {
+                  const year = parseInt(timePeriod);
+                  if (!isNaN(year)) {
+                    data.push({ country, year, value: Number(value) });
+                  }
+                }
+              }
+            });
+            
+            if (data.length > 0) {
+              results[country] = data.sort((a, b) => a.year - b.year);
+              console.log(`✅ OECD Patents: ${country} - ${data.length} years`);
+            }
+          }
+        }
+      } catch (error: any) {
+        if (error.response?.status !== 404 && error.response?.status !== 400) {
+          console.warn(`⚠️ OECD Patents: Could not fetch ${country} -`, error.message);
+        }
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    clientCache.set(cacheKey, results, 1000 * 60 * 60 * 24);
+    
+    console.log(`🔬🏛️ OECD: Patent data fetched for ${Object.keys(results).length} countries`);
+    
+    return results;
+  } catch (error: any) {
+    console.error('❌ OECD: Error fetching patents:', error.message);
+    return {};
+  }
+}
+
+/**
+ * Fetch all OECD technology data at once
+ * NOTE: OECD MSTI API has changed structure and is rate-limited.
+ * We now rely primarily on fallback data for technology indicators.
+ * This function returns empty data to avoid API errors.
+ */
+export async function fetchOECDTechnologyData(): Promise<OECDTechData> {
+  console.log('🔬🏛️ ========================================');
+  console.log('🔬🏛️ OECD: Technology data API currently unavailable');
+  console.log('🔬🏛️ Using fallback data for technology indicators');
+  console.log('🔬🏛️ ========================================');
+  
+  // Return empty data - fallback data will be used instead
+  // The OECD MSTI API structure has changed and is heavily rate-limited
+  return {
+    rdSpending: {},
+    researchers: {},
+    patents: {},
+    hightechExports: {}
+  };
 }
 

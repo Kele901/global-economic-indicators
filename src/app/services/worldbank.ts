@@ -1,10 +1,14 @@
 import axios from "axios";
 import { clientCache, CacheKeys, CURRENT_CACHE_VERSION } from "./clientCache";
-import { fetchUSADataFromFRED, clearFREDCache, type USADataPoint } from "./fred";
+import { fetchUSADataFromFRED, fetchUSATechDataFromFRED, clearFREDCache, type USADataPoint, type USATechData } from "./fred";
 import { fetchAllPolicyRates, clearPolicyRatesCache, type PolicyRateDataPoint } from "./policyRates";
-import { fetchJapanGovernmentDebtOECD, fetchOECDPolicyRates, fetchJapanPolicyRatesOECD, clearOECDCache, type OECDDataPoint } from "./oecd";
+import { fetchJapanGovernmentDebtOECD, fetchOECDPolicyRates, fetchJapanPolicyRatesOECD, fetchOECDTechnologyData, clearOECDCache, type OECDDataPoint, type OECDTechData } from "./oecd";
 import { fetchJapanGovernmentDebtIMF, fetchIMFGovernmentDebt, fetchIMFInterestRates, clearIMFCache, type IMFDataPoint } from "./imf";
 import { fetchBISPolicyRates, fetchJapanPolicyRatesBIS, clearBISCache, type BISDataPoint } from "./bis";
+import { TECHNOLOGY_FALLBACK_DATA, type FallbackDataPoint } from "../data/technologyFallbackData";
+import { fetchWIPOPatentData, type WIPOTechData, type WIPODataPoint } from "./wipo";
+import { fetchEurostatTechnologyData, type EurostatTechData, type EurostatDataPoint } from "./eurostat";
+import { fetchITUTechnologyData, type ITUTechData, type ITUDataPoint } from "./itu";
 
 // Type definitions for economic data
 export interface CountryData {
@@ -77,6 +81,14 @@ const INDICATORS = {
   TOURISM_RECEIPTS: 'ST.INT.RCPT.XP.ZS', // International tourism, receipts (% of total exports)
   PRIVATE_INVESTMENT: 'NE.GDI.STKB.ZS', // Gross fixed capital formation, private sector (% of GDP)
   NEW_BUSINESS_DENSITY: 'IC.BUS.NDNS.ZS', // New businesses registered (number per 1,000 people ages 15-64)
+  
+  // Technology & Innovation Indicators
+  PATENT_APPLICATIONS_NONRES: 'IP.PAT.NRES', // Patent applications, non-residents
+  TRADEMARK_APPLICATIONS: 'IP.TMK.RESD', // Trademark applications, direct resident
+  RESEARCHERS_RD: 'SP.POP.SCIE.RD.P6', // Researchers in R&D (per million people)
+  TECHNICIANS_RD: 'SP.POP.TECH.RD.P6', // Technicians in R&D (per million people)
+  IP_RECEIPTS: 'BX.GSR.ROYL.CD', // Charges for the use of intellectual property, receipts (BoP, current US$)
+  IP_PAYMENTS: 'BM.GSR.ROYL.CD', // Charges for the use of intellectual property, payments (BoP, current US$)
 };
 
 // Country codes for major economies
@@ -1247,3 +1259,603 @@ if (typeof window !== 'undefined') {
     window.location.reload();
   };
 }
+
+// Helper function to merge USA R&D spending data from FRED
+// FRED R&D data is in billions of dollars, we need to convert to % of GDP
+// US GDP is approximately $25-27 trillion, so we estimate the percentage
+function mergeUSARDSpendingData(
+  worldBankData: CountryData[],
+  fredData: USADataPoint[]
+): CountryData[] {
+  if (fredData.length === 0) {
+    return worldBankData;
+  }
+
+  // US GDP by year (approximate, in billions) for conversion
+  const usGDPByYear: { [year: number]: number } = {
+    2000: 10250, 2001: 10582, 2002: 10936, 2003: 11458, 2004: 12214,
+    2005: 13037, 2006: 13815, 2007: 14452, 2008: 14713, 2009: 14449,
+    2010: 14992, 2011: 15543, 2012: 16197, 2013: 16785, 2014: 17522,
+    2015: 18219, 2016: 18707, 2017: 19485, 2018: 20494, 2019: 21381,
+    2020: 20894, 2021: 22996, 2022: 25463, 2023: 27361, 2024: 28500
+  };
+
+  const dataMap = new Map<number, CountryData>();
+  worldBankData.forEach(item => {
+    dataMap.set(item.year, { ...item });
+  });
+
+  let addedCount = 0;
+  let updatedCount = 0;
+
+  fredData.forEach(({ year, value }) => {
+    // Convert FRED R&D (in billions) to % of GDP
+    const gdp = usGDPByYear[year];
+    if (!gdp) return;
+    
+    // FRED R&D value is already in billions, calculate percentage
+    const rdPercentGDP = (value / gdp) * 100;
+    
+    if (dataMap.has(year)) {
+      const existing = dataMap.get(year)!;
+      if (existing.USA === undefined || existing.USA === null) {
+        existing.USA = rdPercentGDP;
+        updatedCount++;
+      }
+    } else {
+      dataMap.set(year, { year, USA: rdPercentGDP });
+      addedCount++;
+    }
+  });
+
+  if (addedCount > 0 || updatedCount > 0) {
+    console.log(`🔬🇺🇸 Merged USA R&D spending: ${addedCount} new years, ${updatedCount} updated`);
+  }
+
+  return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+}
+
+// Technology & Innovation Data Fetching
+export interface TechnologyData {
+  patentApplicationsResident: CountryData[];
+  patentApplicationsNonResident: CountryData[];
+  trademarkApplications: CountryData[];
+  rdSpending: CountryData[];
+  researchersRD: CountryData[];
+  techniciansRD: CountryData[];
+  hightechExports: CountryData[];
+  ictExports: CountryData[];
+  scientificPublications: CountryData[];
+  ipReceipts: CountryData[];
+  ipPayments: CountryData[];
+  internetUsers: CountryData[];
+  mobileSubscriptions: CountryData[];
+}
+
+// Fetch technology and innovation data for the Technology page
+export async function fetchTechnologyData(forceRefresh: boolean = false): Promise<TechnologyData> {
+  try {
+    const cacheKey = 'technology_data_all';
+    
+    if (!forceRefresh) {
+      const cached = clientCache.get<TechnologyData>(cacheKey);
+      if (cached) {
+        console.log('✅ Using cached technology data');
+        return cached;
+      }
+    }
+
+    console.log('🔬 ========================================');
+    console.log('🔬 Fetching Technology & Innovation Data...');
+    console.log('🔬 ========================================');
+    const startTime = Date.now();
+
+    const results = await Promise.allSettled([
+      fetchIndicatorData(INDICATORS.PATENT_APPLICATIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.PATENT_APPLICATIONS_NONRES, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TRADEMARK_APPLICATIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.RD_SPENDING, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.RESEARCHERS_RD, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TECHNICIANS_RD, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.HIGHTECH_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ICT_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.SCIENTIFIC_PUBLICATIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.IP_RECEIPTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.IP_PAYMENTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.INTERNET_USERS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MOBILE_SUBSCRIPTIONS, COUNTRY_CODES, !forceRefresh)
+    ]);
+
+    const [
+      patentResidentResult,
+      patentNonResidentResult,
+      trademarkResult,
+      rdSpendingResult,
+      researchersResult,
+      techniciansResult,
+      hightechExportsResult,
+      ictExportsResult,
+      scientificPubsResult,
+      ipReceiptsResult,
+      ipPaymentsResult,
+      internetUsersResult,
+      mobileSubsResult
+    ] = results;
+
+    const indicatorNames = [
+      'Patent Applications (Resident)', 'Patent Applications (Non-Resident)', 
+      'Trademark Applications', 'R&D Spending', 'Researchers in R&D',
+      'Technicians in R&D', 'High-tech Exports', 'ICT Exports',
+      'Scientific Publications', 'IP Receipts', 'IP Payments',
+      'Internet Users', 'Mobile Subscriptions'
+    ];
+
+    let failedCount = 0;
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`Failed to fetch ${indicatorNames[index]}:`, result.reason);
+        failedCount++;
+      }
+    });
+
+    const elapsedTime = Date.now() - startTime;
+    console.log(`🔬 Technology data fetched in ${elapsedTime}ms (${failedCount} failures)`);
+
+    // Fetch US Technology data from FRED to supplement World Bank data
+    console.log('🔬🇺🇸 ========================================');
+    console.log('🔬🇺🇸 Fetching US Technology data from FRED...');
+    console.log('🔬🇺🇸 ========================================');
+    
+    let usaTechData: USATechData = {
+      patentsGranted: [],
+      patentsTotal: [],
+      rdSpending: [],
+      rdPrivate: [],
+      rdGovernment: [],
+      advancedTechExports: [],
+      ictServicesExports: [],
+      stemEmployment: [],
+      computerEmployment: [],
+      internetUsers: []
+    };
+    
+    try {
+      usaTechData = await fetchUSATechDataFromFRED();
+    } catch (error: any) {
+      console.warn('⚠️ Failed to fetch US tech data from FRED:', error.message);
+    }
+
+    // Fetch OECD Technology data to supplement World Bank data
+    console.log('🔬🏛️ ========================================');
+    console.log('🔬🏛️ Fetching OECD Technology data...');
+    console.log('🔬🏛️ ========================================');
+    
+    let oecdTechData: OECDTechData = {
+      rdSpending: {},
+      researchers: {},
+      patents: {},
+      hightechExports: {}
+    };
+    
+    try {
+      oecdTechData = await fetchOECDTechnologyData();
+    } catch (error: any) {
+      console.warn('⚠️ Failed to fetch OECD tech data:', error.message);
+    }
+
+    // Fetch WIPO Patent data
+    console.log('🔬📜 ========================================');
+    console.log('🔬📜 Fetching WIPO Patent data...');
+    console.log('🔬📜 ========================================');
+    
+    let wipoTechData: WIPOTechData = {
+      patentApplications: {},
+      patentGrants: {},
+      trademarkApplications: {}
+    };
+    
+    try {
+      wipoTechData = await fetchWIPOPatentData();
+    } catch (error: any) {
+      console.warn('⚠️ Failed to fetch WIPO patent data:', error.message);
+    }
+
+    // Fetch Eurostat Technology data (EU countries)
+    console.log('🔬🇪🇺 ========================================');
+    console.log('🔬🇪🇺 Fetching Eurostat Technology data...');
+    console.log('🔬🇪🇺 ========================================');
+    
+    let eurostatTechData: EurostatTechData = {
+      rdSpending: {},
+      researchers: {},
+      hightechExports: {},
+      patents: {},
+      internetUsers: {}
+    };
+    
+    try {
+      eurostatTechData = await fetchEurostatTechnologyData();
+    } catch (error: any) {
+      console.warn('⚠️ Failed to fetch Eurostat tech data:', error.message);
+    }
+
+    // Fetch ITU ICT data (internet users, mobile subscriptions)
+    console.log('🔬📡 ========================================');
+    console.log('🔬📡 Fetching ITU ICT data...');
+    console.log('🔬📡 ========================================');
+    
+    let ituTechData: ITUTechData = {
+      internetUsers: {},
+      mobileSubscriptions: {},
+      fixedBroadband: {},
+      mobileBroadband: {}
+    };
+    
+    try {
+      ituTechData = await fetchITUTechnologyData();
+    } catch (error: any) {
+      console.warn('⚠️ Failed to fetch ITU ICT data:', error.message);
+    }
+
+    // Helper function to merge USA data into World Bank data
+    const mergeUSATechData = (
+      worldBankData: CountryData[],
+      fredData: USADataPoint[]
+    ): CountryData[] => {
+      if (fredData.length === 0) {
+        return worldBankData;
+      }
+
+      const dataMap = new Map<number, CountryData>();
+      worldBankData.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      let addedCount = 0;
+      let updatedCount = 0;
+
+      fredData.forEach(({ year, value }) => {
+        if (dataMap.has(year)) {
+          const existing = dataMap.get(year)!;
+          if (existing.USA === undefined || existing.USA === null) {
+            existing.USA = value;
+            updatedCount++;
+          }
+        } else {
+          dataMap.set(year, { year, USA: value });
+          addedCount++;
+        }
+      });
+
+      if (addedCount > 0 || updatedCount > 0) {
+        console.log(`🔬🇺🇸 Merged USA tech data: ${addedCount} new years, ${updatedCount} updated`);
+      }
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Helper function to merge OECD data into existing data
+    const mergeOECDTechData = (
+      existingData: CountryData[],
+      oecdData: { [country: string]: OECDDataPoint[] }
+    ): CountryData[] => {
+      if (Object.keys(oecdData).length === 0) {
+        return existingData;
+      }
+
+      const dataMap = new Map<number, CountryData>();
+      existingData.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      let totalAdded = 0;
+      let totalUpdated = 0;
+
+      Object.entries(oecdData).forEach(([country, dataPoints]) => {
+        dataPoints.forEach(({ year, value }) => {
+          if (dataMap.has(year)) {
+            const existing = dataMap.get(year)!;
+            if (existing[country] === undefined || existing[country] === null) {
+              existing[country] = value;
+              totalUpdated++;
+            }
+          } else {
+            dataMap.set(year, { year, [country]: value });
+            totalAdded++;
+          }
+        });
+      });
+
+      if (totalAdded > 0 || totalUpdated > 0) {
+        const countries = Object.keys(oecdData).join(', ');
+        console.log(`🔬🏛️ Merged OECD data for ${Object.keys(oecdData).length} countries: ${totalAdded} new, ${totalUpdated} updated`);
+      }
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Helper function to merge WIPO data into existing data
+    const mergeWIPOData = (
+      existingData: CountryData[],
+      wipoData: { [country: string]: WIPODataPoint[] }
+    ): CountryData[] => {
+      if (Object.keys(wipoData).length === 0) {
+        return existingData;
+      }
+
+      const dataMap = new Map<number, CountryData>();
+      existingData.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      let totalAdded = 0;
+      let totalUpdated = 0;
+
+      Object.entries(wipoData).forEach(([country, dataPoints]) => {
+        dataPoints.forEach(({ year, value }) => {
+          if (dataMap.has(year)) {
+            const existing = dataMap.get(year)!;
+            if (existing[country] === undefined || existing[country] === null) {
+              existing[country] = value;
+              totalUpdated++;
+            }
+          } else {
+            dataMap.set(year, { year, [country]: value });
+            totalAdded++;
+          }
+        });
+      });
+
+      if (totalAdded > 0 || totalUpdated > 0) {
+        console.log(`🔬📜 Merged WIPO data for ${Object.keys(wipoData).length} countries: ${totalAdded} new, ${totalUpdated} updated`);
+      }
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Helper function to merge Eurostat data into existing data
+    const mergeEurostatData = (
+      existingData: CountryData[],
+      eurostatData: { [country: string]: EurostatDataPoint[] }
+    ): CountryData[] => {
+      if (Object.keys(eurostatData).length === 0) {
+        return existingData;
+      }
+
+      const dataMap = new Map<number, CountryData>();
+      existingData.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      let totalAdded = 0;
+      let totalUpdated = 0;
+
+      Object.entries(eurostatData).forEach(([country, dataPoints]) => {
+        dataPoints.forEach(({ year, value }) => {
+          if (dataMap.has(year)) {
+            const existing = dataMap.get(year)!;
+            if (existing[country] === undefined || existing[country] === null) {
+              existing[country] = value;
+              totalUpdated++;
+            }
+          } else {
+            dataMap.set(year, { year, [country]: value });
+            totalAdded++;
+          }
+        });
+      });
+
+      if (totalAdded > 0 || totalUpdated > 0) {
+        console.log(`🔬🇪🇺 Merged Eurostat data for ${Object.keys(eurostatData).length} countries: ${totalAdded} new, ${totalUpdated} updated`);
+      }
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Helper function to merge ITU data into existing data
+    const mergeITUData = (
+      existingData: CountryData[],
+      ituData: { [country: string]: ITUDataPoint[] }
+    ): CountryData[] => {
+      if (Object.keys(ituData).length === 0) {
+        return existingData;
+      }
+
+      const dataMap = new Map<number, CountryData>();
+      existingData.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      let totalAdded = 0;
+      let totalUpdated = 0;
+
+      Object.entries(ituData).forEach(([country, dataPoints]) => {
+        dataPoints.forEach(({ year, value }) => {
+          if (dataMap.has(year)) {
+            const existing = dataMap.get(year)!;
+            if (existing[country] === undefined || existing[country] === null) {
+              existing[country] = value;
+              totalUpdated++;
+            }
+          } else {
+            dataMap.set(year, { year, [country]: value });
+            totalAdded++;
+          }
+        });
+      });
+
+      if (totalAdded > 0 || totalUpdated > 0) {
+        console.log(`🔬📡 Merged ITU data for ${Object.keys(ituData).length} countries: ${totalAdded} new, ${totalUpdated} updated`);
+      }
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Build technology data with data merged from all sources
+    // Order: World Bank -> FRED (USA) -> OECD -> WIPO -> Eurostat -> ITU -> Fallback
+    
+    // Patent data: World Bank + FRED + OECD + WIPO
+    let patentData = mergeUSATechData(
+      patentResidentResult.status === 'fulfilled' ? patentResidentResult.value : [],
+      usaTechData.patentsGranted
+    );
+    patentData = mergeOECDTechData(patentData, oecdTechData.patents);
+    patentData = mergeWIPOData(patentData, wipoTechData.patentApplications);
+    patentData = mergeEurostatData(patentData, eurostatTechData.patents);
+
+    // R&D data: World Bank + FRED + OECD + Eurostat
+    let rdData = mergeUSARDSpendingData(
+      rdSpendingResult.status === 'fulfilled' ? rdSpendingResult.value : [],
+      usaTechData.rdSpending
+    );
+    rdData = mergeOECDTechData(rdData, oecdTechData.rdSpending);
+    rdData = mergeEurostatData(rdData, eurostatTechData.rdSpending);
+
+    // Researchers data: World Bank + FRED + OECD
+    let researchersData = mergeUSATechData(
+      researchersResult.status === 'fulfilled' ? researchersResult.value : [],
+      usaTechData.stemEmployment
+    );
+    researchersData = mergeOECDTechData(researchersData, oecdTechData.researchers);
+
+    // Helper function to merge fallback data for countries with missing data
+    const mergeFallbackData = (
+      existingData: CountryData[],
+      metric: 'rdSpending' | 'researchers' | 'patents' | 'internetUsers'
+    ): CountryData[] => {
+      const dataMap = new Map<number, CountryData>();
+      existingData.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      let countriesFilled = 0;
+      let dataPointsAdded = 0;
+
+      // Check each country in fallback data
+      Object.entries(TECHNOLOGY_FALLBACK_DATA).forEach(([country, fallbackData]) => {
+        const metricData = fallbackData[metric];
+        if (!metricData) return;
+
+        let countryFilled = false;
+        metricData.forEach(({ year, value }) => {
+          if (dataMap.has(year)) {
+            const existing = dataMap.get(year)!;
+            // Only fill if country data is missing
+            if (existing[country] === undefined || existing[country] === null) {
+              existing[country] = value;
+              dataPointsAdded++;
+              countryFilled = true;
+            }
+          } else {
+            dataMap.set(year, { year, [country]: value });
+            dataPointsAdded++;
+            countryFilled = true;
+          }
+        });
+        
+        if (countryFilled) countriesFilled++;
+      });
+
+      if (countriesFilled > 0) {
+        console.log(`🔬📋 Merged fallback ${metric} data: ${countriesFilled} countries, ${dataPointsAdded} data points`);
+      }
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Apply fallback data for countries with missing API data
+    console.log('🔬📋 ========================================');
+    console.log('🔬📋 Applying fallback data for missing countries...');
+    console.log('🔬📋 ========================================');
+
+    patentData = mergeFallbackData(patentData, 'patents');
+    rdData = mergeFallbackData(rdData, 'rdSpending');
+    researchersData = mergeFallbackData(researchersData, 'researchers');
+
+    // Internet users: World Bank + FRED + ITU + Fallback
+    let internetData = mergeUSATechData(
+      internetUsersResult.status === 'fulfilled' ? internetUsersResult.value : [],
+      usaTechData.internetUsers
+    );
+    internetData = mergeITUData(internetData, ituTechData.internetUsers);
+    internetData = mergeFallbackData(internetData, 'internetUsers');
+
+    // Mobile subscriptions: World Bank + ITU
+    let mobileData = mobileSubsResult.status === 'fulfilled' ? mobileSubsResult.value : [];
+    mobileData = mergeITUData(mobileData, ituTechData.mobileSubscriptions);
+
+    // High-tech exports: World Bank + FRED + Eurostat
+    let hightechData = mergeUSATechData(
+      hightechExportsResult.status === 'fulfilled' ? hightechExportsResult.value : [],
+      usaTechData.advancedTechExports
+    );
+    hightechData = mergeEurostatData(hightechData, eurostatTechData.hightechExports);
+
+    const technologyData: TechnologyData = {
+      patentApplicationsResident: patentData,
+      patentApplicationsNonResident: patentNonResidentResult.status === 'fulfilled' ? patentNonResidentResult.value : [],
+      trademarkApplications: trademarkResult.status === 'fulfilled' ? trademarkResult.value : [],
+      rdSpending: rdData,
+      researchersRD: researchersData,
+      techniciansRD: mergeUSATechData(
+        techniciansResult.status === 'fulfilled' ? techniciansResult.value : [],
+        usaTechData.computerEmployment // Use computer employment as proxy
+      ),
+      hightechExports: hightechData,
+      ictExports: mergeUSATechData(
+        ictExportsResult.status === 'fulfilled' ? ictExportsResult.value : [],
+        usaTechData.ictServicesExports
+      ),
+      scientificPublications: scientificPubsResult.status === 'fulfilled' ? scientificPubsResult.value : [],
+      ipReceipts: ipReceiptsResult.status === 'fulfilled' ? ipReceiptsResult.value : [],
+      ipPayments: ipPaymentsResult.status === 'fulfilled' ? ipPaymentsResult.value : [],
+      internetUsers: internetData,
+      mobileSubscriptions: mobileData
+    };
+
+    // Cache for 24 hours
+    clientCache.set(cacheKey, technologyData, 1000 * 60 * 60 * 24);
+    
+    console.log('🔬 ========================================');
+    console.log('🔬 Technology Data Fetch Complete!');
+    console.log('🔬 Data Sources Used:');
+    console.log('   - World Bank API (primary)');
+    console.log('   - FRED API (US-specific)');
+    console.log('   - WIPO (global patents up to 2023)');
+    console.log('   - Eurostat (EU countries up to 2023)');
+    console.log('   - ITU (internet/mobile up to 2024)');
+    console.log('   - Fallback data (historical verified data)');
+    console.log('🔬 ========================================');
+
+    return technologyData;
+  } catch (error) {
+    console.error('Critical error fetching technology data:', error);
+    
+    // Try to return cached data as fallback
+    const cached = clientCache.get<TechnologyData>('technology_data_all');
+    if (cached) {
+      console.warn('Returning stale cached technology data due to API error');
+      return cached;
+    }
+    
+    // Return empty data structure
+    return {
+      patentApplicationsResident: [],
+      patentApplicationsNonResident: [],
+      trademarkApplications: [],
+      rdSpending: [],
+      researchersRD: [],
+      techniciansRD: [],
+      hightechExports: [],
+      ictExports: [],
+      scientificPublications: [],
+      ipReceipts: [],
+      ipPayments: [],
+      internetUsers: [],
+      mobileSubscriptions: []
+    };
+  }
+}
+
+// Export country names for use in components
+export { COUNTRY_NAMES };

@@ -85,6 +85,7 @@ const Navbar = () => {
     { href: "/currency-hierarchy", label: "Currency Hierarchy" },
     { href: "/economic-gravity", label: "Economic Gravity" },
     { href: "/economic-cycles", label: "Economic Cycles" },
+    { href: "/technology", label: "Technology" },
     { href: "/trading-places", label: "Trading Places" },
     { href: "/compare", label: "Compare Countries" },
     { href: "/inflation", label: "Inflation" },
@@ -97,43 +98,45 @@ const Navbar = () => {
         ? 'bg-gray-800 border-gray-700' 
         : 'bg-white border-gray-200'
     }`}>
-      <div className="max-w-7xl mx-auto py-3 sm:py-4 px-3 sm:px-4">
-        <nav className="flex items-center">
-          {/* Logo/Brand */}
-          <div className={`flex items-center space-x-3 text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-6 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>
-            <img 
-              src="/logo.png" 
-              alt="Global Economic Indicators Logo" 
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-            />
-            <span>Global Economic Indicators</span>
-          </div>
+      <div className="w-full py-3 sm:py-4 px-3 sm:px-6 lg:px-8">
+        <nav className="flex items-center justify-center">
+          <div className="flex items-center">
+            {/* Logo/Brand */}
+            <div className={`flex items-center space-x-3 text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-6 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              <img 
+                src="/logo.png" 
+                alt="Global Economic Indicators Logo" 
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+              />
+              <span>Global Economic Indicators</span>
+            </div>
 
-          {/* Desktop Navigation - Left aligned */}
-          <div className="hidden md:flex items-center flex-1">
-            <div className="flex items-center space-x-0">
-              {navLinks.map((link, index) => (
-                <div key={link.href} className="flex items-center">
-                  <a 
-                    href={link.href} 
-                    className={`text-sm px-4 py-2 transition-colors duration-200 whitespace-nowrap ${
-                      isDarkMode 
-                        ? 'text-gray-300 hover:text-blue-400' 
-                        : 'text-gray-700 hover:text-blue-600'
-                    }`}
-                  >
-                    {link.label}
-                  </a>
-                  {/* Add separator line between links (except after the last one) */}
-                  {index < navLinks.length - 1 && (
-                    <div className={`w-px h-4 mx-2 transition-colors duration-200 ${
-                      isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
-                    }`}></div>
-                  )}
-                </div>
-              ))}
+            {/* Desktop Navigation - Centered with logo */}
+            <div className="hidden md:flex items-center">
+              <div className="flex items-center space-x-0">
+                {navLinks.map((link, index) => (
+                  <div key={link.href} className="flex items-center">
+                    <a 
+                      href={link.href} 
+                      className={`text-sm px-4 py-2 transition-colors duration-200 whitespace-nowrap ${
+                        isDarkMode 
+                          ? 'text-gray-300 hover:text-blue-400' 
+                          : 'text-gray-700 hover:text-blue-600'
+                      }`}
+                    >
+                      {link.label}
+                    </a>
+                    {/* Add separator line between links (except after the last one) */}
+                    {index < navLinks.length - 1 && (
+                      <div className={`w-px h-4 mx-2 transition-colors duration-200 ${
+                        isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+                      }`}></div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
