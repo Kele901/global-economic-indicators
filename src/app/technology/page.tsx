@@ -74,6 +74,128 @@ const TechWorldMap = dynamic(
   }
 );
 
+// New chart components for expanded technology data
+const DigitalInfraChart = dynamic(
+  () => import('../components/DigitalInfraChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const VCFundingChart = dynamic(
+  () => import('../components/VCFundingChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const AIEmergingTechChart = dynamic(
+  () => import('../components/AIEmergingTechChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const DigitalEconomyChart = dynamic(
+  () => import('../components/DigitalEconomyChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const TechWorkforceChart = dynamic(
+  () => import('../components/TechWorkforceChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+// New visualization components
+const RDEfficiencyChart = dynamic(
+  () => import('../components/RDEfficiencyChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const IPTradeBalanceChart = dynamic(
+  () => import('../components/IPTradeBalanceChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const TechHeatmapChart = dynamic(
+  () => import('../components/TechHeatmapChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const TrademarkTrendsChart = dynamic(
+  () => import('../components/TrademarkTrendsChart'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const TechFlowSankey = dynamic(
+  () => import('../components/TechFlowSankey'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
 const TechnologyPage = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [activeSection, setActiveSection] = useState<string>('overview');
@@ -97,6 +219,15 @@ const TechnologyPage = () => {
         setLoading(true);
         setError(null);
         const data = await fetchTechnologyData();
+        
+        // Debug logging
+        console.log('📊 Technology Data Loaded:');
+        console.log('  - vcFunding:', data.vcFunding?.length, 'records', data.vcFunding?.[0]);
+        console.log('  - aiPatents:', data.aiPatents?.length, 'records', data.aiPatents?.[0]);
+        console.log('  - broadbandSubscriptions:', data.broadbandSubscriptions?.length, 'records', data.broadbandSubscriptions?.[0]);
+        console.log('  - ecommerceAdoption:', data.ecommerceAdoption?.length, 'records', data.ecommerceAdoption?.[0]);
+        console.log('  - stemGraduates:', data.stemGraduates?.length, 'records', data.stemGraduates?.[0]);
+        
         setTechData(data);
         
         // Set the latest year with data
@@ -285,6 +416,12 @@ const TechnologyPage = () => {
             { id: 'rd', label: 'R&D Investment', icon: '🔬' },
             { id: 'trade', label: 'Tech Trade', icon: '🌐' },
             { id: 'compare', label: 'Country Comparison', icon: '📈' },
+            { id: 'infrastructure', label: 'Digital Infrastructure', icon: '🌐' },
+            { id: 'startups', label: 'Startups & VC', icon: '🚀' },
+            { id: 'ai', label: 'AI & Emerging Tech', icon: '🤖' },
+            { id: 'digital-economy', label: 'Digital Economy', icon: '💳' },
+            { id: 'workforce', label: 'Tech Workforce', icon: '👩‍💻' },
+            { id: 'insights', label: 'Insights', icon: '💡' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -405,9 +542,18 @@ const TechnologyPage = () => {
               onCountryChange={setSelectedCountries}
             />
 
-            {/* Trademark Applications */}
+            {/* Trademark Trends Chart */}
+            <TrademarkTrendsChart
+              isDarkMode={isDarkMode}
+              trademarkData={techData.trademarkApplications}
+              patentData={techData.patentApplicationsResident}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+
+            {/* Trademark Applications Summary */}
             <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Trademark Applications</h3>
+              <h3 className="text-lg font-semibold mb-4">Trademark Applications Summary</h3>
               <p className={`text-sm ${themeColors.textSecondary} mb-4`}>
                 Trademark filings indicate commercial activity and brand development across economies.
               </p>
@@ -451,6 +597,16 @@ const TechnologyPage = () => {
               rdData={techData.rdSpending}
               researchersData={techData.researchersRD}
               techniciansData={techData.techniciansRD}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+
+            {/* R&D Efficiency Analysis */}
+            <RDEfficiencyChart
+              isDarkMode={isDarkMode}
+              rdData={techData.rdSpending}
+              patentData={techData.patentApplicationsResident}
+              researchersData={techData.researchersRD}
               selectedCountries={selectedCountries}
               onCountryChange={setSelectedCountries}
             />
@@ -519,6 +675,15 @@ const TechnologyPage = () => {
               isDarkMode={isDarkMode}
               hightechData={techData.hightechExports}
               ictData={techData.ictExports}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+
+            {/* IP Trade Balance Chart */}
+            <IPTradeBalanceChart
+              isDarkMode={isDarkMode}
+              ipReceipts={techData.ipReceipts}
+              ipPayments={techData.ipPayments}
               selectedCountries={selectedCountries}
               onCountryChange={setSelectedCountries}
             />
@@ -692,6 +857,156 @@ const TechnologyPage = () => {
           </div>
         )}
 
+        {/* Section: Digital Infrastructure */}
+        {activeSection === 'infrastructure' && techData && (
+          <div className="space-y-8">
+            <DigitalInfraChart
+              isDarkMode={isDarkMode}
+              broadbandData={techData.broadbandSubscriptions}
+              mobileData={techData.mobileSubscriptions}
+              secureServersData={techData.secureServers}
+              internetUsersData={techData.internetUsers}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+          </div>
+        )}
+
+        {/* Section: Startups & VC */}
+        {activeSection === 'startups' && techData && (
+          <div className="space-y-8">
+            <VCFundingChart
+              isDarkMode={isDarkMode}
+              vcFundingData={techData.vcFunding}
+              unicornData={techData.unicornCount}
+              startupDensityData={techData.startupDensity}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+          </div>
+        )}
+
+        {/* Section: AI & Emerging Tech */}
+        {activeSection === 'ai' && techData && (
+          <div className="space-y-8">
+            <AIEmergingTechChart
+              isDarkMode={isDarkMode}
+              aiPatentData={techData.aiPatents}
+              generalPatentData={techData.patentApplicationsResident}
+              hightechExportsData={techData.hightechExports}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+          </div>
+        )}
+
+        {/* Section: Digital Economy */}
+        {activeSection === 'digital-economy' && techData && (
+          <div className="space-y-8">
+            <DigitalEconomyChart
+              isDarkMode={isDarkMode}
+              ecommerceData={techData.ecommerceAdoption}
+              digitalPaymentsData={techData.digitalPayments}
+              ictServiceExportsData={techData.ictServiceExports}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+          </div>
+        )}
+
+        {/* Section: Tech Workforce */}
+        {activeSection === 'workforce' && techData && (
+          <div className="space-y-8">
+            <TechWorkforceChart
+              isDarkMode={isDarkMode}
+              stemGraduatesData={techData.stemGraduates}
+              techEmploymentData={techData.techEmployment}
+              researchersData={techData.researchersRD}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+          </div>
+        )}
+
+        {/* Section: Insights */}
+        {activeSection === 'insights' && techData && (
+          <div className="space-y-8">
+            <div className={`p-4 rounded-lg border ${
+              isDarkMode 
+                ? 'bg-gray-800 border-indigo-500 text-indigo-400' 
+                : 'bg-white border-indigo-400 text-indigo-700'
+            }`}>
+              <h3 className="font-semibold">Advanced Analytics &amp; Insights</h3>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Explore the relationships between innovation inputs and outputs, compare countries across 
+                multiple metrics, and understand the flow of technology development.
+              </p>
+            </div>
+
+            {/* Tech Ecosystem Flow Sankey */}
+            <TechFlowSankey
+              isDarkMode={isDarkMode}
+              rdSpending={techData.rdSpending}
+              stemGraduates={techData.stemGraduates}
+              patentData={techData.patentApplicationsResident}
+              scientificPublications={techData.scientificPublications}
+              researchersData={techData.researchersRD}
+              hightechExports={techData.hightechExports}
+              techEmployment={techData.techEmployment}
+              vcFunding={techData.vcFunding}
+              selectedYear={selectedYear}
+            />
+
+            {/* Technology Metrics Heatmap */}
+            <TechHeatmapChart
+              isDarkMode={isDarkMode}
+              rdSpending={techData.rdSpending}
+              patentData={techData.patentApplicationsResident}
+              researchersData={techData.researchersRD}
+              hightechExports={techData.hightechExports}
+              internetUsers={techData.internetUsers}
+              vcFunding={techData.vcFunding}
+              stemGraduates={techData.stemGraduates}
+              aiPatents={techData.aiPatents}
+              selectedYear={selectedYear}
+            />
+
+            {/* Key Insights Summary */}
+            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+              <h3 className="text-lg font-semibold mb-4">Key Insights</h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                    Innovation Pipeline
+                  </h4>
+                  <p className={`text-sm ${themeColors.textSecondary}`}>
+                    The Sankey diagram shows how R&amp;D investment and education flow through research 
+                    outputs to economic outcomes like exports and employment.
+                  </p>
+                </div>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
+                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>
+                    Multi-Metric Comparison
+                  </h4>
+                  <p className={`text-sm ${themeColors.textSecondary}`}>
+                    The heatmap provides a comprehensive view of how countries perform across all 
+                    technology metrics, revealing strengths and weaknesses.
+                  </p>
+                </div>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-green-900/30' : 'bg-green-50'}`}>
+                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-green-400' : 'text-green-700'}`}>
+                    Efficiency Analysis
+                  </h4>
+                  <p className={`text-sm ${themeColors.textSecondary}`}>
+                    Some countries achieve high innovation output with relatively low R&amp;D spending, 
+                    indicating efficient use of resources.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Footer / Sources */}
         <div className={`mt-12 p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
           <h3 className="font-semibold mb-3">Data Sources &amp; Methodology</h3>
@@ -706,6 +1021,9 @@ const TechnologyPage = () => {
                 <li>UNESCO - Institute for Statistics</li>
                 <li>UN Comtrade - Trade Statistics</li>
                 <li>ITU - International Telecommunication Union</li>
+                <li>Crunchbase/Dealroom - VC &amp; Startup Data</li>
+                <li>OECD - Education &amp; Workforce Statistics</li>
+                <li>Eurostat - EU Technology Data</li>
               </ul>
             </div>
             <div>
@@ -718,6 +1036,10 @@ const TechnologyPage = () => {
                 <li>Researchers &amp; Technicians in R&amp;D</li>
                 <li>High-Technology Exports</li>
                 <li>Scientific Publications</li>
+                <li>VC Funding &amp; Unicorns</li>
+                <li>AI Patents &amp; Emerging Tech</li>
+                <li>Digital Economy Metrics</li>
+                <li>STEM Graduates &amp; Tech Workforce</li>
               </ul>
             </div>
             <div>

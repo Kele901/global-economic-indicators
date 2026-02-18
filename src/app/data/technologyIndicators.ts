@@ -157,6 +157,187 @@ export const technologyIndicators: { [key: string]: TechIndicatorInfo } = {
     interpretation: 'Higher numbers indicate mobile technology adoption and telecommunications development.',
     color: '#A855F7', // purple-500
     colorDark: '#C084FC' // purple-400
+  },
+
+  // Digital Infrastructure Indicators
+  broadbandSubscriptions: {
+    id: 'broadbandSubscriptions',
+    name: 'Fixed Broadband Subscriptions',
+    shortName: 'Broadband',
+    description: 'Fixed broadband subscriptions per 100 people. Includes DSL, cable, fiber, and other fixed connections.',
+    unit: 'Per 100 people',
+    source: 'World Bank (ITU)',
+    interpretation: 'Higher numbers indicate better fixed internet infrastructure and digital connectivity.',
+    color: '#0EA5E9', // sky-500
+    colorDark: '#38BDF8' // sky-400
+  },
+  secureServers: {
+    id: 'secureServers',
+    name: 'Secure Internet Servers',
+    shortName: 'Secure Servers',
+    description: 'Secure Internet servers per million people. Servers using encryption technology for secure transactions.',
+    unit: 'Per million people',
+    source: 'World Bank (Netcraft)',
+    interpretation: 'Higher numbers indicate stronger digital infrastructure for e-commerce and secure communications.',
+    color: '#22C55E', // green-500
+    colorDark: '#4ADE80' // green-400
+  },
+  ictGoodsImports: {
+    id: 'ictGoodsImports',
+    name: 'ICT Goods Imports',
+    shortName: 'ICT Imports',
+    description: 'Information and communication technology goods imports as a percentage of total goods imports.',
+    unit: '% of total goods imports',
+    source: 'World Bank (UNCTAD)',
+    interpretation: 'Indicates technology adoption and demand for digital equipment.',
+    color: '#F472B6', // pink-400
+    colorDark: '#F9A8D4' // pink-300
+  },
+
+  // Startup & VC Indicators
+  vcFunding: {
+    id: 'vcFunding',
+    name: 'Venture Capital Funding',
+    shortName: 'VC Funding',
+    description: 'Total venture capital investment received by startups in a country.',
+    unit: 'Billion USD',
+    source: 'Crunchbase/Dealroom',
+    interpretation: 'Higher funding indicates a vibrant startup ecosystem and investor confidence.',
+    color: '#8B5CF6', // violet-500
+    colorDark: '#A78BFA' // violet-400
+  },
+  unicornCount: {
+    id: 'unicornCount',
+    name: 'Unicorn Companies',
+    shortName: 'Unicorns',
+    description: 'Number of privately held startup companies valued at over $1 billion.',
+    unit: 'Number of companies',
+    source: 'CB Insights/Dealroom',
+    interpretation: 'Higher counts indicate successful high-growth startup ecosystems.',
+    color: '#EC4899', // pink-500
+    colorDark: '#F472B6' // pink-400
+  },
+  startupDensity: {
+    id: 'startupDensity',
+    name: 'Startup Density',
+    shortName: 'Startups/100K',
+    description: 'Number of startups per 100,000 people in the population.',
+    unit: 'Per 100,000 people',
+    source: 'Startup Genome',
+    interpretation: 'Higher density indicates entrepreneurial culture and startup ecosystem maturity.',
+    color: '#F59E0B', // amber-500
+    colorDark: '#FBBF24' // amber-400
+  },
+
+  // AI & Emerging Tech Indicators
+  aiPatents: {
+    id: 'aiPatents',
+    name: 'AI Patent Applications',
+    shortName: 'AI Patents',
+    description: 'Patent applications related to artificial intelligence and machine learning technologies.',
+    unit: 'Number of applications',
+    source: 'WIPO',
+    interpretation: 'Higher numbers indicate leadership in AI research and development.',
+    color: '#6366F1', // indigo-500
+    colorDark: '#818CF8' // indigo-400
+  },
+  semiconductorTrade: {
+    id: 'semiconductorTrade',
+    name: 'Semiconductor Trade Balance',
+    shortName: 'Chip Trade',
+    description: 'Net exports of semiconductor and integrated circuit products.',
+    unit: 'Billion USD',
+    source: 'UN Comtrade',
+    interpretation: 'Positive values indicate semiconductor manufacturing strength.',
+    color: '#14B8A6', // teal-500
+    colorDark: '#2DD4BF' // teal-400
+  },
+
+  // Digital Economy Indicators
+  ecommerceAdoption: {
+    id: 'ecommerceAdoption',
+    name: 'E-commerce Adoption',
+    shortName: 'E-commerce %',
+    description: 'E-commerce sales as a percentage of total retail sales.',
+    unit: '% of retail sales',
+    source: 'eMarketer/Statista',
+    interpretation: 'Higher percentages indicate digital transformation of retail sector.',
+    color: '#EF4444', // red-500
+    colorDark: '#F87171' // red-400
+  },
+  digitalPayments: {
+    id: 'digitalPayments',
+    name: 'Digital Payment Adoption',
+    shortName: 'Digital Pay %',
+    description: 'Percentage of population using digital payment methods.',
+    unit: '% of population',
+    source: 'World Bank (Findex)',
+    interpretation: 'Higher percentages indicate financial digitization and fintech adoption.',
+    color: '#84CC16', // lime-500
+    colorDark: '#A3E635' // lime-400
+  },
+  ictServiceExports: {
+    id: 'ictServiceExports',
+    name: 'ICT Service Exports',
+    shortName: 'ICT Services',
+    description: 'Information and communication technology service exports as a percentage of total service exports.',
+    unit: '% of service exports',
+    source: 'World Bank (UNCTAD)',
+    interpretation: 'Higher percentages indicate strength in software and digital services.',
+    color: '#06B6D4', // cyan-500
+    colorDark: '#22D3EE' // cyan-400
+  },
+
+  // Tech Workforce Indicators
+  stemGraduates: {
+    id: 'stemGraduates',
+    name: 'STEM Graduates',
+    shortName: 'STEM %',
+    description: 'New tertiary graduates in science, technology, engineering, and mathematics as a share of all graduates.',
+    unit: '% of graduates',
+    source: 'OECD/UNESCO',
+    interpretation: 'Higher percentages indicate strong pipeline of technical talent.',
+    color: '#D946EF', // fuchsia-500
+    colorDark: '#E879F9' // fuchsia-400
+  },
+  techEmployment: {
+    id: 'techEmployment',
+    name: 'Tech Sector Employment',
+    shortName: 'Tech Jobs %',
+    description: 'Employment in technology and information sectors as a percentage of total employment.',
+    unit: '% of employment',
+    source: 'OECD/ILO',
+    interpretation: 'Higher percentages indicate larger tech industry presence in the economy.',
+    color: '#0891B2', // cyan-600
+    colorDark: '#06B6D4' // cyan-500
+  }
+};
+
+// Extended country groupings for new tech categories
+export const extendedTechCountryGroups = {
+  vcLeaders: {
+    name: 'VC Leaders',
+    description: 'Countries with highest venture capital activity',
+    countries: ['USA', 'China', 'UK', 'India', 'Israel'],
+    color: '#8B5CF6'
+  },
+  digitalLeaders: {
+    name: 'Digital Leaders',
+    description: 'Countries with highest digital adoption',
+    countries: ['Sweden', 'Netherlands', 'Singapore', 'SouthKorea', 'UK'],
+    color: '#0EA5E9'
+  },
+  aiLeaders: {
+    name: 'AI Leaders',
+    description: 'Countries leading in AI patent filings',
+    countries: ['USA', 'China', 'Japan', 'SouthKorea', 'Germany'],
+    color: '#6366F1'
+  },
+  startupHubs: {
+    name: 'Startup Hubs',
+    description: 'Countries with highest startup density',
+    countries: ['Israel', 'Singapore', 'USA', 'Sweden', 'UK'],
+    color: '#F59E0B'
   }
 };
 
@@ -219,7 +400,9 @@ export const techChartColors: { [country: string]: string } = {
   Chile: '#E11D48',    // rose-600
   Norway: '#0D9488',   // teal-600
   Belgium: '#4F46E5',  // indigo-600
-  Portugal: '#DB2777'  // pink-600
+  Portugal: '#DB2777', // pink-600
+  Israel: '#0D9488',   // teal-600
+  Singapore: '#7C3AED' // violet-600
 };
 
 // Default countries to display in charts
@@ -237,6 +420,27 @@ export const innovationWeights = {
   scientificPublications: 0.10,
   internetUsers: 0.10,
   ipReceipts: 0.05
+};
+
+// Extended weights for new metrics
+export const digitalEconomyWeights = {
+  ecommerceAdoption: 0.25,
+  digitalPayments: 0.25,
+  broadbandSubscriptions: 0.20,
+  ictServiceExports: 0.15,
+  secureServers: 0.15
+};
+
+export const startupEcosystemWeights = {
+  vcFunding: 0.35,
+  unicornCount: 0.30,
+  startupDensity: 0.35
+};
+
+export const aiLeadershipWeights = {
+  aiPatents: 0.50,
+  rdSpending: 0.30,
+  stemGraduates: 0.20
 };
 
 // Format large numbers for display
@@ -268,4 +472,195 @@ export function getTrendIndicator(current: number, previous: number): { icon: st
     return { icon: '↘', color: 'text-red-500', change };
   }
   return { icon: '→', color: 'text-gray-500', change };
+}
+
+// Format currency values
+export function formatCurrency(value: number, decimals: number = 1): string {
+  if (value >= 1e9) {
+    return '$' + (value / 1e9).toFixed(decimals) + 'B';
+  }
+  if (value >= 1e6) {
+    return '$' + (value / 1e6).toFixed(decimals) + 'M';
+  }
+  if (value >= 1e3) {
+    return '$' + (value / 1e3).toFixed(decimals) + 'K';
+  }
+  return '$' + value.toFixed(decimals);
+}
+
+// Format billions for VC funding display
+export function formatBillions(value: number): string {
+  return '$' + value.toFixed(1) + 'B';
+}
+
+// Heatmap color schemes for multi-metric visualization
+export const heatmapColorSchemes = {
+  performance: {
+    name: 'Performance',
+    colors: {
+      veryHigh: { light: '#059669', dark: '#10B981' },  // green
+      high: { light: '#22C55E', dark: '#4ADE80' },
+      medium: { light: '#EAB308', dark: '#FACC15' },    // yellow
+      low: { light: '#F97316', dark: '#FB923C' },       // orange
+      veryLow: { light: '#DC2626', dark: '#EF4444' }    // red
+    }
+  },
+  diverging: {
+    name: 'Diverging',
+    colors: {
+      positive: { light: '#059669', dark: '#10B981' },
+      neutral: { light: '#6B7280', dark: '#9CA3AF' },
+      negative: { light: '#DC2626', dark: '#EF4444' }
+    }
+  },
+  sequential: {
+    name: 'Sequential',
+    colors: [
+      { light: '#EFF6FF', dark: '#1E3A5F' },  // blue-50 / custom dark
+      { light: '#BFDBFE', dark: '#1E40AF' },  // blue-200 / blue-800
+      { light: '#60A5FA', dark: '#2563EB' },  // blue-400 / blue-600
+      { light: '#2563EB', dark: '#3B82F6' },  // blue-600 / blue-500
+      { light: '#1E40AF', dark: '#60A5FA' }   // blue-800 / blue-400
+    ]
+  }
+};
+
+// Sankey diagram node colors
+export const sankeyNodeColors = {
+  inputs: {
+    rdSpending: { light: '#2563EB', dark: '#3B82F6' },
+    stemGraduates: { light: '#1D4ED8', dark: '#60A5FA' },
+    vcFunding: { light: '#3730A3', dark: '#818CF8' }
+  },
+  process: {
+    patents: { light: '#7C3AED', dark: '#8B5CF6' },
+    publications: { light: '#6D28D9', dark: '#A78BFA' },
+    researchers: { light: '#5B21B6', dark: '#C4B5FD' }
+  },
+  outputs: {
+    hightechExports: { light: '#059669', dark: '#10B981' },
+    techEmployment: { light: '#047857', dark: '#34D399' },
+    ipReceipts: { light: '#065F46', dark: '#6EE7B7' }
+  }
+};
+
+// Normalization helpers for cross-metric comparison
+export interface NormalizationConfig {
+  min: number;
+  max: number;
+  higherIsBetter: boolean;
+}
+
+export const metricNormalizationRanges: { [key: string]: NormalizationConfig } = {
+  rdSpending: { min: 0, max: 5, higherIsBetter: true },
+  patentApplicationsResident: { min: 0, max: 500000, higherIsBetter: true },
+  researchersRD: { min: 0, max: 10000, higherIsBetter: true },
+  hightechExports: { min: 0, max: 50, higherIsBetter: true },
+  internetUsers: { min: 0, max: 100, higherIsBetter: true },
+  vcFunding: { min: 0, max: 350, higherIsBetter: true },
+  stemGraduates: { min: 0, max: 40, higherIsBetter: true },
+  aiPatents: { min: 0, max: 50000, higherIsBetter: true },
+  ecommerceAdoption: { min: 0, max: 40, higherIsBetter: true },
+  digitalPayments: { min: 0, max: 100, higherIsBetter: true },
+  trademarkApplications: { min: 0, max: 1000000, higherIsBetter: true },
+  ipReceipts: { min: 0, max: 150e9, higherIsBetter: true },
+  ipPayments: { min: 0, max: 100e9, higherIsBetter: false }
+};
+
+// Normalize a value to 0-100 scale based on metric config
+export function normalizeValue(value: number, metricKey: string): number {
+  const config = metricNormalizationRanges[metricKey];
+  if (!config) return 50;
+  
+  const { min, max, higherIsBetter } = config;
+  let normalized = ((value - min) / (max - min)) * 100;
+  normalized = Math.max(0, Math.min(100, normalized));
+  
+  return higherIsBetter ? normalized : 100 - normalized;
+}
+
+// Calculate composite score from multiple normalized metrics
+export function calculateCompositeScore(
+  values: { [key: string]: number },
+  weights: { [key: string]: number }
+): number {
+  let totalWeight = 0;
+  let weightedSum = 0;
+  
+  Object.entries(weights).forEach(([key, weight]) => {
+    if (values[key] !== undefined && values[key] !== null) {
+      const normalized = normalizeValue(values[key], key);
+      weightedSum += normalized * weight;
+      totalWeight += weight;
+    }
+  });
+  
+  return totalWeight > 0 ? weightedSum / totalWeight : 0;
+}
+
+// Get color for normalized value (0-100)
+export function getHeatmapColor(value: number, isDarkMode: boolean): string {
+  const scheme = heatmapColorSchemes.performance.colors;
+  
+  if (value >= 80) return isDarkMode ? scheme.veryHigh.dark : scheme.veryHigh.light;
+  if (value >= 60) return isDarkMode ? scheme.high.dark : scheme.high.light;
+  if (value >= 40) return isDarkMode ? scheme.medium.dark : scheme.medium.light;
+  if (value >= 20) return isDarkMode ? scheme.low.dark : scheme.low.light;
+  return isDarkMode ? scheme.veryLow.dark : scheme.veryLow.light;
+}
+
+// Get diverging color for balance values (positive/negative)
+export function getDivergingColor(value: number, isDarkMode: boolean): string {
+  const scheme = heatmapColorSchemes.diverging.colors;
+  
+  if (value > 0) return isDarkMode ? scheme.positive.dark : scheme.positive.light;
+  if (value < 0) return isDarkMode ? scheme.negative.dark : scheme.negative.light;
+  return isDarkMode ? scheme.neutral.dark : scheme.neutral.light;
+}
+
+// Calculate efficiency ratio (output per input)
+export function calculateEfficiency(output: number, input: number): number {
+  if (input === 0) return 0;
+  return output / input;
+}
+
+// Get quadrant classification for scatter plots
+export function getQuadrant(
+  xValue: number, 
+  yValue: number, 
+  xThreshold: number, 
+  yThreshold: number
+): 'high-high' | 'high-low' | 'low-high' | 'low-low' {
+  const isHighX = xValue >= xThreshold;
+  const isHighY = yValue >= yThreshold;
+  
+  if (isHighX && isHighY) return 'high-high';
+  if (isHighX && !isHighY) return 'high-low';
+  if (!isHighX && isHighY) return 'low-high';
+  return 'low-low';
+}
+
+// Quadrant labels for R&D efficiency chart
+export const efficiencyQuadrantLabels = {
+  'high-high': { label: 'Innovation Leaders', description: 'High investment, high output', color: '#3B82F6' },
+  'high-low': { label: 'Inefficient Spenders', description: 'High investment, low output', color: '#EF4444' },
+  'low-high': { label: 'Efficient Innovators', description: 'Low investment, high output', color: '#10B981' },
+  'low-low': { label: 'Developing', description: 'Low investment, low output', color: '#F59E0B' }
+};
+
+// IP trade balance classification
+export const ipBalanceClassification = {
+  surplus: { label: 'IP Exporter', description: 'Net receiver of IP royalties', color: '#10B981' },
+  deficit: { label: 'IP Importer', description: 'Net payer of IP royalties', color: '#EF4444' },
+  balanced: { label: 'Balanced', description: 'Roughly equal IP flows', color: '#6B7280' }
+};
+
+// Get IP balance classification
+export function getIPBalanceClass(receipts: number, payments: number): keyof typeof ipBalanceClassification {
+  const balance = receipts - payments;
+  const threshold = Math.max(receipts, payments) * 0.1;
+  
+  if (balance > threshold) return 'surplus';
+  if (balance < -threshold) return 'deficit';
+  return 'balanced';
 }

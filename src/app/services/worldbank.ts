@@ -6,6 +6,17 @@ import { fetchJapanGovernmentDebtOECD, fetchOECDPolicyRates, fetchJapanPolicyRat
 import { fetchJapanGovernmentDebtIMF, fetchIMFGovernmentDebt, fetchIMFInterestRates, clearIMFCache, type IMFDataPoint } from "./imf";
 import { fetchBISPolicyRates, fetchJapanPolicyRatesBIS, clearBISCache, type BISDataPoint } from "./bis";
 import { TECHNOLOGY_FALLBACK_DATA, type FallbackDataPoint } from "../data/technologyFallbackData";
+import { 
+  vcFundingData, 
+  unicornData, 
+  aiPatentData, 
+  ecommerceAdoptionData, 
+  digitalPaymentData,
+  stemGraduatesData,
+  techEmploymentData,
+  startupDensityData,
+  convertToCountryData
+} from "../data/extendedTechData";
 import { fetchWIPOPatentData, type WIPOTechData, type WIPODataPoint } from "./wipo";
 import { fetchEurostatTechnologyData, type EurostatTechData, type EurostatDataPoint } from "./eurostat";
 import { fetchITUTechnologyData, type ITUTechData, type ITUDataPoint } from "./itu";
@@ -89,12 +100,20 @@ const INDICATORS = {
   TECHNICIANS_RD: 'SP.POP.TECH.RD.P6', // Technicians in R&D (per million people)
   IP_RECEIPTS: 'BX.GSR.ROYL.CD', // Charges for the use of intellectual property, receipts (BoP, current US$)
   IP_PAYMENTS: 'BM.GSR.ROYL.CD', // Charges for the use of intellectual property, payments (BoP, current US$)
+  
+  // Digital Infrastructure Indicators
+  BROADBAND_SUBSCRIPTIONS: 'IT.NET.BBND.P2', // Fixed broadband subscriptions (per 100 people)
+  SECURE_SERVERS: 'IT.NET.SECR.P6', // Secure Internet servers (per 1 million people)
+  ICT_GOODS_IMPORTS: 'TM.VAL.ICTG.ZS.UN', // ICT goods imports (% of total goods imports)
+  
+  // Digital Economy Indicators
+  ICT_SERVICE_EXPORTS: 'BX.GSR.CCIS.ZS', // ICT service exports (% of service exports)
 };
 
 // Country codes for major economies
 const COUNTRY_CODES = [
   'US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'AU', 'MX', 'KR', 'ES', 'SE', 'CH', 'TR', 'NG', 'CN', 'RU', 'BR', 'CL', 'AR', 'IN', 'NO',
-  'NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG'
+  'NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG', 'IL', 'SG'
 ];
 
 // Country name mapping
@@ -128,7 +147,9 @@ const COUNTRY_NAMES: { [key: string]: string } = {
   'ZA': 'SouthAfrica',
   'PL': 'Poland',
   'SA': 'SaudiArabia',
-  'EG': 'Egypt'
+  'EG': 'Egypt',
+  'IL': 'Israel',
+  'SG': 'Singapore'
 };
 
 // Function to fetch data with retry logic and exponential backoff
@@ -1330,12 +1351,34 @@ export interface TechnologyData {
   ipPayments: CountryData[];
   internetUsers: CountryData[];
   mobileSubscriptions: CountryData[];
+  
+  // Digital Infrastructure
+  broadbandSubscriptions: CountryData[];
+  secureServers: CountryData[];
+  ictGoodsImports: CountryData[];
+  
+  // Startup & VC (from static data)
+  vcFunding: CountryData[];
+  unicornCount: CountryData[];
+  startupDensity: CountryData[];
+  
+  // AI & Emerging Tech
+  aiPatents: CountryData[];
+  
+  // Digital Economy
+  ecommerceAdoption: CountryData[];
+  digitalPayments: CountryData[];
+  ictServiceExports: CountryData[];
+  
+  // Tech Workforce
+  stemGraduates: CountryData[];
+  techEmployment: CountryData[];
 }
 
 // Fetch technology and innovation data for the Technology page
 export async function fetchTechnologyData(forceRefresh: boolean = false): Promise<TechnologyData> {
   try {
-    const cacheKey = 'technology_data_all';
+    const cacheKey = `technology_data_all_v${CURRENT_CACHE_VERSION}`;
     
     if (!forceRefresh) {
       const cached = clientCache.get<TechnologyData>(cacheKey);
@@ -1363,7 +1406,13 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       fetchIndicatorData(INDICATORS.IP_RECEIPTS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.IP_PAYMENTS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.INTERNET_USERS, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.MOBILE_SUBSCRIPTIONS, COUNTRY_CODES, !forceRefresh)
+      fetchIndicatorData(INDICATORS.MOBILE_SUBSCRIPTIONS, COUNTRY_CODES, !forceRefresh),
+      // New Digital Infrastructure indicators
+      fetchIndicatorData(INDICATORS.BROADBAND_SUBSCRIPTIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.SECURE_SERVERS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ICT_GOODS_IMPORTS, COUNTRY_CODES, !forceRefresh),
+      // New Digital Economy indicator
+      fetchIndicatorData(INDICATORS.ICT_SERVICE_EXPORTS, COUNTRY_CODES, !forceRefresh)
     ]);
 
     const [
@@ -1379,7 +1428,12 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       ipReceiptsResult,
       ipPaymentsResult,
       internetUsersResult,
-      mobileSubsResult
+      mobileSubsResult,
+      // New results
+      broadbandResult,
+      secureServersResult,
+      ictImportsResult,
+      ictServiceExportsResult
     ] = results;
 
     const indicatorNames = [
@@ -1387,7 +1441,9 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       'Trademark Applications', 'R&D Spending', 'Researchers in R&D',
       'Technicians in R&D', 'High-tech Exports', 'ICT Exports',
       'Scientific Publications', 'IP Receipts', 'IP Payments',
-      'Internet Users', 'Mobile Subscriptions'
+      'Internet Users', 'Mobile Subscriptions',
+      'Broadband Subscriptions', 'Secure Servers', 'ICT Goods Imports',
+      'ICT Service Exports'
     ];
 
     let failedCount = 0;
@@ -1791,6 +1847,40 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
     );
     hightechData = mergeEurostatData(hightechData, eurostatTechData.hightechExports);
 
+    // Broadband data: World Bank + ITU fixed broadband
+    let broadbandData = broadbandResult.status === 'fulfilled' ? broadbandResult.value : [];
+    broadbandData = mergeITUData(broadbandData, ituTechData.fixedBroadband);
+
+    // Convert static data to CountryData format
+    console.log('🔬 Converting static data to CountryData format...');
+    const vcFundingCountryData = convertToCountryData(vcFundingData);
+    console.log('   - vcFunding:', vcFundingCountryData.length, 'years', vcFundingCountryData[0] ? Object.keys(vcFundingCountryData[0]).filter(k => k !== 'year').slice(0, 5) : 'empty');
+    
+    const aiPatentCountryData = convertToCountryData(aiPatentData);
+    console.log('   - aiPatents:', aiPatentCountryData.length, 'years', aiPatentCountryData[0] ? Object.keys(aiPatentCountryData[0]).filter(k => k !== 'year').slice(0, 5) : 'empty');
+    
+    const ecommerceCountryData = convertToCountryData(ecommerceAdoptionData);
+    console.log('   - ecommerce:', ecommerceCountryData.length, 'years', ecommerceCountryData[0] ? Object.keys(ecommerceCountryData[0]).filter(k => k !== 'year').slice(0, 5) : 'empty');
+    
+    const digitalPaymentCountryData = convertToCountryData(digitalPaymentData);
+    console.log('   - digitalPayments:', digitalPaymentCountryData.length, 'years');
+    
+    const stemGraduatesCountryData = convertToCountryData(stemGraduatesData);
+    console.log('   - stemGraduates:', stemGraduatesCountryData.length, 'years');
+    
+    const techEmploymentCountryData = convertToCountryData(techEmploymentData);
+    console.log('   - techEmployment:', techEmploymentCountryData.length, 'years');
+    
+    const startupDensityCountryData = convertToCountryData(startupDensityData);
+    console.log('   - startupDensity:', startupDensityCountryData.length, 'years');
+    
+    // Convert unicorn data (single year snapshot) to CountryData format
+    const unicornCountryData: CountryData[] = [{
+      year: 2024,
+      ...unicornData
+    }];
+    console.log('   - unicorns:', unicornCountryData.length, 'years', Object.keys(unicornCountryData[0]).filter(k => k !== 'year').slice(0, 5));
+
     const technologyData: TechnologyData = {
       patentApplicationsResident: patentData,
       patentApplicationsNonResident: patentNonResidentResult.status === 'fulfilled' ? patentNonResidentResult.value : [],
@@ -1810,7 +1900,29 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       ipReceipts: ipReceiptsResult.status === 'fulfilled' ? ipReceiptsResult.value : [],
       ipPayments: ipPaymentsResult.status === 'fulfilled' ? ipPaymentsResult.value : [],
       internetUsers: internetData,
-      mobileSubscriptions: mobileData
+      mobileSubscriptions: mobileData,
+      
+      // Digital Infrastructure
+      broadbandSubscriptions: broadbandData,
+      secureServers: secureServersResult.status === 'fulfilled' ? secureServersResult.value : [],
+      ictGoodsImports: ictImportsResult.status === 'fulfilled' ? ictImportsResult.value : [],
+      
+      // Startup & VC (from static data)
+      vcFunding: vcFundingCountryData,
+      unicornCount: unicornCountryData,
+      startupDensity: startupDensityCountryData,
+      
+      // AI & Emerging Tech
+      aiPatents: aiPatentCountryData,
+      
+      // Digital Economy
+      ecommerceAdoption: ecommerceCountryData,
+      digitalPayments: digitalPaymentCountryData,
+      ictServiceExports: ictServiceExportsResult.status === 'fulfilled' ? ictServiceExportsResult.value : [],
+      
+      // Tech Workforce
+      stemGraduates: stemGraduatesCountryData,
+      techEmployment: techEmploymentCountryData
     };
 
     // Cache for 24 hours
@@ -1832,7 +1944,7 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
     console.error('Critical error fetching technology data:', error);
     
     // Try to return cached data as fallback
-    const cached = clientCache.get<TechnologyData>('technology_data_all');
+    const cached = clientCache.get<TechnologyData>(`technology_data_all_v${CURRENT_CACHE_VERSION}`);
     if (cached) {
       console.warn('Returning stale cached technology data due to API error');
       return cached;
@@ -1852,7 +1964,19 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       ipReceipts: [],
       ipPayments: [],
       internetUsers: [],
-      mobileSubscriptions: []
+      mobileSubscriptions: [],
+      broadbandSubscriptions: [],
+      secureServers: [],
+      ictGoodsImports: [],
+      vcFunding: [],
+      unicornCount: [],
+      startupDensity: [],
+      aiPatents: [],
+      ecommerceAdoption: [],
+      digitalPayments: [],
+      ictServiceExports: [],
+      stemGraduates: [],
+      techEmployment: []
     };
   }
 }

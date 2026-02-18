@@ -148,7 +148,7 @@ export const clientCache = new ClientCache();
 // v3: Added 16 additional economic indicators (GDP per capita PPP, current account, etc.)
 // v4: Added BIS (Bank for International Settlements) integration
 // v5: Enhanced OECD integration with policy rates
-export const CURRENT_CACHE_VERSION = 7;
+export const CURRENT_CACHE_VERSION = 8;
 
 // Export cache key generators for consistency
 export const CacheKeys = {
