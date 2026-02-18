@@ -182,7 +182,7 @@ const PatentTrendsChart: React.FC<PatentTrendsChartProps> = ({
               style={{
                 backgroundColor: selectedCountries.includes(country) ? techChartColors[country] : undefined,
                 color: selectedCountries.includes(country) ? 'white' : undefined,
-                ringColor: selectedCountries.includes(country) ? techChartColors[country] : undefined
+                borderColor: selectedCountries.includes(country) ? techChartColors[country] : undefined
               }}
             >
               {country}
