@@ -12,7 +12,8 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-  ComposedChart
+  ComposedChart,
+  Cell
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber, formatPercent, defaultTechCountries } from '../data/technologyIndicators';
@@ -262,8 +263,8 @@ const RDSpendingChart: React.FC<RDSpendingChartProps> = ({
                 radius={[0, 4, 4, 0]}
               >
                 {yearData.map((entry, index) => (
-                  <rect
-                    key={`bar-${index}`}
+                  <Cell
+                    key={`cell-${index}`}
                     fill={techChartColors[entry.country] || '#8884d8'}
                   />
                 ))}
