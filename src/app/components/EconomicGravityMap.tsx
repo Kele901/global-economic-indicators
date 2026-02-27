@@ -27,6 +27,10 @@ export interface HistoricalPoint {
     innovations: string;
     economicSystem: string;
   };
+  population?: string;
+  estimatedGDP?: string;
+  keyFigures?: string;
+  historicalContext?: string;
 }
 
 interface EconomicGravityMapProps {
@@ -440,6 +444,12 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
               <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} line-clamp-2`}>
                 {tooltipContent.description}
               </p>
+              {(tooltipContent.population || tooltipContent.estimatedGDP) && (
+                <div className={`flex gap-3 mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {tooltipContent.population && <span>Pop: {tooltipContent.population}</span>}
+                  {tooltipContent.estimatedGDP && <span>GDP: {tooltipContent.estimatedGDP}</span>}
+                </div>
+              )}
               <div className={`mt-2 pt-2 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                 <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   <span className="font-semibold">Cities:</span> {tooltipContent.details.mainCities}
@@ -498,6 +508,26 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
             </button>
           </div>
           
+          {(selectedPoint.population || selectedPoint.estimatedGDP || selectedPoint.keyFigures) && (
+            <div className={`mt-3 flex flex-wrap gap-3 text-xs`}>
+              {selectedPoint.population && (
+                <span className={`px-2.5 py-1 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                  Pop: {selectedPoint.population}
+                </span>
+              )}
+              {selectedPoint.estimatedGDP && (
+                <span className={`px-2.5 py-1 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                  GDP: {selectedPoint.estimatedGDP}
+                </span>
+              )}
+              {selectedPoint.keyFigures && (
+                <span className={`px-2.5 py-1 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                  Key Figures: {selectedPoint.keyFigures}
+                </span>
+              )}
+            </div>
+          )}
+
           <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
@@ -534,6 +564,13 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
               </div>
             </div>
           </div>
+
+          {selectedPoint.historicalContext && (
+            <div className={`mt-3 p-3 rounded-lg text-xs ${isDarkMode ? 'bg-blue-900/20 text-gray-300 border-blue-800' : 'bg-blue-50 text-gray-600 border-blue-200'} border`}>
+              <span className={`font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Historical Context: </span>
+              {selectedPoint.historicalContext}
+            </div>
+          )}
 
           {/* Navigation buttons */}
           <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-between`}>
