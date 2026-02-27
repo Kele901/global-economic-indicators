@@ -7,6 +7,7 @@ import { calculateCurrencyPairs } from '../services/forex';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import InfoPanel from '../components/InfoPanel';
 import { economicMetrics } from '../data/economicMetrics';
+import { CENTRAL_BANK_RATES, CURRENCY_REGIMES, SAFE_HAVEN_CURRENCIES, REER_DATA } from '../data/currencyHierarchyData';
 
 // Dynamically import new components to avoid SSR issues with charts
 const HistoricalRateChart = dynamic(() => import('../components/HistoricalRateChart'), { ssr: false });
@@ -33,132 +34,42 @@ interface CurrencyInfo {
   name: string;
   description: string;
   tier: number;
+  symbol: string;
+  country: string;
+  dailyVolume: string;
   exchangeRates?: {
     [key: string]: number;
   };
 }
 
+const TIER_COLORS: Record<number, { border: string; bg: string; text: string }> = {
+  1: { border: '#3B82F6', bg: 'rgba(59,130,246,0.15)', text: '#60A5FA' },
+  2: { border: '#D97706', bg: 'rgba(217,119,6,0.15)', text: '#FBBF24' },
+  3: { border: '#059669', bg: 'rgba(5,150,105,0.15)', text: '#34D399' },
+  4: { border: '#E11D48', bg: 'rgba(225,29,72,0.15)', text: '#FB7185' },
+};
+
 const currencyData: { [key: string]: CurrencyInfo } = {
-  USD: {
-    code: 'USD',
-    name: 'US Dollar',
-    description: 'Global reserve currency, dominates international trade and foreign exchange reserves.',
-    tier: 1
-  },
-  EUR: {
-    code: 'EUR',
-    name: 'Euro',
-    description: 'Second most traded currency, official currency of the Eurozone.',
-    tier: 2
-  },
-  JPY: {
-    code: 'JPY',
-    name: 'Japanese Yen',
-    description: 'Major Asian currency, known for its role in carry trades.',
-    tier: 2
-  },
-  GBP: {
-    code: 'GBP',
-    name: 'British Pound',
-    description: 'Oldest currency still in use, major reserve currency.',
-    tier: 2
-  },
-  CNH: {
-    code: 'CNH',
-    name: 'Offshore Chinese Yuan',
-    description: 'Offshore trading version of the Chinese Yuan, increasingly important in global trade.',
-    tier: 2
-  },
-  CHF: {
-    code: 'CHF',
-    name: 'Swiss Franc',
-    description: 'Traditional safe-haven currency, known for stability.',
-    tier: 2
-  },
-  CNY: {
-    code: 'CNY',
-    name: 'Chinese Yuan',
-    description: 'Growing international currency, backed by world\'s second-largest economy.',
-    tier: 3
-  },
-  HKD: {
-    code: 'HKD',
-    name: 'Hong Kong Dollar',
-    description: 'Major Asian financial center currency, pegged to USD.',
-    tier: 3
-  },
-  SEK: {
-    code: 'SEK',
-    name: 'Swedish Krona',
-    description: 'Important Scandinavian currency, highly traded in Europe.',
-    tier: 3
-  },
-  NOK: {
-    code: 'NOK',
-    name: 'Norwegian Krone',
-    description: 'Major oil currency, closely tied to petroleum exports.',
-    tier: 3
-  },
-  NZD: {
-    code: 'NZD',
-    name: 'New Zealand Dollar',
-    description: 'Major commodity currency, known as the Kiwi dollar.',
-    tier: 3
-  },
-  CAD: {
-    code: 'CAD',
-    name: 'Canadian Dollar',
-    description: 'Commodity currency, closely tied to natural resources.',
-    tier: 3
-  },
-  AUD: {
-    code: 'AUD',
-    name: 'Australian Dollar',
-    description: 'Major commodity currency, highly traded in Asian markets.',
-    tier: 3
-  },
-  SGD: {
-    code: 'SGD',
-    name: 'Singapore Dollar',
-    description: 'Major Asian financial hub currency, known for stability.',
-    tier: 3
-  },
-  MXN: {
-    code: 'MXN',
-    name: 'Mexican Peso',
-    description: 'Most traded currency in Latin America.',
-    tier: 4
-  },
-  BRL: {
-    code: 'BRL',
-    name: 'Brazilian Real',
-    description: 'Major South American currency.',
-    tier: 4
-  },
-  INR: {
-    code: 'INR',
-    name: 'Indian Rupee',
-    description: 'Currency of one of the world\'s largest economies.',
-    tier: 4
-  },
-  ZAR: {
-    code: 'ZAR',
-    name: 'South African Rand',
-    description: 'Most traded African currency.',
-    tier: 4
-  },
-  RUB: {
-    code: 'RUB',
-    name: 'Russian Ruble',
-    description: 'Major commodity currency.',
-    tier: 4
-  },
-  TRY: {
-    code: 'TRY',
-    name: 'Turkish Lira',
-    description: 'Important regional currency in the Middle East.',
-    tier: 4
-  }
+  USD: { code: 'USD', name: 'US Dollar', symbol: '$', country: 'United States', dailyVolume: '$6.6T', description: 'Global reserve currency, dominates international trade and foreign exchange reserves.', tier: 1 },
+  EUR: { code: 'EUR', name: 'Euro', symbol: '€', country: 'Eurozone', dailyVolume: '$2.3T', description: 'Second most traded currency, official currency of the Eurozone.', tier: 2 },
+  JPY: { code: 'JPY', name: 'Japanese Yen', symbol: '¥', country: 'Japan', dailyVolume: '$1.25T', description: 'Major Asian currency, known for its role in carry trades.', tier: 2 },
+  GBP: { code: 'GBP', name: 'British Pound', symbol: '£', country: 'United Kingdom', dailyVolume: '$968B', description: 'Oldest currency still in use, major reserve currency.', tier: 2 },
+  CNH: { code: 'CNH', name: 'Offshore Chinese Yuan', symbol: '¥', country: 'China (Offshore)', dailyVolume: '$526B', description: 'Offshore trading version of the Chinese Yuan, increasingly important in global trade.', tier: 2 },
+  CHF: { code: 'CHF', name: 'Swiss Franc', symbol: 'Fr', country: 'Switzerland', dailyVolume: '$390B', description: 'Traditional safe-haven currency, known for stability.', tier: 2 },
+  CNY: { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', country: 'China', dailyVolume: '$526B', description: 'Growing international currency, backed by world\'s second-largest economy.', tier: 3 },
+  HKD: { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', country: 'Hong Kong', dailyVolume: '$219B', description: 'Major Asian financial center currency, pegged to USD.', tier: 3 },
+  SEK: { code: 'SEK', name: 'Swedish Krona', symbol: 'kr', country: 'Sweden', dailyVolume: '$134B', description: 'Important Scandinavian currency, highly traded in Europe.', tier: 3 },
+  NOK: { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr', country: 'Norway', dailyVolume: '$119B', description: 'Major oil currency, closely tied to petroleum exports.', tier: 3 },
+  NZD: { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$', country: 'New Zealand', dailyVolume: '$107B', description: 'Major commodity currency, known as the Kiwi dollar.', tier: 3 },
+  CAD: { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', country: 'Canada', dailyVolume: '$332B', description: 'Commodity currency, closely tied to natural resources.', tier: 3 },
+  AUD: { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', country: 'Australia', dailyVolume: '$420B', description: 'Major commodity currency, highly traded in Asian markets.', tier: 3 },
+  SGD: { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', country: 'Singapore', dailyVolume: '$164B', description: 'Major Asian financial hub currency, known for stability.', tier: 3 },
+  MXN: { code: 'MXN', name: 'Mexican Peso', symbol: 'Mex$', country: 'Mexico', dailyVolume: '$114B', description: 'Most traded currency in Latin America.', tier: 4 },
+  BRL: { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', country: 'Brazil', dailyVolume: '$72B', description: 'Major South American currency.', tier: 4 },
+  INR: { code: 'INR', name: 'Indian Rupee', symbol: '₹', country: 'India', dailyVolume: '$56B', description: 'Currency of one of the world\'s largest economies.', tier: 4 },
+  ZAR: { code: 'ZAR', name: 'South African Rand', symbol: 'R', country: 'South Africa', dailyVolume: '$64B', description: 'Most traded African currency.', tier: 4 },
+  RUB: { code: 'RUB', name: 'Russian Ruble', symbol: '₽', country: 'Russia', dailyVolume: '$26B', description: 'Major commodity currency, subject to capital controls.', tier: 4 },
+  TRY: { code: 'TRY', name: 'Turkish Lira', symbol: '₺', country: 'Turkey', dailyVolume: '$71B', description: 'Important regional currency in the Middle East.', tier: 4 },
 };
 
 const navigationTabs: Tab[] = [
@@ -189,8 +100,6 @@ const CurrencyHierarchyPage = () => {
   const [converterFromCurrency, setConverterFromCurrency] = useState<string>('USD');
   const [converterResults, setConverterResults] = useState<{ [key: string]: number }>({});
 
-  // Define Tier 4 currencies for tooltip positioning
-  const tier4Currencies = ['MXN', 'BRL', 'INR', 'ZAR', 'RUB', 'TRY'];
 
   useEffect(() => {
     // Apply theme changes to DOM
@@ -318,123 +227,22 @@ const CurrencyHierarchyPage = () => {
   ) => {
     if (currency) {
       const rect = event.currentTarget.getBoundingClientRect();
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
-      // Calculate base position
-      let x = rect.left + rect.width / 2;
-      let y = rect.top + scrollTop;
-      
-      // Aggressive handling for right-side currencies (like TRY at x=900)
-      if (x > viewportWidth * 0.5) {
-        // For currencies on the right half, position tooltip to the left with more offset
-        x = x - 300;
+      const container = (event.currentTarget as SVGElement).closest('.relative');
+      const containerRect = container?.getBoundingClientRect() ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+      const containerScrollTop = (container as HTMLElement)?.scrollTop ?? 0;
+
+      const tooltipW = 280;
+      const tooltipH = 220;
+      const pad = 12;
+      let x = rect.left + rect.width / 2 - containerRect.left;
+      let y = rect.top - containerRect.top + containerScrollTop - pad;
+
+      x = Math.max(tooltipW / 2 + pad, Math.min(x, containerRect.width - tooltipW / 2 - pad));
+
+      if (y - tooltipH < 0) {
+        y = rect.bottom - containerRect.top + containerScrollTop + pad;
       }
-      
-      // Extra aggressive handling for currencies at the very right edge
-      if (x > viewportWidth * 0.7) {
-        // For currencies very close to the right edge, position tooltip much further left
-        x = x - 400;
-      }
-      
-      // Super aggressive for extreme right edge currencies
-      if (x > viewportWidth * 0.8) {
-        // For currencies at the extreme right edge, force tooltip to left side
-        x = 200;
-      }
-      
-      // Specific positioning for known right-edge currencies
-      if (currency === 'TRY' || currency === 'RUB' || currency === 'AUD') {
-        // Force these currencies to have tooltips on the left side of the screen
-        x = Math.min(250, viewportWidth * 0.3);
-      }
-      
-      // Adjust horizontal position to keep tooltip within viewport
-      if (x < 120) {
-        x = 120; // Keep tooltip away from left edge
-      } else if (x > viewportWidth - 120) {
-        x = viewportWidth - 120; // Keep tooltip away from right edge
-      }
-      
-      // Final fallback: if tooltip would still be off-screen, force it to center
-      if (x < 100 || x > viewportWidth - 100) {
-        x = viewportWidth / 2; // Center the tooltip as a last resort
-      }
-      
-      // Ultimate safety override for right-edge currencies
-      if (currency === 'TRY' || currency === 'RUB' || currency === 'AUD') {
-        // These currencies ALWAYS get tooltips in the left third of the screen
-        x = Math.max(150, Math.min(300, viewportWidth * 0.25));
-        console.log(`${currency} Ultimate Safety Override:`, { x, viewportWidth });
-      }
-      
-      // Special positioning for Tier 4 currencies - keep them closer to their actual positions
-      if (tier4Currencies.includes(currency)) {
-        // For Tier 4 currencies, use a more moderate leftward shift to keep them closer
-        const originalX = rect.left + rect.width / 2;
-        if (originalX > viewportWidth * 0.7) {
-          // Only shift significantly if they're very close to the right edge
-          x = originalX - 200;
-        } else if (originalX > viewportWidth * 0.6) {
-          // Moderate shift for currencies in the right third
-          x = originalX - 150;
-        } else {
-          // Keep close to original position for currencies in the left/middle
-          x = originalX - 50;
-        }
-        
-        // Ensure the tooltip stays within viewport bounds
-        if (x < 120) {
-          x = 120;
-        } else if (x > viewportWidth - 120) {
-          x = viewportWidth - 120;
-        }
-      }
-      
-      // Special vertical positioning for TRY
-      if (currency === 'TRY') {
-        // Position TRY tooltip higher on the screen
-        y = Math.max(100, y - 100);
-      }
-      
-      // Special vertical positioning for all Tier 4 currencies
-      if (tier4Currencies.includes(currency)) {
-        // Position all Tier 4 currency tooltips higher on the screen
-        y = Math.max(100, y - 80);
-      }
-      
-      // Debug logging for TRY positioning
-      if (currency === 'TRY') {
-        console.log('TRY Tooltip Positioning:', {
-          originalX: rect.left + rect.width / 2,
-          adjustedX: x,
-          originalY: rect.top + scrollTop,
-          adjustedY: y,
-          viewportWidth,
-          rect: { left: rect.left, right: rect.right, width: rect.width },
-          finalX: x,
-          currency: currency
-        });
-      }
-      
-      // Debug logging for all right-edge currencies
-      if (x > viewportWidth * 0.6) {
-        console.log(`${currency} Tooltip (Right Edge):`, {
-          originalX: rect.left + rect.width / 2,
-          adjustedX: x,
-          viewportWidth,
-          finalX: x
-        });
-      }
-      
-      // Adjust vertical position to keep tooltip within viewport
-      if (y < 100) {
-        y = rect.bottom + scrollTop + 20; // Show tooltip below if too close to top
-      } else if (y > viewportHeight - 100) {
-        y = rect.top + scrollTop - 20; // Show tooltip above if too close to bottom
-      }
-      
+
       setTooltipPosition({ x, y });
     }
     setHoveredCurrency(currency);
@@ -666,49 +474,114 @@ const CurrencyHierarchyPage = () => {
           position="top-right"
           size="medium"
         />
-        {/* Tooltip with Exchange Rate */}
-        {hoveredCurrency && currencyData[hoveredCurrency] && (
-          <div
-            className="absolute z-50 bg-black bg-opacity-95 text-white p-3 rounded-lg pointer-events-none shadow-xl transition-all duration-200 ease-out animate-in fade-in-0 zoom-in-95"
-            style={{
-              left: `${tooltipPosition.x}px`,
-              top: `${tooltipPosition.y - (hoveredCurrency === 'TRY' ? 60 : tier4Currencies.includes(hoveredCurrency) ? 50 : 35)}px`,
-              transform: 'translateX(-50%)',
-              minWidth: '200px',
-              maxWidth: '250px'
-            }}
-          >
-            <div className="font-semibold text-sm mb-1">{currencyData[hoveredCurrency].name}</div>
-            <div className="text-xs text-gray-300 mb-2">Tier {currencyData[hoveredCurrency].tier}</div>
-            {selectedCurrency && exchangeRates[selectedCurrency]?.[hoveredCurrency] && (
-              <div className="text-sm">
-                <div className="font-medium text-green-400">
-                  1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency]?.[hoveredCurrency])} {hoveredCurrency}
-                </div>
-                {lastUpdated && (
-                  <div className="text-xs text-gray-400 mt-1">
-                    Updated: {formatLastUpdated(lastUpdated)}
+        {/* Refined Tooltip */}
+        {hoveredCurrency && currencyData[hoveredCurrency] && (() => {
+          const cd = currencyData[hoveredCurrency];
+          const tier = cd.tier;
+          const tc = TIER_COLORS[tier];
+          const cbRate = CENTRAL_BANK_RATES.find(r => r.currency === hoveredCurrency || (hoveredCurrency === 'CNH' && r.currency === 'CNY'));
+          const reer = REER_DATA.find(r => r.currency === hoveredCurrency || (hoveredCurrency === 'CNH' && r.currency === 'CNY'));
+          const safeHaven = SAFE_HAVEN_CURRENCIES.find(r => r.currency === hoveredCurrency || (hoveredCurrency === 'CNH' && r.currency === 'CNY'));
+          const trendArrow = cbRate?.trend === 'rising' ? '▲' : cbRate?.trend === 'falling' ? '▼' : '—';
+          const trendColor = cbRate?.trend === 'rising' ? '#F87171' : cbRate?.trend === 'falling' ? '#34D399' : '#9CA3AF';
+          return (
+            <div
+              className="absolute z-50 pointer-events-none shadow-2xl transition-all duration-150 ease-out"
+              style={{
+                left: `${tooltipPosition.x}px`,
+                top: `${tooltipPosition.y}px`,
+                transform: 'translate(-50%, -100%)',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+              }}
+            >
+              <div
+                className="rounded-lg overflow-hidden backdrop-blur-sm"
+                style={{
+                  borderLeft: `4px solid ${tc.border}`,
+                  background: isDarkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.97)',
+                  minWidth: '260px',
+                  maxWidth: '300px',
+                }}
+              >
+                <div className="p-3">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-base font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{cd.code}</span>
+                      <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{cd.name}</span>
+                    </div>
+                    <span
+                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                      style={{ background: tc.bg, color: tc.text }}
+                    >
+                      Tier {tier}
+                    </span>
                   </div>
-                )}
-              </div>
-            )}
-            
-            {/* Quick Converter in Tooltip */}
-            {converterAmount && converterFromCurrency && converterFromCurrency !== hoveredCurrency && (
-              <div className="mt-2 pt-2 border-t border-gray-600">
-                <div className="text-xs text-gray-300 mb-1">Quick Convert:</div>
-                <div className="text-sm text-blue-300">
-                  {converterAmount} {converterFromCurrency} = {
-                    formatConvertedAmount(
-                      parseFloat(converterAmount) * (exchangeRates[converterFromCurrency]?.[hoveredCurrency] || 0),
-                      hoveredCurrency
-                    )
-                  } {hoveredCurrency}
+
+                  {/* Country + Symbol */}
+                  <div className={`text-xs mb-2.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {cd.country} &middot; {cd.symbol} &middot; Vol: {cd.dailyVolume}
+                  </div>
+
+                  {/* Key stats row */}
+                  <div className={`flex gap-3 text-[11px] mb-2.5 pb-2.5 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} style={{ borderBottomWidth: '1px', borderBottomStyle: 'solid' }}>
+                    {cbRate && (
+                      <div>
+                        <div className={`font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{cbRate.bankAbbrev}</div>
+                        <div className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {cbRate.rate}% <span style={{ color: trendColor, fontSize: '10px' }}>{trendArrow}</span>
+                        </div>
+                      </div>
+                    )}
+                    {reer && (
+                      <div>
+                        <div className={`font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>REER</div>
+                        <div className={`font-semibold ${reer.isOvervalued ? 'text-rose-400' : isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                          {reer.deviation > 0 ? '+' : ''}{reer.deviation.toFixed(1)}%
+                        </div>
+                      </div>
+                    )}
+                    {safeHaven && (
+                      <div>
+                        <div className={`font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Safe Haven</div>
+                        <div className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {safeHaven.score}/100
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Exchange rate */}
+                  {selectedCurrency && exchangeRates[selectedCurrency]?.[hoveredCurrency] && (
+                    <div className="mb-2">
+                      <div className="font-medium text-sm" style={{ color: '#34D399' }}>
+                        1 {selectedCurrency} = {formatRate(exchangeRates[selectedCurrency]?.[hoveredCurrency])} {hoveredCurrency}
+                      </div>
+                      {lastUpdated && (
+                        <div className={`text-[10px] mt-0.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                          Updated: {formatLastUpdated(lastUpdated)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Quick converter */}
+                  {converterAmount && converterFromCurrency && converterFromCurrency !== hoveredCurrency && exchangeRates[converterFromCurrency]?.[hoveredCurrency] && (
+                    <div className={`pt-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} style={{ borderTopWidth: '1px', borderTopStyle: 'solid' }}>
+                      <div className={`text-[10px] mb-0.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Quick Convert</div>
+                      <div className="text-sm font-medium" style={{ color: '#60A5FA' }}>
+                        {converterAmount} {converterFromCurrency} = {formatConvertedAmount(
+                          parseFloat(converterAmount) * (exchangeRates[converterFromCurrency]?.[hoveredCurrency] || 0),
+                          hoveredCurrency
+                        )} {hoveredCurrency}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          );
+        })()}
 
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -716,47 +589,53 @@ const CurrencyHierarchyPage = () => {
           className="w-full h-auto min-h-[600px]"
           preserveAspectRatio="xMidYMid meet"
         >
-          {/* Gradient Definitions */}
           <defs>
-            {/* Background gradient */}
-            <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#121438" />
-              <stop offset="100%" stopColor="#1e1f45" />
-            </linearGradient>
-            
-            {/* Node gradients */}
-            <radialGradient id="tier1Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#4fc3f7" />
-              <stop offset="100%" stopColor="#2196f3" />
+            <radialGradient id="tier1Gradient" cx="50%" cy="30%" r="65%" fx="50%" fy="30%">
+              <stop offset="0%" stopColor="#60A5FA" />
+              <stop offset="100%" stopColor="#1D4ED8" />
             </radialGradient>
-            
-            <radialGradient id="tier2Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#ffb74d" />
-              <stop offset="100%" stopColor="#ff9800" />
+            <radialGradient id="tier2Gradient" cx="50%" cy="30%" r="65%" fx="50%" fy="30%">
+              <stop offset="0%" stopColor="#FBBF24" />
+              <stop offset="100%" stopColor="#D97706" />
             </radialGradient>
-            
-            <radialGradient id="tier3Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#81c784" />
-              <stop offset="100%" stopColor="#4caf50" />
+            <radialGradient id="tier3Gradient" cx="50%" cy="30%" r="65%" fx="50%" fy="30%">
+              <stop offset="0%" stopColor="#34D399" />
+              <stop offset="100%" stopColor="#059669" />
             </radialGradient>
-            
-            <radialGradient id="tier4Gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="#e57373" />
-              <stop offset="100%" stopColor="#f44336" />
+            <radialGradient id="tier4Gradient" cx="50%" cy="30%" r="65%" fx="50%" fy="30%">
+              <stop offset="0%" stopColor="#FB7185" />
+              <stop offset="100%" stopColor="#E11D48" />
             </radialGradient>
-            
-            {/* Glow filters */}
+
             <filter id="glow1" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+            <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="3" result="blur"/>
               <feComposite in="SourceGraphic" in2="blur" operator="over"/>
             </filter>
-            
-            <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
+            <filter id="glow3" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="2" result="blur"/>
               <feComposite in="SourceGraphic" in2="blur" operator="over"/>
             </filter>
-            
-            {/* Connection gradient */}
+            <filter id="cardShadow" x="-10%" y="-10%" width="130%" height="130%">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" floodOpacity="0.15"/>
+            </filter>
+
+            <linearGradient id="connT1T2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.5"/>
+              <stop offset="100%" stopColor="#D97706" stopOpacity="0.5"/>
+            </linearGradient>
+            <linearGradient id="connT2T3" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#D97706" stopOpacity="0.4"/>
+              <stop offset="100%" stopColor="#059669" stopOpacity="0.4"/>
+            </linearGradient>
+            <linearGradient id="connT3T4" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#059669" stopOpacity="0.35"/>
+              <stop offset="100%" stopColor="#E11D48" stopOpacity="0.35"/>
+            </linearGradient>
+
             <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor={isDarkMode ? "#ffffff" : "#000000"} stopOpacity="0.1"/>
               <stop offset="50%" stopColor={isDarkMode ? "#ffffff" : "#000000"} stopOpacity="0.7"/>
@@ -765,443 +644,513 @@ const CurrencyHierarchyPage = () => {
           </defs>
           
           {/* Background */}
-          <rect 
-            width="1200" 
-            height="900" 
-            fill={isDarkMode ? "rgb(17, 24, 39)" : "#f8fafc"}
-            stroke={isDarkMode ? "rgb(55, 65, 81)" : "rgb(229, 231, 235)"}
-            strokeWidth="2"
-            rx="8"
-            ry="8"
-          />
-          
-          {/* Inner border for better definition in dark mode */}
-          <rect 
-            x="4" 
-            y="4" 
-            width="1192" 
-            height="892" 
-            fill="none"
-            stroke={isDarkMode ? "rgba(75, 85, 99, 0.4)" : "rgba(0, 0, 0, 0.1)"}
-            strokeWidth="1"
-            rx="6"
-            ry="6"
-          />
-          
-          {/* Grid lines */}
-          <g stroke={isDarkMode ? "rgba(75, 85, 99, 0.3)" : "rgba(0, 0, 0, 0.05)"} strokeWidth="1">
-            {/* Horizontal lines */}
-            <line x1="0" y1="225" x2="1200" y2="225"/>
-            <line x1="0" y1="375" x2="1200" y2="375"/>
-            <line x1="0" y1="525" x2="1200" y2="525"/>
-            <line x1="0" y1="675" x2="1200" y2="675"/>
-            
-            {/* Vertical lines */}
-            <line x1="300" y1="150" x2="300" y2="750"/>
-            <line x1="600" y1="150" x2="600" y2="750"/>
-            <line x1="900" y1="150" x2="900" y2="750"/>
-          </g>
+          <rect width="1200" height="900" fill={isDarkMode ? "rgb(17, 24, 39)" : "#f8fafc"} rx="12" ry="12"/>
+          <rect x="2" y="2" width="1196" height="896" fill="none" stroke={isDarkMode ? "rgba(75, 85, 99, 0.3)" : "rgba(0, 0, 0, 0.08)"} strokeWidth="1" rx="11" ry="11"/>
+
+          {/* Tier zone bands */}
+          <rect x="0" y="120" width="1200" height="100" rx="0" fill={isDarkMode ? "rgba(59, 130, 246, 0.06)" : "rgba(59, 130, 246, 0.04)"}/>
+          <rect x="0" y="290" width="1200" height="100" rx="0" fill={isDarkMode ? "rgba(217, 119, 6, 0.06)" : "rgba(217, 119, 6, 0.04)"}/>
+          <rect x="0" y="460" width="1200" height="100" rx="0" fill={isDarkMode ? "rgba(5, 150, 105, 0.06)" : "rgba(5, 150, 105, 0.04)"}/>
+          <rect x="0" y="630" width="1200" height="100" rx="0" fill={isDarkMode ? "rgba(225, 29, 72, 0.06)" : "rgba(225, 29, 72, 0.04)"}/>
+
+          {/* Tier zone labels */}
+          <text x="28" y="138" fontFamily="system-ui, -apple-system, sans-serif" fontSize="10" fontWeight="600" letterSpacing="1.5" fill={isDarkMode ? "rgba(96, 165, 250, 0.45)" : "rgba(37, 99, 235, 0.3)"}>TIER 1 &middot; GLOBAL RESERVE</text>
+          <text x="28" y="308" fontFamily="system-ui, -apple-system, sans-serif" fontSize="10" fontWeight="600" letterSpacing="1.5" fill={isDarkMode ? "rgba(251, 191, 36, 0.45)" : "rgba(217, 119, 6, 0.3)"}>TIER 2 &middot; MAJOR</text>
+          <text x="28" y="478" fontFamily="system-ui, -apple-system, sans-serif" fontSize="10" fontWeight="600" letterSpacing="1.5" fill={isDarkMode ? "rgba(52, 211, 153, 0.45)" : "rgba(5, 150, 105, 0.3)"}>TIER 3 &middot; REGIONAL</text>
+          <text x="28" y="648" fontFamily="system-ui, -apple-system, sans-serif" fontSize="10" fontWeight="600" letterSpacing="1.5" fill={isDarkMode ? "rgba(251, 113, 133, 0.45)" : "rgba(225, 29, 72, 0.3)"}>TIER 4 &middot; LOCAL</text>
           
           {/* Title */}
-          <text 
-            x="600" 
-            y="90" 
-            textAnchor="middle" 
-            fontFamily="'Helvetica Neue', Arial, sans-serif" 
-            fontSize="42" 
-            fontWeight="bold" 
-            fill={isDarkMode ? "#ffffff" : "#000000"} 
-            opacity="0.9"
-          >
-            GLOBAL CURRENCY HIERARCHY
-          </text>
-          <line 
-            x1="375" 
-            y1="105" 
-            x2="825" 
-            y2="105" 
-            stroke={isDarkMode ? "#ffffff" : "#000000"} 
-            strokeOpacity="0.3" 
-            strokeWidth="1"
-          />
-          
-          {/* Legend - moved to the right */}
-          <g transform="translate(930, 150)">
-            <rect 
-              x="-10" 
-              y="-10" 
-              width="250" 
-              height="210" 
-              rx="10" 
-              ry="10" 
-              fill={isDarkMode ? "rgb(31, 41, 55)" : "#000000"} 
-              fillOpacity={isDarkMode ? "1" : "0.05"}
-              stroke={isDarkMode ? "rgb(75, 85, 99)" : "rgba(0, 0, 0, 0.1)"}
-              strokeWidth="1"
-            />
-            <text 
-              x="0" 
-              y="10" 
-              fontFamily="'Helvetica Neue', Arial, sans-serif" 
-              fontSize="20" 
-              fontWeight="bold" 
-              fill={isDarkMode ? "#ffffff" : "#000000"} 
-              opacity="0.9"
-            >
-              CURRENCY TIERS
-            </text>
-            
-            {/* Update legend items with larger text and spacing */}
-            <circle cx="15" cy="50" r="12" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
-            <text 
-              x="40" 
-              y="55" 
-              fontFamily="'Helvetica Neue', Arial, sans-serif" 
-              fontSize="16" 
-              fill={isDarkMode ? "#ffffff" : "#000000"} 
-              opacity="0.8"
-            >
-              Tier 1: Global Reserve
-            </text>
-            
-            <circle cx="15" cy="90" r="12" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text 
-              x="40" 
-              y="95" 
-              fontFamily="'Helvetica Neue', Arial, sans-serif" 
-              fontSize="16" 
-              fill={isDarkMode ? "#ffffff" : "#000000"} 
-              opacity="0.8"
-            >
-              Tier 2: Major
-            </text>
-            
-            <circle cx="15" cy="130" r="12" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text 
-              x="40" 
-              y="135" 
-              fontFamily="'Helvetica Neue', Arial, sans-serif" 
-              fontSize="16" 
-              fill={isDarkMode ? "#ffffff" : "#000000"} 
-              opacity="0.8"
-            >
-              Tier 3: Regional
-            </text>
-            
-            <circle cx="15" cy="170" r="12" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text 
-              x="40" 
-              y="175" 
-              fontFamily="'Helvetica Neue', Arial, sans-serif" 
-              fontSize="16" 
-              fill={isDarkMode ? "#ffffff" : "#000000"} 
-              opacity="0.8"
-            >
-              Tier 4: Local
-            </text>
+          <text x="600" y="52" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif" fontSize="34" fontWeight="700" letterSpacing="2" fill={isDarkMode ? "#ffffff" : "#111827"} opacity="0.9">GLOBAL CURRENCY HIERARCHY</text>
+          <line x1="420" y1="68" x2="780" y2="68" stroke={isDarkMode ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"} strokeWidth="1"/>
+          <text x="600" y="88" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif" fontSize="12" fill={isDarkMode ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)"} letterSpacing="3">TREE OF GLOBAL FOREX INFLUENCE</text>
+
+          {/* Legend - compact frosted card */}
+          <g transform="translate(848, 30)">
+            <rect x="-12" y="-14" width="340" height="44" rx="8" ry="8" fill={isDarkMode ? "rgba(31, 41, 55, 0.85)" : "rgba(255, 255, 255, 0.9)"} stroke={isDarkMode ? "rgba(75, 85, 99, 0.4)" : "rgba(0, 0, 0, 0.1)"} strokeWidth="1" filter="url(#cardShadow)"/>
+            <circle cx="8" cy="8" r="6" fill="url(#tier1Gradient)"/>
+            <text x="20" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Reserve</text>
+            <circle cx="88" cy="8" r="6" fill="url(#tier2Gradient)"/>
+            <text x="100" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Major</text>
+            <circle cx="158" cy="8" r="6" fill="url(#tier3Gradient)"/>
+            <text x="170" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Regional</text>
+            <circle cx="242" cy="8" r="6" fill="url(#tier4Gradient)"/>
+            <text x="254" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Local</text>
           </g>
 
-          {/* Update currency positions for larger SVG */}
-          {/* USD */}
+          {/* Tier 1: USD - top center with double-ring */}
           <g
             style={getCurrencyStyle('USD')}
             onClick={() => handleCurrencyClick('USD')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'USD')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="600" cy="225" r="45" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
-            <text x="600" y="235" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#ffffff">USD</text>
+            <circle cx="600" cy="170" r="58" fill="none" stroke={isDarkMode ? "rgba(96, 165, 250, 0.3)" : "rgba(29, 78, 216, 0.2)"} strokeWidth="2"/>
+            <circle cx="600" cy="170" r="52" fill="url(#tier1Gradient)" filter="url(#glow1)"/>
+            <text x="600" y="170" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="26" fontWeight="700" fill="#ffffff">USD</text>
+            <text x="600" y="235" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif" fontSize="10" fontWeight="600" letterSpacing="1" fill={isDarkMode ? "rgba(96, 165, 250, 0.7)" : "rgba(37, 99, 235, 0.6)"}>GLOBAL RESERVE</text>
           </g>
 
-          {/* Update Tier 2 currencies */}
-          {/* EUR */}
+          {/* Tier 2: Major currencies */}
           <g
             style={getCurrencyStyle('EUR')}
             onClick={() => handleCurrencyClick('EUR')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'EUR')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="200" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="200" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">EUR</text>
+            <circle cx="200" cy="340" r="43" fill="none" stroke={isDarkMode ? "rgba(251, 191, 36, 0.25)" : "rgba(217, 119, 6, 0.15)"} strokeWidth="1.5"/>
+            <circle cx="200" cy="340" r="38" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="200" y="340" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="20" fontWeight="700" fill="#ffffff">EUR</text>
           </g>
-
-          {/* JPY */}
           <g
             style={getCurrencyStyle('JPY')}
             onClick={() => handleCurrencyClick('JPY')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'JPY')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="400" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="400" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">JPY</text>
+            <circle cx="400" cy="340" r="43" fill="none" stroke={isDarkMode ? "rgba(251, 191, 36, 0.25)" : "rgba(217, 119, 6, 0.15)"} strokeWidth="1.5"/>
+            <circle cx="400" cy="340" r="38" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="400" y="340" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="20" fontWeight="700" fill="#ffffff">JPY</text>
           </g>
-
-          {/* GBP */}
           <g
             style={getCurrencyStyle('GBP')}
             onClick={() => handleCurrencyClick('GBP')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'GBP')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="600" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="600" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">GBP</text>
+            <circle cx="600" cy="340" r="43" fill="none" stroke={isDarkMode ? "rgba(251, 191, 36, 0.25)" : "rgba(217, 119, 6, 0.15)"} strokeWidth="1.5"/>
+            <circle cx="600" cy="340" r="38" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="600" y="340" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="20" fontWeight="700" fill="#ffffff">GBP</text>
           </g>
-
-          {/* CNH */}
           <g
             style={getCurrencyStyle('CNH')}
             onClick={() => handleCurrencyClick('CNH')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'CNH')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="800" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="800" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">CNH</text>
+            <circle cx="800" cy="340" r="43" fill="none" stroke={isDarkMode ? "rgba(251, 191, 36, 0.25)" : "rgba(217, 119, 6, 0.15)"} strokeWidth="1.5"/>
+            <circle cx="800" cy="340" r="38" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="800" y="340" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="20" fontWeight="700" fill="#ffffff">CNH</text>
           </g>
-
-          {/* CHF */}
           <g
             style={getCurrencyStyle('CHF')}
             onClick={() => handleCurrencyClick('CHF')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'CHF')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="1000" cy="375" r="36" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
-            <text x="1000" y="385" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="20" fontWeight="bold" fill="#ffffff">CHF</text>
+            <circle cx="1000" cy="340" r="43" fill="none" stroke={isDarkMode ? "rgba(251, 191, 36, 0.25)" : "rgba(217, 119, 6, 0.15)"} strokeWidth="1.5"/>
+            <circle cx="1000" cy="340" r="38" fill="url(#tier2Gradient)" filter="url(#glow2)"/>
+            <text x="1000" y="340" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="20" fontWeight="700" fill="#ffffff">CHF</text>
           </g>
 
-          {/* Update Tier 3 currencies with new positions */}
-          {/* CNY */}
+          {/* Tier 3: Regional currencies */}
           <g
             style={getCurrencyStyle('CNY')}
             onClick={() => handleCurrencyClick('CNY')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'CNY')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="150" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="150" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">CNY</text>
+            <circle cx="100" cy="510" r="28" fill="url(#tier3Gradient)" filter="url(#glow3)"/>
+            <text x="100" y="510" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="700" fill="#ffffff">CNY</text>
           </g>
-
-          {/* HKD */}
           <g
             style={getCurrencyStyle('HKD')}
             onClick={() => handleCurrencyClick('HKD')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'HKD')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="300" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="300" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">HKD</text>
+            <circle cx="267" cy="510" r="28" fill="url(#tier3Gradient)" filter="url(#glow3)"/>
+            <text x="267" y="510" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="700" fill="#ffffff">HKD</text>
           </g>
-
-          {/* SEK */}
           <g
             style={getCurrencyStyle('SEK')}
             onClick={() => handleCurrencyClick('SEK')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'SEK')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="450" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="450" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">SEK</text>
+            <circle cx="433" cy="510" r="28" fill="url(#tier3Gradient)" filter="url(#glow3)"/>
+            <text x="433" y="510" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="700" fill="#ffffff">SEK</text>
           </g>
-
-          {/* NOK */}
           <g
             style={getCurrencyStyle('NOK')}
             onClick={() => handleCurrencyClick('NOK')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'NOK')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="600" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="600" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">NOK</text>
+            <circle cx="600" cy="510" r="28" fill="url(#tier3Gradient)" filter="url(#glow3)"/>
+            <text x="600" y="510" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="700" fill="#ffffff">NOK</text>
           </g>
-
-          {/* NZD */}
           <g
             style={getCurrencyStyle('NZD')}
             onClick={() => handleCurrencyClick('NZD')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'NZD')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="750" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="750" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">NZD</text>
+            <circle cx="767" cy="510" r="28" fill="url(#tier3Gradient)" filter="url(#glow3)"/>
+            <text x="767" y="510" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="700" fill="#ffffff">NZD</text>
           </g>
-
-          {/* CAD */}
           <g
             style={getCurrencyStyle('CAD')}
             onClick={() => handleCurrencyClick('CAD')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'CAD')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="900" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="900" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">CAD</text>
+            <circle cx="933" cy="510" r="28" fill="url(#tier3Gradient)" filter="url(#glow3)"/>
+            <text x="933" y="510" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="700" fill="#ffffff">CAD</text>
           </g>
-
-          {/* AUD */}
           <g
             style={getCurrencyStyle('AUD')}
             onClick={() => handleCurrencyClick('AUD')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'AUD')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="1050" cy="525" r="27" fill="url(#tier3Gradient)" filter="url(#glow2)"/>
-            <text x="1050" y="535" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="16" fontWeight="bold" fill="#ffffff">AUD</text>
+            <circle cx="1100" cy="510" r="28" fill="url(#tier3Gradient)" filter="url(#glow3)"/>
+            <text x="1100" y="510" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="700" fill="#ffffff">AUD</text>
           </g>
 
-          {/* Update Tier 4 currencies */}
-          {/* MXN */}
+          {/* Tier 4: Local currencies */}
           <g
             style={getCurrencyStyle('MXN')}
             onClick={() => handleCurrencyClick('MXN')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'MXN')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="195" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="195" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">MXN</text>
+            <circle cx="150" cy="680" r="22" fill="url(#tier4Gradient)" filter="url(#glow3)"/>
+            <text x="150" y="680" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="700" fill="#ffffff">MXN</text>
           </g>
-
-          {/* BRL */}
           <g
             style={getCurrencyStyle('BRL')}
             onClick={() => handleCurrencyClick('BRL')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'BRL')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="300" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="300" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">BRL</text>
+            <circle cx="330" cy="680" r="22" fill="url(#tier4Gradient)" filter="url(#glow3)"/>
+            <text x="330" y="680" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="700" fill="#ffffff">BRL</text>
           </g>
-
-          {/* INR */}
           <g
             style={getCurrencyStyle('INR')}
             onClick={() => handleCurrencyClick('INR')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'INR')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="450" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="450" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">INR</text>
+            <circle cx="510" cy="680" r="22" fill="url(#tier4Gradient)" filter="url(#glow3)"/>
+            <text x="510" y="680" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="700" fill="#ffffff">INR</text>
           </g>
-
-          {/* ZAR */}
           <g
             style={getCurrencyStyle('ZAR')}
             onClick={() => handleCurrencyClick('ZAR')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'ZAR')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="600" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="600" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">ZAR</text>
+            <circle cx="690" cy="680" r="22" fill="url(#tier4Gradient)" filter="url(#glow3)"/>
+            <text x="690" y="680" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="700" fill="#ffffff">ZAR</text>
           </g>
-
-          {/* RUB */}
           <g
             style={getCurrencyStyle('RUB')}
             onClick={() => handleCurrencyClick('RUB')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'RUB')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="750" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="750" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">RUB</text>
+            <circle cx="870" cy="680" r="22" fill="url(#tier4Gradient)" filter="url(#glow3)"/>
+            <text x="870" y="680" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="700" fill="#ffffff">RUB</text>
           </g>
-
-          {/* TRY */}
           <g
             style={getCurrencyStyle('TRY')}
             onClick={() => handleCurrencyClick('TRY')}
             onMouseEnter={(e) => handleCurrencyHover(e, 'TRY')}
             onMouseLeave={() => handleCurrencyHover(null, null)}
           >
-            <circle cx="900" cy="675" r="21" fill="url(#tier4Gradient)" filter="url(#glow2)"/>
-            <text x="900" y="680" textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize="14" fontWeight="bold" fill="#ffffff">TRY</text>
+            <circle cx="1050" cy="680" r="22" fill="url(#tier4Gradient)" filter="url(#glow3)"/>
+            <text x="1050" y="680" textAnchor="middle" dominantBaseline="central" fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="700" fill="#ffffff">TRY</text>
           </g>
 
-          {/* Connection paths */}
-          <g stroke="url(#connectionGradient)" strokeWidth="2" opacity="0.4">
-            {/* USD to Tier 2 connections */}
-            <path d="M600,270 Q600,322 200,375" fill="none"/>
-            <path d="M600,270 Q600,322 400,375" fill="none"/>
-            <path d="M600,270 L600,375" fill="none"/>
-            <path d="M600,270 Q600,322 800,375" fill="none"/>
-            <path d="M600,270 Q600,322 1000,375" fill="none"/>
-
-            {/* Tier 2 to Tier 3 connections */}
-            <path d="M200,411 Q200,468 150,525" fill="none"/>
-            <path d="M200,411 Q200,468 300,525" fill="none"/>
-            
-            <path d="M400,411 Q400,468 450,525" fill="none"/>
-            <path d="M400,411 Q400,468 600,525" fill="none"/>
-            
-            <path d="M600,411 Q600,468 750,525" fill="none"/>
-            <path d="M600,411 Q600,468 900,525" fill="none"/>
-            
-            <path d="M800,411 Q800,468 1050,525" fill="none"/>
-
-            {/* Tier 3 to Tier 4 connections */}
-            {/* CNY connections */}
-            <path d="M150,552 Q150,613 195,675" fill="none"/>
-            <path d="M150,552 Q150,613 300,675" fill="none"/>
-            
-            {/* HKD connections */}
-            <path d="M300,552 Q300,613 300,675" fill="none"/>
-            <path d="M300,552 Q300,613 450,675" fill="none"/>
-            
-            {/* SEK connections */}
-            <path d="M450,552 Q450,613 450,675" fill="none"/>
-            <path d="M450,552 Q450,613 600,675" fill="none"/>
-            
-            {/* NOK connections */}
-            <path d="M600,552 Q600,613 600,675" fill="none"/>
-            <path d="M600,552 Q600,613 750,675" fill="none"/>
-            
-            {/* NZD connections */}
-            <path d="M750,552 Q750,613 750,675" fill="none"/>
-            <path d="M750,552 Q750,613 900,675" fill="none"/>
-            
-            {/* CAD connections */}
-            <path d="M900,552 Q900,613 195,675" fill="none"/>
-            <path d="M900,552 Q900,613 900,675" fill="none"/>
-            
-            {/* AUD connections */}
-            <path d="M1050,552 Q1050,613 600,675" fill="none"/>
-            <path d="M1050,552 Q1050,613 750,675" fill="none"/>
+          {/* Tree connection paths - Tier 1 to Tier 2 */}
+          <g stroke="url(#connT1T2)" strokeWidth="2.5" fill="none" opacity="0.5">
+            <path d="M600,222 C600,262 200,262 200,302"/>
+            <path d="M600,222 C600,262 400,262 400,302"/>
+            <path d="M600,222 C600,255 600,270 600,302"/>
+            <path d="M600,222 C600,262 800,262 800,302"/>
+            <path d="M600,222 C600,262 1000,262 1000,302"/>
           </g>
 
-          {/* Add glowing effect for selected currency connections */}
+          {/* Tree connection paths - Tier 2 to Tier 3 */}
+          <g stroke="url(#connT2T3)" strokeWidth="2" fill="none" opacity="0.4">
+            <path d="M200,378 C200,430 100,430 100,482"/>
+            <path d="M200,378 C200,430 267,430 267,482"/>
+            <path d="M400,378 C400,430 433,430 433,482"/>
+            <path d="M400,378 C400,430 600,430 600,482"/>
+            <path d="M600,378 C600,430 767,430 767,482"/>
+            <path d="M600,378 C600,430 933,430 933,482"/>
+            <path d="M800,378 C800,430 1100,430 1100,482"/>
+          </g>
+
+          {/* Tree connection paths - Tier 3 to Tier 4 */}
+          <g stroke="url(#connT3T4)" strokeWidth="1.5" fill="none" opacity="0.35">
+            <path d="M100,538 C100,598 150,598 150,658"/>
+            <path d="M100,538 C100,598 330,598 330,658"/>
+            <path d="M267,538 C267,598 330,598 330,658"/>
+            <path d="M267,538 C267,598 510,598 510,658"/>
+            <path d="M433,538 C433,598 510,598 510,658"/>
+            <path d="M433,538 C433,598 690,598 690,658"/>
+            <path d="M600,538 C600,598 690,598 690,658"/>
+            <path d="M600,538 C600,598 870,598 870,658"/>
+            <path d="M767,538 C767,598 870,598 870,658"/>
+            <path d="M767,538 C767,598 1050,598 1050,658"/>
+            <path d="M933,538 C933,598 150,598 150,658"/>
+            <path d="M933,538 C933,598 1050,598 1050,658"/>
+            <path d="M1100,538 C1100,598 690,598 690,658"/>
+            <path d="M1100,538 C1100,598 870,598 870,658"/>
+          </g>
+
+          {/* Glowing highlight for selected currency connections */}
           {selectedCurrency && (
-            <g stroke={isDarkMode ? "#ffffff" : "#000000"} strokeWidth="3" opacity="0.6" filter="url(#glow1)">
+            <g stroke={isDarkMode ? "#ffffff" : "#1e3a5f"} strokeWidth="3" opacity="0.6" fill="none" filter="url(#glow2)">
               {selectedCurrency === 'USD' && (
                 <>
-                  <path d="M600,270 Q600,322 200,375" fill="none"/>
-                  <path d="M600,270 Q600,322 400,375" fill="none"/>
-                  <path d="M600,270 L600,375" fill="none"/>
-                  <path d="M600,270 Q600,322 800,375" fill="none"/>
-                  <path d="M600,270 Q600,322 1000,375" fill="none"/>
+                  <path d="M600,222 C600,262 200,262 200,302"/>
+                  <path d="M600,222 C600,262 400,262 400,302"/>
+                  <path d="M600,222 C600,255 600,270 600,302"/>
+                  <path d="M600,222 C600,262 800,262 800,302"/>
+                  <path d="M600,222 C600,262 1000,262 1000,302"/>
                 </>
               )}
               {selectedCurrency === 'EUR' && (
                 <>
-                  <path d="M200,411 Q200,468 150,525" fill="none"/>
-                  <path d="M200,411 Q200,468 300,525" fill="none"/>
+                  <path d="M200,378 C200,430 100,430 100,482"/>
+                  <path d="M200,378 C200,430 267,430 267,482"/>
                 </>
               )}
               {selectedCurrency === 'JPY' && (
                 <>
-                  <path d="M400,411 Q400,468 450,525" fill="none"/>
-                  <path d="M400,411 Q400,468 600,525" fill="none"/>
+                  <path d="M400,378 C400,430 433,430 433,482"/>
+                  <path d="M400,378 C400,430 600,430 600,482"/>
                 </>
               )}
               {selectedCurrency === 'GBP' && (
                 <>
-                  <path d="M600,411 Q600,468 750,525" fill="none"/>
-                  <path d="M600,411 Q600,468 900,525" fill="none"/>
+                  <path d="M600,378 C600,430 767,430 767,482"/>
+                  <path d="M600,378 C600,430 933,430 933,482"/>
                 </>
               )}
               {selectedCurrency === 'CNH' && (
-                <path d="M800,411 Q800,468 1050,525" fill="none"/>
+                <path d="M800,378 C800,430 1100,430 1100,482"/>
               )}
             </g>
           )}
         </svg>
       </div>
+
+      {/* Click-to-open Currency Detail Panel */}
+      {selectedCurrency && currencyData[selectedCurrency] && (() => {
+        const cd = currencyData[selectedCurrency];
+        const tier = cd.tier;
+        const tc = TIER_COLORS[tier];
+        const cbRate = CENTRAL_BANK_RATES.find(r => r.currency === selectedCurrency || (selectedCurrency === 'CNH' && r.currency === 'CNY'));
+        const regime = CURRENCY_REGIMES.find(r => r.currency === selectedCurrency || (selectedCurrency === 'CNH' && r.currency === 'CNY'));
+        const safeHaven = SAFE_HAVEN_CURRENCIES.find(r => r.currency === selectedCurrency || (selectedCurrency === 'CNH' && r.currency === 'CNY'));
+        const reer = REER_DATA.find(r => r.currency === selectedCurrency || (selectedCurrency === 'CNH' && r.currency === 'CNY'));
+        const tierLabel = tier === 1 ? 'Global Reserve' : tier === 2 ? 'Major' : tier === 3 ? 'Regional' : 'Local';
+        const rates = exchangeRates[selectedCurrency] || {};
+
+        return (
+          <div
+            className={`mt-6 rounded-xl overflow-hidden shadow-lg transition-all duration-300 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}
+            style={{ borderTop: `3px solid ${tc.border}` }}
+          >
+            {/* Panel Header */}
+            <div className={`px-5 py-4 flex items-center justify-between ${isDarkMode ? 'bg-gray-800/80' : 'bg-gray-50'}`}>
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                  style={{ background: `linear-gradient(135deg, ${tc.text}, ${tc.border})` }}
+                >
+                  {cd.symbol}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{cd.code}</span>
+                    <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{cd.name}</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: tc.bg, color: tc.text }}>
+                      Tier {tier} &middot; {tierLabel}
+                    </span>
+                  </div>
+                  <div className={`text-xs mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {cd.country} &middot; Daily Volume: {cd.dailyVolume}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedCurrency(null)}
+                className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            {/* Panel Body - Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: isDarkMode ? 'rgb(55,65,81)' : 'rgb(229,231,235)' }}>
+
+              {/* Central Bank */}
+              <div className={`p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-wider mb-2.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Central Bank</div>
+                {cbRate ? (
+                  <>
+                    <div className={`text-sm font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{cbRate.bank}</div>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{cbRate.rate}%</span>
+                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                        cbRate.trend === 'rising' ? 'bg-red-500/15 text-red-400' :
+                        cbRate.trend === 'falling' ? 'bg-emerald-500/15 text-emerald-400' :
+                        isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {cbRate.trend === 'rising' ? '▲' : cbRate.trend === 'falling' ? '▼' : '—'} {cbRate.trend}
+                      </span>
+                    </div>
+                    <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <div>Previous: {cbRate.previousRate}%</div>
+                      <div>Next Meeting: {cbRate.nextMeeting}</div>
+                    </div>
+                  </>
+                ) : (
+                  <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No data available</div>
+                )}
+              </div>
+
+              {/* Currency Regime */}
+              <div className={`p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-wider mb-2.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Currency Regime</div>
+                {regime ? (
+                  <>
+                    <div className={`text-sm font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{regime.description}</div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Flexibility</span>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map(i => (
+                          <div
+                            key={i}
+                            className="w-4 h-1.5 rounded-full"
+                            style={{
+                              background: i <= regime.flexibility ? tc.border : isDarkMode ? 'rgb(55,65,81)' : 'rgb(229,231,235)',
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <span className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{regime.flexibility}/5</span>
+                    </div>
+                    {regime.peggedTo && (
+                      <div className={`text-xs mb-1 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                        Pegged to: {regime.peggedTo}
+                      </div>
+                    )}
+                    <div className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{regime.details}</div>
+                  </>
+                ) : (
+                  <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No data available</div>
+                )}
+              </div>
+
+              {/* Safe Haven */}
+              <div className={`p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-wider mb-2.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Safe Haven Status</div>
+                {safeHaven ? (
+                  <>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        safeHaven.category === 'primary' ? 'bg-blue-500/15 text-blue-400' :
+                        safeHaven.category === 'secondary' ? 'bg-cyan-500/15 text-cyan-400' :
+                        safeHaven.category === 'neutral' ? (isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600') :
+                        'bg-rose-500/15 text-rose-400'
+                      }`}>
+                        {safeHaven.category.replace('_', ' ')}
+                      </span>
+                      <span className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{safeHaven.score}</span>
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>/100</span>
+                    </div>
+                    {/* Score bar */}
+                    <div className={`w-full h-1.5 rounded-full mb-2.5 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${safeHaven.score}%`,
+                          background: safeHaven.score >= 70 ? '#3B82F6' : safeHaven.score >= 40 ? '#F59E0B' : '#EF4444',
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {safeHaven.characteristics.slice(0, 3).map((c, i) => (
+                        <span key={i} className={`text-[10px] px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No data available</div>
+                )}
+              </div>
+
+              {/* REER Valuation */}
+              <div className={`p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-wider mb-2.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>REER Valuation</div>
+                {reer ? (
+                  <>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{reer.current.toFixed(1)}</span>
+                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                        reer.isOvervalued ? 'bg-rose-500/15 text-rose-400' : 'bg-emerald-500/15 text-emerald-400'
+                      }`}>
+                        {reer.isOvervalued ? 'Overvalued' : 'Undervalued'}
+                      </span>
+                    </div>
+                    <div className={`text-xs mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      vs historical avg of {reer.historicalAverage}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <div className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Deviation</div>
+                        <div className={`text-sm font-semibold ${reer.deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                          {reer.deviation > 0 ? '+' : ''}{reer.deviation.toFixed(1)}%
+                        </div>
+                      </div>
+                      <div>
+                        <div className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Trend</div>
+                        <div className={`text-sm font-semibold ${
+                          reer.trend === 'appreciating' ? 'text-emerald-400' :
+                          reer.trend === 'depreciating' ? 'text-rose-400' :
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {reer.trend}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No data available</div>
+                )}
+              </div>
+            </div>
+
+            {/* Live Exchange Rates row */}
+            {Object.keys(rates).length > 0 && (
+              <div className={`px-5 py-3 ${isDarkMode ? 'bg-gray-800/60 border-t border-gray-700' : 'bg-gray-50/80 border-t border-gray-200'}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Live Exchange Rates</div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {Object.entries(rates).slice(0, 12).map(([code, rate]) => (
+                    <div key={code} className="flex items-baseline gap-1">
+                      <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{code}</span>
+                      <span className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{formatRate(rate)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Description footer */}
+            <div className={`px-5 py-3 ${isDarkMode ? 'border-t border-gray-700' : 'border-t border-gray-200'}`}>
+              <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{cd.description}</p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Interactive Currency Converter Bar */}
       <div className={`mt-8 p-4 rounded-lg shadow-lg transition-all duration-200 ${
