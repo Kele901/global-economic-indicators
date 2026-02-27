@@ -57,21 +57,36 @@ export default function RootLayout({
             </main>
 
             <footer className="bg-gray-50 dark:bg-gray-800 mt-8 sm:mt-12 transition-colors duration-200">
-              <div className="max-w-4xl mx-auto py-6 sm:py-8 px-3 sm:px-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              <div className="max-w-5xl mx-auto py-6 sm:py-8 px-3 sm:px-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">About Us</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200">
-                      We provide comprehensive economic data analysis and visualization, 
-                      helping users understand global economic trends through reliable 
-                      World Bank data.
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200 mb-3">
+                      Free, open-access platform providing comprehensive economic data analysis
+                      and visualization across 30+ global economies.
                     </p>
+                    <div className="flex flex-col gap-1.5 text-xs sm:text-sm">
+                      <a href="/about" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">About</a>
+                      <a href="/contact" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Contact</a>
+                      <a href="/methodology" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Methodology</a>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">Guides</h3>
+                    <div className="flex flex-col gap-1.5 text-xs sm:text-sm">
+                      <a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">How to Read Economic Data</a>
+                      <a href="/guides/understanding-interest-rates" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Understanding Interest Rates</a>
+                      <a href="/guides/inflation-guide" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Understanding Inflation</a>
+                      <a href="/guides/how-central-banks-work" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">How Central Banks Work</a>
+                      <a href="/guides/glossary" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Glossary</a>
+                      <a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200 font-medium mt-1">View All Guides &rarr;</a>
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">Data Sources</h3>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200">
-                      All economic data is sourced from the World Bank's official databases, 
-                      ensuring accuracy and reliability in our analysis.
+                      Data sourced from the World Bank, IMF, FRED, OECD, WIPO, ITU,
+                      Eurostat, and the Bank for International Settlements.
                     </p>
                   </div>
                   <div>
@@ -80,19 +95,9 @@ export default function RootLayout({
                       © {new Date().getFullYear()} Global Economic Indicators.
                       This site uses cookies for analytics and personalized content.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm">
-                      <a 
-                        href="/privacy" 
-                        className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200"
-                      >
-                        Privacy Policy
-                      </a>
-                      <a 
-                        href="/terms" 
-                        className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200"
-                      >
-                        Terms of Service
-                      </a>
+                    <div className="flex flex-col gap-1.5 text-xs sm:text-sm">
+                      <a href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Privacy Policy</a>
+                      <a href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Terms of Service</a>
                     </div>
                   </div>
                 </div>

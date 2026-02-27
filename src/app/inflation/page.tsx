@@ -1134,6 +1134,22 @@ export default function InflationPage() {
           </div>
         </div>
 
+        {/* Static intro content - always visible for SEO */}
+        <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+          <h2 className="text-lg sm:text-xl font-semibold mb-3">Global Inflation Tracker</h2>
+          <p className={`text-sm sm:text-base mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            Inflation measures the rate at which prices for goods and services rise over time, eroding
+            purchasing power. This dashboard tracks consumer price inflation across 30+ economies using
+            data from the World Bank and IMF, with historical coverage spanning decades. Compare how
+            different countries have managed price stability, identify periods of elevated inflation
+            or deflation, and explore cost of living differences across major cities worldwide.
+          </p>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Switch between the Inflation Rates tab for cross-country analysis and the Cost of Living
+            tab for city-level price comparisons including rent, groceries, and purchasing power indices.
+          </p>
+        </div>
+
         {/* Tab Navigation */}
         <div className={`flex gap-2 p-1 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
           <button

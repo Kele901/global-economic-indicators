@@ -104,6 +104,23 @@ const EconomicCyclesPage = () => {
           </div>
         </div>
 
+        {/* Static intro content - always visible for SEO */}
+        <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+          <h2 className="text-lg sm:text-xl font-semibold mb-3">Understanding Economic &amp; Market Cycles</h2>
+          <p className={`text-sm sm:text-base mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            Economic cycles are recurring patterns of expansion and contraction that shape the financial
+            landscape of nations and empires. This page draws on frameworks from Ray Dalio&apos;s
+            &quot;The Changing World Order&quot; and Reinhart-Rogoff&apos;s &quot;This Time is
+            Different&quot; to catalog major financial crises, debt super-cycles, and the rise and fall
+            of economic powers spanning over two centuries of documented history.
+          </p>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Explore interactive timelines, crisis maps, debt cycle phases, and comparison tools to
+            understand patterns that repeat across eras and geographies. Understanding past cycles
+            helps contextualize current economic conditions and anticipate future shifts.
+          </p>
+        </div>
+
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>

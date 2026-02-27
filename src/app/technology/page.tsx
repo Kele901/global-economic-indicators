@@ -376,6 +376,23 @@ const TechnologyPage = () => {
           </div>
         </div>
 
+        {/* Static intro content - always visible for SEO */}
+        <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+          <h2 className="text-lg sm:text-xl font-semibold mb-3">Technology &amp; Innovation Economics</h2>
+          <p className={`text-sm sm:text-base mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            Technology and innovation are the primary engines of long-term economic growth. This dashboard
+            provides comprehensive data on how nations invest in research, generate intellectual property,
+            and translate innovation into economic value. Explore R&amp;D expenditure as a share of GDP,
+            patent and trademark filing activity, high-tech export performance, digital infrastructure
+            development, venture capital ecosystems, AI and emerging technology trends, and workforce
+            metrics across 30+ countries worldwide.
+          </p>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Data sourced from the World Bank, FRED, WIPO, ITU, Eurostat, and curated institutional reports.
+            Use the tabs below to navigate between different aspects of the global technology landscape.
+          </p>
+        </div>
+
         {/* Quick Stats */}
         {summaryStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

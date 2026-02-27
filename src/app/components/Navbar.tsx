@@ -89,7 +89,9 @@ const Navbar = () => {
     { href: "/trading-places", label: "Trading Places" },
     { href: "/compare", label: "Compare Countries" },
     { href: "/inflation", label: "Inflation" },
-    { href: "/inflation-calculator", label: "Inflation Calculator" }
+    { href: "/inflation-calculator", label: "Inflation Calculator" },
+    { href: "/about", label: "About" },
+    { href: "/guides/reading-economic-data", label: "Guides" }
   ];
 
   return (

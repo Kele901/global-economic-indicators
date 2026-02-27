@@ -112,6 +112,22 @@ export default function InflationCalculatorPage() {
           </p>
         </div>
 
+        {/* Static intro content - always visible for SEO */}
+        <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+          <h2 className="text-lg sm:text-xl font-semibold mb-3">How the Inflation Calculator Works</h2>
+          <p className={`text-sm sm:text-base mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            This calculator shows you the real impact of inflation on purchasing power over time.
+            Enter an amount, select a base country and year, and see what that money would be worth
+            in a different year &mdash; or compare the same amount across multiple economies. The
+            calculations use official consumer price index (CPI) data from the World Bank and
+            national statistical agencies to provide accurate historical purchasing power comparisons.
+          </p>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Select multiple countries to compare how inflation has affected different currencies.
+            Use the chart view to visualize purchasing power erosion over your selected time period.
+          </p>
+        </div>
+
         {/* Calculator */}
         <InflationCalculator
           cpiData={cpiData}

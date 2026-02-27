@@ -252,6 +252,24 @@ const EconomicGravityPage = () => {
         </div>
       </div>
 
+      {/* Static intro content - always visible for SEO */}
+      <div className={`rounded-lg p-4 sm:p-6 mb-8 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+        <h2 className="text-lg sm:text-xl font-semibold mb-3">The Economic Center of Gravity</h2>
+        <p className={`text-sm sm:text-base mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          The economic center of gravity is a geographic point representing the weighted average
+          location of global economic activity. Over the past two millennia, this point has shifted
+          dramatically &mdash; from ancient civilizations in Mesopotamia and China, through European
+          colonial dominance, to the Atlantic-centered post-war economy, and now eastward as Asia
+          reasserts its economic weight. This visualization tracks that journey using GDP shares,
+          population data, and trade volumes to show how global economic power has migrated across
+          continents and empires.
+        </p>
+        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          Data drawn from the Maddison Project, World Bank, and historical economic research.
+          Select different eras to see the world through the lens of economic geography.
+        </p>
+      </div>
+
       {/* World Map Visualization - NEW RESPONSIVE MAP */}
       <div className={`mb-12 p-4 sm:p-6 rounded-2xl relative ${
         isDarkMode 
