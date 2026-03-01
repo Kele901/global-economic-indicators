@@ -665,16 +665,16 @@ const CurrencyHierarchyPage = () => {
           <text x="600" y="88" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif" fontSize="12" fill={isDarkMode ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)"} letterSpacing="3">TREE OF GLOBAL FOREX INFLUENCE</text>
 
           {/* Legend - compact frosted card */}
-          <g transform="translate(848, 30)">
-            <rect x="-12" y="-14" width="340" height="44" rx="8" ry="8" fill={isDarkMode ? "rgba(31, 41, 55, 0.85)" : "rgba(255, 255, 255, 0.9)"} stroke={isDarkMode ? "rgba(75, 85, 99, 0.4)" : "rgba(0, 0, 0, 0.1)"} strokeWidth="1" filter="url(#cardShadow)"/>
-            <circle cx="8" cy="8" r="6" fill="url(#tier1Gradient)"/>
-            <text x="20" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Reserve</text>
-            <circle cx="88" cy="8" r="6" fill="url(#tier2Gradient)"/>
-            <text x="100" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Major</text>
-            <circle cx="158" cy="8" r="6" fill="url(#tier3Gradient)"/>
-            <text x="170" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Regional</text>
-            <circle cx="242" cy="8" r="6" fill="url(#tier4Gradient)"/>
-            <text x="254" y="12" fontFamily="system-ui, -apple-system, sans-serif" fontSize="11" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Local</text>
+          <g transform="translate(920, 36)">
+            <rect x="-8" y="-10" width="250" height="30" rx="6" ry="6" fill={isDarkMode ? "rgba(31, 41, 55, 0.85)" : "rgba(255, 255, 255, 0.9)"} stroke={isDarkMode ? "rgba(75, 85, 99, 0.4)" : "rgba(0, 0, 0, 0.1)"} strokeWidth="1" filter="url(#cardShadow)"/>
+            <circle cx="4" cy="5" r="4" fill="url(#tier1Gradient)"/>
+            <text x="13" y="9" fontFamily="system-ui, -apple-system, sans-serif" fontSize="9.5" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Reserve</text>
+            <circle cx="66" cy="5" r="4" fill="url(#tier2Gradient)"/>
+            <text x="75" y="9" fontFamily="system-ui, -apple-system, sans-serif" fontSize="9.5" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Major</text>
+            <circle cx="120" cy="5" r="4" fill="url(#tier3Gradient)"/>
+            <text x="129" y="9" fontFamily="system-ui, -apple-system, sans-serif" fontSize="9.5" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Regional</text>
+            <circle cx="186" cy="5" r="4" fill="url(#tier4Gradient)"/>
+            <text x="195" y="9" fontFamily="system-ui, -apple-system, sans-serif" fontSize="9.5" fill={isDarkMode ? "#e5e7eb" : "#374151"}>Local</text>
           </g>
 
           {/* Tier 1: USD - top center with double-ring */}
