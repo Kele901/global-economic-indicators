@@ -821,6 +821,14 @@ const GlobalInterestRateApp = () => {
     country.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const formatYAxisTick = (value: number): string => {
+    if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+    if (Math.abs(value) >= 10_000) return `${(value / 1_000).toFixed(0)}K`;
+    if (Math.abs(value) >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+    if (Number.isInteger(value)) return value.toString();
+    return value.toFixed(1);
+  };
+
   // Create a reusable chart component with different styles for different metrics
   const Chart = ({ 
     title, 
@@ -860,7 +868,9 @@ const GlobalInterestRateApp = () => {
               domain={yDomain} 
               stroke={isDarkMode ? '#fff' : '#666'}
               tick={{ fontSize: 10 }}
-              width={35}
+              width={55}
+              tickFormatter={formatYAxisTick}
+              tickCount={6}
             />
             <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Legend 
@@ -898,7 +908,9 @@ const GlobalInterestRateApp = () => {
               domain={yDomain} 
               stroke={isDarkMode ? '#fff' : '#666'}
               tick={{ fontSize: 10 }}
-              width={35}
+              width={55}
+              tickFormatter={formatYAxisTick}
+              tickCount={6}
             />
             <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Legend 
@@ -932,7 +944,9 @@ const GlobalInterestRateApp = () => {
               domain={yDomain} 
               stroke={isDarkMode ? '#fff' : '#666'}
               tick={{ fontSize: 10 }}
-              width={35}
+              width={55}
+              tickFormatter={formatYAxisTick}
+              tickCount={6}
             />
             <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
             <Legend 
@@ -980,7 +994,9 @@ const GlobalInterestRateApp = () => {
             domain={yDomain} 
             stroke={isDarkMode ? '#fff' : '#666'}
             tick={{ fontSize: 10 }}
-            width={35}
+            width={55}
+            tickFormatter={formatYAxisTick}
+            tickCount={6}
           />
           <Tooltip content={<CustomTooltip isDarkMode={isDarkMode} />} />
           <Legend 
