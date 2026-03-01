@@ -317,6 +317,31 @@ const CountryEconomicSummary = ({
     hightechExports: CountryData[];
     co2Emissions: CountryData[];
     netMigration: CountryData[];
+    laborForceParticipation: CountryData[];
+    budgetBalance: CountryData[];
+    healthcareExpenditure: CountryData[];
+    educationExpenditure: CountryData[];
+    internetUsers: CountryData[];
+    youthUnemployment: CountryData[];
+    manufacturingValueAdded: CountryData[];
+    householdConsumption: CountryData[];
+    renewableEnergy: CountryData[];
+    femaleLaborForce: CountryData[];
+    militaryExpenditure: CountryData[];
+    marketCapitalization: CountryData[];
+    scientificPublications: CountryData[];
+    ictExports: CountryData[];
+    mobileSubscriptions: CountryData[];
+    patentApplications: CountryData[];
+    socialSpending: CountryData[];
+    publicDebtService: CountryData[];
+    servicesValueAdded: CountryData[];
+    agriculturalValueAdded: CountryData[];
+    tradeOpenness: CountryData[];
+    tariffRate: CountryData[];
+    tourismReceipts: CountryData[];
+    privateInvestment: CountryData[];
+    newBusinessDensity: CountryData[];
   };
   isDarkMode: boolean;
 }) => {
@@ -397,7 +422,48 @@ const CountryEconomicSummary = ({
     productivity: calculateMetrics(data.laborProductivity, country),
     gini: calculateMetrics(data.giniCoefficient, country),
     rd: calculateMetrics(data.rdSpending, country),
-    energy: calculateMetrics(data.energyConsumption, country)
+    energy: calculateMetrics(data.energyConsumption, country),
+    gdpPerCapita: calculateMetrics(data.gdpPerCapitaPPP, country),
+    currentAccount: calculateMetrics(data.currentAccount, country),
+    capitalFormation: calculateMetrics(data.grossCapitalFormation, country),
+    reserves: calculateMetrics(data.reservesMonthsImports, country),
+    exchangeRate: calculateMetrics(data.exchangeRate, country),
+    poverty: calculateMetrics(data.povertyRate, country),
+    education: calculateMetrics(data.tertiaryEnrollment, country),
+    taxRevenue: calculateMetrics(data.taxRevenue, country),
+    credit: calculateMetrics(data.domesticCredit, country),
+    exports: calculateMetrics(data.exports, country),
+    imports: calculateMetrics(data.imports, country),
+    lifeExpectancy: calculateMetrics(data.lifeExpectancy, country),
+    urbanPop: calculateMetrics(data.urbanPopulation, country),
+    hightech: calculateMetrics(data.hightechExports, country),
+    co2: calculateMetrics(data.co2Emissions, country),
+    migration: calculateMetrics(data.netMigration, country),
+    laborForce: calculateMetrics(data.laborForceParticipation, country),
+    budget: calculateMetrics(data.budgetBalance, country),
+    healthcare: calculateMetrics(data.healthcareExpenditure, country),
+    eduExpenditure: calculateMetrics(data.educationExpenditure, country),
+    internet: calculateMetrics(data.internetUsers, country),
+    youthUnemployment: calculateMetrics(data.youthUnemployment, country),
+    manufacturing: calculateMetrics(data.manufacturingValueAdded, country),
+    household: calculateMetrics(data.householdConsumption, country),
+    renewable: calculateMetrics(data.renewableEnergy, country),
+    femaleLaborForce: calculateMetrics(data.femaleLaborForce, country),
+    military: calculateMetrics(data.militaryExpenditure, country),
+    marketCap: calculateMetrics(data.marketCapitalization, country),
+    sciPublications: calculateMetrics(data.scientificPublications, country),
+    ictExports: calculateMetrics(data.ictExports, country),
+    mobile: calculateMetrics(data.mobileSubscriptions, country),
+    patents: calculateMetrics(data.patentApplications, country),
+    socialSpending: calculateMetrics(data.socialSpending, country),
+    debtService: calculateMetrics(data.publicDebtService, country),
+    services: calculateMetrics(data.servicesValueAdded, country),
+    agriculture: calculateMetrics(data.agriculturalValueAdded, country),
+    tradeOpenness: calculateMetrics(data.tradeOpenness, country),
+    tariffs: calculateMetrics(data.tariffRate, country),
+    tourism: calculateMetrics(data.tourismReceipts, country),
+    privateInvest: calculateMetrics(data.privateInvestment, country),
+    newBusiness: calculateMetrics(data.newBusinessDensity, country),
   };
 
   const getTrendEmoji = (trend: string) => {
@@ -474,80 +540,179 @@ const CountryEconomicSummary = ({
         </ResponsiveContainer>
       </div>
 
-      <div className="space-y-2 text-xs sm:text-sm">
-        <p>
-          <strong>Interest Rates:</strong> Currently at {metrics.interest.recent.toFixed(1)}% 
-          {getTrendEmoji(metrics.interest.trend)} (Historical avg: {metrics.interest.avg.toFixed(1)}%)
-        </p>
-        <p>
-          <strong>Employment:</strong> Currently at {metrics.employment.recent.toFixed(1)}% 
-          {getTrendEmoji(metrics.employment.trend)} (Historical avg: {metrics.employment.avg.toFixed(1)}%)
-        </p>
-        <p>
-          <strong>Unemployment:</strong> Currently at {metrics.unemployment.recent.toFixed(1)}% 
-          {getTrendEmoji(metrics.unemployment.trend)} (Historical avg: {metrics.unemployment.avg.toFixed(1)}%)
-        </p>
-        <p>
-          <strong>Government Debt:</strong> Currently at {metrics.debt.recent.toFixed(1)}% of GDP 
-          {getTrendEmoji(metrics.debt.trend)} (Historical avg: {metrics.debt.avg.toFixed(1)}%)
-        </p>
-        <p>
-          <strong>Inflation Rate:</strong> Currently at {metrics.inflation.recent.toFixed(1)}% 
-          {getTrendEmoji(metrics.inflation.trend)} (Historical avg: {metrics.inflation.avg.toFixed(1)}%)
-        </p>
-        <p>
-          <strong>GDP Growth:</strong> Currently at {metrics.gdp.recent.toFixed(1)}% 
-          {getTrendEmoji(metrics.gdp.trend)} (Historical avg: {metrics.gdp.avg.toFixed(1)}%)
-        </p>
-        <p>
-          <strong>Consumer Price Index:</strong> Currently at {metrics.cpi.recent.toFixed(1)} 
-          {getTrendEmoji(metrics.cpi.trend)} (2010 base year = 100, Historical avg: {metrics.cpi.avg.toFixed(1)})
-        </p>
-        <p>
-          <strong>Population Growth:</strong> Currently at {metrics.population.recent.toFixed(2)}% 
-          {getTrendEmoji(metrics.population.trend)} (Historical avg: {metrics.population.avg.toFixed(2)}%)
-        </p>
-        <p>
-          <strong>Foreign Direct Investment:</strong> Currently at {metrics.fdi.recent.toFixed(2)}% of GDP 
-          {getTrendEmoji(metrics.fdi.trend)} (Historical avg: {metrics.fdi.avg.toFixed(2)}%)
-        </p>
-        <p>
-          <strong>Trade Balance:</strong> Currently at {metrics.trade.recent.toFixed(2)}% of GDP 
-          {getTrendEmoji(metrics.trade.trend)} (Historical avg: {metrics.trade.avg.toFixed(2)}%)
-        </p>
-        <p>
-          <strong>Government Spending:</strong> Currently at {metrics.spending.recent.toFixed(1)}% of GDP 
-          {getTrendEmoji(metrics.spending.trend)} (Historical avg: {metrics.spending.avg.toFixed(1)}%)
-        </p>
-        <p>
-          <strong>Labor Productivity:</strong> Currently at {metrics.productivity.recent.toFixed(0)} 
-          {getTrendEmoji(metrics.productivity.trend)} (Historical avg: {metrics.productivity.avg.toFixed(0)})
-        </p>
-        <p>
-          <strong>Income Inequality (Gini):</strong> Currently at {metrics.gini.recent.toFixed(3)} 
-          {getTrendEmoji(metrics.gini.trend)} (Historical avg: {metrics.gini.avg.toFixed(3)})
-        </p>
-        <p>
-          <strong>R&D Spending:</strong> Currently at {metrics.rd.recent.toFixed(2)}% of GDP 
-          {getTrendEmoji(metrics.rd.trend)} (Historical avg: {metrics.rd.avg.toFixed(2)}%)
-        </p>
-        <p>
-          <strong>Energy Consumption:</strong> Currently at {metrics.energy.recent.toFixed(0)} kWh per capita 
-          {getTrendEmoji(metrics.energy.trend)} (Historical avg: {metrics.energy.avg.toFixed(0)} kWh)
-        </p>
+      {(() => {
+        const has = (m: { recent: number; avg: number }) => m.recent !== 0 || m.avg !== 0;
+        const fmt = (n: number) => n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-        <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-md ${isDarkMode ? 'bg-gray-600' : 'bg-blue-100'}`}>
-          <p className="text-xs sm:text-sm">
-            <strong>Economic Overview:</strong> {country}&apos;s economy shows {' '}
-            {metrics.gdp.recent > 2 ? 'strong' : metrics.gdp.recent > 0 ? 'moderate' : 'challenging'} growth at {metrics.gdp.recent.toFixed(1)}% with {' '}
-            {metrics.inflation.recent > 5 ? 'high' : metrics.inflation.recent > 2 ? 'moderate' : 'low'} inflation ({metrics.inflation.recent.toFixed(1)}%). {' '}
-            Employment levels are {metrics.employment.recent > 65 ? 'robust' : metrics.employment.recent > 55 ? 'moderate' : 'concerning'} at {metrics.employment.recent.toFixed(1)}%, while {' '}
-            government debt is {metrics.debt.recent > 100 ? 'significantly high' : metrics.debt.recent > 60 ? 'moderate' : 'manageable'} at {metrics.debt.recent.toFixed(1)}% of GDP. {' '}
-            {metrics.interest.recent > 5 ? 'High' : metrics.interest.recent > 2 ? 'Moderate' : 'Low'} interest rates ({metrics.interest.recent.toFixed(1)}%) suggest {' '}
-            {metrics.interest.recent > 5 ? 'tight' : metrics.interest.recent > 2 ? 'balanced' : 'accommodative'} monetary policy.
-          </p>
-        </div>
-      </div>
+        const coreItems = [
+          has(metrics.gdp) && <p key="gdp"><strong>GDP Growth:</strong> {metrics.gdp.recent.toFixed(1)}% {getTrendEmoji(metrics.gdp.trend)} (Avg: {metrics.gdp.avg.toFixed(1)}%)</p>,
+          has(metrics.gdpPerCapita) && <p key="gdppc"><strong>GDP per Capita (PPP):</strong> ${fmt(metrics.gdpPerCapita.recent)} {getTrendEmoji(metrics.gdpPerCapita.trend)} (Avg: ${fmt(metrics.gdpPerCapita.avg)})</p>,
+          has(metrics.interest) && <p key="int"><strong>Interest Rates:</strong> {metrics.interest.recent.toFixed(1)}% {getTrendEmoji(metrics.interest.trend)} (Avg: {metrics.interest.avg.toFixed(1)}%)</p>,
+          has(metrics.inflation) && <p key="inf"><strong>Inflation Rate:</strong> {metrics.inflation.recent.toFixed(1)}% {getTrendEmoji(metrics.inflation.trend)} (Avg: {metrics.inflation.avg.toFixed(1)}%)</p>,
+          has(metrics.cpi) && <p key="cpi"><strong>Consumer Price Index:</strong> {metrics.cpi.recent.toFixed(1)} {getTrendEmoji(metrics.cpi.trend)} (Base 2010 = 100, Avg: {metrics.cpi.avg.toFixed(1)})</p>,
+          has(metrics.exchangeRate) && <p key="fx"><strong>Exchange Rate:</strong> {metrics.exchangeRate.recent.toFixed(2)} LCU/USD {getTrendEmoji(metrics.exchangeRate.trend)} (Avg: {metrics.exchangeRate.avg.toFixed(2)})</p>,
+        ].filter(Boolean);
+
+        const employmentItems = [
+          has(metrics.employment) && <p key="emp"><strong>Employment:</strong> {metrics.employment.recent.toFixed(1)}% {getTrendEmoji(metrics.employment.trend)} (Avg: {metrics.employment.avg.toFixed(1)}%)</p>,
+          has(metrics.unemployment) && <p key="unemp"><strong>Unemployment:</strong> {metrics.unemployment.recent.toFixed(1)}% {getTrendEmoji(metrics.unemployment.trend)} (Avg: {metrics.unemployment.avg.toFixed(1)}%)</p>,
+          has(metrics.youthUnemployment) && <p key="yunemp"><strong>Youth Unemployment:</strong> {metrics.youthUnemployment.recent.toFixed(1)}% {getTrendEmoji(metrics.youthUnemployment.trend)} (Avg: {metrics.youthUnemployment.avg.toFixed(1)}%)</p>,
+          has(metrics.laborForce) && <p key="lf"><strong>Labor Force Participation:</strong> {metrics.laborForce.recent.toFixed(1)}% {getTrendEmoji(metrics.laborForce.trend)} (Avg: {metrics.laborForce.avg.toFixed(1)}%)</p>,
+          has(metrics.femaleLaborForce) && <p key="flf"><strong>Female Labor Force:</strong> {metrics.femaleLaborForce.recent.toFixed(1)}% {getTrendEmoji(metrics.femaleLaborForce.trend)} (Avg: {metrics.femaleLaborForce.avg.toFixed(1)}%)</p>,
+          has(metrics.productivity) && <p key="prod"><strong>Labor Productivity:</strong> {metrics.productivity.recent.toFixed(0)} {getTrendEmoji(metrics.productivity.trend)} (Avg: {metrics.productivity.avg.toFixed(0)})</p>,
+        ].filter(Boolean);
+
+        const govItems = [
+          has(metrics.debt) && <p key="debt"><strong>Government Debt:</strong> {metrics.debt.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.debt.trend)} (Avg: {metrics.debt.avg.toFixed(1)}%)</p>,
+          has(metrics.spending) && <p key="spend"><strong>Government Spending:</strong> {metrics.spending.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.spending.trend)} (Avg: {metrics.spending.avg.toFixed(1)}%)</p>,
+          has(metrics.budget) && <p key="budget"><strong>Budget Balance:</strong> {metrics.budget.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.budget.trend)} (Avg: {metrics.budget.avg.toFixed(1)}%)</p>,
+          has(metrics.taxRevenue) && <p key="tax"><strong>Tax Revenue:</strong> {metrics.taxRevenue.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.taxRevenue.trend)} (Avg: {metrics.taxRevenue.avg.toFixed(1)}%)</p>,
+          has(metrics.debtService) && <p key="ds"><strong>Debt Service:</strong> {metrics.debtService.recent.toFixed(1)}% of revenue {getTrendEmoji(metrics.debtService.trend)} (Avg: {metrics.debtService.avg.toFixed(1)}%)</p>,
+          has(metrics.military) && <p key="mil"><strong>Military Expenditure:</strong> {metrics.military.recent.toFixed(2)}% of GDP {getTrendEmoji(metrics.military.trend)} (Avg: {metrics.military.avg.toFixed(2)}%)</p>,
+          has(metrics.healthcare) && <p key="hc"><strong>Healthcare Expenditure:</strong> {metrics.healthcare.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.healthcare.trend)} (Avg: {metrics.healthcare.avg.toFixed(1)}%)</p>,
+          has(metrics.eduExpenditure) && <p key="edux"><strong>Education Expenditure:</strong> {metrics.eduExpenditure.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.eduExpenditure.trend)} (Avg: {metrics.eduExpenditure.avg.toFixed(1)}%)</p>,
+          has(metrics.socialSpending) && <p key="soc"><strong>Social Protection:</strong> {metrics.socialSpending.recent.toFixed(1)}% coverage {getTrendEmoji(metrics.socialSpending.trend)} (Avg: {metrics.socialSpending.avg.toFixed(1)}%)</p>,
+        ].filter(Boolean);
+
+        const tradeItems = [
+          has(metrics.trade) && <p key="trade"><strong>Trade Balance:</strong> {metrics.trade.recent.toFixed(2)}% of GDP {getTrendEmoji(metrics.trade.trend)} (Avg: {metrics.trade.avg.toFixed(2)}%)</p>,
+          has(metrics.exports) && <p key="exp"><strong>Exports:</strong> {metrics.exports.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.exports.trend)} (Avg: {metrics.exports.avg.toFixed(1)}%)</p>,
+          has(metrics.imports) && <p key="imp"><strong>Imports:</strong> {metrics.imports.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.imports.trend)} (Avg: {metrics.imports.avg.toFixed(1)}%)</p>,
+          has(metrics.currentAccount) && <p key="ca"><strong>Current Account:</strong> {metrics.currentAccount.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.currentAccount.trend)} (Avg: {metrics.currentAccount.avg.toFixed(1)}%)</p>,
+          has(metrics.fdi) && <p key="fdi"><strong>FDI:</strong> {metrics.fdi.recent.toFixed(2)}% of GDP {getTrendEmoji(metrics.fdi.trend)} (Avg: {metrics.fdi.avg.toFixed(2)}%)</p>,
+          has(metrics.tradeOpenness) && <p key="to"><strong>Trade Openness:</strong> {metrics.tradeOpenness.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.tradeOpenness.trend)} (Avg: {metrics.tradeOpenness.avg.toFixed(1)}%)</p>,
+          has(metrics.tariffs) && <p key="tar"><strong>Tariff Rate:</strong> {metrics.tariffs.recent.toFixed(1)}% {getTrendEmoji(metrics.tariffs.trend)} (Avg: {metrics.tariffs.avg.toFixed(1)}%)</p>,
+          has(metrics.hightech) && <p key="ht"><strong>High-tech Exports:</strong> {metrics.hightech.recent.toFixed(1)}% of mfg exports {getTrendEmoji(metrics.hightech.trend)} (Avg: {metrics.hightech.avg.toFixed(1)}%)</p>,
+          has(metrics.ictExports) && <p key="ict"><strong>ICT Exports:</strong> {metrics.ictExports.recent.toFixed(1)}% of goods exports {getTrendEmoji(metrics.ictExports.trend)} (Avg: {metrics.ictExports.avg.toFixed(1)}%)</p>,
+          has(metrics.tourism) && <p key="tour"><strong>Tourism Receipts:</strong> {metrics.tourism.recent.toFixed(1)}% of exports {getTrendEmoji(metrics.tourism.trend)} (Avg: {metrics.tourism.avg.toFixed(1)}%)</p>,
+        ].filter(Boolean);
+
+        const financeItems = [
+          has(metrics.credit) && <p key="cred"><strong>Domestic Credit:</strong> {metrics.credit.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.credit.trend)} (Avg: {metrics.credit.avg.toFixed(1)}%)</p>,
+          has(metrics.reserves) && <p key="res"><strong>Foreign Reserves:</strong> {metrics.reserves.recent.toFixed(1)} months of imports {getTrendEmoji(metrics.reserves.trend)} (Avg: {metrics.reserves.avg.toFixed(1)})</p>,
+          has(metrics.capitalFormation) && <p key="cf"><strong>Capital Formation:</strong> {metrics.capitalFormation.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.capitalFormation.trend)} (Avg: {metrics.capitalFormation.avg.toFixed(1)}%)</p>,
+          has(metrics.household) && <p key="hh"><strong>Household Consumption:</strong> {metrics.household.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.household.trend)} (Avg: {metrics.household.avg.toFixed(1)}%)</p>,
+          has(metrics.marketCap) && <p key="mc"><strong>Market Capitalization:</strong> {metrics.marketCap.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.marketCap.trend)} (Avg: {metrics.marketCap.avg.toFixed(1)}%)</p>,
+          has(metrics.privateInvest) && <p key="pi"><strong>Private Investment:</strong> {metrics.privateInvest.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.privateInvest.trend)} (Avg: {metrics.privateInvest.avg.toFixed(1)}%)</p>,
+        ].filter(Boolean);
+
+        const socialItems = [
+          has(metrics.population) && <p key="pop"><strong>Population Growth:</strong> {metrics.population.recent.toFixed(2)}% {getTrendEmoji(metrics.population.trend)} (Avg: {metrics.population.avg.toFixed(2)}%)</p>,
+          has(metrics.migration) && <p key="mig"><strong>Net Migration:</strong> {fmt(metrics.migration.recent)} {getTrendEmoji(metrics.migration.trend)} (Avg: {fmt(metrics.migration.avg)})</p>,
+          has(metrics.lifeExpectancy) && <p key="le"><strong>Life Expectancy:</strong> {metrics.lifeExpectancy.recent.toFixed(1)} years {getTrendEmoji(metrics.lifeExpectancy.trend)} (Avg: {metrics.lifeExpectancy.avg.toFixed(1)} years)</p>,
+          has(metrics.urbanPop) && <p key="urb"><strong>Urbanization:</strong> {metrics.urbanPop.recent.toFixed(1)}% {getTrendEmoji(metrics.urbanPop.trend)} (Avg: {metrics.urbanPop.avg.toFixed(1)}%)</p>,
+          has(metrics.poverty) && <p key="pov"><strong>Poverty Rate:</strong> {metrics.poverty.recent.toFixed(1)}% {getTrendEmoji(metrics.poverty.trend)} (Avg: {metrics.poverty.avg.toFixed(1)}%)</p>,
+          has(metrics.gini) && <p key="gini"><strong>Income Inequality (Gini):</strong> {metrics.gini.recent.toFixed(3)} {getTrendEmoji(metrics.gini.trend)} (Avg: {metrics.gini.avg.toFixed(3)})</p>,
+          has(metrics.education) && <p key="edu"><strong>Tertiary Education:</strong> {metrics.education.recent.toFixed(1)}% enrollment {getTrendEmoji(metrics.education.trend)} (Avg: {metrics.education.avg.toFixed(1)}%)</p>,
+          has(metrics.internet) && <p key="net"><strong>Internet Users:</strong> {metrics.internet.recent.toFixed(1)}% of population {getTrendEmoji(metrics.internet.trend)} (Avg: {metrics.internet.avg.toFixed(1)}%)</p>,
+          has(metrics.mobile) && <p key="mob"><strong>Mobile Subscriptions:</strong> {metrics.mobile.recent.toFixed(1)} per 100 people {getTrendEmoji(metrics.mobile.trend)} (Avg: {metrics.mobile.avg.toFixed(1)})</p>,
+        ].filter(Boolean);
+
+        const innovationItems = [
+          has(metrics.rd) && <p key="rd"><strong>R&amp;D Spending:</strong> {metrics.rd.recent.toFixed(2)}% of GDP {getTrendEmoji(metrics.rd.trend)} (Avg: {metrics.rd.avg.toFixed(2)}%)</p>,
+          has(metrics.patents) && <p key="pat"><strong>Patent Applications:</strong> {fmt(metrics.patents.recent)} {getTrendEmoji(metrics.patents.trend)} (Avg: {fmt(metrics.patents.avg)})</p>,
+          has(metrics.sciPublications) && <p key="sci"><strong>Scientific Publications:</strong> {fmt(metrics.sciPublications.recent)} {getTrendEmoji(metrics.sciPublications.trend)} (Avg: {fmt(metrics.sciPublications.avg)})</p>,
+          has(metrics.energy) && <p key="ener"><strong>Energy Consumption:</strong> {fmt(metrics.energy.recent)} kWh/capita {getTrendEmoji(metrics.energy.trend)} (Avg: {fmt(metrics.energy.avg)} kWh)</p>,
+          has(metrics.co2) && <p key="co2"><strong>CO2 Emissions:</strong> {metrics.co2.recent.toFixed(1)} tons/capita {getTrendEmoji(metrics.co2.trend)} (Avg: {metrics.co2.avg.toFixed(1)} tons)</p>,
+          has(metrics.renewable) && <p key="ren"><strong>Renewable Energy:</strong> {metrics.renewable.recent.toFixed(1)}% of total {getTrendEmoji(metrics.renewable.trend)} (Avg: {metrics.renewable.avg.toFixed(1)}%)</p>,
+        ].filter(Boolean);
+
+        const structureItems = [
+          has(metrics.services) && <p key="svc"><strong>Services Value Added:</strong> {metrics.services.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.services.trend)} (Avg: {metrics.services.avg.toFixed(1)}%)</p>,
+          has(metrics.manufacturing) && <p key="mfg"><strong>Manufacturing:</strong> {metrics.manufacturing.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.manufacturing.trend)} (Avg: {metrics.manufacturing.avg.toFixed(1)}%)</p>,
+          has(metrics.agriculture) && <p key="agr"><strong>Agriculture:</strong> {metrics.agriculture.recent.toFixed(1)}% of GDP {getTrendEmoji(metrics.agriculture.trend)} (Avg: {metrics.agriculture.avg.toFixed(1)}%)</p>,
+          has(metrics.newBusiness) && <p key="nb"><strong>New Business Density:</strong> {metrics.newBusiness.recent.toFixed(1)} per 1,000 people {getTrendEmoji(metrics.newBusiness.trend)} (Avg: {metrics.newBusiness.avg.toFixed(1)})</p>,
+        ].filter(Boolean);
+
+        const overviewParts: string[] = [];
+        if (has(metrics.gdp)) overviewParts.push(`${country}'s economy shows ${metrics.gdp.recent > 2 ? 'strong' : metrics.gdp.recent > 0 ? 'moderate' : 'challenging'} growth at ${metrics.gdp.recent.toFixed(1)}%`);
+        if (has(metrics.gdpPerCapita)) overviewParts.push(`with a GDP per capita of $${fmt(metrics.gdpPerCapita.recent)} (PPP)`);
+        if (has(metrics.inflation)) overviewParts.push(`and ${metrics.inflation.recent > 5 ? 'high' : metrics.inflation.recent > 2 ? 'moderate' : 'low'} inflation (${metrics.inflation.recent.toFixed(1)}%)`);
+        if (has(metrics.employment)) overviewParts.push(`Employment levels are ${metrics.employment.recent > 65 ? 'robust' : metrics.employment.recent > 55 ? 'moderate' : 'concerning'} at ${metrics.employment.recent.toFixed(1)}%`);
+        if (has(metrics.youthUnemployment)) overviewParts.push(`with youth unemployment at ${metrics.youthUnemployment.recent.toFixed(1)}%`);
+        if (has(metrics.debt)) overviewParts.push(`Government debt stands at ${metrics.debt.recent.toFixed(1)}% of GDP (${metrics.debt.recent > 100 ? 'significantly high' : metrics.debt.recent > 60 ? 'moderate' : 'manageable'})`);
+        if (has(metrics.budget)) overviewParts.push(`while the budget balance is ${metrics.budget.recent > 0 ? 'in surplus' : 'in deficit'} at ${metrics.budget.recent.toFixed(1)}% of GDP`);
+        if (has(metrics.interest)) overviewParts.push(`${metrics.interest.recent > 5 ? 'High' : metrics.interest.recent > 2 ? 'Moderate' : 'Low'} interest rates (${metrics.interest.recent.toFixed(1)}%) suggest ${metrics.interest.recent > 5 ? 'tight' : metrics.interest.recent > 2 ? 'balanced' : 'accommodative'} monetary policy`);
+        if (has(metrics.trade)) overviewParts.push(`The trade balance sits at ${metrics.trade.recent.toFixed(1)}% of GDP`);
+        if (has(metrics.tradeOpenness)) overviewParts.push(`with trade openness of ${metrics.tradeOpenness.recent.toFixed(0)}%`);
+        if (has(metrics.reserves)) overviewParts.push(`and foreign reserves cover ${metrics.reserves.recent.toFixed(1)} months of imports`);
+        if (has(metrics.lifeExpectancy)) overviewParts.push(`Life expectancy is ${metrics.lifeExpectancy.recent.toFixed(0)} years`);
+        if (has(metrics.urbanPop)) overviewParts.push(`${metrics.urbanPop.recent.toFixed(0)}% of the population is urbanized`);
+        if (has(metrics.internet)) overviewParts.push(`and ${metrics.internet.recent.toFixed(0)}% have internet access`);
+        if (has(metrics.rd)) overviewParts.push(`R&D spending is at ${metrics.rd.recent.toFixed(2)}% of GDP`);
+        if (has(metrics.patents)) overviewParts.push(`with ${fmt(metrics.patents.recent)} patent applications`);
+        if (has(metrics.services) || has(metrics.manufacturing) || has(metrics.agriculture)) {
+          const parts = [];
+          if (has(metrics.services)) parts.push(`services at ${metrics.services.recent.toFixed(0)}%`);
+          if (has(metrics.manufacturing)) parts.push(`manufacturing at ${metrics.manufacturing.recent.toFixed(0)}%`);
+          if (has(metrics.agriculture)) parts.push(`agriculture at ${metrics.agriculture.recent.toFixed(0)}%`);
+          const structureType = has(metrics.services) && metrics.services.recent > 60 ? 'services-dominated' : has(metrics.manufacturing) && metrics.manufacturing.recent > 25 ? 'manufacturing-oriented' : 'diversified';
+          overviewParts.push(`The economy is ${structureType}, with ${parts.join(', ')} of GDP`);
+        }
+        if (has(metrics.co2)) overviewParts.push(`CO2 emissions are ${metrics.co2.recent > 10 ? 'high' : metrics.co2.recent > 5 ? 'moderate' : 'relatively low'} at ${metrics.co2.recent.toFixed(1)} tons per capita`);
+        if (has(metrics.renewable)) overviewParts.push(`with renewable energy comprising ${metrics.renewable.recent.toFixed(0)}% of consumption`);
+
+        return (
+          <div className="space-y-1 text-xs sm:text-sm">
+            {coreItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-2 mb-1 ${isDarkMode ? 'text-blue-300' : 'text-blue-700'}`}>Core Economic</h4>
+                {coreItems}
+              </>
+            )}
+            {employmentItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-3 mb-1 ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>Employment &amp; Labor</h4>
+                {employmentItems}
+              </>
+            )}
+            {govItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-3 mb-1 ${isDarkMode ? 'text-yellow-300' : 'text-yellow-700'}`}>Government &amp; Fiscal</h4>
+                {govItems}
+              </>
+            )}
+            {tradeItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-3 mb-1 ${isDarkMode ? 'text-purple-300' : 'text-purple-700'}`}>Trade &amp; Investment</h4>
+                {tradeItems}
+              </>
+            )}
+            {financeItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-3 mb-1 ${isDarkMode ? 'text-orange-300' : 'text-orange-700'}`}>Financial &amp; Monetary</h4>
+                {financeItems}
+              </>
+            )}
+            {socialItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-3 mb-1 ${isDarkMode ? 'text-pink-300' : 'text-pink-700'}`}>Social &amp; Demographics</h4>
+                {socialItems}
+              </>
+            )}
+            {innovationItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-3 mb-1 ${isDarkMode ? 'text-teal-300' : 'text-teal-700'}`}>Innovation &amp; Environment</h4>
+                {innovationItems}
+              </>
+            )}
+            {structureItems.length > 0 && (
+              <>
+                <h4 className={`font-semibold text-sm mt-3 mb-1 ${isDarkMode ? 'text-cyan-300' : 'text-cyan-700'}`}>Economic Structure</h4>
+                {structureItems}
+              </>
+            )}
+
+            {overviewParts.length > 0 && (
+              <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-md ${isDarkMode ? 'bg-gray-600' : 'bg-blue-100'}`}>
+                <p className="text-xs sm:text-sm">
+                  <strong>Economic Overview:</strong> {overviewParts.join('. ')}.
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 };
