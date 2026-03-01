@@ -98,6 +98,7 @@ export default function RootLayout({
                     <div className="flex flex-col gap-1.5 text-xs sm:text-sm">
                       <a href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Privacy Policy</a>
                       <a href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Terms of Service</a>
+                      <a href="/disclaimer" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Disclaimer</a>
                     </div>
                   </div>
                 </div>

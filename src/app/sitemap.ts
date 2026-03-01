@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/guides/glossary', changeFrequency: 'monthly' as const, priority: 0.7 },
     { path: '/privacy', changeFrequency: 'yearly' as const, priority: 0.3 },
     { path: '/terms', changeFrequency: 'yearly' as const, priority: 0.3 },
+    { path: '/disclaimer', changeFrequency: 'yearly' as const, priority: 0.3 },
   ];
 
   return routes.map((route) => ({
