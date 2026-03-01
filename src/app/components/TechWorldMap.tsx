@@ -174,11 +174,15 @@ const TechWorldMap: React.FC<TechWorldMapProps> = ({
         style={{ backgroundColor: themeColors.background }}
       >
         <ComposableMap
-          projection="geoMercator"
+          projection="geoNaturalEarth1"
+          width={960}
+          height={420}
           projectionConfig={{
-            scale: 130,
-            center: [0, 30]
+            scale: 155,
+            center: [0, 0],
+            rotate: [0, 0, 0]
           }}
+          style={{ width: '100%', height: '100%' }}
         >
           <ZoomableGroup
             zoom={zoom}
@@ -307,7 +311,7 @@ const TechWorldMap: React.FC<TechWorldMapProps> = ({
           -
         </button>
         <button
-          onClick={() => { setZoom(1); setCenter([0, 20]); }}
+          onClick={() => { setZoom(1); setCenter([0, 0] as [number, number]); }}
           className={`w-8 h-8 rounded flex items-center justify-center text-xs ${
             isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-100'
           } shadow`}

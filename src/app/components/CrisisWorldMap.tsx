@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
 import {
   ComposableMap,
   Geographies,
@@ -96,6 +96,48 @@ const CrisisWorldMap: React.FC<CrisisWorldMapProps> = ({
   const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
   const [hoveredCrisis, setHoveredCrisis] = useState<CrisisEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [legendOpen, setLegendOpen] = useState(true);
+
+  const animTarget = useRef<{ coordinates: [number, number]; zoom: number } | null>(null);
+  const animStart = useRef<{ coordinates: [number, number]; zoom: number } | null>(null);
+  const animStartTime = useRef<number>(0);
+  const animFrame = useRef<number>(0);
+
+  const animateTo = useCallback((target: { coordinates: [number, number]; zoom: number }) => {
+    if (animFrame.current) cancelAnimationFrame(animFrame.current);
+    animStart.current = { ...position, coordinates: [...position.coordinates] as [number, number] };
+    animTarget.current = target;
+    animStartTime.current = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - animStartTime.current;
+      const duration = 700;
+      const t = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+
+      const from = animStart.current!;
+      const to = animTarget.current!;
+      const coords: [number, number] = [
+        from.coordinates[0] + (to.coordinates[0] - from.coordinates[0]) * ease,
+        from.coordinates[1] + (to.coordinates[1] - from.coordinates[1]) * ease,
+      ];
+      const zoom = from.zoom + (to.zoom - from.zoom) * ease;
+
+      setPosition({ coordinates: coords, zoom });
+
+      if (t < 1) {
+        animFrame.current = requestAnimationFrame(step);
+      } else {
+        animFrame.current = 0;
+      }
+    };
+
+    animFrame.current = requestAnimationFrame(step);
+  }, [position]);
+
+  useEffect(() => {
+    return () => { if (animFrame.current) cancelAnimationFrame(animFrame.current); };
+  }, []);
 
   // Helper to get crisis generation (either explicit or calculated)
   const getCrisisGen = useCallback((crisis: CrisisEvent): CrisisGeneration => {
@@ -144,14 +186,29 @@ const CrisisWorldMap: React.FC<CrisisWorldMapProps> = ({
   }, []);
 
   const handleReset = useCallback(() => {
-    setPosition({ coordinates: [0, 20], zoom: 1 });
     onSelectCrisis?.(null);
-  }, [onSelectCrisis]);
+    animateTo({ coordinates: [0, 20] as [number, number], zoom: 1 });
+  }, [onSelectCrisis, animateTo]);
 
   const handleMarkerClick = (crises: CrisisEvent[]) => {
-    // If multiple crises at location, cycle through them or show the most severe
     const mostSevere = crises.reduce((a, b) => a.severity > b.severity ? a : b);
-    onSelectCrisis?.(selectedCrisis?.id === mostSevere.id ? null : mostSevere);
+    const isDeselecting = selectedCrisis?.id === mostSevere.id;
+
+    if (isDeselecting) {
+      onSelectCrisis?.(null);
+      animateTo({ coordinates: [0, 20] as [number, number], zoom: 1 });
+    } else {
+      onSelectCrisis?.(mostSevere);
+      const coords = countryCoordinates[mostSevere.countryCode];
+      if (coords) {
+        if (mostSevere.countryCode === 'WORLD') {
+          animateTo({ coordinates: coords, zoom: 1.5 });
+        } else {
+          const offsetCoords: [number, number] = [coords[0], coords[1] - 15];
+          animateTo({ coordinates: offsetCoords, zoom: 3 });
+        }
+      }
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -203,52 +260,71 @@ const CrisisWorldMap: React.FC<CrisisWorldMapProps> = ({
         </button>
       </div>
 
-      {/* Legend */}
-      <div className={`absolute bottom-4 left-4 z-10 p-3 rounded-lg shadow-lg ${
-        isDarkMode ? 'bg-gray-800/90' : 'bg-white/90'
-      }`}>
-        <h4 className={`text-xs font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-          Crisis Types
-        </h4>
-        <div className="space-y-1">
-          {(['banking', 'sovereign_debt', 'currency', 'inflation', 'stock_market'] as CrisisType[]).map(type => (
-            <div key={type} className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: getCrisisTypeColor(type) }}
-              />
-              <span className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                {getCrisisTypeLabel(type)}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className={`mt-2 pt-2 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <h4 className={`text-xs font-semibold mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            Crisis Models
-          </h4>
-          <div className="space-y-1">
-            {(['1st', '2nd', '3rd'] as CrisisGeneration[]).map(gen => (
-              <div key={gen} className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded text-[8px] font-bold text-white flex items-center justify-center"
-                  style={{ backgroundColor: getCrisisGenerationColor(gen) }}
-                >
-                  {gen.charAt(0)}
+      {/* Legend — auto-hides when crisis details panel is open */}
+      {!selectedCrisis && (
+        <div className={`absolute bottom-4 left-4 z-10 rounded-lg shadow-lg transition-all ${
+          isDarkMode ? 'bg-gray-800/90' : 'bg-white/90'
+        }`}>
+          <button
+            onClick={() => setLegendOpen(!legendOpen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 w-full text-left ${
+              legendOpen ? `border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}` : ''
+            }`}
+          >
+            <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Key
+            </span>
+            <span className={`text-[10px] transition-transform ${legendOpen ? 'rotate-180' : ''} ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              ▲
+            </span>
+          </button>
+          {legendOpen && (
+            <div className="p-3 pt-2">
+              <h4 className={`text-xs font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Crisis Types
+              </h4>
+              <div className="space-y-1">
+                {(['banking', 'sovereign_debt', 'currency', 'inflation', 'stock_market'] as CrisisType[]).map(type => (
+                  <div key={type} className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: getCrisisTypeColor(type) }}
+                    />
+                    <span className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {getCrisisTypeLabel(type)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className={`mt-2 pt-2 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <h4 className={`text-xs font-semibold mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Crisis Models
+                </h4>
+                <div className="space-y-1">
+                  {(['1st', '2nd', '3rd'] as CrisisGeneration[]).map(gen => (
+                    <div key={gen} className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded text-[8px] font-bold text-white flex items-center justify-center"
+                        style={{ backgroundColor: getCrisisGenerationColor(gen) }}
+                      >
+                        {gen.charAt(0)}
+                      </div>
+                      <span className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {gen} Gen
+                      </span>
+                    </div>
+                  ))}
                 </div>
-                <span className={`text-[10px] ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {gen} Gen
+              </div>
+              <div className={`mt-2 pt-2 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                  Size = Severity
                 </span>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
-        <div className={`mt-2 pt-2 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-            Size = Severity
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* Stats Overlay */}
       <div className={`absolute top-4 left-4 z-10 p-3 rounded-lg shadow-lg ${
@@ -435,40 +511,39 @@ const CrisisWorldMap: React.FC<CrisisWorldMapProps> = ({
 
       {/* Selected Crisis Details */}
       {selectedCrisis && (
-        <div className={`absolute bottom-0 left-0 right-0 p-4 border-t ${
+        <div className={`absolute bottom-0 left-0 right-0 z-20 max-h-[45%] flex flex-col border-t ${
           isDarkMode ? 'bg-gray-900/95 border-gray-700' : 'bg-white/95 border-gray-200'
         }`}>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <div 
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: getCrisisTypeColor(selectedCrisis.type) }}
-                />
-                <h4 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {selectedCrisis.name} ({selectedCrisis.year})
-                </h4>
-                <span className={`text-xs px-2 py-0.5 rounded ${
-                  isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-                }`}>
-                  {getCrisisTypeLabel(selectedCrisis.type)}
-                </span>
-                <span 
-                  className="text-xs px-2 py-0.5 rounded text-white"
-                  style={{ backgroundColor: getCrisisGenerationColor(getCrisisGen(selectedCrisis)) }}
-                >
-                  {getCrisisGen(selectedCrisis)} Gen: {generationModelNames[getCrisisGen(selectedCrisis)]}
-                </span>
-              </div>
-              <p className={`text-sm mb-3 max-w-3xl ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                {selectedCrisis.description}
-              </p>
+          {/* Sticky header with title + close button */}
+          <div className={`flex items-center justify-between px-4 py-2 shrink-0 border-b ${
+            isDarkMode ? 'border-gray-800' : 'border-gray-100'
+          }`}>
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <div 
+                className="w-3.5 h-3.5 rounded-full shrink-0"
+                style={{ backgroundColor: getCrisisTypeColor(selectedCrisis.type) }}
+              />
+              <h4 className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {selectedCrisis.name} ({selectedCrisis.year})
+              </h4>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
+              }`}>
+                {getCrisisTypeLabel(selectedCrisis.type)}
+              </span>
+              <span 
+                className="text-[10px] px-1.5 py-0.5 rounded text-white"
+                style={{ backgroundColor: getCrisisGenerationColor(getCrisisGen(selectedCrisis)) }}
+              >
+                {getCrisisGen(selectedCrisis)} Gen: {generationModelNames[getCrisisGen(selectedCrisis)]}
+              </span>
             </div>
             <button
               onClick={() => onSelectCrisis?.(null)}
-              className={`p-1 rounded-full hover:bg-gray-700/50 ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              className={`p-1.5 rounded-lg shrink-0 ml-3 transition-colors ${
+                isDarkMode ? 'hover:bg-gray-700 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-500 hover:text-gray-900'
               }`}
+              title="Close"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -476,82 +551,87 @@ const CrisisWorldMap: React.FC<CrisisWorldMapProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-            {/* Key Metrics */}
-            {selectedCrisis.gdpDecline && (
-              <div className={`p-2 rounded ${isDarkMode ? 'bg-red-900/30' : 'bg-red-50'}`}>
-                <div className={`text-xs ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>GDP Decline</div>
-                <div className="text-lg font-bold text-red-500">-{selectedCrisis.gdpDecline}%</div>
-              </div>
-            )}
-            {selectedCrisis.recoveryYears && (
-              <div className={`p-2 rounded ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
-                <div className={`text-xs ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Recovery Time</div>
-                <div className={`text-lg font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                  {selectedCrisis.recoveryYears} years
+          {/* Scrollable content */}
+          <div className="overflow-y-auto px-4 py-3 space-y-3">
+            <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {selectedCrisis.description}
+            </p>
+
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+              {selectedCrisis.gdpDecline && (
+                <div className={`p-1.5 rounded ${isDarkMode ? 'bg-red-900/30' : 'bg-red-50'}`}>
+                  <div className={`text-[10px] ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>GDP Decline</div>
+                  <div className="text-sm font-bold text-red-500">-{selectedCrisis.gdpDecline}%</div>
+                </div>
+              )}
+              {selectedCrisis.recoveryYears && (
+                <div className={`p-1.5 rounded ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+                  <div className={`text-[10px] ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Recovery</div>
+                  <div className={`text-sm font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                    {selectedCrisis.recoveryYears}yr
+                  </div>
+                </div>
+              )}
+              {selectedCrisis.peakInflation && (
+                <div className={`p-1.5 rounded ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-50'}`}>
+                  <div className={`text-[10px] ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>Peak Inflation</div>
+                  <div className="text-sm font-bold text-orange-500">{selectedCrisis.peakInflation.toLocaleString()}%</div>
+                </div>
+              )}
+              {selectedCrisis.currencyDecline && (
+                <div className={`p-1.5 rounded ${isDarkMode ? 'bg-amber-900/30' : 'bg-amber-50'}`}>
+                  <div className={`text-[10px] ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>Currency Fall</div>
+                  <div className="text-sm font-bold text-amber-500">-{selectedCrisis.currencyDecline}%</div>
+                </div>
+              )}
+              {selectedCrisis.bankFailures && (
+                <div className={`p-1.5 rounded ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
+                  <div className={`text-[10px] ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>Bank Failures</div>
+                  <div className="text-sm font-bold text-purple-500">{selectedCrisis.bankFailures.toLocaleString()}</div>
+                </div>
+              )}
+              {selectedCrisis.debtToGdp && (
+                <div className={`p-1.5 rounded ${isDarkMode ? 'bg-violet-900/30' : 'bg-violet-50'}`}>
+                  <div className={`text-[10px] ${isDarkMode ? 'text-violet-400' : 'text-violet-600'}`}>Debt/GDP</div>
+                  <div className="text-sm font-bold text-violet-500">{selectedCrisis.debtToGdp}%</div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <h5 className={`text-[10px] font-semibold mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  CAUSES
+                </h5>
+                <div className="flex flex-wrap gap-1">
+                  {selectedCrisis.causes.map((cause, idx) => (
+                    <span 
+                      key={idx}
+                      className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {cause}
+                    </span>
+                  ))}
                 </div>
               </div>
-            )}
-            {selectedCrisis.peakInflation && (
-              <div className={`p-2 rounded ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-50'}`}>
-                <div className={`text-xs ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>Peak Inflation</div>
-                <div className="text-lg font-bold text-orange-500">{selectedCrisis.peakInflation.toLocaleString()}%</div>
-              </div>
-            )}
-            {selectedCrisis.currencyDecline && (
-              <div className={`p-2 rounded ${isDarkMode ? 'bg-amber-900/30' : 'bg-amber-50'}`}>
-                <div className={`text-xs ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>Currency Fall</div>
-                <div className="text-lg font-bold text-amber-500">-{selectedCrisis.currencyDecline}%</div>
-              </div>
-            )}
-            {selectedCrisis.bankFailures && (
-              <div className={`p-2 rounded ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
-                <div className={`text-xs ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>Bank Failures</div>
-                <div className="text-lg font-bold text-purple-500">{selectedCrisis.bankFailures.toLocaleString()}</div>
-              </div>
-            )}
-            {selectedCrisis.debtToGdp && (
-              <div className={`p-2 rounded ${isDarkMode ? 'bg-violet-900/30' : 'bg-violet-50'}`}>
-                <div className={`text-xs ${isDarkMode ? 'text-violet-400' : 'text-violet-600'}`}>Debt/GDP</div>
-                <div className="text-lg font-bold text-violet-500">{selectedCrisis.debtToGdp}%</div>
-              </div>
-            )}
-          </div>
-
-          {/* Causes and Consequences */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-            <div>
-              <h5 className={`text-xs font-semibold mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                CAUSES
-              </h5>
-              <div className="flex flex-wrap gap-1">
-                {selectedCrisis.causes.map((cause, idx) => (
-                  <span 
-                    key={idx}
-                    className={`text-xs px-2 py-1 rounded ${
-                      isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {cause}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h5 className={`text-xs font-semibold mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                CONSEQUENCES
-              </h5>
-              <div className="flex flex-wrap gap-1">
-                {selectedCrisis.consequences.map((consequence, idx) => (
-                  <span 
-                    key={idx}
-                    className={`text-xs px-2 py-1 rounded ${
-                      isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {consequence}
-                  </span>
-                ))}
+              <div>
+                <h5 className={`text-[10px] font-semibold mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  CONSEQUENCES
+                </h5>
+                <div className="flex flex-wrap gap-1">
+                  {selectedCrisis.consequences.map((consequence, idx) => (
+                    <span 
+                      key={idx}
+                      className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {consequence}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
