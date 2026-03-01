@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -13,9 +13,17 @@ import {
   PieChart,
   MapPin,
   Calendar,
-  Filter
+  Filter,
+  Search,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-import { ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+import {
+  ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip, Legend,
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  AreaChart, Area, BarChart, Bar, ComposedChart, ReferenceLine
+} from 'recharts';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import AdSense from '../components/AdSense';
 import RealDataToggle from '../components/RealDataToggle';
@@ -23,6 +31,7 @@ import DataSourceIndicator from '../components/DataSourceIndicator';
 import DataSourceBreakdown from '../components/DataSourceBreakdown';
 import InfoPanel from '../components/InfoPanel';
 import { useTradeData, useHistoricalTradeData } from '../hooks/useTradeData';
+import ChartDownloadMenu from '../components/ChartDownloadMenu';
 import { COUNTRY_MAPPINGS } from '../services/tradeData';
 import { 
   US, CN, DE, JP, GB, IN, BR, KR, CA, AU, MX, RU, SA,
@@ -78,6 +87,8 @@ const REVERSE_COUNTRY_MAPPINGS: { [key: string]: string } = {
   IDN: 'ID',
   TUR: 'TR'
 };
+
+const TRADE_COUNTRIES = ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA', 'FR', 'IT', 'ES', 'ID', 'TR'] as const;
 
 // Enhanced mock trade data with more countries and metrics
 const mockTradeData = {
@@ -854,6 +865,31 @@ const TradingPlacesPage: React.FC = () => {
   const [showAllCountries, setShowAllCountries] = useState(false);
   const [selectedCountriesForComparison, setSelectedCountriesForComparison] = useState<string[]>([]);
   const [comparisonMode, setComparisonMode] = useState<'all' | 'selected'>('all');
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const tabBarRef = useRef<HTMLDivElement>(null);
+  const tabContentRef = useRef<HTMLDivElement>(null);
+
+  const chartRefGlobalVolume = useRef<HTMLDivElement>(null);
+  const chartRefExportsImports = useRef<HTMLDivElement>(null);
+  const chartRefTradeBalance = useRef<HTMLDivElement>(null);
+  const chartRefTop5Exporters = useRef<HTMLDivElement>(null);
+  const chartRefTradeIntensity = useRef<HTMLDivElement>(null);
+  const chartRefTradeByCountry = useRef<HTMLDivElement>(null);
+  const chartRefExportCategories = useRef<HTMLDivElement>(null);
+  const chartRefImportCategories = useRef<HTMLDivElement>(null);
+  const chartRefTradingPartners = useRef<HTMLDivElement>(null);
+  const chartRefTariffTrends = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 600);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   // Regional Trade Blocs Data
   const tradeBlocs = {
@@ -1110,9 +1146,9 @@ const TradingPlacesPage: React.FC = () => {
     isRealData,
     refreshData
   } = useTradeData({
-    countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA', 'FR', 'IT', 'ES', 'ID', 'TR'],
+    countries: TRADE_COUNTRIES as unknown as string[],
     enableRealData,
-    refreshInterval: 3600000 // 1 hour
+    refreshInterval: 3600000
   });
 
   // Historical data integration (fetching from 1960 - earliest World Bank data)
@@ -1125,7 +1161,7 @@ const TradingPlacesPage: React.FC = () => {
     availableYearRange,
     refreshData: refreshHistoricalData
   } = useHistoricalTradeData({
-    countries: ['US', 'CN', 'DE', 'JP', 'GB', 'IN', 'BR', 'KR', 'CA', 'AU', 'MX', 'RU', 'SA', 'FR', 'IT', 'ES', 'ID', 'TR'],
+    countries: TRADE_COUNTRIES as unknown as string[],
     startYear: customStartYear,
     endYear: customEndYear,
     enableRealData: enableRealData && showHistoricalView
@@ -1153,34 +1189,9 @@ const TradingPlacesPage: React.FC = () => {
     window.dispatchEvent(new Event('themeChange'));
   }, [isDarkMode]);
 
-  // Debug logging for comparison feature
-  useEffect(() => {
-    if (comparisonMode === 'selected' && selectedCountriesForComparison.length >= 2) {
-      console.log('Comparison Debug:', {
-        selectedCountries: selectedCountriesForComparison,
-        historicalTrendsKeys: Object.keys(historicalTrends),
-        historicalTrendsLength: Object.keys(historicalTrends).length,
-        enableRealData,
-        showHistoricalView,
-        historicalLoading,
-        sampleTrend: historicalTrends[selectedCountriesForComparison[0]]
-      });
-    }
-  }, [comparisonMode, selectedCountriesForComparison, historicalTrends, enableRealData, showHistoricalView, historicalLoading]);
-
   // Merge real data with mock data
   const combinedTradeData = useMemo(() => {
     if (enableRealData && realTradeData.length > 0) {
-      // Log the incoming real data for debugging
-      console.log('Real Trade Data received:', realTradeData.map(r => ({
-        code: r.code,
-        countryCode: r.countryCode,
-        country: r.country,
-        exports: r.exports,
-        imports: r.imports
-      })));
-
-      // First, merge real data with mock data for each country
       const mergedCountries = mockTradeData.countries.map(mockCountry => {
         const realCountryData = realTradeData.find(real => 
           real.code === mockCountry.code || // Match by 2-letter code (e.g., US)
@@ -1190,12 +1201,6 @@ const TradingPlacesPage: React.FC = () => {
         );
 
         if (realCountryData) {
-          console.log(`Matched ${mockCountry.code} (${mockCountry.name}) with real data:`, {
-            exports: realCountryData.exports,
-            imports: realCountryData.imports,
-            totalExports: realCountryData.exports || mockCountry.totalExports,
-            totalImports: realCountryData.imports || mockCountry.totalImports
-          });
           return {
             ...mockCountry,
             // Use real data if it exists and is a valid number, otherwise use mock data
@@ -1270,16 +1275,6 @@ const TradingPlacesPage: React.FC = () => {
         ? validGrowthRates.reduce((sum, val) => sum + val, 0) / validGrowthRates.length
         : mockTradeData.globalStats.tradeMetrics.globalTradeGrowth;
 
-      // Log for debugging
-      console.log('Trading Places - Real Data:', {
-        realDataCount: realTradeData.length,
-        mergedCountriesCount: mergedCountries.length,
-        totalWorldTrade,
-        topTradingNations,
-        averageTradeIntensity,
-        globalTradeGrowth
-      });
-
       return {
         countries: mergedCountries,
         globalStats: {
@@ -1297,10 +1292,25 @@ const TradingPlacesPage: React.FC = () => {
     return mockTradeData;
   }, [enableRealData, realTradeData]);
 
+  useEffect(() => {
+    const updated = combinedTradeData.countries.find(c => c.code === selectedCountry.code);
+    if (updated && updated !== selectedCountry) {
+      setSelectedCountry(updated);
+    }
+  }, [combinedTradeData]);
+
+  const [countrySearch, setCountrySearch] = useState('');
+
   const sortedCountries = useMemo(() => {
     let filtered = [...combinedTradeData.countries];
     
-    // Filter by region
+    if (countrySearch.trim()) {
+      const q = countrySearch.toLowerCase();
+      filtered = filtered.filter(country =>
+        country.name.toLowerCase().includes(q) || country.code.toLowerCase().includes(q)
+      );
+    }
+
     if (filterRegion !== 'All') {
       filtered = filtered.filter(country => country.region === filterRegion);
     }
@@ -1330,7 +1340,7 @@ const TradingPlacesPage: React.FC = () => {
           return 0;
       }
     });
-  }, [sortBy, filterRegion, combinedTradeData]);
+  }, [sortBy, filterRegion, combinedTradeData, countrySearch]);
 
   const formatNumber = (num: number, suffix: string = 'B') => {
     return `$${Math.round(Math.abs(num))}${suffix}`;
@@ -1381,17 +1391,24 @@ const TradingPlacesPage: React.FC = () => {
       '#14B8A6', '#F43F5E', '#A855F7', '#0EA5E9', '#22C55E'
     ];
 
-    // Create stable data objects
+    const makeWeights = (count: number) => {
+      const weights = Array.from({ length: count }, (_, i) => Math.max(1, count - i));
+      const total = weights.reduce((a, b) => a + b, 0);
+      return weights.map(w => Math.round((w / total) * 100));
+    };
+
+    const exportWeights = makeWeights(selectedCountry.topExports.length);
     const exportData = selectedCountry.topExports.map((exportItem: string, index: number) => ({
       name: exportItem,
-      value: 20 + (index * 5), // Stable values instead of Math.random()
+      value: exportWeights[index],
       color: exportColors[index % exportColors.length],
       fill: exportColors[index % exportColors.length]
     }));
 
+    const importWeights = makeWeights(selectedCountry.topImports.length);
     const importData = selectedCountry.topImports.map((importItem: string, index: number) => ({
       name: importItem,
-      value: 18 + (index * 4), // Stable values instead of Math.random()
+      value: importWeights[index],
       color: importColors[index % importColors.length],
       fill: importColors[index % importColors.length]
     }));
@@ -1405,6 +1422,83 @@ const TradingPlacesPage: React.FC = () => {
 
     return { exportData, importData, partnerData };
   }, [selectedCountry]);
+
+  const globalAggregateData = useMemo(() => {
+    if (!historicalYearlyData || Object.keys(historicalYearlyData).length === 0) return [];
+    return Object.entries(historicalYearlyData)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([year, countries]: [string, any[]]) => {
+        const totalExports = countries.reduce((s, c) => s + (c.exports || 0), 0);
+        const totalImports = countries.reduce((s, c) => s + (c.imports || 0), 0);
+        const tradeBalance = countries.reduce((s, c) => s + (c.tradeBalance || 0), 0);
+        const intensities = countries.filter(c => c.tradeIntensity > 0).map(c => c.tradeIntensity);
+        const avgIntensity = intensities.length > 0 ? intensities.reduce((s, v) => s + v, 0) / intensities.length : 0;
+        const minIntensity = intensities.length > 0 ? Math.min(...intensities) : 0;
+        const maxIntensity = intensities.length > 0 ? Math.max(...intensities) : 0;
+        return {
+          year: Number(year),
+          'Exports ($B)': Math.round(totalExports * 10) / 10,
+          'Imports ($B)': Math.round(totalImports * 10) / 10,
+          tradeBalance: Math.round(tradeBalance * 10) / 10,
+          avgIntensity: Math.round(avgIntensity * 10) / 10,
+          minIntensity: Math.round(minIntensity * 10) / 10,
+          maxIntensity: Math.round(maxIntensity * 10) / 10,
+        };
+      });
+  }, [historicalYearlyData]);
+
+  const top5ExporterData = useMemo(() => {
+    if (!historicalTrends || Object.keys(historicalTrends).length === 0) return { lines: [] as string[], data: [] as any[] };
+    const sorted = Object.entries(historicalTrends)
+      .filter(([, t]: [string, any]) => t.data && t.data.length > 0)
+      .sort(([, a]: [string, any], [, b]: [string, any]) => b.averageExports - a.averageExports)
+      .slice(0, 5);
+    const top5Codes = sorted.map(([code]) => code);
+    const top5Names = top5Codes.map(code => {
+      const country = mockTradeData.countries.find(c => c.code === code);
+      return country?.name || code;
+    });
+    const yearSet = new Set<number>();
+    sorted.forEach(([, t]: [string, any]) => t.data.forEach((d: any) => yearSet.add(d.year)));
+    const years = Array.from(yearSet).sort((a, b) => a - b);
+    const data = years.map(year => {
+      const point: any = { year };
+      sorted.forEach(([code, trend]: [string, any], i) => {
+        const yd = trend.data.find((d: any) => d.year === year);
+        point[top5Names[i]] = yd ? Math.round(yd.exports * 10) / 10 : null;
+      });
+      return point;
+    });
+    return { lines: top5Names, data };
+  }, [historicalTrends]);
+
+  const latestYearSnapshot = useMemo(() => {
+    if (!historicalYearlyData || Object.keys(historicalYearlyData).length === 0) return [];
+    const years = Object.keys(historicalYearlyData).map(Number).sort((a, b) => b - a);
+    const latestYear = years[0];
+    const countries: any[] = historicalYearlyData[latestYear] || [];
+    return countries
+      .filter(c => c.exports > 0 || c.imports > 0)
+      .map(c => ({
+        name: c.country?.length > 12 ? c.country.substring(0, 12) + '...' : c.country,
+        fullName: c.country,
+        'Trade Volume ($B)': Math.round((c.exports + c.imports) * 10) / 10,
+        'GDP ($T)': Math.round(c.gdp * 100) / 100,
+        year: latestYear,
+      }))
+      .sort((a, b) => b['Trade Volume ($B)'] - a['Trade Volume ($B)']);
+  }, [historicalYearlyData]);
+
+  const globalTradeVolumeData = useMemo(() => {
+    return Object.entries(historicalGlobalTrends?.totalWorldTradeByYear || {})
+      .sort(([yearA], [yearB]) => Number(yearA) - Number(yearB))
+      .map(([year, trade]) => ({
+        year: Number(year),
+        'World Trade Volume ($T)': Math.round((Number(trade) + Number.EPSILON) * 100) / 100
+      }));
+  }, [historicalGlobalTrends]);
+
+  const CHART_LINE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   const COLORS = [
     '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -1469,7 +1563,7 @@ const TradingPlacesPage: React.FC = () => {
             <div className="flex items-center space-x-2 text-sm">
               <Calendar className="w-4 h-4" />
               <span className={isDarkMode ? 'text-gray-300' : 'text-gray-500'}>
-                Last updated: {new Date().toLocaleDateString()}
+                Last updated: {lastUpdated ? new Date(lastUpdated).toLocaleDateString() : new Date().toLocaleDateString()}
               </span>
             </div>
             <div className="flex items-center space-x-2">
@@ -1534,6 +1628,16 @@ const TradingPlacesPage: React.FC = () => {
           onRefresh={refreshData}
           isDarkMode={isDarkMode}
         />
+
+        {/* Loading overlay when fetching live data */}
+        {loading && enableRealData && (
+          <div className={`p-4 rounded-lg flex items-center space-x-3 ${isDarkMode ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
+            <span className={`text-sm font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-700'}`}>
+              Fetching live trade data from World Bank & UN Comtrade...
+            </span>
+          </div>
+        )}
 
         {/* Alert when Compare Mode needs Live Data */}
         {comparisonMode === 'selected' && !enableRealData && (
@@ -1803,25 +1907,28 @@ const TradingPlacesPage: React.FC = () => {
               </div>
             </div>
 
-            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-              <h2 className="text-2xl font-bold mb-4">
-                Global Trade Volume Over Time 
-                {availableYearRange && (
-                  <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    ({availableYearRange.min}-{availableYearRange.max})
-                  </span>
-                )}
-              </h2>
+            <div ref={chartRefGlobalVolume} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">
+                  Global Trade Volume Over Time 
+                  {availableYearRange && (
+                    <span className={`text-base font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      ({availableYearRange.min}-{availableYearRange.max})
+                    </span>
+                  )}
+                </h2>
+                <ChartDownloadMenu
+                  chartRef={chartRefGlobalVolume}
+                  data={globalTradeVolumeData}
+                  filename="Global_Trade_Volume_Over_Time"
+                  title="Global Trade Volume Over Time"
+                  isDarkMode={isDarkMode}
+                />
+              </div>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={Object.entries(historicalGlobalTrends?.totalWorldTradeByYear || {})
-                      .sort(([yearA], [yearB]) => Number(yearA) - Number(yearB))
-                      .map(([year, trade]) => ({
-                        year: Number(year),
-                        'World Trade Volume ($T)': Math.round((Number(trade) + Number.EPSILON) * 100) / 100
-                      }))
-                    }
+                    data={globalTradeVolumeData}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
@@ -1853,6 +1960,268 @@ const TradingPlacesPage: React.FC = () => {
                 </ResponsiveContainer>
               </div>
             </div>
+
+            {/* Charts Row 1: Exports vs Imports + Trade Balance */}
+            {globalAggregateData.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Chart 1: Global Exports vs Imports (Stacked Area) */}
+                <div ref={chartRefExportsImports} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      Global Exports vs Imports
+                    </h3>
+                    <ChartDownloadMenu
+                      chartRef={chartRefExportsImports}
+                      data={globalAggregateData}
+                      filename="Global_Exports_vs_Imports"
+                      title="Global Exports vs Imports"
+                      isDarkMode={isDarkMode}
+                    />
+                  </div>
+                  <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Total tracked exports and imports across all economies ($ Billions)
+                  </p>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={globalAggregateData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ fontSize: '0.75rem' }} />
+                        <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ fontSize: '0.75rem' }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                            border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                            borderRadius: '0.5rem',
+                            color: isDarkMode ? '#ffffff' : '#000000',
+                            fontSize: '0.8rem'
+                          }}
+                        />
+                        <Legend />
+                        <Area type="monotone" dataKey="Exports ($B)" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.4} />
+                        <Area type="monotone" dataKey="Imports ($B)" stackId="1" stroke="#ef4444" fill="#ef4444" fillOpacity={0.4} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Chart 2: Global Trade Balance (Bar Chart) */}
+                <div ref={chartRefTradeBalance} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      Global Trade Balance Over Time
+                    </h3>
+                    <ChartDownloadMenu
+                      chartRef={chartRefTradeBalance}
+                      data={globalAggregateData}
+                      filename="Global_Trade_Balance"
+                      title="Global Trade Balance Over Time"
+                      isDarkMode={isDarkMode}
+                    />
+                  </div>
+                  <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Net trade balance across tracked economies ($ Billions)
+                  </p>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={globalAggregateData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ fontSize: '0.75rem' }} />
+                        <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ fontSize: '0.75rem' }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                            border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                            borderRadius: '0.5rem',
+                            color: isDarkMode ? '#ffffff' : '#000000',
+                            fontSize: '0.8rem'
+                          }}
+                          formatter={(value: any) => [`$${value}B`, 'Trade Balance']}
+                        />
+                        <ReferenceLine y={0} stroke={isDarkMode ? '#9ca3af' : '#6b7280'} strokeDasharray="3 3" />
+                        <Bar
+                          dataKey="tradeBalance"
+                          name="Trade Balance ($B)"
+                          radius={[2, 2, 0, 0]}
+                        >
+                          {globalAggregateData.map((entry, index) => (
+                            <Cell key={`balance-${index}`} fill={entry.tradeBalance >= 0 ? '#10b981' : '#ef4444'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chart 3: Top 5 Exporters Over Time (Full Width) */}
+            {top5ExporterData.data.length > 0 && (
+              <div ref={chartRefTop5Exporters} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Top 5 Exporters Over Time
+                  </h3>
+                  <ChartDownloadMenu
+                    chartRef={chartRefTop5Exporters}
+                    data={top5ExporterData.data}
+                    filename="Top_5_Exporters_Over_Time"
+                    title="Top 5 Exporters Over Time"
+                    isDarkMode={isDarkMode}
+                  />
+                </div>
+                <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Export volumes ($ Billions) for the five largest exporting economies by average volume
+                </p>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={top5ExporterData.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                      <XAxis dataKey="year" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                      <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                          border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                          borderRadius: '0.5rem',
+                          color: isDarkMode ? '#ffffff' : '#000000',
+                          fontSize: '0.8rem'
+                        }}
+                      />
+                      <Legend />
+                      {top5ExporterData.lines.map((name, i) => (
+                        <Line
+                          key={name}
+                          type="monotone"
+                          dataKey={name}
+                          stroke={CHART_LINE_COLORS[i % CHART_LINE_COLORS.length]}
+                          strokeWidth={2}
+                          dot={false}
+                          connectNulls
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* Charts Row 2: Trade Intensity + GDP vs Trade Volume */}
+            {globalAggregateData.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Chart 4: Trade Intensity Trends (Composed Chart with range band) */}
+                <div ref={chartRefTradeIntensity} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      Trade Intensity Trends
+                    </h3>
+                    <ChartDownloadMenu
+                      chartRef={chartRefTradeIntensity}
+                      data={globalAggregateData}
+                      filename="Trade_Intensity_Trends"
+                      title="Trade Intensity Trends"
+                      isDarkMode={isDarkMode}
+                    />
+                  </div>
+                  <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Average trade openness (% of GDP) with min-max range across tracked economies
+                  </p>
+                  <div className="h-60">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={globalAggregateData} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                        <XAxis dataKey="year" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ fontSize: '0.75rem' }} />
+                        <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ fontSize: '0.75rem' }} unit="%" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                            border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                            borderRadius: '0.5rem',
+                            color: isDarkMode ? '#ffffff' : '#000000',
+                            fontSize: '0.8rem'
+                          }}
+                          formatter={(value: any, name: string) => [`${value}%`, name]}
+                        />
+                        <Area type="monotone" dataKey="maxIntensity" name="Max Intensity" stroke="none" fill="#8b5cf6" fillOpacity={0.15} legendType="none" />
+                        <Area type="monotone" dataKey="minIntensity" name="Min Intensity" stroke="none" fill="#ffffff" fillOpacity={isDarkMode ? 0 : 0.8} legendType="none" />
+                        <Line type="monotone" dataKey="avgIntensity" name="Avg Intensity" stroke="#8b5cf6" strokeWidth={2.5} dot={false} legendType="none" />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex items-center justify-center gap-4 mt-1">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-0.5 bg-purple-500 rounded"></div>
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Avg Intensity</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 bg-purple-500/15 border border-purple-300 rounded-sm"></div>
+                      <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Range (Min–Max)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Chart 5: Trade Volume by Country (latest year) */}
+                {latestYearSnapshot.length > 0 && (
+                  <div ref={chartRefTradeByCountry} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        Trade Volume by Country
+                        <span className={`text-sm font-normal ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          ({latestYearSnapshot[0]?.year})
+                        </span>
+                      </h3>
+                      <ChartDownloadMenu
+                        chartRef={chartRefTradeByCountry}
+                        data={latestYearSnapshot}
+                        filename="Trade_Volume_by_Country"
+                        title="Trade Volume by Country"
+                        isDarkMode={isDarkMode}
+                      />
+                    </div>
+                    <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Total trade volume (exports + imports) for the most recent year with data
+                    </p>
+                    <div style={{ height: Math.max(300, latestYearSnapshot.length * 28) }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={latestYearSnapshot}
+                          layout="vertical"
+                          margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                          <XAxis type="number" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} style={{ fontSize: '0.7rem' }} />
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            width={80}
+                            stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                            style={{ fontSize: '0.7rem' }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                              border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                              borderRadius: '0.5rem',
+                              color: isDarkMode ? '#ffffff' : '#000000',
+                              fontSize: '0.8rem'
+                            }}
+                            formatter={(value: any, name: string, props: any) => {
+                              const item = props.payload;
+                              return [`$${value}B (GDP: $${item['GDP ($T)']}T)`, 'Trade Volume'];
+                            }}
+                            labelFormatter={(label: string, payload: any[]) => payload?.[0]?.payload?.fullName || label}
+                          />
+                          <Bar dataKey="Trade Volume ($B)" radius={[0, 4, 4, 0]}>
+                            {latestYearSnapshot.map((_, index) => (
+                              <Cell key={`snap-${index}`} fill={CHART_LINE_COLORS[index % CHART_LINE_COLORS.length]} fillOpacity={0.8} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Country-Specific Historical Trends */}
             <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
@@ -1943,7 +2312,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['USA', 'CHN']);
+                              setSelectedCountriesForComparison(['US', 'CN']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
@@ -1957,7 +2326,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['USA', 'CHN', 'JPN', 'DEU']);
+                              setSelectedCountriesForComparison(['US', 'CN', 'JP', 'DE']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
@@ -1976,7 +2345,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['BRA', 'RUS', 'IND', 'CHN', 'SAU']);
+                              setSelectedCountriesForComparison(['BR', 'RU', 'IN', 'CN', 'SA']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-yellow-500 hover:bg-yellow-600'
@@ -1990,7 +2359,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['USA', 'CAN', 'MEX']);
+                              setSelectedCountriesForComparison(['US', 'CA', 'MX']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'
@@ -2004,7 +2373,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['DEU', 'FRA', 'ITA', 'ESP']);
+                              setSelectedCountriesForComparison(['DE', 'FR', 'IT', 'ES']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'
@@ -2023,7 +2392,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['CHN', 'JPN', 'KOR', 'IND']);
+                              setSelectedCountriesForComparison(['CN', 'JP', 'KR', 'IN']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'
@@ -2037,7 +2406,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['USA', 'CAN', 'MEX', 'BRA']);
+                              setSelectedCountriesForComparison(['US', 'CA', 'MX', 'BR']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'
@@ -2051,7 +2420,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['DEU', 'FRA', 'ITA', 'ESP']);
+                              setSelectedCountriesForComparison(['DE', 'FR', 'IT', 'ES']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'
@@ -2065,7 +2434,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['SAU', 'RUS']);
+                              setSelectedCountriesForComparison(['SA', 'RU']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-orange-600 hover:bg-orange-700' : 'bg-orange-500 hover:bg-orange-600'
@@ -2079,7 +2448,7 @@ const TradingPlacesPage: React.FC = () => {
                                 alert('Please enable Live Data first to use comparison features!');
                                 return;
                               }
-                              setSelectedCountriesForComparison(['AUS', 'CAN', 'BRA', 'RUS']);
+                              setSelectedCountriesForComparison(['AU', 'CA', 'BR', 'RU']);
                             }}
                             className={`text-xs px-2 py-1 rounded ${
                               isDarkMode ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-500 hover:bg-emerald-600'
@@ -2495,6 +2864,30 @@ const TradingPlacesPage: React.FC = () => {
                   </select>
                 </div>
               </div>
+
+              {/* Country search */}
+              <div className="relative mb-4">
+                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`} />
+                <input
+                  type="text"
+                  placeholder="Search countries..."
+                  value={countrySearch}
+                  onChange={(e) => setCountrySearch(e.target.value)}
+                  className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isDarkMode
+                      ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                  }`}
+                />
+                {countrySearch && (
+                  <button
+                    onClick={() => setCountrySearch('')}
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
               
               <div className="space-y-3">
                 {sortedCountries.map((country) => (
@@ -2524,6 +2917,9 @@ const TradingPlacesPage: React.FC = () => {
                           </p>
                           <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                             {country.code} • {country.region}
+                            {enableRealData && isRealData && realTradeData.some(r => r.code === country.code || r.countryCode === country.code) && (
+                              <span className="ml-1 inline-block w-2 h-2 bg-green-500 rounded-full" title="Live data" />
+                            )}
                           </p>
                         </div>
                       </div>
@@ -2551,7 +2947,11 @@ const TradingPlacesPage: React.FC = () => {
 
           {/* Country Details */}
           <div className="lg:col-span-2">
-            <div className={`p-4 sm:p-6 rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+            <div
+              key={selectedCountry.code}
+              className={`p-4 sm:p-6 rounded-md animate-fadeIn ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
+              style={{ animation: 'fadeIn 0.25s ease-in-out' }}
+            >
               {/* Country Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
                 <div className="flex items-center space-x-4">
@@ -2577,34 +2977,42 @@ const TradingPlacesPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tabs */}
-              <div className={`flex flex-wrap gap-1 mb-4 sm:mb-6 rounded-lg p-1 ${
+              {/* Tabs - scrollable on mobile, sticky */}
+              <div ref={tabBarRef} className={`sticky top-0 z-10 mb-4 sm:mb-6 rounded-lg p-1 ${
                 isDarkMode ? 'bg-gray-600' : 'bg-gray-100'
               }`}>
-                {['overview', 'exports', 'imports', 'partners', 'metrics', 'regional', 'charts', 'tariffs', 'country-tariffs', 'trade-blocs', 'advanced-metrics', 'data-sources'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-                      activeTab === tab
-                        ? isDarkMode
-                          ? 'bg-gray-500 text-white shadow-sm'
-                          : 'bg-white text-blue-600 shadow-sm'
-                        : isDarkMode
-                          ? 'text-gray-300 hover:text-white'
-                          : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    {tab === 'trade-blocs' ? 'Trade Blocs' : 
-                     tab === 'country-tariffs' ? 'Country Tariffs' :
-                     tab === 'data-sources' ? 'Data Sources' :
-                     tab === 'advanced-metrics' ? 'Advanced Metrics' :
-                     tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
+                <div className="relative">
+                  <div className="overflow-x-auto scrollbar-hide flex gap-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    {['overview', 'exports', 'imports', 'partners', 'metrics', 'regional', 'charts', 'tariffs', 'country-tariffs', 'trade-blocs', 'advanced-metrics', 'data-sources'].map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => {
+                          setActiveTab(tab);
+                          tabContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }}
+                        className={`px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                          activeTab === tab
+                            ? isDarkMode
+                              ? 'bg-gray-500 text-white shadow-sm'
+                              : 'bg-white text-blue-600 shadow-sm'
+                            : isDarkMode
+                              ? 'text-gray-300 hover:text-white'
+                              : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        {tab === 'trade-blocs' ? 'Trade Blocs' : 
+                         tab === 'country-tariffs' ? 'Country Tariffs' :
+                         tab === 'data-sources' ? 'Data Sources' :
+                         tab === 'advanced-metrics' ? 'Advanced Metrics' :
+                         tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Tab Content */}
+              <div ref={tabContentRef} />
               {activeTab === 'overview' && (
                 <div className="space-y-4 sm:space-y-6">
                   {/* Key Metrics */}
@@ -3038,13 +3446,22 @@ const TradingPlacesPage: React.FC = () => {
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Export Categories Pie Chart */}
-                    <div className={`p-6 rounded-xl shadow-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}>
+                    <div ref={chartRefExportCategories} className={`p-6 rounded-xl shadow-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}>
                       <div className="flex items-center justify-between mb-6">
                         <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                           Export Categories
                         </h4>
-                        <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
-                          <PieChart className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div className="flex items-center gap-2">
+                          <ChartDownloadMenu
+                            chartRef={chartRefExportCategories}
+                            data={chartData.exportData}
+                            filename={`${selectedCountry.name}_Export_Categories`}
+                            title={`${selectedCountry.name} - Export Categories`}
+                            isDarkMode={isDarkMode}
+                          />
+                          <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+                            <PieChart className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                          </div>
                         </div>
                       </div>
                       <div className="h-72">
@@ -3113,13 +3530,22 @@ const TradingPlacesPage: React.FC = () => {
                     </div>
 
                     {/* Import Categories Pie Chart */}
-                    <div className={`p-6 rounded-xl shadow-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}>
+                    <div ref={chartRefImportCategories} className={`p-6 rounded-xl shadow-lg border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}>
                       <div className="flex items-center justify-between mb-6">
                         <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                           Import Categories
                         </h4>
-                        <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/30' : 'bg-red-50'}`}>
-                          <Package className={`w-5 h-5 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
+                        <div className="flex items-center gap-2">
+                          <ChartDownloadMenu
+                            chartRef={chartRefImportCategories}
+                            data={chartData.importData}
+                            filename={`${selectedCountry.name}_Import_Categories`}
+                            title={`${selectedCountry.name} - Import Categories`}
+                            isDarkMode={isDarkMode}
+                          />
+                          <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/30' : 'bg-red-50'}`}>
+                            <Package className={`w-5 h-5 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
+                          </div>
                         </div>
                       </div>
                       <div className="h-72">
@@ -3188,13 +3614,22 @@ const TradingPlacesPage: React.FC = () => {
                     </div>
 
                     {/* Trading Partners Pie Chart */}
-                    <div className={`p-6 rounded-xl shadow-lg border lg:col-span-2 ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}>
+                    <div ref={chartRefTradingPartners} className={`p-6 rounded-xl shadow-lg border lg:col-span-2 ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}>
                       <div className="flex items-center justify-between mb-6">
                         <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                           Trading Partners Distribution
                         </h4>
-                        <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-green-900/30' : 'bg-green-50'}`}>
-                          <Globe className={`w-5 h-5 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} />
+                        <div className="flex items-center gap-2">
+                          <ChartDownloadMenu
+                            chartRef={chartRefTradingPartners}
+                            data={chartData.partnerData}
+                            filename={`${selectedCountry.name}_Trading_Partners`}
+                            title={`${selectedCountry.name} - Trading Partners Distribution`}
+                            isDarkMode={isDarkMode}
+                          />
+                          <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-green-900/30' : 'bg-green-50'}`}>
+                            <Globe className={`w-5 h-5 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} />
+                          </div>
                         </div>
                       </div>
                       <div className="h-96">
@@ -3556,12 +3991,21 @@ const TradingPlacesPage: React.FC = () => {
                   {tariffTab === 'trends' && (
                     <div className="space-y-6">
                       {/* Global Tariff Trends Chart */}
-                      <div className={`p-6 rounded-xl shadow-lg border ${
+                      <div ref={chartRefTariffTrends} className={`p-6 rounded-xl shadow-lg border ${
                         isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
                       }`}>
-                        <h4 className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                          Global Average Tariff Trends (2015-2024)
-                        </h4>
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            Global Average Tariff Trends (2015-2024)
+                          </h4>
+                          <ChartDownloadMenu
+                            chartRef={chartRefTariffTrends}
+                            data={tariffData.globalTariffTrends}
+                            filename="Global_Tariff_Trends"
+                            title="Global Average Tariff Trends (2015-2024)"
+                            isDarkMode={isDarkMode}
+                          />
+                        </div>
                         <div className="h-64">
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={tariffData.globalTariffTrends}>
@@ -4348,7 +4792,7 @@ const TradingPlacesPage: React.FC = () => {
                                       <div className="bg-blue-600 h-2 rounded-full" style={{width: `${metrics.exportQuality * 100}%`}}></div>
                                     </div>
                                     <p className={`text-sm font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                                      {formatPercentage(metrics.exportQuality * 100)}%
+                                      {formatPercentage(metrics.exportQuality * 100)}
                                     </p>
                                   </div>
                                   <div>
@@ -4363,7 +4807,7 @@ const TradingPlacesPage: React.FC = () => {
                                       <div className="bg-purple-600 h-2 rounded-full" style={{width: `${metrics.competitiveness * 100}%`}}></div>
                                     </div>
                                     <p className={`text-sm font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                                      {formatPercentage(metrics.competitiveness * 100)}%
+                                      {formatPercentage(metrics.competitiveness * 100)}
                                     </p>
                                   </div>
                                   <div>
@@ -4372,7 +4816,7 @@ const TradingPlacesPage: React.FC = () => {
                                       <div className="bg-orange-600 h-2 rounded-full" style={{width: `${metrics.innovation * 100}%`}}></div>
                                     </div>
                                     <p className={`text-sm font-medium ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                                      {formatPercentage(metrics.innovation * 100)}%
+                                      {formatPercentage(metrics.innovation * 100)}
                                     </p>
                                   </div>
                                 </div>
@@ -4455,10 +4899,10 @@ const TradingPlacesPage: React.FC = () => {
                                       {formatDecimal(metrics.sustainableExports)}%
                                     </td>
                                     <td className={`text-center py-3 px-4 font-medium ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-                                      {formatPercentage(metrics.greenTech * 100)}%
+                                      {formatPercentage(metrics.greenTech * 100)}
                                     </td>
                                     <td className={`text-center py-3 px-4 font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                                      {formatPercentage(metrics.circularTrade * 100)}%
+                                      {formatPercentage(metrics.circularTrade * 100)}
                                     </td>
                                   </tr>
                                 );
@@ -4545,7 +4989,7 @@ const TradingPlacesPage: React.FC = () => {
                                     <div className="flex justify-between mb-1">
                                       <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Financing Access</span>
                                       <span className={`text-sm font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                                        {formatPercentage(metrics.financingAccess * 100)}%
+                                        {formatPercentage(metrics.financingAccess * 100)}
                                       </span>
                                     </div>
                                     <div className={`w-full bg-gray-300 rounded-full h-2 ${isDarkMode ? 'bg-gray-500' : 'bg-gray-300'}`}>
@@ -4556,7 +5000,7 @@ const TradingPlacesPage: React.FC = () => {
                                     <div className="flex justify-between mb-1">
                                       <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Digital Trade</span>
                                       <span className={`text-sm font-medium ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                                        {formatPercentage(metrics.digitalTrade * 100)}%
+                                        {formatPercentage(metrics.digitalTrade * 100)}
                                       </span>
                                     </div>
                                     <div className={`w-full bg-gray-300 rounded-full h-2 ${isDarkMode ? 'bg-gray-500' : 'bg-gray-300'}`}>
@@ -4656,7 +5100,7 @@ const TradingPlacesPage: React.FC = () => {
                                     <div className="flex justify-between text-xs mb-1">
                                       <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Trade Concentration</span>
                                       <span className={`font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                                        {formatPercentage(metrics.tradeConcentration * 100)}%
+                                        {formatPercentage(metrics.tradeConcentration * 100)}
                                       </span>
                                     </div>
                                     <div className={`w-full bg-gray-300 rounded-full h-2 ${isDarkMode ? 'bg-gray-500' : 'bg-gray-300'}`}>
@@ -4667,7 +5111,7 @@ const TradingPlacesPage: React.FC = () => {
                                     <div className="flex justify-between text-xs mb-1">
                                       <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Resilience Score</span>
                                       <span className={`font-medium ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-                                        {formatPercentage(metrics.resilience * 100)}%
+                                        {formatPercentage(metrics.resilience * 100)}
                                       </span>
                                     </div>
                                     <div className={`w-full bg-gray-300 rounded-full h-2 ${isDarkMode ? 'bg-gray-500' : 'bg-gray-300'}`}>
@@ -4678,7 +5122,7 @@ const TradingPlacesPage: React.FC = () => {
                                     <div className="flex justify-between text-xs mb-1">
                                       <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Adaptability</span>
                                       <span className={`font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                                        {formatPercentage(metrics.adaptability * 100)}%
+                                        {formatPercentage(metrics.adaptability * 100)}
                                       </span>
                                     </div>
                                     <div className={`w-full bg-gray-300 rounded-full h-2 ${isDarkMode ? 'bg-gray-500' : 'bg-gray-300'}`}>
@@ -4712,6 +5156,21 @@ const TradingPlacesPage: React.FC = () => {
         {/* Only show ads when content is ready */}
         <AdSense show={mounted && !loading} />
       </div>
+
+      {/* Scroll to top button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className={`fixed bottom-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
+            isDarkMode
+              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+          }`}
+          aria-label="Scroll to top"
+        >
+          <ChevronUp className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 // Custom hook for fetching and managing real trade data
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { tradeDataService, apiCache, COUNTRY_MAPPINGS } from '../services/tradeData';
 
 interface UseTradeDataOptions {
@@ -30,8 +30,15 @@ export const useTradeData = ({
     isRealData: false
   });
 
+  const countriesKey = countries.join(',');
+  const countriesRef = useRef(countries);
+  if (countriesRef.current.join(',') !== countriesKey) {
+    countriesRef.current = countries;
+  }
+
   const fetchRealData = useCallback(async () => {
     if (!enableRealData) return;
+    const countries = countriesRef.current;
 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
@@ -132,9 +139,8 @@ export const useTradeData = ({
         isRealData: false
       }));
     }
-  }, [countries, enableRealData]);
+  }, [countriesKey, enableRealData]);
 
-  // Auto-refresh data
   useEffect(() => {
     if (!enableRealData) return;
 
@@ -222,7 +228,7 @@ interface HistoricalTradeDataState {
 
 export const useHistoricalTradeData = ({ 
   countries, 
-  startYear = 1960, // World Bank data typically starts from 1960
+  startYear = 1960,
   endYear = 2023,
   enableRealData = false
 }: UseHistoricalTradeDataOptions) => {
@@ -236,13 +242,19 @@ export const useHistoricalTradeData = ({
     availableYearRange: null
   });
 
+  const historicalCountriesKey = countries.join(',');
+  const historicalCountriesRef = useRef(countries);
+  if (historicalCountriesRef.current.join(',') !== historicalCountriesKey) {
+    historicalCountriesRef.current = countries;
+  }
+
   const fetchHistoricalData = useCallback(async () => {
     if (!enableRealData) return;
+    const countries = historicalCountriesRef.current;
 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Check cache first
       const cacheKey = `historical-trade-data-${countries.join('-')}-${startYear}-${endYear}`;
       const cachedData = apiCache.get(cacheKey);
       
@@ -297,9 +309,8 @@ export const useHistoricalTradeData = ({
         error: error instanceof Error ? error.message : 'Failed to fetch historical data'
       }));
     }
-  }, [countries, startYear, endYear, enableRealData]);
+  }, [historicalCountriesKey, startYear, endYear, enableRealData]);
 
-  // Fetch data when enabled
   useEffect(() => {
     if (enableRealData) {
       fetchHistoricalData();
@@ -307,10 +318,9 @@ export const useHistoricalTradeData = ({
   }, [fetchHistoricalData, enableRealData]);
 
   const refreshData = useCallback(() => {
-    const cacheKey = `historical-trade-data-${countries.join('-')}-${startYear}-${endYear}`;
     apiCache.clear();
     fetchHistoricalData();
-  }, [fetchHistoricalData, countries, startYear, endYear]);
+  }, [fetchHistoricalData]);
 
   return {
     ...state,
