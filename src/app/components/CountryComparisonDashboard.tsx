@@ -24,6 +24,62 @@ const countryFlags: { [key: string]: React.ComponentType<any> } = {
   Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG
 };
 
+const getThemeColors = (isDarkMode: boolean) => isDarkMode ? {
+  card: 'bg-gray-800 border-gray-700',
+  cardHover: 'hover:border-gray-600',
+  cardInner: 'bg-gray-700/50',
+  text: 'text-white',
+  textSecondary: 'text-gray-400',
+  textMuted: 'text-gray-500',
+  border: 'border-gray-700',
+  divider: 'bg-gray-700',
+  accent: 'text-blue-400',
+  accentBg: 'bg-blue-500/15',
+  accentBorder: 'border-blue-500/40',
+  gridStroke: '#374151',
+  axisStroke: '#9ca3af',
+  tooltipStyle: { backgroundColor: '#1f2937', border: '1px solid #374151', color: '#fff', borderRadius: '8px' } as React.CSSProperties,
+  btnSelected: 'bg-blue-500/20 border-blue-500 text-blue-400 ring-1 ring-blue-500/30',
+  btnUnselected: 'border-gray-600 hover:border-gray-500 hover:bg-gray-700/50',
+  periodActive: 'bg-blue-600 text-white',
+  periodInactive: 'bg-gray-700/50 text-gray-400 hover:text-gray-300 hover:bg-gray-700',
+  correlationBg: 'bg-gray-700/60 border border-gray-600/50',
+  analysisBg: 'bg-gray-700/40 border border-gray-600/40',
+} : {
+  card: 'bg-white border-gray-200',
+  cardHover: 'hover:border-gray-300 hover:shadow-md',
+  cardInner: 'bg-gray-50',
+  text: 'text-gray-900',
+  textSecondary: 'text-gray-500',
+  textMuted: 'text-gray-400',
+  border: 'border-gray-200',
+  divider: 'bg-gray-200',
+  accent: 'text-blue-600',
+  accentBg: 'bg-blue-50',
+  accentBorder: 'border-blue-200',
+  gridStroke: '#e5e7eb',
+  axisStroke: '#6b7280',
+  tooltipStyle: { backgroundColor: '#fff', border: '1px solid #e5e7eb', color: '#111827', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' } as React.CSSProperties,
+  btnSelected: 'bg-blue-50 border-blue-500 text-blue-600 ring-1 ring-blue-500/30',
+  btnUnselected: 'border-gray-200 hover:border-gray-300 hover:bg-gray-50',
+  periodActive: 'bg-blue-600 text-white',
+  periodInactive: 'bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100',
+  correlationBg: 'bg-blue-50/60 border border-blue-100',
+  analysisBg: 'bg-blue-50/40 border border-blue-100',
+};
+
+const SectionHeader = ({ title, isDarkMode }: { title: string; isDarkMode: boolean }) => {
+  const tc = getThemeColors(isDarkMode);
+  return (
+    <div className="flex items-center gap-3 mt-2 mb-4">
+      <h3 className={`text-sm font-semibold uppercase tracking-wider whitespace-nowrap ${tc.textSecondary}`}>
+        {title}
+      </h3>
+      <div className={`flex-1 h-px ${tc.divider}`} />
+    </div>
+  );
+};
+
 interface ComparisonDashboardProps {
   data: {
     interestRates: CountryData[];
@@ -165,55 +221,51 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   chartType = 'line'
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  if (chartType === 'area') {
-    return (
-      <div 
-        ref={chartRef}
-        data-chart-container
-        data-chart-title={title}
-        className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
-      >
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <ChartDownloadButton
-            chartElement={chartRef.current}
-            chartData={{
-              title,
-              data: data[metricKey],
-              type: 'area',
-              countries
-            }}
-            variant="outline"
-            size="sm"
-          />
-        </div>
-        
-        {/* Info Panel */}
-        <InfoPanel
-          metric={economicMetrics[metricKey as keyof typeof economicMetrics] || economicMetrics.interestRate}
-          isDarkMode={isDarkMode}
-          position="top-right"
-          size="small"
+  const tc = getThemeColors(isDarkMode);
+  const cardClass = `p-4 sm:p-5 rounded-xl border shadow-sm transition-all duration-200 relative ${tc.card} ${tc.cardHover}`;
+
+  const sharedChartElements = (type: 'area' | 'bar' | 'line') => ({
+    grid: <CartesianGrid strokeDasharray="3 3" stroke={tc.gridStroke} />,
+    xAxis: <XAxis dataKey="year" stroke={tc.axisStroke} tick={{ fontSize: 10, fill: tc.axisStroke }} tickLine={{ stroke: tc.gridStroke }} />,
+    yAxis: <YAxis domain={yDomain} stroke={tc.axisStroke} tickFormatter={valueFormatter} width={55} tick={{ fontSize: 10, fill: tc.axisStroke }} tickLine={{ stroke: tc.gridStroke }} />,
+    tooltip: <Tooltip contentStyle={tc.tooltipStyle} formatter={(value: number) => valueFormatter(value)} />,
+    legend: <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '4px' }} />,
+    header: (
+      <div className="flex justify-between items-start mb-3">
+        <h3 className={`text-sm sm:text-base font-semibold leading-tight pr-2 ${tc.text}`}>{title}</h3>
+        <ChartDownloadButton
+          chartElement={chartRef.current}
+          chartData={{ title, data: data[metricKey], type, countries }}
+          variant="outline"
+          size="sm"
         />
-        <div className="h-[200px]">
+      </div>
+    ),
+    info: (
+      <InfoPanel
+        metric={economicMetrics[metricKey as keyof typeof economicMetrics] || economicMetrics.interestRate}
+        isDarkMode={isDarkMode}
+        position="top-right"
+        size="small"
+      />
+    ),
+  });
+
+  if (chartType === 'area') {
+    const els = sharedChartElements('area');
+    return (
+      <div ref={chartRef} data-chart-container data-chart-title={title} className={cardClass}>
+        {els.header}
+        {els.info}
+        <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
-              <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
-              <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
-              <Tooltip
-                contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
-                formatter={(value: number) => valueFormatter(value)}
-              />
-              <Legend />
+            <AreaChart data={data[metricKey]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              {els.grid}{els.xAxis}{els.yAxis}{els.tooltip}{els.legend}
               {countries.map(country => (
-                <Area
-                  key={country}
-                  type="monotone"
-                  dataKey={country}
+                <Area key={country} type="monotone" dataKey={country}
                   stroke={countryColors[country as keyof typeof countryColors]}
                   fill={countryColors[country as keyof typeof countryColors]}
-                />
+                  fillOpacity={0.15} />
               ))}
             </AreaChart>
           </ResponsiveContainer>
@@ -223,52 +275,19 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   }
 
   if (chartType === 'bar') {
+    const els = sharedChartElements('bar');
     return (
-      <div 
-        ref={chartRef}
-        data-chart-container
-        data-chart-title={title}
-        className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
-      >
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <ChartDownloadButton
-            chartElement={chartRef.current}
-            chartData={{
-              title,
-              data: data[metricKey],
-              type: 'bar',
-              countries
-            }}
-            variant="outline"
-            size="sm"
-          />
-        </div>
-        
-        {/* Info Panel */}
-        <InfoPanel
-          metric={economicMetrics[metricKey as keyof typeof economicMetrics] || economicMetrics.interestRate}
-          isDarkMode={isDarkMode}
-          position="top-right"
-          size="small"
-        />
-        <div className="h-[200px]">
+      <div ref={chartRef} data-chart-container data-chart-title={title} className={cardClass}>
+        {els.header}
+        {els.info}
+        <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
-              <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
-              <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
-              <Tooltip
-                contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
-                formatter={(value: number) => valueFormatter(value)}
-              />
-              <Legend />
+            <BarChart data={data[metricKey]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              {els.grid}{els.xAxis}{els.yAxis}{els.tooltip}{els.legend}
               {countries.map(country => (
-                <Bar
-                  key={country}
-                  dataKey={country}
+                <Bar key={country} dataKey={country}
                   fill={countryColors[country as keyof typeof countryColors]}
-                />
+                  radius={[2, 2, 0, 0]} />
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -277,55 +296,19 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
     );
   }
 
+  const els = sharedChartElements('line');
   return (
-    <div 
-      ref={chartRef}
-      data-chart-container
-      data-chart-title={title}
-      className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}
-    >
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <ChartDownloadButton
-          chartElement={chartRef.current}
-          chartData={{
-            title,
-            data: data[metricKey],
-            type: 'line',
-            countries
-          }}
-          variant="outline"
-          size="sm"
-        />
-      </div>
-      
-      {/* Info Panel */}
-      <InfoPanel
-        metric={economicMetrics[metricKey as keyof typeof economicMetrics] || economicMetrics.interestRate}
-        isDarkMode={isDarkMode}
-        position="top-right"
-        size="small"
-      />
-      <div className="h-[200px]">
+    <div ref={chartRef} data-chart-container data-chart-title={title} className={cardClass}>
+      {els.header}
+      {els.info}
+      <div className="h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data[metricKey]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
-            <XAxis dataKey="year" stroke={isDarkMode ? '#fff' : '#666'} />
-            <YAxis domain={yDomain} stroke={isDarkMode ? '#fff' : '#666'} />
-            <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
-              formatter={(value: number) => valueFormatter(value)}
-            />
-            <Legend />
+          <LineChart data={data[metricKey]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            {els.grid}{els.xAxis}{els.yAxis}{els.tooltip}{els.legend}
             {countries.map(country => (
-              <Line
-                key={country}
-                type="monotone"
-                dataKey={country}
+              <Line key={country} type="monotone" dataKey={country}
                 stroke={countryColors[country as keyof typeof countryColors]}
-                dot={false}
-                activeDot={{ r: 4 }}
-              />
+                dot={false} activeDot={{ r: 4 }} strokeWidth={2} />
             ))}
           </LineChart>
         </ResponsiveContainer>
@@ -351,14 +334,14 @@ const StatComparison = ({
   title,
   format = (v: number) => `${v.toFixed(1)}%`
 }: StatComparisonProps) => {
+  const tc = getThemeColors(isDarkMode);
   const latest = metric[metric.length - 1];
   
-  // Handle empty metric data
   if (!latest) {
     return (
-      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-        <h3 className="text-lg font-semibold mb-4">{title}</h3>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div className={`p-4 rounded-xl border border-l-4 border-l-blue-500 shadow-sm ${tc.card}`}>
+        <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>{title}</h3>
+        <div className={`text-sm ${tc.textMuted}`}>
           No data available for this indicator
         </div>
       </div>
@@ -366,24 +349,40 @@ const StatComparison = ({
   }
   
   const sorted = [...countries].sort((a, b) => (Number(latest[b]) || 0) - (Number(latest[a]) || 0));
+  const maxVal = Math.max(...sorted.map(c => Math.abs(Number(latest[c]) || 0)), 1);
 
   return (
-    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
-      <div className="space-y-4">
-        {sorted.map(country => {
+    <div className={`p-4 rounded-xl border border-l-4 border-l-blue-500 shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
+      <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>{title}</h3>
+      <div className="space-y-3">
+        {sorted.map((country, idx) => {
           const value = Number(latest[country]) || 0;
           const FlagComponent = countryFlags[country];
+          const barWidth = Math.max((Math.abs(value) / maxVal) * 100, 4);
           
           return (
-            <div key={country} className="flex items-center gap-4">
-              {FlagComponent && (
-                <div className="w-8 h-6 overflow-hidden rounded shadow">
-                  <FlagComponent />
-                </div>
-              )}
-              <span className="flex-1">{country}</span>
-              <span className="font-semibold">{format(value)}</span>
+            <div key={country}>
+              <div className="flex items-center gap-3 mb-1">
+                {FlagComponent && (
+                  <div className="w-7 h-5 overflow-hidden rounded shadow-sm flex-shrink-0">
+                    <FlagComponent />
+                  </div>
+                )}
+                <span className={`flex-1 text-sm ${tc.text}`}>{country}</span>
+                <span className={`text-sm font-semibold tabular-nums ${idx === 0 ? tc.accent : tc.text}`}>
+                  {format(value)}
+                </span>
+              </div>
+              <div className={`h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-gray-600/50' : 'bg-gray-100'}`}>
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${barWidth}%`,
+                    backgroundColor: countryColors[country as keyof typeof countryColors] || '#8884d8',
+                    opacity: idx === 0 ? 1 : 0.6,
+                  }}
+                />
+              </div>
             </div>
           );
         })}
@@ -473,48 +472,45 @@ const CorrelationMatrix = ({
     return matrix;
   }, [data, countries]);
 
+  const tc = getThemeColors(isDarkMode);
+  const getCorrelationColor = (val: number) =>
+    val > 0.5 ? 'text-emerald-500 font-semibold' : val < -0.5 ? 'text-red-500 font-semibold' : tc.textSecondary;
+  const getCorrelationBadge = (val: number) => {
+    const bg = val > 0.5 ? (isDarkMode ? 'bg-emerald-500/15' : 'bg-emerald-50') : val < -0.5 ? (isDarkMode ? 'bg-red-500/15' : 'bg-red-50') : (isDarkMode ? 'bg-gray-600/40' : 'bg-gray-50');
+    return `inline-block px-2 py-0.5 rounded-md text-xs font-medium tabular-nums ${bg}`;
+  };
+
   return (
-    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-lg font-semibold mb-4">Economic Correlations</h3>
-      <div className="space-y-4">
+    <div className={`p-4 sm:p-5 rounded-xl border shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
+      <h3 className={`text-base font-semibold mb-4 ${tc.text}`}>Economic Correlations</h3>
+      <div className="space-y-3">
         {correlations.map(({ country1, country2, gdp, inflation, employment, lifeExpectancy }) => {
           const Flag1 = countryFlags[country1];
           const Flag2 = countryFlags[country2];
           
           return (
-            <div key={`${country1}-${country2}`} className="p-3 rounded bg-opacity-10 bg-blue-500">
-              <div className="flex items-center gap-2 mb-2">
-                {Flag1 && <Flag1 className="w-6 h-4" />}
-                <span className="font-medium">{country1}</span>
-                <span className="mx-2">⟷</span>
-                {Flag2 && <Flag2 className="w-6 h-4" />}
-                <span className="font-medium">{country2}</span>
+            <div key={`${country1}-${country2}`} className={`p-3 sm:p-4 rounded-lg ${tc.correlationBg}`}>
+              <div className="flex items-center gap-2 mb-3">
+                {Flag1 && <div className="w-6 h-4 rounded overflow-hidden shadow-sm"><Flag1 /></div>}
+                <span className={`font-medium text-sm ${tc.text}`}>{country1}</span>
+                <span className={`mx-1 ${tc.textMuted}`}>⟷</span>
+                {Flag2 && <div className="w-6 h-4 rounded overflow-hidden shadow-sm"><Flag2 /></div>}
+                <span className={`font-medium text-sm ${tc.text}`}>{country2}</span>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-500 dark:text-gray-400">GDP Correlation: </span>
-                  <span className={gdp > 0.5 ? 'text-green-500' : gdp < -0.5 ? 'text-red-500' : ''}>
-                    {(gdp * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500 dark:text-gray-400">Inflation Correlation: </span>
-                  <span className={inflation > 0.5 ? 'text-green-500' : inflation < -0.5 ? 'text-red-500' : ''}>
-                    {(inflation * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500 dark:text-gray-400">Employment Correlation: </span>
-                  <span className={employment > 0.5 ? 'text-green-500' : employment < -0.5 ? 'text-red-500' : ''}>
-                    {(employment * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500 dark:text-gray-400">Life Expectancy Correlation: </span>
-                  <span className={lifeExpectancy > 0.5 ? 'text-green-500' : lifeExpectancy < -0.5 ? 'text-red-500' : ''}>
-                    {(lifeExpectancy * 100).toFixed(1)}%
-                  </span>
-                </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                {[
+                  { label: 'GDP', val: gdp },
+                  { label: 'Inflation', val: inflation },
+                  { label: 'Employment', val: employment },
+                  { label: 'Life Expectancy', val: lifeExpectancy },
+                ].map(({ label, val }) => (
+                  <div key={label} className="flex items-center justify-between gap-2">
+                    <span className={`text-xs ${tc.textSecondary}`}>{label}</span>
+                    <span className={`${getCorrelationBadge(val)} ${getCorrelationColor(val)}`}>
+                      {(val * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           );
@@ -579,10 +575,12 @@ const EconomicSimilarityChart = ({
     return similarities;
   }, [data, countries]);
 
+  const tc = getThemeColors(isDarkMode);
+
   return (
-    <div className={`p-4 rounded-lg relative ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
+    <div className={`p-4 sm:p-5 rounded-xl border shadow-sm relative transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-semibold">Enhanced Economic Similarity Analysis</h3>
+        <h3 className={`text-base font-semibold ${tc.text}`}>Enhanced Economic Similarity Analysis</h3>
         <InfoPanel
           metric={economicMetrics.economicSimilarityAnalysis}
           isDarkMode={isDarkMode}
@@ -593,47 +591,27 @@ const EconomicSimilarityChart = ({
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
-            <XAxis 
-              dataKey="gdpDiff" 
-              name="GDP Difference" 
-              unit="%" 
-              stroke={isDarkMode ? '#fff' : '#666'}
-            />
-            <YAxis 
-              dataKey="inflationDiff" 
-              name="Inflation Difference" 
-              unit="%" 
-              stroke={isDarkMode ? '#fff' : '#666'}
-            />
-            <ZAxis 
-              dataKey="similarity" 
-              range={[50, 400]} 
-              name="Economic Similarity"
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke={tc.gridStroke} />
+            <XAxis dataKey="gdpDiff" name="GDP Difference" unit="%" stroke={tc.axisStroke} tick={{ fontSize: 10, fill: tc.axisStroke }} />
+            <YAxis dataKey="inflationDiff" name="Inflation Difference" unit="%" stroke={tc.axisStroke} tick={{ fontSize: 10, fill: tc.axisStroke }} />
+            <ZAxis dataKey="similarity" range={[50, 400]} name="Economic Similarity" />
             <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
+              contentStyle={tc.tooltipStyle}
               formatter={(value: any, name: string) => [
                 `${parseFloat(value).toFixed(1)}%`,
                 name.replace('Diff', ' Difference')
               ]}
             />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: '11px' }} />
             {chartData.map((entry, index) => (
-              <Scatter
-                key={index}
-                name={`${entry.country1} - ${entry.country2}`}
-                data={[entry]}
-                fill={countryColors[entry.country1]}
-              />
+              <Scatter key={index} name={`${entry.country1} - ${entry.country2}`} data={[entry]} fill={countryColors[entry.country1]} />
             ))}
           </ScatterChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-        Enhanced analysis includes GDP, inflation, FDI, trade balance, government spending, labor productivity, and Gini coefficient. 
+      <p className={`mt-4 text-xs leading-relaxed ${tc.textMuted}`}>
         Bubble size indicates overall economic similarity. Smaller distances suggest more similar economies.
-      </div>
+      </p>
     </div>
   );
 };
@@ -698,42 +676,31 @@ const EconomicRadarChart = ({
     { metric: 'Life Expectancy', ...radarData.reduce((acc, country) => ({ ...acc, [country.country]: country.lifeExpectancy }), {}) }
   ];
 
+  const tc = getThemeColors(isDarkMode);
+
   return (
-    <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-      <h3 className="text-lg font-semibold mb-4">Economic Profile Radar Chart</h3>
+    <div className={`p-4 sm:p-5 rounded-xl border shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
+      <h3 className={`text-base font-semibold mb-4 ${tc.text}`}>Economic Profile Radar Chart</h3>
       <div className="h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={combinedData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-            <PolarGrid stroke={isDarkMode ? '#555' : '#ccc'} />
-            <PolarAngleAxis 
-              dataKey="metric" 
-              tick={{ fill: isDarkMode ? '#fff' : '#666' }}
-            />
-            <PolarRadiusAxis 
-              angle={90} 
-              domain={[0, 100]} 
-              tick={{ fill: isDarkMode ? '#fff' : '#666' }}
-            />
+            <PolarGrid stroke={tc.gridStroke} />
+            <PolarAngleAxis dataKey="metric" tick={{ fill: tc.axisStroke, fontSize: 11 }} />
+            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: tc.axisStroke, fontSize: 10 }} />
             {countries.map((country) => (
-              <Radar
-                key={country}
-                name={country}
-                dataKey={country}
+              <Radar key={country} name={country} dataKey={country}
                 stroke={countryColors[country as keyof typeof countryColors]}
                 fill={countryColors[country as keyof typeof countryColors]}
-                fillOpacity={0.3}
-              />
+                fillOpacity={0.2} strokeWidth={2} />
             ))}
-            <Tooltip
-              contentStyle={isDarkMode ? { backgroundColor: '#333', border: 'none', color: '#fff' } : undefined}
-            />
-            <Legend />
+            <Tooltip contentStyle={tc.tooltipStyle} />
+            <Legend wrapperStyle={{ fontSize: '11px' }} />
           </RadarChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+      <p className={`mt-4 text-xs leading-relaxed ${tc.textMuted}`}>
         Multi-dimensional economic profile comparison. Higher values indicate better performance in each metric.
-      </div>
+      </p>
     </div>
   );
 };
@@ -829,27 +796,31 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
     };
   }, [data, selectedPeriod]);
 
+  const tc = getThemeColors(isDarkMode);
+
   return (
-    <div className="space-y-8">
-      <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+    <div className="space-y-6">
+      <div className={`p-4 sm:p-6 rounded-xl border shadow-sm ${tc.card}`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
           <div>
-            <h2 className="text-xl font-bold">Country Comparison Dashboard</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Select up to {maxCountries} countries to compare</p>
+            <h2 className={`text-lg sm:text-xl font-bold ${tc.text}`}>Country Comparison Dashboard</h2>
+            <p className={`text-sm mt-0.5 ${tc.textSecondary}`}>Select up to {maxCountries} countries to compare</p>
           </div>
           <div className="flex items-center gap-3">
             <BulkChartDownload variant="primary" size="sm" />
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
-              className={`px-3 py-2 rounded-md border ${
-                isDarkMode ? 'bg-gray-600 border-gray-500' : 'bg-white border-gray-300'
-              }`}
-            >
-              <option value="all">All Time</option>
-              <option value="10y">Last 10 Years</option>
-              <option value="5y">Last 5 Years</option>
-            </select>
+            <div className={`flex rounded-lg border ${tc.border} overflow-hidden`}>
+              {(['all', '10y', '5y'] as const).map(period => (
+                <button
+                  key={period}
+                  onClick={() => setSelectedPeriod(period)}
+                  className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 ${
+                    selectedPeriod === period ? tc.periodActive : tc.periodInactive
+                  }`}
+                >
+                  {period === 'all' ? 'All Time' : period === '10y' ? '10 Years' : '5 Years'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         
@@ -862,18 +833,18 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
               <button
                 key={country}
                 onClick={() => handleCountryToggle(country)}
-                className={`p-2 rounded-lg flex items-center gap-2 transition-colors
-                  ${isSelected 
-                    ? (isDarkMode ? 'bg-blue-600' : 'bg-blue-100') 
-                    : (isDarkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-100 hover:bg-gray-200')
-                  }`}
+                className={`px-2.5 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 border text-sm
+                  ${isSelected ? tc.btnSelected : tc.btnUnselected}`}
               >
                 {FlagComponent && (
-                  <div className="w-6 h-4 overflow-hidden rounded">
+                  <div className="w-6 h-4 overflow-hidden rounded shadow-sm flex-shrink-0">
                     <FlagComponent />
                   </div>
                 )}
-                <span className="text-sm">{country}</span>
+                <span className="truncate">{country}</span>
+                {isSelected && (
+                  <span className="ml-auto flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500" />
+                )}
               </button>
             );
           })}
@@ -882,8 +853,8 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
 
       {selectedCountries.length > 0 && (
         <>
-          {/* Core Economic Indicators */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <SectionHeader title="Core Economic Indicators" isDarkMode={isDarkMode} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <ComparisonMetric
               title="Interest Rates"
               data={filteredData}
@@ -921,8 +892,8 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             />
           </div>
 
-          {/* New Economic Indicators */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <SectionHeader title="Investment & Trade" isDarkMode={isDarkMode} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <ComparisonMetric
               title="Foreign Direct Investment (% of GDP)"
               data={filteredData}
@@ -964,8 +935,8 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             />
           </div>
 
-          {/* Advanced Economic Indicators */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <SectionHeader title="Advanced Economic Indicators" isDarkMode={isDarkMode} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <ComparisonMetric
               title="Gini Coefficient (Income Inequality)"
               data={filteredData}
@@ -1244,6 +1215,198 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             />
           </div>
 
+          <SectionHeader title="Fiscal & Debt Indicators" isDarkMode={isDarkMode} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <ComparisonMetric
+              title="Unemployment Rate (%)"
+              data={filteredData}
+              metricKey="unemploymentRates"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 30]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Government Debt (% of GDP)"
+              data={filteredData}
+              metricKey="governmentDebt"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 300]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Consumer Price Index"
+              data={filteredData}
+              metricKey="cpiData"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 200]}
+              valueFormatter={(value) => value.toFixed(1)}
+            />
+            <ComparisonMetric
+              title="GDP per Capita (PPP, current $)"
+              data={filteredData}
+              metricKey="gdpPerCapitaPPP"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 100000]}
+              valueFormatter={(value) => `$${Math.round(value).toLocaleString()}`}
+            />
+            <ComparisonMetric
+              title="Current Account Balance (% of GDP)"
+              data={filteredData}
+              metricKey="currentAccount"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[-20, 30]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Gross Capital Formation (% of GDP)"
+              data={filteredData}
+              metricKey="grossCapitalFormation"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 50]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Reserves (months of imports)"
+              data={filteredData}
+              metricKey="reservesMonthsImports"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 30]}
+              valueFormatter={(value) => `${value.toFixed(1)} mo`}
+            />
+            <ComparisonMetric
+              title="Exchange Rate (LCU per US$)"
+              data={filteredData}
+              metricKey="exchangeRate"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 200]}
+              valueFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(1)}K` : value.toFixed(2)}
+            />
+            <ComparisonMetric
+              title="Poverty Rate (%)"
+              data={filteredData}
+              metricKey="povertyRate"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 80]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Tertiary Education Enrollment (%)"
+              data={filteredData}
+              metricKey="tertiaryEnrollment"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 120]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Tax Revenue (% of GDP)"
+              data={filteredData}
+              metricKey="taxRevenue"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 40]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="Domestic Credit to Private Sector (% of GDP)"
+              data={filteredData}
+              metricKey="domesticCredit"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 300]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+          </div>
+
+          <SectionHeader title="Trade & Demographics" isDarkMode={isDarkMode} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <ComparisonMetric
+              title="Exports of Goods & Services (% of GDP)"
+              data={filteredData}
+              metricKey="exports"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 60]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Imports of Goods & Services (% of GDP)"
+              data={filteredData}
+              metricKey="imports"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 60]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="Life Expectancy (years)"
+              data={filteredData}
+              metricKey="lifeExpectancy"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[40, 90]}
+              valueFormatter={(value) => `${value.toFixed(1)} yrs`}
+            />
+            <ComparisonMetric
+              title="Urban Population (% of total)"
+              data={filteredData}
+              metricKey="urbanPopulation"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 100]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <ComparisonMetric
+              title="High-Tech Exports (% of manufactured exports)"
+              data={filteredData}
+              metricKey="hightechExports"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 40]}
+              valueFormatter={(value) => `${value.toFixed(1)}%`}
+              chartType="area"
+            />
+            <ComparisonMetric
+              title="CO2 Emissions (metric tons per capita)"
+              data={filteredData}
+              metricKey="co2Emissions"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[0, 25]}
+              valueFormatter={(value) => `${value.toFixed(1)} t`}
+              chartType="bar"
+            />
+            <ComparisonMetric
+              title="Net Migration"
+              data={filteredData}
+              metricKey="netMigration"
+              countries={selectedCountries}
+              isDarkMode={isDarkMode}
+              yDomain={[-2000000, 2000000]}
+              valueFormatter={(value) => {
+                if (Math.abs(value) >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                return Math.round(value).toString();
+              }}
+              chartType="bar"
+            />
+          </div>
+
           {selectedCountries.length >= 2 && (
             <>
               <CorrelationMatrix
@@ -1266,7 +1429,7 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
             </>
           )}
 
-          {/* Enhanced Statistics Comparison */}
+          <SectionHeader title="Latest Statistics" isDarkMode={isDarkMode} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatComparison
               title="Latest Interest Rates"
@@ -1481,12 +1644,128 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
               isDarkMode={isDarkMode}
               format={(v: number) => v.toFixed(2)}
             />
+            <StatComparison
+              title="Latest Unemployment Rate"
+              countries={selectedCountries}
+              metric={filteredData.unemploymentRates}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Government Debt (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.governmentDebt}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Consumer Price Index"
+              countries={selectedCountries}
+              metric={filteredData.cpiData}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => v.toFixed(1)}
+            />
+            <StatComparison
+              title="Latest Gross Capital Formation (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.grossCapitalFormation}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Reserves (months of imports)"
+              countries={selectedCountries}
+              metric={filteredData.reservesMonthsImports}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)} months`}
+            />
+            <StatComparison
+              title="Latest Exchange Rate (LCU per US$)"
+              countries={selectedCountries}
+              metric={filteredData.exchangeRate}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => v.toFixed(2)}
+            />
+            <StatComparison
+              title="Latest Poverty Rate"
+              countries={selectedCountries}
+              metric={filteredData.povertyRate}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Tertiary Enrollment (%)"
+              countries={selectedCountries}
+              metric={filteredData.tertiaryEnrollment}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Domestic Credit (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.domesticCredit}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Exports (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.exports}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest Imports (% of GDP)"
+              countries={selectedCountries}
+              metric={filteredData.imports}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest High-Tech Exports (% of manufactured)"
+              countries={selectedCountries}
+              metric={filteredData.hightechExports}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)}%`}
+            />
+            <StatComparison
+              title="Latest CO2 Emissions (tons per capita)"
+              countries={selectedCountries}
+              metric={filteredData.co2Emissions}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => `${v.toFixed(1)} t`}
+            />
+            <StatComparison
+              title="Latest Net Migration"
+              countries={selectedCountries}
+              metric={filteredData.netMigration}
+              data={filteredData}
+              isDarkMode={isDarkMode}
+              format={(v: number) => {
+                if (Math.abs(v) >= 1000000) return `${(v / 1000000).toFixed(1)}M`;
+                if (Math.abs(v) >= 1000) return `${(v / 1000).toFixed(0)}K`;
+                return Math.round(v).toString();
+              }}
+            />
           </div>
 
-          {/* Enhanced Comparative Analysis */}
-          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg`}>
-            <h3 className="text-lg font-semibold mb-4">Enhanced Comparative Analysis</h3>
-            <div className="space-y-4">
+          <SectionHeader title="Comparative Analysis" isDarkMode={isDarkMode} />
+          <div className={`p-4 sm:p-5 rounded-xl border shadow-sm ${tc.card}`}>
+            <h3 className={`text-base font-semibold mb-4 ${tc.text}`}>Enhanced Comparative Analysis</h3>
+            <div className="space-y-3">
               {selectedCountries.map(country => {
                 const latestData = {
                   interest: Number(data.interestRates[data.interestRates.length - 1][country]) || 0,
@@ -1505,12 +1784,16 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
                 };
 
                 return (
-                  <div key={country} className="p-4 rounded bg-opacity-10 bg-blue-500">
+                  <div key={country} className={`p-4 rounded-lg ${tc.analysisBg}`}>
                     <div className="flex items-center gap-2 mb-2">
-                      {countryFlags[country] && React.createElement(countryFlags[country], { className: "w-6 h-4" })}
-                      <h4 className="font-semibold">{country}</h4>
+                      {countryFlags[country] && (
+                        <div className="w-7 h-5 rounded overflow-hidden shadow-sm">
+                          {React.createElement(countryFlags[country])}
+                        </div>
+                      )}
+                      <h4 className={`font-semibold text-sm ${tc.text}`}>{country}</h4>
                     </div>
-                    <p className="text-sm">
+                    <p className={`text-sm leading-relaxed ${tc.textSecondary}`}>
                       {country} shows {' '}
                       {latestData.gdp > 2 ? 'strong' : latestData.gdp > 0 ? 'moderate' : 'challenging'} growth at {latestData.gdp.toFixed(1)}% with {' '}
                       {latestData.inflation > 5 ? 'high' : latestData.inflation > 2 ? 'moderate' : 'low'} inflation ({latestData.inflation.toFixed(1)}%). {' '}
