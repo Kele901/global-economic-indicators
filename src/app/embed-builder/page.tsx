@@ -14,6 +14,11 @@ export default function EmbedBuilderPage() {
   const [width, setWidth] = useState('600');
   const [height, setHeight] = useState('400');
   const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -52,8 +57,8 @@ export default function EmbedBuilderPage() {
   }, [metric, selectedCountries, period, theme]);
 
   const embedCode = useMemo(() => {
-    return `<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}${embedUrl}" width="${width}" height="${height}" frameborder="0" style="border-radius: 8px; border: 1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'};"></iframe>`;
-  }, [embedUrl, width, height, theme]);
+    return `<iframe src="${origin}${embedUrl}" width="${width}" height="${height}" frameborder="0" style="border-radius: 8px; border: 1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'};"></iframe>`;
+  }, [origin, embedUrl, width, height, theme]);
 
   const copyCode = () => {
     navigator.clipboard.writeText(embedCode);
