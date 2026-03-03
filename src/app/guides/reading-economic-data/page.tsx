@@ -32,7 +32,7 @@ export default function ReadingEconomicDataGuide() {
             <li>&bull; Rates and ratios (GDP growth, unemployment rate) are better for cross-country comparison than absolute numbers.</li>
             <li>&bull; Always check axis scales, time periods, and data sources before drawing conclusions from charts.</li>
             <li>&bull; Context matters: the same metric can mean different things for developed versus emerging economies.</li>
-            <li>&bull; Use our 14 in-depth guides below to build understanding of specific economic topics.</li>
+            <li>&bull; Use our 20 in-depth guides below to build understanding of specific economic topics.</li>
           </ul>
         </div>
 
@@ -135,7 +135,13 @@ export default function ReadingEconomicDataGuide() {
                 { title: 'How Central Banks Work', href: '/guides/how-central-banks-work', desc: 'QE, policy tools, and inflation targeting' },
                 { title: 'Understanding Employment Data', href: '/guides/understanding-employment-data', desc: 'Unemployment, participation, and labor metrics' },
                 { title: 'Digital Economy and AI', href: '/guides/digital-economy-and-ai', desc: 'AI patents, digital payments, and e-commerce' },
-                { title: 'Glossary of Economic Terms', href: '/guides/glossary', desc: 'A-Z definitions of 55+ economic and financial terms' }
+                { title: 'Glossary of Economic Terms', href: '/guides/glossary', desc: 'A-Z definitions of 55+ economic and financial terms' },
+                { title: 'Monetary Policy Decisions', href: '/guides/monetary-policy-decisions', desc: 'How central banks set rates and what hikes, cuts, and holds mean' },
+                { title: 'Debt Sustainability', href: '/guides/debt-sustainability', desc: 'Interest-growth differentials, fiscal space, and sustainability scoring' },
+                { title: 'Economic Forecasting & Outlook', href: '/guides/economic-forecasting', desc: 'How IMF projections are produced and how to interpret forecasts' },
+                { title: 'Human Development & Inequality', href: '/guides/development-inequality', desc: 'HDI, Gini coefficient, social progress, and sustainability metrics' },
+                { title: 'Trade Networks & Supply Chains', href: '/guides/trade-networks', desc: 'Bilateral trade, trade openness, and supply chain concentration risk' },
+                { title: 'Scenario Analysis & Correlations', href: '/guides/scenario-analysis', desc: 'Correlation vs causation, lagged effects, and simulation confidence' },
               ].map(guide => (
                 <a
                   key={guide.href}
