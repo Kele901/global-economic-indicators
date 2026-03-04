@@ -3,9 +3,9 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
-import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
+import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, COUNTRY_REGIONS, type CountryKey } from '../utils/countryMappings';
 import { BILATERAL_TRADE, getTradePartnersFor } from '../data/bilateralTradeData';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, LineChart, Line, PieChart, Pie } from 'recharts';
 import { US, GB, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
 
 const FLAG_MAP: Record<string, React.ComponentType<any>> = {
@@ -106,6 +106,106 @@ export default function TradeNetworkPage() {
       };
     }).sort((a, b) => b.concentration - a.concentration);
   }, [networkNodes]);
+
+  const [sortColumn, setSortColumn] = useState<'partner' | 'exports' | 'imports' | 'balance' | 'share'>('exports');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const tradeTrendData = useMemo(() => {
+    if (!data) return [];
+    const balanceSeries = data.tradeBalance || [];
+    const opennessSeries = data.tradeOpenness || [];
+    const years = new Set<number>();
+    balanceSeries.forEach(d => { if (Number(d.year) >= 2000) years.add(Number(d.year)); });
+    opennessSeries.forEach(d => { if (Number(d.year) >= 2000) years.add(Number(d.year)); });
+    return Array.from(years).sort((a, b) => a - b).map(year => {
+      const balanceEntry = balanceSeries.find(d => Number(d.year) === year);
+      const opennessEntry = opennessSeries.find(d => Number(d.year) === year);
+      const balVal = balanceEntry ? Number(balanceEntry[selectedCountry]) : null;
+      const openVal = opennessEntry ? Number(opennessEntry[selectedCountry]) : null;
+      return {
+        year,
+        tradeBalance: balVal && !isNaN(balVal) ? balVal : null,
+        tradeOpenness: openVal && !isNaN(openVal) ? openVal : null,
+      };
+    }).filter(d => d.tradeBalance !== null || d.tradeOpenness !== null);
+  }, [data, selectedCountry]);
+
+  const hhiData = useMemo(() => {
+    return networkNodes.map(ck => {
+      const p = getTradePartnersFor(ck);
+      const totalTrade = p.reduce((s, x) => s + x.exports + x.imports, 0);
+      if (totalTrade === 0) return { country: (COUNTRY_DISPLAY_NAMES[ck as CountryKey] || ck).slice(0, 12), hhi: 0, fill: '#22c55e' };
+      const hhi = p.reduce((sum, x) => {
+        const share = (x.exports + x.imports) / totalTrade;
+        return sum + share * share;
+      }, 0) * 10000;
+      return {
+        country: (COUNTRY_DISPLAY_NAMES[ck as CountryKey] || ck).slice(0, 12),
+        hhi: Math.round(hhi),
+        fill: hhi < 1500 ? '#22c55e' : hhi < 2500 ? '#eab308' : '#ef4444',
+      };
+    }).sort((a, b) => b.hhi - a.hhi);
+  }, [networkNodes]);
+
+  const tradeFlowTableData = useMemo(() => {
+    const totalExports = partners.reduce((s, p) => s + p.exports, 0);
+    const totalImports = partners.reduce((s, p) => s + p.imports, 0);
+    const totalTrade = totalExports + totalImports;
+    const rows = partners.map(p => ({
+      partner: COUNTRY_DISPLAY_NAMES[p.partner as CountryKey] || p.partner,
+      partnerKey: p.partner,
+      exports: p.exports,
+      imports: p.imports,
+      balance: p.balance,
+      share: totalTrade > 0 ? ((p.exports + p.imports) / totalTrade) * 100 : 0,
+    }));
+    const sorted = [...rows].sort((a, b) => {
+      const aVal = a[sortColumn] ?? 0;
+      const bVal = b[sortColumn] ?? 0;
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return sortDirection === 'asc' ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
+    });
+    return { rows: sorted, totalExports, totalImports, totalBalance: totalExports - totalImports, totalTrade };
+  }, [partners, sortColumn, sortDirection]);
+
+  const regionalTradeData = useMemo(() => {
+    const regionTotals: Record<string, number> = {};
+    for (const p of partners) {
+      let region = 'Other';
+      for (const [r, members] of Object.entries(COUNTRY_REGIONS)) {
+        if (members.includes(p.partner as CountryKey)) { region = r; break; }
+      }
+      regionTotals[region] = (regionTotals[region] || 0) + p.exports + p.imports;
+    }
+    const REGION_COLORS: Record<string, string> = {
+      'North America': '#3b82f6', 'Europe': '#8b5cf6', 'Asia-Pacific': '#f59e0b',
+      'Latin America': '#22c55e', 'Middle East & Africa': '#ef4444', 'Other': '#6b7280',
+    };
+    return Object.entries(regionTotals)
+      .map(([region, value]) => ({ name: region, value: Math.round(value * 10) / 10, fill: REGION_COLORS[region] || '#6b7280' }))
+      .sort((a, b) => b.value - a.value);
+  }, [partners]);
+
+  const tradeSummary = useMemo(() => {
+    const totalExports = partners.reduce((s, p) => s + p.exports, 0);
+    const totalImports = partners.reduce((s, p) => s + p.imports, 0);
+    const surplusPartner = partners.reduce((best, p) => (!best || p.balance > best.balance) ? p : best, partners[0]);
+    const deficitPartner = partners.reduce((best, p) => (!best || p.balance < best.balance) ? p : best, partners[0]);
+    return {
+      totalExports, totalImports,
+      overallBalance: totalExports - totalImports,
+      numPartners: partners.length,
+      largestSurplus: surplusPartner ? { name: COUNTRY_DISPLAY_NAMES[surplusPartner.partner as CountryKey] || surplusPartner.partner, value: surplusPartner.balance } : null,
+      largestDeficit: deficitPartner ? { name: COUNTRY_DISPLAY_NAMES[deficitPartner.partner as CountryKey] || deficitPartner.partner, value: deficitPartner.balance } : null,
+    };
+  }, [partners]);
+
+  const handleSort = (col: typeof sortColumn) => {
+    if (sortColumn === col) setSortDirection(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortColumn(col); setSortDirection('desc'); }
+  };
 
   if (loading) {
     return (
@@ -291,6 +391,196 @@ export default function TradeNetworkPage() {
                   <span className={`text-xs w-20 truncate ${tc.textSec}`}>{d.topPartner}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Section 1: Trade Trend Over Time */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-1">
+            {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Trend Over Time
+          </h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Trade balance (% of GDP) and trade openness since 2000</p>
+          {tradeTrendData.length > 0 ? (
+            <div className="h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={tradeTrendData} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                  <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
+                  <YAxis yAxisId="left" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                  <YAxis yAxisId="right" orientation="right" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                  <Tooltip contentStyle={tc.tooltip} />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="tradeBalance" name="Trade Balance (% GDP)" stroke="#3b82f6" strokeWidth={2} dot={false} connectNulls />
+                  <Line yAxisId="right" type="monotone" dataKey="tradeOpenness" name="Trade Openness (% GDP)" stroke="#f59e0b" strokeWidth={2} dot={false} connectNulls />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className={`text-sm ${tc.textSec}`}>No trend data available for this country.</p>
+          )}
+        </div>
+
+        {/* Section 2: Trade Diversification Index (HHI) */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-1">Trade Diversification Index</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Herfindahl-Hirschman Index — lower = more diversified.
+            <span className="ml-2 inline-flex gap-3">
+              <span className="text-green-500">● &lt;1500 Diversified</span>
+              <span className="text-yellow-500">● &lt;2500 Moderate</span>
+              <span className="text-red-500">● ≥2500 Concentrated</span>
+            </span>
+          </p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={hhiData} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="country" stroke={tc.axis} tick={{ fontSize: 10 }} width={80} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(v: number) => [v.toLocaleString(), 'HHI']} />
+                <Bar dataKey="hhi" name="HHI Score" radius={[0, 4, 4, 0]}>
+                  {hhiData.map((entry, i) => (
+                    <Cell key={i} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Section 3: Top Trade Flows Table */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-1">
+            {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Top Trade Flows
+          </h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Click column headers to sort</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className={isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}>
+                  {([
+                    ['partner', 'Partner'],
+                    ['exports', 'Exports ($B)'],
+                    ['imports', 'Imports ($B)'],
+                    ['balance', 'Balance ($B)'],
+                    ['share', 'Share of Trade (%)'],
+                  ] as const).map(([key, label]) => (
+                    <th
+                      key={key}
+                      className={`${key === 'partner' ? 'text-left' : 'text-right'} px-3 py-2 cursor-pointer select-none hover:text-blue-500 transition-colors`}
+                      onClick={() => handleSort(key)}
+                    >
+                      {label}
+                      {sortColumn === key && (
+                        <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {tradeFlowTableData.rows.map(row => (
+                  <tr key={row.partnerKey} className={`border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-100'}`}>
+                    <td className="px-3 py-2 font-medium">{row.partner}</td>
+                    <td className="text-right px-3 py-2 text-green-500">{row.exports.toFixed(1)}</td>
+                    <td className="text-right px-3 py-2 text-red-500">{row.imports.toFixed(1)}</td>
+                    <td className={`text-right px-3 py-2 font-medium ${row.balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {row.balance >= 0 ? '+' : ''}{row.balance.toFixed(1)}
+                    </td>
+                    <td className="text-right px-3 py-2">{row.share.toFixed(1)}%</td>
+                  </tr>
+                ))}
+                <tr className={`border-t-2 font-bold ${isDarkMode ? 'border-gray-500 bg-gray-700/30' : 'border-gray-300 bg-gray-50'}`}>
+                  <td className="px-3 py-2">Total</td>
+                  <td className="text-right px-3 py-2 text-green-500">{tradeFlowTableData.totalExports.toFixed(1)}</td>
+                  <td className="text-right px-3 py-2 text-red-500">{tradeFlowTableData.totalImports.toFixed(1)}</td>
+                  <td className={`text-right px-3 py-2 ${tradeFlowTableData.totalBalance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {tradeFlowTableData.totalBalance >= 0 ? '+' : ''}{tradeFlowTableData.totalBalance.toFixed(1)}
+                  </td>
+                  <td className="text-right px-3 py-2">100.0%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Section 4: Regional Trade Breakdown */}
+          <div className={`rounded-xl border p-6 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-1">
+              {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Regional Breakdown
+            </h2>
+            <p className={`text-xs mb-4 ${tc.textSec}`}>Share of total trade by region</p>
+            {regionalTradeData.length > 0 ? (
+              <div className="h-[350px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={regionalTradeData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={2}
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={{ stroke: tc.axis }}
+                    >
+                      {regionalTradeData.map((entry, i) => (
+                        <Cell key={i} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={tc.tooltip} formatter={(v: number) => [`$${v}B`, 'Trade Volume']} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className={`text-sm ${tc.textSec}`}>No regional data available.</p>
+            )}
+          </div>
+
+          {/* Section 5: Trade Balance Summary Cards */}
+          <div className={`rounded-xl border p-6 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-1">
+              {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Summary
+            </h2>
+            <p className={`text-xs mb-4 ${tc.textSec}`}>Key trade statistics at a glance</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-green-50'}`}>
+                <p className={`text-xs font-medium mb-1 ${tc.textSec}`}>Total Exports</p>
+                <p className="text-2xl font-bold text-green-500">${tradeSummary.totalExports.toFixed(1)}B</p>
+              </div>
+              <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-red-50'}`}>
+                <p className={`text-xs font-medium mb-1 ${tc.textSec}`}>Total Imports</p>
+                <p className="text-2xl font-bold text-red-500">${tradeSummary.totalImports.toFixed(1)}B</p>
+              </div>
+              <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : tradeSummary.overallBalance >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                <p className={`text-xs font-medium mb-1 ${tc.textSec}`}>Overall Balance</p>
+                <p className={`text-2xl font-bold ${tradeSummary.overallBalance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {tradeSummary.overallBalance >= 0 ? '+' : ''}${tradeSummary.overallBalance.toFixed(1)}B
+                </p>
+              </div>
+              <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-blue-50'}`}>
+                <p className={`text-xs font-medium mb-1 ${tc.textSec}`}>Trade Partners</p>
+                <p className="text-2xl font-bold text-blue-500">{tradeSummary.numPartners}</p>
+              </div>
+              {tradeSummary.largestSurplus && tradeSummary.largestSurplus.value > 0 && (
+                <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-green-50'}`}>
+                  <p className={`text-xs font-medium mb-1 ${tc.textSec}`}>Largest Surplus With</p>
+                  <p className="text-lg font-bold text-green-500">{tradeSummary.largestSurplus.name}</p>
+                  <p className={`text-xs ${tc.textSec}`}>+${tradeSummary.largestSurplus.value.toFixed(1)}B</p>
+                </div>
+              )}
+              {tradeSummary.largestDeficit && tradeSummary.largestDeficit.value < 0 && (
+                <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-red-50'}`}>
+                  <p className={`text-xs font-medium mb-1 ${tc.textSec}`}>Largest Deficit With</p>
+                  <p className="text-lg font-bold text-red-500">{tradeSummary.largestDeficit.name}</p>
+                  <p className={`text-xs ${tc.textSec}`}>${tradeSummary.largestDeficit.value.toFixed(1)}B</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

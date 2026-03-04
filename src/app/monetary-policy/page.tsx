@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { CENTRAL_BANK_RATES } from '../data/currencyHierarchyData';
 import { RECENT_DECISIONS, FORWARD_GUIDANCE, type RateDecision } from '../data/monetaryPolicyData';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, ScatterChart, Scatter, Cell, ReferenceLine } from 'recharts';
 
 const BANK_COLORS: Record<string, string> = {
   'Federal Reserve': '#8884d8', 'ECB': '#82ca9d', 'Bank of Japan': '#ffc658',
@@ -86,6 +86,80 @@ export default function MonetaryPolicyPage() {
 
   const uniqueBanks = useMemo(() => Array.from(new Set(RECENT_DECISIONS.map(d => d.bank))), []);
 
+  const BANK_COUNTRY_MAP: Record<string, string> = {
+    'Federal Reserve': 'USA', 'ECB': 'France', 'Bank of Japan': 'Japan',
+    'Bank of England': 'UK', 'PBoC': 'China', 'Reserve Bank of Australia': 'Australia',
+    'Bank of Canada': 'Canada', 'Swiss National Bank': 'Switzerland',
+    'Reserve Bank of India': 'India', 'CBRT': 'Turkey', 'BCB': 'Brazil',
+  };
+
+  const realRateData = useMemo(() => {
+    if (!data) return [];
+    const inflSeries = (data as any).inflationRates as CountryData[] | undefined;
+    if (!inflSeries) return [];
+    const latestInflRow = inflSeries[inflSeries.length - 1] || {};
+    return CENTRAL_BANK_RATES.map(r => {
+      const country = BANK_COUNTRY_MAP[r.bank];
+      const infl = country ? Number(latestInflRow[country]) : NaN;
+      const inflation = isNaN(infl) ? 0 : infl;
+      const realRate = r.rate - inflation;
+      return { bank: r.bankAbbrev, nominalRate: r.rate, inflation: parseFloat(inflation.toFixed(2)), realRate: parseFloat(realRate.toFixed(2)) };
+    }).sort((a, b) => b.realRate - a.realRate);
+  }, [data]);
+
+  const rateVsInflationData = useMemo(() => {
+    if (!data) return [];
+    const inflSeries = (data as any).inflationRates as CountryData[] | undefined;
+    if (!inflSeries) return [];
+    const latestInflRow = inflSeries[inflSeries.length - 1] || {};
+    return CENTRAL_BANK_RATES.map(r => {
+      const country = BANK_COUNTRY_MAP[r.bank];
+      const infl = country ? Number(latestInflRow[country]) : NaN;
+      return { bank: r.bankAbbrev, inflation: isNaN(infl) ? 0 : parseFloat(infl.toFixed(2)), rate: r.rate, color: BANK_COLORS[r.bank] || '#888' };
+    });
+  }, [data]);
+
+  const cyclePhases = useMemo(() => {
+    const phases: Record<string, { phase: string; color: string }> = {};
+    for (const bank of uniqueBanks) {
+      const decisions = RECENT_DECISIONS.filter(d => d.bank === bank).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3);
+      const hikes = decisions.filter(d => d.action === 'hike').length;
+      const cuts = decisions.filter(d => d.action === 'cut').length;
+      if (hikes >= 2) phases[bank] = { phase: 'Tightening', color: 'text-red-500 bg-red-500/10' };
+      else if (cuts >= 2) phases[bank] = { phase: 'Easing', color: 'text-green-500 bg-green-500/10' };
+      else phases[bank] = { phase: 'Neutral', color: 'text-yellow-500 bg-yellow-500/10' };
+    }
+    return phases;
+  }, [uniqueBanks]);
+
+  const rateChangeFreqData = useMemo(() => {
+    return uniqueBanks.map(bank => {
+      const decisions = RECENT_DECISIONS.filter(d => d.bank === bank);
+      return {
+        bank: bank.length > 15 ? bank.split(' ').map(w => w[0]).join('') : bank,
+        hikes: decisions.filter(d => d.action === 'hike').length,
+        cuts: decisions.filter(d => d.action === 'cut').length,
+        holds: decisions.filter(d => d.action === 'hold').length,
+      };
+    });
+  }, [uniqueBanks]);
+
+  const comparisonTableData = useMemo(() => {
+    if (!data) return [];
+    const inflSeries = (data as any).inflationRates as CountryData[] | undefined;
+    const latestInflRow = inflSeries ? inflSeries[inflSeries.length - 1] : {} as any;
+    return CENTRAL_BANK_RATES.map(r => {
+      const country = BANK_COUNTRY_MAP[r.bank];
+      const infl = country ? Number(latestInflRow?.[country]) : NaN;
+      const inflation = isNaN(infl) ? null : parseFloat(infl.toFixed(2));
+      const realRate = inflation !== null ? parseFloat((r.rate - inflation).toFixed(2)) : null;
+      const lastDecision = RECENT_DECISIONS.filter(d => d.bank === r.bank).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      const phase = cyclePhases[r.bank];
+      const guidance = FORWARD_GUIDANCE.find(fg => fg.bank === r.bank);
+      return { ...r, inflation, realRate, lastDecision, phase, guidance };
+    });
+  }, [data, cyclePhases]);
+
   if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${tc.bg}`}>
@@ -157,24 +231,32 @@ export default function MonetaryPolicyPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {sortedRates.map(rate => (
-              <div key={rate.currency} className={`rounded-xl border p-4 ${tc.card}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">{rate.bankAbbrev}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    rate.trend === 'rising' ? 'bg-red-500/10 text-red-500' :
-                    rate.trend === 'falling' ? 'bg-green-500/10 text-green-500' :
-                    'bg-yellow-500/10 text-yellow-500'
-                  }`}>{rate.trend}</span>
+            {sortedRates.map(rate => {
+              const phase = cyclePhases[rate.bank];
+              return (
+                <div key={rate.currency} className={`rounded-xl border p-4 ${tc.card}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">{rate.bankAbbrev}</span>
+                    <div className="flex items-center gap-1.5">
+                      {phase && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${phase.color}`}>{phase.phase}</span>
+                      )}
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        rate.trend === 'rising' ? 'bg-red-500/10 text-red-500' :
+                        rate.trend === 'falling' ? 'bg-green-500/10 text-green-500' :
+                        'bg-yellow-500/10 text-yellow-500'
+                      }`}>{rate.trend}</span>
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold">{rate.rate.toFixed(2)}%</p>
+                  <p className={`text-xs ${tc.textSec}`}>{rate.bank}</p>
+                  <div className={`flex justify-between mt-2 text-xs ${tc.textSec}`}>
+                    <span>Prev: {rate.previousRate.toFixed(2)}%</span>
+                    <span>{rate.currency}</span>
+                  </div>
                 </div>
-                <p className="text-2xl font-bold">{rate.rate.toFixed(2)}%</p>
-                <p className={`text-xs ${tc.textSec}`}>{rate.bank}</p>
-                <div className={`flex justify-between mt-2 text-xs ${tc.textSec}`}>
-                  <span>Prev: {rate.previousRate.toFixed(2)}%</span>
-                  <span>{rate.currency}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -239,6 +321,142 @@ export default function MonetaryPolicyPage() {
                 ))}
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Real Interest Rate Comparison */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Real Interest Rate Comparison</h2>
+          <p className={`text-sm mb-4 ${tc.textSec}`}>Policy rate minus latest inflation. Positive real rates indicate restrictive policy; negative means monetary conditions remain loose.</p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={realRateData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="bank" stroke={tc.axis} tick={{ fontSize: 10 }} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(value: number) => [`${value}%`]} />
+                <ReferenceLine y={0} stroke={isDarkMode ? '#6b7280' : '#9ca3af'} strokeDasharray="3 3" />
+                <Bar dataKey="realRate" name="Real Rate">
+                  {realRateData.map((entry, idx) => (
+                    <Cell key={idx} fill={entry.realRate >= 0 ? '#22c55e' : '#ef4444'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Rate vs Inflation Scatter */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Policy Rate vs Inflation</h2>
+          <p className={`text-sm mb-4 ${tc.textSec}`}>Each dot represents a central bank. Points above the diagonal line have positive real rates (ahead of the curve).</p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" dataKey="inflation" name="Inflation" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} label={{ value: 'Inflation Rate (%)', position: 'insideBottom', offset: -5, style: { fill: tc.axis, fontSize: 11 } }} />
+                <YAxis type="number" dataKey="rate" name="Policy Rate" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} label={{ value: 'Policy Rate (%)', angle: -90, position: 'insideLeft', style: { fill: tc.axis, fontSize: 11 } }} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(value: number) => [`${value}%`]} labelFormatter={() => ''} content={({ active, payload }) => {
+                  if (active && payload?.length) {
+                    const d = payload[0].payload;
+                    return (
+                      <div style={tc.tooltip} className="p-2 rounded-lg text-sm shadow-lg">
+                        <p className="font-semibold">{d.bank}</p>
+                        <p>Policy Rate: {d.rate}%</p>
+                        <p>Inflation: {d.inflation}%</p>
+                        <p>Real Rate: {(d.rate - d.inflation).toFixed(2)}%</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }} />
+                <ReferenceLine stroke={isDarkMode ? '#6b7280' : '#9ca3af'} strokeDasharray="5 5" segment={[{ x: -5, y: -5 }, { x: 50, y: 50 }]} />
+                <Scatter name="Central Banks" data={rateVsInflationData} fill="#8884d8">
+                  {rateVsInflationData.map((entry, idx) => (
+                    <Cell key={idx} fill={entry.color} />
+                  ))}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap gap-3 mt-3">
+            {rateVsInflationData.map(d => (
+              <span key={d.bank} className="flex items-center gap-1 text-xs">
+                <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: d.color }} />
+                {d.bank}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Rate Change Frequency */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Rate Change Frequency</h2>
+          <p className={`text-sm mb-4 ${tc.textSec}`}>Count of hikes, cuts, and holds per central bank from recent decision history.</p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={rateChangeFreqData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="bank" stroke={tc.axis} tick={{ fontSize: 9 }} interval={0} angle={-20} textAnchor="end" height={60} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip contentStyle={tc.tooltip} />
+                <Legend />
+                <Bar dataKey="hikes" name="Hikes" fill="#ef4444" stackId="a" />
+                <Bar dataKey="cuts" name="Cuts" fill="#22c55e" stackId="a" />
+                <Bar dataKey="holds" name="Holds" fill="#eab308" stackId="a" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Central Bank Comparison Table */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Central Bank Comparison Table</h2>
+          <p className={`text-sm mb-4 ${tc.textSec}`}>Comprehensive side-by-side view of all tracked central banks.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <th className="text-left py-3 px-2 font-semibold">Bank</th>
+                  <th className="text-right py-3 px-2 font-semibold">Rate</th>
+                  <th className="text-right py-3 px-2 font-semibold">Inflation</th>
+                  <th className="text-right py-3 px-2 font-semibold">Real Rate</th>
+                  <th className="text-center py-3 px-2 font-semibold">Last Action</th>
+                  <th className="text-center py-3 px-2 font-semibold">Cycle</th>
+                  <th className="text-left py-3 px-2 font-semibold hidden lg:table-cell">Guidance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonTableData.map(row => (
+                  <tr key={row.currency} className={`border-b ${isDarkMode ? 'border-gray-700/50' : 'border-gray-100'} hover:${isDarkMode ? 'bg-gray-700/30' : 'bg-gray-50'}`}>
+                    <td className="py-2 px-2">
+                      <span className="font-medium">{row.bankAbbrev}</span>
+                      <span className={`block text-xs ${tc.textSec}`}>{row.currency}</span>
+                    </td>
+                    <td className="text-right py-2 px-2 font-mono font-semibold">{row.rate.toFixed(2)}%</td>
+                    <td className="text-right py-2 px-2 font-mono">{row.inflation !== null ? `${row.inflation}%` : 'N/A'}</td>
+                    <td className={`text-right py-2 px-2 font-mono font-semibold ${row.realRate !== null ? (row.realRate >= 0 ? 'text-green-500' : 'text-red-500') : ''}`}>
+                      {row.realRate !== null ? `${row.realRate}%` : 'N/A'}
+                    </td>
+                    <td className="text-center py-2 px-2">
+                      {row.lastDecision && (
+                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${ACTION_STYLES[row.lastDecision.action].bg} ${ACTION_STYLES[row.lastDecision.action].text}`}>
+                          {ACTION_STYLES[row.lastDecision.action].icon} {row.lastDecision.action}
+                        </span>
+                      )}
+                    </td>
+                    <td className="text-center py-2 px-2">
+                      {row.phase && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${row.phase.color}`}>{row.phase.phase}</span>
+                      )}
+                    </td>
+                    <td className={`py-2 px-2 text-xs hidden lg:table-cell ${tc.textSec}`}>
+                      {row.guidance ? row.guidance.outlook.slice(0, 80) + '...' : 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 

@@ -3,7 +3,7 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
-import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
+import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, COUNTRY_REGIONS, type CountryKey } from '../utils/countryMappings';
 import { formatMetricValue } from '../utils/metricCategories';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line, ScatterChart, Scatter, Cell } from 'recharts';
 
@@ -28,6 +28,9 @@ export default function DevelopmentPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [data, setData] = useState<Record<string, CountryData[]> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDevCountries, setSelectedDevCountries] = useState<string[]>(['USA', 'Japan', 'Brazil', 'India', 'Nigeria', 'China']);
+  const [sortField, setSortField] = useState<string>('hdi');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     if (isDarkMode) {
@@ -101,6 +104,89 @@ export default function DevelopmentPage() {
       youth: getLatest(data.youthUnemployment, ck) || 0,
     }));
   }, [data]);
+
+  const hdiBreakdown = useMemo(() => {
+    if (!data) return [];
+    return COUNTRY_KEYS.slice(0, 15).map(ck => {
+      const lifeExp = getLatest(data.lifeExpectancy, ck);
+      const education = getLatest(data.tertiaryEnrollment, ck);
+      const gdpPc = getLatest(data.gdpPerCapitaPPP, ck);
+      const lifeScore = lifeExp !== null ? Math.max(0, Math.min(1, (lifeExp - 20) / (85 - 20))) * 100 : 0;
+      const eduScore = education !== null ? Math.max(0, Math.min(1, education / 100)) * 100 : 0;
+      const incScore = gdpPc !== null ? Math.max(0, Math.min(1, (Math.log(gdpPc) - Math.log(100)) / (Math.log(75000) - Math.log(100)))) * 100 : 0;
+      return {
+        country: (COUNTRY_DISPLAY_NAMES[ck as CountryKey] || ck).slice(0, 10),
+        'Life Expectancy': parseFloat(lifeScore.toFixed(1)),
+        'Education': parseFloat(eduScore.toFixed(1)),
+        'Income': parseFloat(incScore.toFixed(1)),
+      };
+    });
+  }, [data]);
+
+  const devOverTimeData = useMemo(() => {
+    if (!data?.lifeExpectancy) return [];
+    return data.lifeExpectancy
+      .filter((row: any) => {
+        const yr = Number(row.date || row.year);
+        return !isNaN(yr) && yr >= 2000;
+      })
+      .map((row: any) => {
+        const point: Record<string, any> = { year: Number(row.date || row.year) };
+        selectedDevCountries.forEach(ck => {
+          const v = Number(row[ck]);
+          if (!isNaN(v) && v > 0) point[ck] = v;
+        });
+        return point;
+      })
+      .sort((a: any, b: any) => a.year - b.year);
+  }, [data, selectedDevCountries]);
+
+  const regionalComparison = useMemo(() => {
+    if (scoreCards.length === 0) return [];
+    const regions = ['North America', 'Europe', 'Asia-Pacific', 'Latin America', 'Middle East & Africa'];
+    return regions.map(region => {
+      const members = COUNTRY_REGIONS[region] || [];
+      const cards = scoreCards.filter(sc => members.includes(sc.country as CountryKey));
+      if (cards.length === 0) return { region, HDI: 0, Gini: 0, Healthcare: 0 };
+      const avg = (arr: (number | null)[]): number => {
+        const valid = arr.filter((v): v is number => v !== null);
+        return valid.length > 0 ? parseFloat((valid.reduce((s, v) => s + v, 0) / valid.length).toFixed(1)) : 0;
+      };
+      return {
+        region,
+        HDI: parseFloat((avg(cards.map(c => c.hdi)) * 100).toFixed(1)),
+        Gini: avg(cards.map(c => c.gini)),
+        Healthcare: avg(cards.map(c => c.healthcare)),
+      };
+    });
+  }, [scoreCards]);
+
+  const povertyCards = useMemo(() => {
+    return scoreCards
+      .filter(sc => sc.gdpPc !== null)
+      .sort((a, b) => (b.gdpPc ?? 0) - (a.gdpPc ?? 0));
+  }, [scoreCards]);
+
+  const rankingsData = useMemo(() => {
+    const sorted = [...scoreCards];
+    sorted.sort((a, b) => {
+      const aVal = (a as any)[sortField] ?? -Infinity;
+      const bVal = (b as any)[sortField] ?? -Infinity;
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return sorted;
+  }, [scoreCards, sortField, sortDir]);
+
+  const toggleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+  };
+
+  const devTimeColors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
   if (loading) {
     return (
@@ -243,6 +329,202 @@ export default function DevelopmentPage() {
                 </Scatter>
               </ScatterChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* HDI Component Breakdown */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">HDI Component Breakdown</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Three dimensions of the Human Development Index scored 0-100 for top 15 countries</p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={hdiBreakdown} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="country" stroke={tc.axis} tick={{ fontSize: 9 }} angle={-45} textAnchor="end" height={60} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={v => `${v}`} />
+                <Tooltip contentStyle={tc.tooltip} />
+                <Legend />
+                <Bar dataKey="Life Expectancy" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Education" fill="#22c55e" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Income" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Development Over Time */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Development Over Time</h2>
+          <p className={`text-xs mb-3 ${tc.textSec}`}>Life expectancy trends since 2000 for selected countries</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {COUNTRY_KEYS.map(ck => {
+              const active = selectedDevCountries.includes(ck);
+              return (
+                <button
+                  key={ck}
+                  onClick={() => setSelectedDevCountries(prev =>
+                    prev.includes(ck) ? prev.filter(c => c !== ck) : [...prev, ck]
+                  )}
+                  className={`px-2 py-1 text-xs rounded-full border transition-colors ${
+                    active
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : isDarkMode
+                        ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
+                        : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'
+                  }`}
+                >
+                  {(COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12)}
+                </button>
+              );
+            })}
+          </div>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={devOverTimeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} domain={['auto', 'auto']}
+                  label={{ value: 'Life Expectancy (yrs)', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                <Tooltip contentStyle={tc.tooltip} />
+                <Legend />
+                {selectedDevCountries.map((ck, i) => (
+                  <Line
+                    key={ck}
+                    type="monotone"
+                    dataKey={ck}
+                    name={COUNTRY_DISPLAY_NAMES[ck as CountryKey] || ck}
+                    stroke={COUNTRY_COLORS[ck as CountryKey] || devTimeColors[i % devTimeColors.length]}
+                    strokeWidth={2}
+                    dot={false}
+                    connectNulls
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Regional Development Comparison */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Regional Development Comparison</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Average HDI (x100), Gini coefficient, and healthcare spending by region</p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={regionalComparison} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="region" stroke={tc.axis} tick={{ fontSize: 10 }} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <Tooltip contentStyle={tc.tooltip} />
+                <Legend />
+                <Bar dataKey="HDI" name="HDI (x100)" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Gini" name="Gini Index" fill="#ef4444" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Healthcare" name="Healthcare %GDP" fill="#22c55e" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Poverty & Income Cards */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Poverty & Income Overview</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Countries sorted by GDP per capita (PPP). Color indicators: Gini green &lt; 30, yellow &lt; 40, red &ge; 40</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {povertyCards.map(sc => {
+              const giniColor = sc.gini === null ? 'text-gray-400' : sc.gini < 30 ? 'text-green-500' : sc.gini < 40 ? 'text-yellow-500' : 'text-red-500';
+              return (
+                <div key={sc.country} className={`rounded-lg border p-3 ${tc.card}`}>
+                  <p className="text-xs font-semibold truncate">{COUNTRY_DISPLAY_NAMES[sc.country as CountryKey]}</p>
+                  <p className="text-lg font-bold mt-1">
+                    ${sc.gdpPc !== null ? sc.gdpPc.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                  </p>
+                  <p className={`text-xs ${tc.textSec}`}>GDP/capita PPP</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <div>
+                      <span className={`text-xs font-medium ${giniColor}`}>
+                        Gini: {sc.gini !== null ? sc.gini.toFixed(1) : 'N/A'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className={`text-xs ${tc.textSec}`}>
+                        Poverty: {sc.poverty !== null ? `${sc.poverty.toFixed(1)}%` : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Development Rankings Table */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Development Rankings</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Click column headers to sort. All countries ranked by key development indicators.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  {[
+                    { key: 'rank', label: 'Rank' },
+                    { key: 'country', label: 'Country' },
+                    { key: 'hdi', label: 'HDI Score' },
+                    { key: 'lifeExp', label: 'Life Exp.' },
+                    { key: 'education', label: 'Education %' },
+                    { key: 'gdpPc', label: 'GDP/Capita' },
+                    { key: 'gini', label: 'Gini' },
+                    { key: 'healthcare', label: 'Healthcare %' },
+                    { key: 'internet', label: 'Internet %' },
+                  ].map(col => (
+                    <th
+                      key={col.key}
+                      className={`px-3 py-2 text-left font-medium cursor-pointer select-none hover:text-blue-500 transition-colors ${tc.textSec}`}
+                      onClick={() => col.key !== 'rank' && col.key !== 'country' && toggleSort(col.key)}
+                    >
+                      {col.label}
+                      {sortField === col.key && (
+                        <span className="ml-1">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rankingsData.map((sc, idx) => (
+                  <tr
+                    key={sc.country}
+                    className={`border-b transition-colors ${
+                      isDarkMode
+                        ? 'border-gray-700/50 hover:bg-gray-700/30'
+                        : 'border-gray-100 hover:bg-gray-50'
+                    }`}
+                  >
+                    <td className="px-3 py-2 font-medium">{idx + 1}</td>
+                    <td className="px-3 py-2 font-medium">{COUNTRY_DISPLAY_NAMES[sc.country as CountryKey]}</td>
+                    <td className="px-3 py-2">
+                      <span className={
+                        (sc.hdi ?? 0) >= 0.8 ? 'text-green-500 font-semibold' :
+                        (sc.hdi ?? 0) >= 0.6 ? 'text-yellow-500 font-semibold' : 'text-red-500 font-semibold'
+                      }>
+                        {sc.hdi?.toFixed(3) ?? '—'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">{sc.lifeExp?.toFixed(1) ?? '—'}</td>
+                    <td className="px-3 py-2">{sc.education !== null ? `${sc.education.toFixed(1)}%` : '—'}</td>
+                    <td className="px-3 py-2">{sc.gdpPc !== null ? `$${sc.gdpPc.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '—'}</td>
+                    <td className="px-3 py-2">
+                      <span className={
+                        sc.gini === null ? '' :
+                        sc.gini < 30 ? 'text-green-500' : sc.gini < 40 ? 'text-yellow-500' : 'text-red-500'
+                      }>
+                        {sc.gini?.toFixed(1) ?? '—'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">{sc.healthcare !== null ? `${sc.healthcare.toFixed(1)}%` : '—'}</td>
+                    <td className="px-3 py-2">{sc.internet !== null ? `${sc.internet.toFixed(1)}%` : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

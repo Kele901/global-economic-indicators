@@ -1,12 +1,19 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
 import { ALL_METRICS, getMetricByKey, formatMetricValue } from '../utils/metricCategories';
-import { simulateScenario, type ScenarioImpact } from '../utils/correlationEngine';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import {
+  simulateScenario, type ScenarioImpact,
+  computeCorrelationMatrix, computeLaggedCorrelations,
+  extractTimeSeries, alignTimeSeries,
+} from '../utils/correlationEngine';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  LineChart, Line, Legend,
+} from 'recharts';
 
 const INPUT_METRICS = ['interestRates', 'inflationRates', 'gdpGrowth', 'governmentDebt', 'exchangeRate', 'fdi'];
 const OUTPUT_METRICS = [
@@ -14,6 +21,24 @@ const OUTPUT_METRICS = [
   'tradeBalance', 'governmentDebt', 'fdi', 'domesticCredit',
   'householdConsumption', 'grossCapitalFormation', 'interestRates',
 ];
+const HEATMAP_METRICS = ['gdpGrowth', 'inflationRates', 'interestRates', 'unemploymentRates', 'exchangeRate', 'governmentDebt', 'tradeBalance', 'fdi'];
+const SCENARIO_TEMPLATES = [
+  { label: 'Rate Hike +2%', inputMetric: 'interestRates', changeMagnitude: 2 },
+  { label: 'Rate Cut −1%', inputMetric: 'interestRates', changeMagnitude: -1 },
+  { label: 'Oil Shock (FDI −3)', inputMetric: 'fdi', changeMagnitude: -3 },
+  { label: 'Currency Depreciation −15%', inputMetric: 'exchangeRate', changeMagnitude: -15 },
+  { label: 'Fiscal Stimulus +3% GDP', inputMetric: 'governmentDebt', changeMagnitude: 3 },
+  { label: 'Growth Boom +2%', inputMetric: 'gdpGrowth', changeMagnitude: 2 },
+];
+const LINE_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444'];
+
+interface ScenarioHistoryEntry {
+  country: string;
+  inputMetric: string;
+  changeMagnitude: number;
+  timestamp: number;
+  topImpacts: string[];
+}
 
 export default function SimulatorPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
@@ -23,6 +48,8 @@ export default function SimulatorPage() {
   const [inputMetric, setInputMetric] = useState('interestRates');
   const [changeMagnitude, setChangeMagnitude] = useState(2);
   const [results, setResults] = useState<ScenarioImpact[]>([]);
+  const [scenarioHistory, setScenarioHistory] = useState<ScenarioHistoryEntry[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -52,12 +79,35 @@ export default function SimulatorPage() {
     inputBg: 'bg-white border-gray-300 text-gray-900',
   };
 
-  const runSimulation = () => {
+  const pushHistory = useCallback((c: string, metric: string, magnitude: number, impacts: ScenarioImpact[]) => {
+    setScenarioHistory(prev => [...prev, {
+      country: c,
+      inputMetric: metric,
+      changeMagnitude: magnitude,
+      timestamp: Date.now(),
+      topImpacts: impacts.slice(0, 3).map(im =>
+        `${getMetricByKey(im.metric)?.label || im.metric}: ${im.estimatedChange >= 0 ? '+' : ''}${im.estimatedChange.toFixed(2)}`
+      ),
+    }]);
+  }, []);
+
+  const runSimulation = useCallback(() => {
     if (!data) return;
     const outputs = OUTPUT_METRICS.filter(m => m !== inputMetric);
     const impacts = simulateScenario(data, country, inputMetric, changeMagnitude, outputs);
     setResults(impacts);
-  };
+    pushHistory(country, inputMetric, changeMagnitude, impacts);
+  }, [data, country, inputMetric, changeMagnitude, pushHistory]);
+
+  const applyTemplate = useCallback((metric: string, magnitude: number) => {
+    setInputMetric(metric);
+    setChangeMagnitude(magnitude);
+    if (!data) return;
+    const outputs = OUTPUT_METRICS.filter(m => m !== metric);
+    const impacts = simulateScenario(data, country, metric, magnitude, outputs);
+    setResults(impacts);
+    pushHistory(country, metric, magnitude, impacts);
+  }, [data, country, pushHistory]);
 
   const chartData = useMemo(() => {
     return results.slice(0, 8).map(r => {
@@ -70,6 +120,50 @@ export default function SimulatorPage() {
       };
     });
   }, [results]);
+
+  const correlationMatrix = useMemo(() => {
+    if (!data) return null;
+    return computeCorrelationMatrix(data, country, HEATMAP_METRICS);
+  }, [data, country]);
+
+  const timelineData = useMemo(() => {
+    if (!data || results.length === 0) return null;
+    const top4 = results.slice(0, 4);
+    const inputSeries = extractTimeSeries(data[inputMetric] || [], country);
+    const lines: { metric: string; label: string; lags: { lag: number; impact: number }[] }[] = [];
+    for (const impact of top4) {
+      const outputSeries = extractTimeSeries(data[impact.metric] || [], country);
+      const aligned = alignTimeSeries(inputSeries, outputSeries);
+      if (aligned.a.length >= 5) {
+        const lagged = computeLaggedCorrelations(aligned.a, aligned.b, 3);
+        const inputStd = Math.sqrt(
+          aligned.a.reduce((s, v) => s + v * v, 0) / aligned.a.length -
+          Math.pow(aligned.a.reduce((s, v) => s + v, 0) / aligned.a.length, 2)
+        );
+        const outputStd = Math.sqrt(
+          aligned.b.reduce((s, v) => s + v * v, 0) / aligned.b.length -
+          Math.pow(aligned.b.reduce((s, v) => s + v, 0) / aligned.b.length, 2)
+        );
+        lines.push({
+          metric: impact.metric,
+          label: (getMetricByKey(impact.metric)?.label || impact.metric).slice(0, 20),
+          lags: lagged.filter(l => l.lag <= 3).map(l => ({
+            lag: l.lag,
+            impact: inputStd > 0 ? parseFloat(((changeMagnitude / inputStd) * l.correlation * outputStd).toFixed(3)) : 0,
+          })),
+        });
+      }
+    }
+    const chartPoints = [0, 1, 2, 3].map(lag => {
+      const point: Record<string, any> = { lag: `Year ${lag}` };
+      for (const line of lines) {
+        const found = line.lags.find(l => l.lag === lag);
+        point[line.label] = found ? found.impact : 0;
+      }
+      return point;
+    });
+    return { lines, chartPoints };
+  }, [data, results, inputMetric, country, changeMagnitude]);
 
   if (loading) {
     return (
@@ -133,6 +227,101 @@ export default function SimulatorPage() {
           </p>
         </div>
 
+        {/* Correlation Matrix Heatmap */}
+        {correlationMatrix && (
+          <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-2">Correlation Matrix</h2>
+            <p className={`text-sm mb-4 ${tc.textSec}`}>
+              Pearson correlations between major metrics for {COUNTRY_DISPLAY_NAMES[country as CountryKey]}
+            </p>
+            <div className="overflow-x-auto">
+              <table className="text-xs border-separate" style={{ borderSpacing: '2px' }}>
+                <thead>
+                  <tr>
+                    <th />
+                    {HEATMAP_METRICS.map(m => (
+                      <th key={m} className="px-1 py-2 font-medium text-center"
+                        style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', maxWidth: '40px', minHeight: '80px' }}>
+                        {(getMetricByKey(m)?.label || m).slice(0, 14)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {HEATMAP_METRICS.map(row => (
+                    <tr key={row}>
+                      <td className="pr-2 py-1 font-medium text-right whitespace-nowrap">
+                        {(getMetricByKey(row)?.label || row).slice(0, 18)}
+                      </td>
+                      {HEATMAP_METRICS.map(col => {
+                        if (row === col) {
+                          return (
+                            <td key={col} className="px-0 py-0">
+                              <div className="w-12 h-8 rounded flex items-center justify-center text-xs font-bold"
+                                style={{ backgroundColor: 'rgba(59,130,246,0.8)', color: '#fff' }}>
+                                1.00
+                              </div>
+                            </td>
+                          );
+                        }
+                        const pair = correlationMatrix.find(
+                          c => (c.metricA === row && c.metricB === col) || (c.metricA === col && c.metricB === row)
+                        );
+                        const corr = pair?.correlation ?? 0;
+                        const absCorr = Math.abs(corr);
+                        const bg = corr >= 0
+                          ? `rgba(59,130,246,${0.1 + absCorr * 0.7})`
+                          : `rgba(239,68,68,${0.1 + absCorr * 0.7})`;
+                        const textColor = absCorr > 0.35 ? '#fff' : (isDarkMode ? '#d1d5db' : '#374151');
+                        return (
+                          <td key={col} className="px-0 py-0">
+                            <div className="w-12 h-8 rounded flex items-center justify-center text-xs font-medium"
+                              style={{ backgroundColor: bg, color: textColor }}>
+                              {pair ? corr.toFixed(2) : '—'}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex items-center gap-4 mt-3">
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-3 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.7)' }} />
+                <span className={`text-xs ${tc.textSec}`}>Negative</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-3 rounded" style={{ backgroundColor: 'rgba(156,163,175,0.3)' }} />
+                <span className={`text-xs ${tc.textSec}`}>Near zero</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-3 rounded" style={{ backgroundColor: 'rgba(59,130,246,0.7)' }} />
+                <span className={`text-xs ${tc.textSec}`}>Positive</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Pre-built Scenario Templates */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Quick Scenario Templates</h2>
+          <p className={`text-sm mb-4 ${tc.textSec}`}>Click a pre-built scenario to auto-fill and run the simulation</p>
+          <div className="flex flex-wrap gap-2">
+            {SCENARIO_TEMPLATES.map((tpl, i) => (
+              <button key={i} onClick={() => applyTemplate(tpl.inputMetric, tpl.changeMagnitude)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  isDarkMode
+                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600'
+                    : 'bg-gray-100 hover:bg-blue-50 hover:border-blue-300 text-gray-700 border-gray-300'
+                }`}>
+                {tpl.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Scenario Builder */}
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <h2 className="text-xl font-semibold mb-4">Build Scenario</h2>
@@ -158,7 +347,7 @@ export default function SimulatorPage() {
               <label className={`block text-xs mb-1 ${tc.textSec}`}>Change Magnitude</label>
               <div className="flex items-center gap-2">
                 <input
-                  type="range" min={-10} max={10} step={0.5} value={changeMagnitude}
+                  type="range" min={-15} max={15} step={0.5} value={changeMagnitude}
                   onChange={e => setChangeMagnitude(parseFloat(e.target.value))}
                   className="flex-1"
                 />
@@ -240,13 +429,81 @@ export default function SimulatorPage() {
             </div>
 
             {/* Disclaimer */}
-            <div className={`rounded-xl border p-4 ${isDarkMode ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
+            <div className={`rounded-xl border p-4 mb-8 ${isDarkMode ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
               <p className="text-sm text-yellow-600 dark:text-yellow-400">
                 <strong>Disclaimer:</strong> These projections are based on historical correlations and should not be used for
                 investment decisions. Correlations do not imply causation, and real economic systems involve many more variables
                 and non-linear interactions than this simple model captures.
               </p>
             </div>
+
+            {/* Impact Timeline */}
+            {timelineData && timelineData.lines.length > 0 && (
+              <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+                <h2 className="text-xl font-semibold mb-2">Impact Timeline</h2>
+                <p className={`text-sm mb-4 ${tc.textSec}`}>
+                  Estimated impact propagation over 0–3 year lags for the top correlated metrics
+                </p>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={timelineData.chartPoints} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                      <XAxis dataKey="lag" stroke={tc.axis} tick={{ fontSize: 12 }} />
+                      <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} />
+                      <Tooltip contentStyle={tc.tooltip} />
+                      <Legend />
+                      {timelineData.lines.map((line, i) => (
+                        <Line key={line.metric} type="monotone" dataKey={line.label}
+                          stroke={LINE_COLORS[i % LINE_COLORS.length]} strokeWidth={2} dot={{ r: 4 }} />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* Scenario History Log */}
+            {scenarioHistory.length > 0 && (
+              <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+                <button onClick={() => setHistoryOpen(!historyOpen)}
+                  className="flex items-center gap-2 w-full text-left">
+                  <h2 className="text-xl font-semibold">Scenario History</h2>
+                  <span className={`text-sm ${tc.textSec}`}>
+                    ({scenarioHistory.length} run{scenarioHistory.length !== 1 ? 's' : ''})
+                  </span>
+                  <span className={`ml-auto transition-transform duration-200 ${historyOpen ? 'rotate-180' : ''}`}>
+                    &#9660;
+                  </span>
+                </button>
+                {historyOpen && (
+                  <div className="mt-4 space-y-3">
+                    {[...scenarioHistory].reverse().map((entry, i) => (
+                      <div key={i} className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-sm font-medium">
+                              {COUNTRY_DISPLAY_NAMES[entry.country as CountryKey]} —{' '}
+                              {getMetricByKey(entry.inputMetric)?.label || entry.inputMetric}{' '}
+                              <span className={entry.changeMagnitude >= 0 ? 'text-green-500' : 'text-red-500'}>
+                                {entry.changeMagnitude >= 0 ? '+' : ''}{entry.changeMagnitude}
+                              </span>
+                            </p>
+                            <div className="mt-1 space-y-0.5">
+                              {entry.topImpacts.map((imp, j) => (
+                                <p key={j} className={`text-xs ${tc.textSec}`}>{imp}</p>
+                              ))}
+                            </div>
+                          </div>
+                          <span className={`text-xs ${tc.textSec} whitespace-nowrap ml-4`}>
+                            {new Date(entry.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>

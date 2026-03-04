@@ -22,6 +22,8 @@ const KEY_INDICATOR_METRICS = [
   'gdpPerCapitaPPP', 'governmentDebt', 'tradeBalance', 'fdi',
   'lifeExpectancy', 'populationGrowth', 'internetUsers', 'co2Emissions',
   'laborForceParticipation', 'giniCoefficient', 'rdSpending', 'healthcareExpenditure',
+  'renewableEnergy', 'povertyRate', 'taxRevenue', 'grossCapitalFormation',
+  'domesticCredit', 'educationExpenditure', 'budgetBalance', 'currentAccount',
 ];
 
 export default function CountryProfilePage() {
@@ -35,6 +37,8 @@ export default function CountryProfilePage() {
   const [data, setData] = useState<Record<string, CountryData[]> | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['gdpGrowth', 'inflationRates']);
+  const [dualMetricLeft, setDualMetricLeft] = useState('gdpGrowth');
+  const [dualMetricRight, setDualMetricRight] = useState('inflationRates');
 
   useEffect(() => {
     if (isDarkMode) {
@@ -131,6 +135,99 @@ export default function CountryProfilePage() {
     return Object.values(yearMap).sort((a, b) => (a.year as number) - (b.year as number));
   }, [data, countryKey, selectedMetrics]);
 
+  const economicSummary = useMemo(() => {
+    if (!data || !countryKey) return null;
+    const gdp = getLatestValue('gdpGrowth');
+    const inflation = getLatestValue('inflationRates');
+    const debt = getLatestValue('governmentDebt');
+    const unemployment = getLatestValue('unemploymentRates');
+    const interest = getLatestValue('interestRates');
+    const trade = getLatestValue('tradeBalance');
+    let strengthFactors = 0;
+    if (gdp !== null && gdp > 3) strengthFactors++;
+    if (unemployment !== null && unemployment < 5) strengthFactors++;
+    if (inflation !== null && inflation >= 1 && inflation <= 3) strengthFactors++;
+    if (debt !== null && debt < 60) strengthFactors++;
+    const strength = strengthFactors >= 3 ? 'strong' : strengthFactors <= 1 ? 'weak' : 'moderate';
+    return { gdp, inflation, debt, unemployment, interest, trade, strength };
+  }, [data, countryKey]);
+
+  const healthScore = useMemo(() => {
+    if (!data || !countryKey) return null;
+    const gdp = getLatestValue('gdpGrowth');
+    const unemployment = getLatestValue('unemploymentRates');
+    const inflation = getLatestValue('inflationRates');
+    const debt = getLatestValue('governmentDebt');
+    const trade = getLatestValue('tradeBalance');
+    let score = 0;
+    const breakdown: { label: string; points: number; max: number }[] = [];
+    const gdpPts = gdp !== null ? Math.min(20, Math.max(0, (gdp / 8) * 20)) : 0;
+    breakdown.push({ label: 'GDP Growth', points: Math.round(gdpPts), max: 20 });
+    score += gdpPts;
+    const unempPts = unemployment !== null ? Math.min(20, Math.max(0, (1 - unemployment / 20) * 20)) : 0;
+    breakdown.push({ label: 'Unemployment', points: Math.round(unempPts), max: 20 });
+    score += unempPts;
+    const inflDist = inflation !== null ? Math.abs(inflation - 2) : 10;
+    const inflPts = Math.min(20, Math.max(0, (1 - inflDist / 10) * 20));
+    breakdown.push({ label: 'Inflation', points: Math.round(inflPts), max: 20 });
+    score += inflPts;
+    const debtPts = debt !== null ? Math.min(20, Math.max(0, (1 - debt / 200) * 20)) : 0;
+    breakdown.push({ label: 'Debt-to-GDP', points: Math.round(debtPts), max: 20 });
+    score += debtPts;
+    const tradePts = trade !== null ? Math.min(20, Math.max(0, ((trade + 20) / 40) * 20)) : 10;
+    breakdown.push({ label: 'Trade Balance', points: Math.round(tradePts), max: 20 });
+    score += tradePts;
+    return { score: Math.round(score), breakdown };
+  }, [data, countryKey]);
+
+  const peerComparisonData = useMemo(() => {
+    if (!data || !countryKey) return [];
+    const region = Object.entries(COUNTRY_REGIONS).find(([, countries]) => countries.includes(countryKey));
+    if (!region) return [];
+    const peers = region[1].filter(k => k !== countryKey);
+    const comparisonMetrics = [
+      'gdpGrowth', 'inflationRates', 'unemploymentRates', 'governmentDebt',
+      'tradeBalance', 'gdpPerCapitaPPP', 'lifeExpectancy', 'internetUsers',
+    ];
+    const invertedMetrics = new Set(['inflationRates', 'unemploymentRates', 'governmentDebt']);
+    return comparisonMetrics.map(mk => {
+      const metric = getMetricByKey(mk);
+      const countryVal = getLatestValue(mk);
+      const peerValues: number[] = [];
+      for (const peer of peers) {
+        const series = (data as any)[mk] as CountryData[] | undefined;
+        if (!series) continue;
+        for (let i = series.length - 1; i >= 0; i--) {
+          const v = Number(series[i][peer]);
+          if (!isNaN(v) && v !== 0) { peerValues.push(v); break; }
+        }
+      }
+      const avg = peerValues.length > 0 ? peerValues.reduce((a, b) => a + b, 0) / peerValues.length : null;
+      const diff = countryVal !== null && avg !== null ? countryVal - avg : null;
+      const isInverted = invertedMetrics.has(mk);
+      const favorable = diff !== null ? (isInverted ? diff < 0 : diff > 0) : null;
+      return { key: mk, label: metric?.label || mk, countryValue: countryVal, regionAvg: avg, diff, favorable };
+    });
+  }, [data, countryKey]);
+
+  const dualAxisData = useMemo(() => {
+    if (!data || !countryKey) return [];
+    const yearMap: Record<number, Record<string, number>> = {};
+    for (const mk of [dualMetricLeft, dualMetricRight]) {
+      const series = (data as any)[mk] as CountryData[] | undefined;
+      if (!series) continue;
+      for (const row of series) {
+        const yr = Number(row.year);
+        const v = Number(row[countryKey]);
+        if (!isNaN(v) && yr) {
+          if (!yearMap[yr]) yearMap[yr] = { year: yr };
+          yearMap[yr][mk] = v;
+        }
+      }
+    }
+    return Object.values(yearMap).sort((a, b) => (a.year as number) - (b.year as number));
+  }, [data, countryKey, dualMetricLeft, dualMetricRight]);
+
   if (!countryKey) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${tc.bg} ${tc.text}`}>
@@ -215,6 +312,80 @@ export default function CountryProfilePage() {
           </p>
         </div>
 
+        {/* Economic Summary */}
+        {economicSummary && (
+          <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-3">Economic Summary</h2>
+            <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              {displayName} has{' '}
+              {economicSummary.gdp !== null
+                ? <>GDP growth of <strong>{economicSummary.gdp.toFixed(1)}%</strong></>
+                : <>unavailable GDP data</>}
+              {economicSummary.inflation !== null && (
+                <>, {economicSummary.inflation < 3 ? 'moderate' : economicSummary.inflation < 6 ? 'elevated' : 'high'} inflation at <strong>{economicSummary.inflation.toFixed(1)}%</strong></>
+              )}
+              {economicSummary.debt !== null && (
+                <>, a debt-to-GDP ratio of <strong>{economicSummary.debt.toFixed(0)}%</strong></>
+              )}
+              {economicSummary.unemployment !== null && (
+                <>, and unemployment of <strong>{economicSummary.unemployment.toFixed(1)}%</strong></>
+              )}
+              . The economy shows <strong>{economicSummary.strength}</strong> growth relative to its peers.
+            </p>
+          </div>
+        )}
+
+        {/* Economic Health Score */}
+        {healthScore && (
+          <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-4">Economic Health Score</h2>
+            <div className="flex flex-col sm:flex-row items-center gap-8">
+              <div className="relative flex-shrink-0">
+                <div
+                  className="rounded-full flex items-center justify-center"
+                  style={{
+                    width: '180px',
+                    height: '180px',
+                    background: `conic-gradient(${
+                      healthScore.score >= 70 ? '#22c55e' : healthScore.score >= 40 ? '#eab308' : '#ef4444'
+                    } 0deg ${healthScore.score * 3.6}deg, ${isDarkMode ? '#374151' : '#e5e7eb'} ${healthScore.score * 3.6}deg 360deg)`,
+                  }}
+                >
+                  <div
+                    className={`rounded-full flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
+                    style={{ width: '140px', height: '140px' }}
+                  >
+                    <span className="text-4xl font-bold">{healthScore.score}</span>
+                    <span className={`text-xs ${tc.textSec}`}>out of 100</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                {healthScore.breakdown.map(b => {
+                  const ratio = b.points / b.max;
+                  return (
+                    <div key={b.label} className={`flex items-center justify-between p-3 rounded-lg border ${tc.card}`}>
+                      <span className={`text-sm ${tc.textSec}`}>{b.label}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 rounded-full overflow-hidden" style={{ backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }}>
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${ratio * 100}%`,
+                              backgroundColor: ratio >= 0.7 ? '#22c55e' : ratio >= 0.4 ? '#eab308' : '#ef4444',
+                            }}
+                          />
+                        </div>
+                        <span className="text-sm font-semibold w-10 text-right">{b.points}/{b.max}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Key Indicators */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Key Indicators</h2>
@@ -274,6 +445,111 @@ export default function CountryProfilePage() {
                       stroke={metricColors[i % metricColors.length]} dot={false} strokeWidth={2} />
                   );
                 })}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Peer Comparison Table */}
+        {peerComparisonData.length > 0 && (
+          <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-2">Peer Comparison</h2>
+            <p className={`text-sm mb-4 ${tc.textSec}`}>
+              {displayName} vs. regional average ({Object.entries(COUNTRY_REGIONS).find(([, c]) => c.includes(countryKey))?.[0] || 'Region'})
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <th className="text-left py-3 px-2 font-semibold">Metric</th>
+                    <th className="text-right py-3 px-2 font-semibold">{displayName}</th>
+                    <th className="text-right py-3 px-2 font-semibold">Regional Avg</th>
+                    <th className="text-right py-3 px-2 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {peerComparisonData.map(row => (
+                    <tr key={row.key} className={`border-b ${isDarkMode ? 'border-gray-700/50' : 'border-gray-100'}`}>
+                      <td className="py-3 px-2 font-medium">{row.label}</td>
+                      <td className="text-right py-3 px-2">
+                        {row.countryValue !== null ? formatMetricValue(row.key, row.countryValue) : 'N/A'}
+                      </td>
+                      <td className={`text-right py-3 px-2 ${tc.textSec}`}>
+                        {row.regionAvg !== null ? formatMetricValue(row.key, row.regionAvg) : 'N/A'}
+                      </td>
+                      <td className="text-right py-3 px-2">
+                        {row.diff !== null && row.favorable !== null ? (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                            row.favorable
+                              ? (isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700')
+                              : (isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-700')
+                          }`}>
+                            {row.favorable ? '▲ Above' : '▼ Below'} avg
+                          </span>
+                        ) : (
+                          <span className={tc.textMuted}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Multi-Metric Comparison (Dual Y-Axes) */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-4">Multi-Metric Comparison</h2>
+          <div className="flex flex-wrap gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <label className={`text-sm font-medium ${tc.textSec}`}>Left Axis:</label>
+              <select
+                value={dualMetricLeft}
+                onChange={e => setDualMetricLeft(e.target.value)}
+                className={`px-3 py-1.5 rounded-lg border text-sm ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                }`}
+              >
+                {METRIC_CATEGORIES.flatMap(c => c.metrics).map(m => (
+                  <option key={m.key} value={m.key}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className={`text-sm font-medium ${tc.textSec}`}>Right Axis:</label>
+              <select
+                value={dualMetricRight}
+                onChange={e => setDualMetricRight(e.target.value)}
+                className={`px-3 py-1.5 rounded-lg border text-sm ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                }`}
+              >
+                {METRIC_CATEGORIES.flatMap(c => c.metrics).map(m => (
+                  <option key={m.key} value={m.key}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="h-[350px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={dualAxisData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="left" stroke={metricColors[0]} tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="right" orientation="right" stroke={metricColors[1]} tick={{ fontSize: 11 }} />
+                <Tooltip contentStyle={tc.tooltip} />
+                <Legend />
+                <Line
+                  yAxisId="left" type="monotone" dataKey={dualMetricLeft}
+                  name={getMetricByKey(dualMetricLeft)?.label || dualMetricLeft}
+                  stroke={metricColors[0]} dot={false} strokeWidth={2}
+                />
+                <Line
+                  yAxisId="right" type="monotone" dataKey={dualMetricRight}
+                  name={getMetricByKey(dualMetricRight)?.label || dualMetricRight}
+                  stroke={metricColors[1]} dot={false} strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>

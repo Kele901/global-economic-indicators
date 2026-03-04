@@ -4,7 +4,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, ScatterChart, Scatter, Cell, ReferenceLine } from 'recharts';
 
 function getLatest(series: CountryData[] | undefined, country: string): number | null {
   if (!series) return null;
@@ -117,6 +117,83 @@ export default function DebtDashboardPage() {
       };
     });
   }, [data, selectedCountries]);
+
+  const fiscalSpaceData = useMemo(() => {
+    return scoreCards
+      .filter(sc => selectedCountries.includes(sc.country))
+      .map(sc => {
+        const debtGdp = sc.debt ?? 0;
+        const primaryAdj = sc.budget ?? 0;
+        const space = Math.max(0, 100 - debtGdp + primaryAdj * 2);
+        return {
+          country: COUNTRY_DISPLAY_NAMES[sc.country as CountryKey] || sc.country,
+          space: parseFloat(space.toFixed(1)),
+          fill: COUNTRY_COLORS[sc.country as CountryKey] || '#6b7280',
+        };
+      })
+      .sort((a, b) => b.space - a.space);
+  }, [scoreCards, selectedCountries]);
+
+  const debtServiceRanking = useMemo(() => {
+    return scoreCards
+      .filter(sc => sc.debtService !== null)
+      .map(sc => ({
+        country: COUNTRY_DISPLAY_NAMES[sc.country as CountryKey] || sc.country,
+        debtService: sc.debtService!,
+        fill: sc.debtService! >= 15 ? '#ef4444' : sc.debtService! >= 5 ? '#eab308' : '#22c55e',
+      }))
+      .sort((a, b) => b.debtService - a.debtService);
+  }, [scoreCards]);
+
+  const budgetTrendData = useMemo(() => {
+    if (!data?.budgetBalance) return [];
+    return data.budgetBalance
+      .filter(r => Number(r.year) >= 2000)
+      .map(row => {
+        const point: Record<string, number | string> = { year: row.year };
+        for (const ck of selectedCountries) {
+          const v = Number(row[ck]);
+          if (!isNaN(v)) point[ck] = v;
+        }
+        return point;
+      });
+  }, [data, selectedCountries]);
+
+  const debtVsGrowthData = useMemo(() => {
+    return scoreCards
+      .filter(sc => sc.debt !== null && sc.growth !== null)
+      .map(sc => ({
+        country: COUNTRY_DISPLAY_NAMES[sc.country as CountryKey] || sc.country,
+        debt: sc.debt!,
+        growth: sc.growth!,
+        fill: COUNTRY_COLORS[sc.country as CountryKey] || '#6b7280',
+      }));
+  }, [scoreCards]);
+
+  const riskCards = useMemo(() => {
+    return scoreCards
+      .filter(sc => selectedCountries.includes(sc.country))
+      .map(sc => {
+        const debtRisk = sc.debt === null ? 'gray' : sc.debt < 60 ? 'green' : sc.debt < 90 ? 'yellow' : 'red';
+        const dsRisk = sc.debtService === null ? 'gray' : sc.debtService < 5 ? 'green' : sc.debtService < 15 ? 'yellow' : 'red';
+        const budgetRisk = sc.budget === null ? 'gray' : sc.budget >= 0 ? 'green' : sc.budget >= -3 ? 'yellow' : 'red';
+        const rgDiff = (sc.interest !== null && sc.growth !== null) ? sc.interest - sc.growth : null;
+        const rgRisk = rgDiff === null ? 'gray' : rgDiff < 0 ? 'green' : rgDiff < 2 ? 'yellow' : 'red';
+        return {
+          country: sc.country,
+          displayName: COUNTRY_DISPLAY_NAMES[sc.country as CountryKey] || sc.country,
+          score: sc.score,
+          label: sc.label,
+          scoreColor: sc.color,
+          risks: [
+            { name: 'Debt Level', level: debtRisk, value: sc.debt !== null ? `${sc.debt.toFixed(0)}%` : 'N/A' },
+            { name: 'Debt Service', level: dsRisk, value: sc.debtService !== null ? `${sc.debtService.toFixed(1)}%` : 'N/A' },
+            { name: 'Budget', level: budgetRisk, value: sc.budget !== null ? `${sc.budget.toFixed(1)}%` : 'N/A' },
+            { name: 'r − g', level: rgRisk, value: rgDiff !== null ? `${rgDiff.toFixed(1)}%` : 'N/A' },
+          ],
+        };
+      });
+  }, [scoreCards, selectedCountries]);
 
   if (loading) {
     return (
@@ -281,6 +358,129 @@ export default function DebtDashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </div>
+        </div>
+
+        {/* Fiscal Space Indicator */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Fiscal Space Indicator</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Estimated fiscal room (higher = more headroom) based on debt level and primary balance</p>
+          <div className="h-[350px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={fiscalSpaceData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="country" stroke={tc.axis} tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={60} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(value: number) => [`${value}`, 'Fiscal Space']} />
+                <Bar dataKey="space" name="Fiscal Space" radius={[4, 4, 0, 0]}>
+                  {fiscalSpaceData.map((entry, i) => (
+                    <Cell key={i} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Debt Service Burden Chart */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Debt Service Burden</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Debt service as % of government revenue — sorted highest to lowest</p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={debtServiceRanking} layout="vertical" margin={{ top: 5, right: 20, left: 80, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <YAxis type="category" dataKey="country" stroke={tc.axis} tick={{ fontSize: 11 }} width={75} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(value: number) => [`${value.toFixed(1)}%`, 'Debt Service']} />
+                <ReferenceLine x={15} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'High', fill: '#ef4444', fontSize: 10 }} />
+                <ReferenceLine x={5} stroke="#eab308" strokeDasharray="3 3" label={{ value: 'Moderate', fill: '#eab308', fontSize: 10 }} />
+                <Bar dataKey="debtService" name="Debt Service %" radius={[0, 4, 4, 0]}>
+                  {debtServiceRanking.map((entry, i) => (
+                    <Cell key={i} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Budget Balance Trend */}
+          <div className={`rounded-xl border p-6 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-2">Budget Balance Trend</h2>
+            <p className={`text-xs mb-4 ${tc.textSec}`}>Budget balance (% of GDP) over time for selected countries</p>
+            <div className="h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={budgetTrendData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                  <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
+                  <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                  <Tooltip contentStyle={tc.tooltip} />
+                  <Legend />
+                  <ReferenceLine y={0} stroke={tc.axis} strokeDasharray="3 3" />
+                  {selectedCountries.map(ck => (
+                    <Line key={ck} type="monotone" dataKey={ck} name={COUNTRY_DISPLAY_NAMES[ck as CountryKey]}
+                      stroke={COUNTRY_COLORS[ck as CountryKey]} dot={false} strokeWidth={2} connectNulls />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Debt vs Growth Scatter */}
+          <div className={`rounded-xl border p-6 ${tc.card}`}>
+            <h2 className="text-xl font-semibold mb-2">Debt vs Growth Scatter</h2>
+            <p className={`text-xs mb-4 ${tc.textSec}`}>Debt-to-GDP (x) vs GDP growth (y) — each dot is a country</p>
+            <div className="h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                  <XAxis type="number" dataKey="debt" name="Debt/GDP" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                  <YAxis type="number" dataKey="growth" name="GDP Growth" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                  <Tooltip contentStyle={tc.tooltip} cursor={{ strokeDasharray: '3 3' }}
+                    formatter={(value: number, name: string) => [`${value.toFixed(1)}%`, name === 'debt' ? 'Debt/GDP' : 'GDP Growth']}
+                    labelFormatter={() => ''} />
+                  <ReferenceLine x={60} stroke="#eab308" strokeDasharray="3 3" />
+                  <ReferenceLine x={90} stroke="#ef4444" strokeDasharray="3 3" />
+                  <Scatter name="Countries" data={debtVsGrowthData}>
+                    {debtVsGrowthData.map((entry, i) => (
+                      <Cell key={i} fill={entry.fill} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Risk Summary Cards */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-4">Risk Summary</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {riskCards.map(rc => (
+              <div key={rc.country} className={`rounded-lg border p-4 ${tc.card}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">{rc.displayName}</h3>
+                  <span className={`text-sm font-bold ${rc.scoreColor}`}>{rc.score} — {rc.label}</span>
+                </div>
+                <div className="space-y-2">
+                  {rc.risks.map(risk => (
+                    <div key={risk.name} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                          risk.level === 'green' ? 'bg-green-500' :
+                          risk.level === 'yellow' ? 'bg-yellow-500' :
+                          risk.level === 'red' ? 'bg-red-500' : 'bg-gray-400'
+                        }`} />
+                        <span className={tc.textSec}>{risk.name}</span>
+                      </div>
+                      <span className="font-medium">{risk.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
