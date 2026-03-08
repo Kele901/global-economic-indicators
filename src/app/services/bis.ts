@@ -249,6 +249,129 @@ export async function fetchJapanPolicyRatesBIS(): Promise<BISDataPoint[]> {
 export function clearBISCache(): void {
   clientCache.delete('bis_policy_rates');
   clientCache.delete('bis_japan_policy_rates');
+  clientCache.delete('bis_reer_data');
   console.log('✅ Cleared BIS cached data');
+}
+
+// REER Data Types
+export interface REERData {
+  currency: string;
+  current: number;
+  historicalAverage: number;
+  deviation: number;
+  isOvervalued: boolean;
+  trend: 'appreciating' | 'depreciating' | 'stable';
+  lastUpdated: string;
+}
+
+const CURRENCY_TO_BIS: Record<string, string> = {
+  USD: 'US',
+  EUR: 'XM',
+  JPY: 'JP',
+  GBP: 'GB',
+  CHF: 'CH',
+  CAD: 'CA',
+  AUD: 'AU',
+  NZD: 'NZ',
+  CNY: 'CN',
+  SEK: 'SE',
+  NOK: 'NO',
+  INR: 'IN',
+  BRL: 'BR',
+  MXN: 'MX',
+  ZAR: 'ZA',
+  KRW: 'KR',
+};
+
+/**
+ * Fetch Real Effective Exchange Rate data from BIS
+ */
+export async function fetchREERData(): Promise<REERData[]> {
+  const cacheKey = 'bis_reer_data';
+  const cached = clientCache.get<REERData[]>(cacheKey);
+  
+  if (cached) {
+    console.log('✅ Using cached BIS REER data');
+    return cached;
+  }
+  
+  console.log('📊 Fetching REER data from BIS...');
+  
+  const results: REERData[] = [];
+  
+  for (const [currency, bisCode] of Object.entries(CURRENCY_TO_BIS)) {
+    try {
+      const url = `/api/bis?dataset=${BIS_DATASETS.EXCHANGE_RATES}&country=${bisCode}&startPeriod=2010`;
+      
+      const response = await axios.get(url, { timeout: 15000 });
+      
+      if (response.data?.data?.dataSets?.[0]?.series) {
+        const series = response.data.data.dataSets[0].series;
+        const structure = response.data.data.structure;
+        const timeDimension = structure.dimensions?.observation?.find((d: any) => 
+          d.id === 'TIME_PERIOD' || d.id === 'time'
+        );
+        
+        if (timeDimension?.values) {
+          const values: { period: string; value: number }[] = [];
+          
+          Object.entries(series).forEach(([key, seriesData]: [string, any]) => {
+            if (seriesData.observations) {
+              Object.entries(seriesData.observations).forEach(([timeIndex, obs]: [string, any]) => {
+                const value = obs[0];
+                if (value !== null && !isNaN(value)) {
+                  const period = timeDimension.values[parseInt(timeIndex)]?.id;
+                  if (period) {
+                    values.push({ period, value: Number(value) });
+                  }
+                }
+              });
+            }
+          });
+          
+          if (values.length > 0) {
+            values.sort((a, b) => b.period.localeCompare(a.period));
+            
+            const current = values[0].value;
+            const historicalAverage = values.reduce((sum, v) => sum + v.value, 0) / values.length;
+            const deviation = ((current - historicalAverage) / historicalAverage) * 100;
+            
+            const recent = values.slice(0, 3);
+            let trend: 'appreciating' | 'depreciating' | 'stable' = 'stable';
+            if (recent.length >= 2) {
+              const change = recent[0].value - recent[recent.length - 1].value;
+              if (change > 1) trend = 'appreciating';
+              else if (change < -1) trend = 'depreciating';
+            }
+            
+            results.push({
+              currency,
+              current: Math.round(current * 10) / 10,
+              historicalAverage: Math.round(historicalAverage * 10) / 10,
+              deviation: Math.round(deviation * 10) / 10,
+              isOvervalued: deviation > 0,
+              trend,
+              lastUpdated: values[0].period
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to fetch REER for ${currency}:`, error);
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  clientCache.set(cacheKey, results, 1000 * 60 * 60 * 24);
+  
+  console.log(`✅ Fetched REER data for ${results.length} currencies`);
+  
+  return results;
+}
+
+export function clearREERCache(): void {
+  clientCache.delete('bis_reer_data');
+  console.log('✅ Cleared REER cache');
 }
 

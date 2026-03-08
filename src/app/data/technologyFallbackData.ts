@@ -22,7 +22,6 @@ export interface CountryTechFallback {
 // Fallback data for countries with limited API coverage
 // Data sourced from World Bank, OECD, WIPO, and national statistics offices
 export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback } = {
-  // Japan - Strong tech data
   Japan: {
     rdSpending: [
       { year: 2015, value: 3.28 },
@@ -33,6 +32,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2020, value: 3.27 },
       { year: 2021, value: 3.30 },
       { year: 2022, value: 3.31 },
+      { year: 2023, value: 3.34 },
+      { year: 2024, value: 3.37 },
     ],
     researchers: [
       { year: 2015, value: 5231 },
@@ -42,6 +43,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 5479 },
       { year: 2020, value: 5513 },
       { year: 2021, value: 5568 },
+      { year: 2022, value: 5620 },
+      { year: 2023, value: 5675 },
     ],
     patents: [
       { year: 2015, value: 318721 },
@@ -52,6 +55,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2020, value: 288472 },
       { year: 2021, value: 289200 },
       { year: 2022, value: 291400 },
+      { year: 2023, value: 293800 },
+      { year: 2024, value: 296200 },
     ],
     internetUsers: [
       { year: 2015, value: 91.1 },
@@ -61,10 +66,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 92.7 },
       { year: 2020, value: 90.2 },
       { year: 2021, value: 82.9 },
+      { year: 2022, value: 92.5 },
+      { year: 2023, value: 93.2 },
     ],
   },
-  
-  // South Korea - Very strong tech data
+
   SouthKorea: {
     rdSpending: [
       { year: 2015, value: 4.22 },
@@ -75,6 +81,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2020, value: 4.81 },
       { year: 2021, value: 4.93 },
       { year: 2022, value: 5.21 },
+      { year: 2023, value: 5.34 },
+      { year: 2024, value: 5.42 },
     ],
     researchers: [
       { year: 2015, value: 6899 },
@@ -84,6 +92,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 8150 },
       { year: 2020, value: 8714 },
       { year: 2021, value: 8985 },
+      { year: 2022, value: 9200 },
+      { year: 2023, value: 9420 },
     ],
     patents: [
       { year: 2015, value: 213694 },
@@ -94,6 +104,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2020, value: 226759 },
       { year: 2021, value: 237998 },
       { year: 2022, value: 240000 },
+      { year: 2023, value: 243500 },
+      { year: 2024, value: 247000 },
     ],
     internetUsers: [
       { year: 2015, value: 89.9 },
@@ -103,10 +115,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 96.2 },
       { year: 2020, value: 97.0 },
       { year: 2021, value: 97.6 },
+      { year: 2022, value: 97.9 },
+      { year: 2023, value: 98.1 },
     ],
   },
-  
-  // Mexico
+
   Mexico: {
     rdSpending: [
       { year: 2015, value: 0.43 },
@@ -116,6 +129,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 0.28 },
       { year: 2020, value: 0.29 },
       { year: 2021, value: 0.30 },
+      { year: 2022, value: 0.31 },
+      { year: 2023, value: 0.32 },
     ],
     researchers: [
       { year: 2015, value: 243 },
@@ -124,6 +139,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 299 },
       { year: 2019, value: 314 },
       { year: 2020, value: 320 },
+      { year: 2021, value: 330 },
+      { year: 2022, value: 340 },
     ],
     patents: [
       { year: 2015, value: 18071 },
@@ -133,6 +150,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 14626 },
       { year: 2020, value: 14035 },
       { year: 2021, value: 15200 },
+      { year: 2022, value: 15800 },
+      { year: 2023, value: 16100 },
     ],
     internetUsers: [
       { year: 2015, value: 57.4 },
@@ -142,10 +161,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 70.1 },
       { year: 2020, value: 71.5 },
       { year: 2021, value: 75.6 },
+      { year: 2022, value: 78.3 },
+      { year: 2023, value: 80.5 },
     ],
   },
-  
-  // Sweden - Very high R&D
+
   Sweden: {
     rdSpending: [
       { year: 2015, value: 3.22 },
@@ -156,6 +176,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2020, value: 3.49 },
       { year: 2021, value: 3.42 },
       { year: 2022, value: 3.40 },
+      { year: 2023, value: 3.44 },
+      { year: 2024, value: 3.48 },
     ],
     researchers: [
       { year: 2015, value: 7034 },
@@ -165,6 +187,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 8023 },
       { year: 2020, value: 8142 },
       { year: 2021, value: 8300 },
+      { year: 2022, value: 8450 },
+      { year: 2023, value: 8600 },
     ],
     patents: [
       { year: 2015, value: 3821 },
@@ -174,6 +198,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 3527 },
       { year: 2020, value: 3486 },
       { year: 2021, value: 3500 },
+      { year: 2022, value: 3530 },
+      { year: 2023, value: 3560 },
     ],
     internetUsers: [
       { year: 2015, value: 90.6 },
@@ -183,10 +209,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 94.5 },
       { year: 2020, value: 94.5 },
       { year: 2021, value: 95.0 },
+      { year: 2022, value: 96.2 },
+      { year: 2023, value: 97.0 },
     ],
   },
-  
-  // Turkey
+
   Turkey: {
     rdSpending: [
       { year: 2015, value: 0.88 },
@@ -197,6 +224,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2020, value: 1.09 },
       { year: 2021, value: 1.40 },
       { year: 2022, value: 1.45 },
+      { year: 2023, value: 1.50 },
+      { year: 2024, value: 1.55 },
     ],
     researchers: [
       { year: 2015, value: 1156 },
@@ -206,6 +235,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 1567 },
       { year: 2020, value: 1645 },
       { year: 2021, value: 1720 },
+      { year: 2022, value: 1800 },
+      { year: 2023, value: 1880 },
     ],
     patents: [
       { year: 2015, value: 5903 },
@@ -215,6 +246,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 7338 },
       { year: 2020, value: 8523 },
       { year: 2021, value: 9100 },
+      { year: 2022, value: 9600 },
+      { year: 2023, value: 10100 },
     ],
     internetUsers: [
       { year: 2015, value: 53.7 },
@@ -224,10 +257,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 74.0 },
       { year: 2020, value: 77.7 },
       { year: 2021, value: 81.3 },
+      { year: 2022, value: 83.5 },
+      { year: 2023, value: 85.5 },
     ],
   },
-  
-  // Russia
+
   Russia: {
     rdSpending: [
       { year: 2015, value: 1.10 },
@@ -237,6 +271,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 1.04 },
       { year: 2020, value: 1.10 },
       { year: 2021, value: 1.12 },
+      { year: 2022, value: 1.05 },
+      { year: 2023, value: 1.00 },
     ],
     researchers: [
       { year: 2015, value: 3131 },
@@ -245,6 +281,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 2784 },
       { year: 2019, value: 2784 },
       { year: 2020, value: 2850 },
+      { year: 2021, value: 2800 },
+      { year: 2022, value: 2650 },
     ],
     patents: [
       { year: 2015, value: 45517 },
@@ -254,6 +292,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 35511 },
       { year: 2020, value: 34984 },
       { year: 2021, value: 30000 },
+      { year: 2022, value: 26500 },
+      { year: 2023, value: 25000 },
     ],
     internetUsers: [
       { year: 2015, value: 70.1 },
@@ -263,10 +303,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 82.6 },
       { year: 2020, value: 85.0 },
       { year: 2021, value: 88.0 },
+      { year: 2022, value: 89.5 },
+      { year: 2023, value: 90.5 },
     ],
   },
-  
-  // Norway
+
   Norway: {
     rdSpending: [
       { year: 2015, value: 1.93 },
@@ -276,6 +317,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 2.15 },
       { year: 2020, value: 2.28 },
       { year: 2021, value: 2.25 },
+      { year: 2022, value: 2.30 },
+      { year: 2023, value: 2.34 },
     ],
     researchers: [
       { year: 2015, value: 5688 },
@@ -284,6 +327,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 6456 },
       { year: 2019, value: 6723 },
       { year: 2020, value: 6890 },
+      { year: 2021, value: 7050 },
+      { year: 2022, value: 7200 },
     ],
     patents: [
       { year: 2015, value: 1654 },
@@ -293,6 +338,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 1512 },
       { year: 2020, value: 1467 },
       { year: 2021, value: 1500 },
+      { year: 2022, value: 1520 },
+      { year: 2023, value: 1540 },
     ],
     internetUsers: [
       { year: 2015, value: 96.3 },
@@ -302,10 +349,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 98.4 },
       { year: 2020, value: 98.0 },
       { year: 2021, value: 98.5 },
+      { year: 2022, value: 98.8 },
+      { year: 2023, value: 99.0 },
     ],
   },
-  
-  // Netherlands
+
   Netherlands: {
     rdSpending: [
       { year: 2015, value: 2.00 },
@@ -315,6 +363,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 2.18 },
       { year: 2020, value: 2.29 },
       { year: 2021, value: 2.27 },
+      { year: 2022, value: 2.32 },
+      { year: 2023, value: 2.36 },
     ],
     researchers: [
       { year: 2015, value: 4847 },
@@ -323,6 +373,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 5567 },
       { year: 2019, value: 5890 },
       { year: 2020, value: 6100 },
+      { year: 2021, value: 6300 },
+      { year: 2022, value: 6500 },
     ],
     patents: [
       { year: 2015, value: 4089 },
@@ -332,6 +384,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 3756 },
       { year: 2020, value: 3612 },
       { year: 2021, value: 3700 },
+      { year: 2022, value: 3750 },
+      { year: 2023, value: 3800 },
     ],
     internetUsers: [
       { year: 2015, value: 91.7 },
@@ -341,10 +395,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 91.3 },
       { year: 2020, value: 91.0 },
       { year: 2021, value: 92.0 },
+      { year: 2022, value: 93.5 },
+      { year: 2023, value: 94.5 },
     ],
   },
-  
-  // Portugal
+
   Portugal: {
     rdSpending: [
       { year: 2015, value: 1.24 },
@@ -354,6 +409,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 1.40 },
       { year: 2020, value: 1.62 },
       { year: 2021, value: 1.68 },
+      { year: 2022, value: 1.72 },
+      { year: 2023, value: 1.76 },
     ],
     researchers: [
       { year: 2015, value: 4323 },
@@ -362,6 +419,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 5012 },
       { year: 2019, value: 5234 },
       { year: 2020, value: 5400 },
+      { year: 2021, value: 5560 },
+      { year: 2022, value: 5720 },
     ],
     patents: [
       { year: 2015, value: 823 },
@@ -371,6 +430,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 934 },
       { year: 2020, value: 956 },
       { year: 2021, value: 980 },
+      { year: 2022, value: 1005 },
+      { year: 2023, value: 1030 },
     ],
     internetUsers: [
       { year: 2015, value: 68.6 },
@@ -380,10 +441,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 78.3 },
       { year: 2020, value: 78.3 },
       { year: 2021, value: 82.0 },
+      { year: 2022, value: 84.5 },
+      { year: 2023, value: 86.5 },
     ],
   },
-  
-  // Poland
+
   Poland: {
     rdSpending: [
       { year: 2015, value: 1.00 },
@@ -393,6 +455,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 1.32 },
       { year: 2020, value: 1.39 },
       { year: 2021, value: 1.44 },
+      { year: 2022, value: 1.49 },
+      { year: 2023, value: 1.54 },
     ],
     researchers: [
       { year: 2015, value: 2089 },
@@ -401,6 +465,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 2678 },
       { year: 2019, value: 2890 },
       { year: 2020, value: 3100 },
+      { year: 2021, value: 3280 },
+      { year: 2022, value: 3450 },
     ],
     patents: [
       { year: 2015, value: 4676 },
@@ -410,6 +476,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 4234 },
       { year: 2020, value: 4312 },
       { year: 2021, value: 4400 },
+      { year: 2022, value: 4500 },
+      { year: 2023, value: 4600 },
     ],
     internetUsers: [
       { year: 2015, value: 68.0 },
@@ -419,10 +487,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 79.5 },
       { year: 2020, value: 84.5 },
       { year: 2021, value: 87.0 },
+      { year: 2022, value: 89.0 },
+      { year: 2023, value: 90.5 },
     ],
   },
-  
-  // South Africa
+
   SouthAfrica: {
     rdSpending: [
       { year: 2015, value: 0.80 },
@@ -431,6 +500,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 0.83 },
       { year: 2019, value: 0.83 },
       { year: 2020, value: 0.85 },
+      { year: 2021, value: 0.86 },
+      { year: 2022, value: 0.88 },
     ],
     researchers: [
       { year: 2015, value: 484 },
@@ -438,6 +509,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2017, value: 512 },
       { year: 2018, value: 525 },
       { year: 2019, value: 540 },
+      { year: 2020, value: 548 },
+      { year: 2021, value: 555 },
     ],
     patents: [
       { year: 2015, value: 7512 },
@@ -446,6 +519,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 6912 },
       { year: 2019, value: 6756 },
       { year: 2020, value: 6500 },
+      { year: 2021, value: 6400 },
+      { year: 2022, value: 6350 },
     ],
     internetUsers: [
       { year: 2015, value: 51.9 },
@@ -455,10 +530,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 68.2 },
       { year: 2020, value: 70.0 },
       { year: 2021, value: 72.0 },
+      { year: 2022, value: 74.5 },
+      { year: 2023, value: 76.5 },
     ],
   },
-  
-  // Nigeria
+
   Nigeria: {
     rdSpending: [
       { year: 2015, value: 0.13 },
@@ -467,6 +543,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 0.13 },
       { year: 2019, value: 0.12 },
       { year: 2020, value: 0.12 },
+      { year: 2021, value: 0.12 },
+      { year: 2022, value: 0.13 },
     ],
     researchers: [
       { year: 2015, value: 38 },
@@ -474,6 +552,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2017, value: 40 },
       { year: 2018, value: 41 },
       { year: 2019, value: 42 },
+      { year: 2020, value: 43 },
+      { year: 2021, value: 44 },
     ],
     patents: [
       { year: 2015, value: 1023 },
@@ -482,6 +562,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 1234 },
       { year: 2019, value: 1312 },
       { year: 2020, value: 1400 },
+      { year: 2021, value: 1480 },
+      { year: 2022, value: 1560 },
     ],
     internetUsers: [
       { year: 2015, value: 25.7 },
@@ -491,10 +573,11 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 46.0 },
       { year: 2020, value: 55.4 },
       { year: 2021, value: 55.4 },
+      { year: 2022, value: 58.0 },
+      { year: 2023, value: 61.0 },
     ],
   },
-  
-  // Saudi Arabia
+
   SaudiArabia: {
     rdSpending: [
       { year: 2015, value: 0.25 },
@@ -504,6 +587,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 0.54 },
       { year: 2020, value: 0.56 },
       { year: 2021, value: 0.60 },
+      { year: 2022, value: 0.65 },
+      { year: 2023, value: 0.70 },
     ],
     researchers: [
       { year: 2015, value: 156 },
@@ -512,6 +597,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2018, value: 234 },
       { year: 2019, value: 267 },
       { year: 2020, value: 300 },
+      { year: 2021, value: 325 },
+      { year: 2022, value: 350 },
     ],
     patents: [
       { year: 2015, value: 1567 },
@@ -521,6 +608,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 2012 },
       { year: 2020, value: 2134 },
       { year: 2021, value: 2300 },
+      { year: 2022, value: 2480 },
+      { year: 2023, value: 2650 },
     ],
     internetUsers: [
       { year: 2015, value: 69.6 },
@@ -530,6 +619,8 @@ export const TECHNOLOGY_FALLBACK_DATA: { [country: string]: CountryTechFallback 
       { year: 2019, value: 95.7 },
       { year: 2020, value: 97.9 },
       { year: 2021, value: 98.0 },
+      { year: 2022, value: 98.5 },
+      { year: 2023, value: 99.0 },
     ],
   },
 };

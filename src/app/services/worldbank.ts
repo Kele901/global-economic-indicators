@@ -108,6 +108,9 @@ const INDICATORS = {
   
   // Digital Economy Indicators
   ICT_SERVICE_EXPORTS: 'BX.GSR.CCIS.ZS', // ICT service exports (% of service exports)
+
+  // Live replacements for formerly static-only datasets
+  STEM_GRADUATES: 'SE.TER.GRAD.SC.ZS', // STEM graduates (% of total tertiary graduates)
 };
 
 // Country codes for major economies
@@ -1407,12 +1410,12 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       fetchIndicatorData(INDICATORS.IP_PAYMENTS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.INTERNET_USERS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.MOBILE_SUBSCRIPTIONS, COUNTRY_CODES, !forceRefresh),
-      // New Digital Infrastructure indicators
       fetchIndicatorData(INDICATORS.BROADBAND_SUBSCRIPTIONS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.SECURE_SERVERS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.ICT_GOODS_IMPORTS, COUNTRY_CODES, !forceRefresh),
-      // New Digital Economy indicator
-      fetchIndicatorData(INDICATORS.ICT_SERVICE_EXPORTS, COUNTRY_CODES, !forceRefresh)
+      fetchIndicatorData(INDICATORS.ICT_SERVICE_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.NEW_BUSINESS_DENSITY, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.STEM_GRADUATES, COUNTRY_CODES, !forceRefresh),
     ]);
 
     const [
@@ -1429,11 +1432,12 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       ipPaymentsResult,
       internetUsersResult,
       mobileSubsResult,
-      // New results
       broadbandResult,
       secureServersResult,
       ictImportsResult,
-      ictServiceExportsResult
+      ictServiceExportsResult,
+      newBusinessDensityResult,
+      stemGraduatesResult,
     ] = results;
 
     const indicatorNames = [
@@ -1443,7 +1447,7 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       'Scientific Publications', 'IP Receipts', 'IP Payments',
       'Internet Users', 'Mobile Subscriptions',
       'Broadband Subscriptions', 'Secure Servers', 'ICT Goods Imports',
-      'ICT Service Exports'
+      'ICT Service Exports', 'New Business Density', 'STEM Graduates'
     ];
 
     let failedCount = 0;
@@ -1851,35 +1855,122 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
     let broadbandData = broadbandResult.status === 'fulfilled' ? broadbandResult.value : [];
     broadbandData = mergeITUData(broadbandData, ituTechData.fixedBroadband);
 
-    // Convert static data to CountryData format
-    console.log('🔬 Converting static data to CountryData format...');
+    // Helper: merge static data into live data — live values take precedence, static fills gaps
+    const mergeStaticIntoLive = (
+      liveData: CountryData[],
+      staticData: CountryData[]
+    ): CountryData[] => {
+      const dataMap = new Map<number, CountryData>();
+
+      // Start with static data as base
+      staticData.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      // Overlay live data — live values always win
+      liveData.forEach(item => {
+        const existing = dataMap.get(item.year) || { year: item.year };
+        Object.entries(item).forEach(([key, value]) => {
+          if (key !== 'year' && value !== undefined && value !== null) {
+            existing[key] = value;
+          }
+        });
+        dataMap.set(item.year, existing);
+      });
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Helper: build tech employment data from researchers + technicians (per million) as proxy
+    // Converts per-million-population to approximate % of workforce (dividing by ~5000 to normalize)
+    const buildTechEmploymentData = (
+      researchersData: CountryData[],
+      techniciansData: CountryData[],
+      staticFallback: CountryData[]
+    ): CountryData[] => {
+      const dataMap = new Map<number, CountryData>();
+
+      // Start with static fallback
+      staticFallback.forEach(item => {
+        dataMap.set(item.year, { ...item });
+      });
+
+      // Merge researchers + technicians as proxy (per million -> approx % of workforce)
+      const allYears = new Set<number>();
+      researchersData.forEach(item => allYears.add(item.year));
+      techniciansData.forEach(item => allYears.add(item.year));
+
+      const researchersMap = new Map(researchersData.map(d => [d.year, d]));
+      const techniciansMap = new Map(techniciansData.map(d => [d.year, d]));
+
+      allYears.forEach(year => {
+        const res = researchersMap.get(year);
+        const tech = techniciansMap.get(year);
+        const existing = dataMap.get(year) || { year };
+
+        if (res || tech) {
+          const countries = new Set<string>();
+          if (res) Object.keys(res).filter(k => k !== 'year').forEach(c => countries.add(c));
+          if (tech) Object.keys(tech).filter(k => k !== 'year').forEach(c => countries.add(c));
+
+          countries.forEach(country => {
+            const resVal = res ? Number(res[country]) || 0 : 0;
+            const techVal = tech ? Number(tech[country]) || 0 : 0;
+            const combined = resVal + techVal;
+            if (combined > 0 && (existing[country] === undefined || existing[country] === null)) {
+              existing[country] = parseFloat((combined / 5000 * 100).toFixed(1));
+            }
+          });
+        }
+
+        dataMap.set(year, existing);
+      });
+
+      return Array.from(dataMap.values()).sort((a, b) => a.year - b.year);
+    };
+
+    // Build live + static hybrid data for datasets that now have API sources
+    console.log('🔬 Building hybrid live+static data...');
+
+    // Startup Density: World Bank IC.BUS.NDNS.ZS with static fallback
+    const liveStartupDensity = newBusinessDensityResult.status === 'fulfilled' ? newBusinessDensityResult.value : [];
+    const staticStartupDensity = convertToCountryData(startupDensityData);
+    const startupDensityCountryData = mergeStaticIntoLive(liveStartupDensity, staticStartupDensity);
+    console.log('   - startupDensity: live=' + liveStartupDensity.length + ' years, merged=' + startupDensityCountryData.length + ' years');
+
+    // STEM Graduates: World Bank SE.TER.GRAD.SC.ZS with static fallback
+    const liveStemGraduates = stemGraduatesResult.status === 'fulfilled' ? stemGraduatesResult.value : [];
+    const staticStemGraduates = convertToCountryData(stemGraduatesData);
+    const stemGraduatesCountryData = mergeStaticIntoLive(liveStemGraduates, staticStemGraduates);
+    console.log('   - stemGraduates: live=' + liveStemGraduates.length + ' years, merged=' + stemGraduatesCountryData.length + ' years');
+
+    // Tech Employment: combine live researchers + technicians per million as proxy, with static fallback
+    const liveResearchers = researchersResult.status === 'fulfilled' ? researchersResult.value : [];
+    const liveTechnicians = techniciansResult.status === 'fulfilled' ? techniciansResult.value : [];
+    const staticTechEmployment = convertToCountryData(techEmploymentData);
+    const techEmploymentCountryData = buildTechEmploymentData(liveResearchers, liveTechnicians, staticTechEmployment);
+    console.log('   - techEmployment: merged=' + techEmploymentCountryData.length + ' years');
+
+    // Convert remaining static-only data to CountryData format
+    console.log('🔬 Converting remaining static data to CountryData format...');
     const vcFundingCountryData = convertToCountryData(vcFundingData);
-    console.log('   - vcFunding:', vcFundingCountryData.length, 'years', vcFundingCountryData[0] ? Object.keys(vcFundingCountryData[0]).filter(k => k !== 'year').slice(0, 5) : 'empty');
-    
+    console.log('   - vcFunding:', vcFundingCountryData.length, 'years');
+
     const aiPatentCountryData = convertToCountryData(aiPatentData);
-    console.log('   - aiPatents:', aiPatentCountryData.length, 'years', aiPatentCountryData[0] ? Object.keys(aiPatentCountryData[0]).filter(k => k !== 'year').slice(0, 5) : 'empty');
-    
+    console.log('   - aiPatents:', aiPatentCountryData.length, 'years');
+
     const ecommerceCountryData = convertToCountryData(ecommerceAdoptionData);
-    console.log('   - ecommerce:', ecommerceCountryData.length, 'years', ecommerceCountryData[0] ? Object.keys(ecommerceCountryData[0]).filter(k => k !== 'year').slice(0, 5) : 'empty');
-    
+    console.log('   - ecommerce:', ecommerceCountryData.length, 'years');
+
     const digitalPaymentCountryData = convertToCountryData(digitalPaymentData);
     console.log('   - digitalPayments:', digitalPaymentCountryData.length, 'years');
-    
-    const stemGraduatesCountryData = convertToCountryData(stemGraduatesData);
-    console.log('   - stemGraduates:', stemGraduatesCountryData.length, 'years');
-    
-    const techEmploymentCountryData = convertToCountryData(techEmploymentData);
-    console.log('   - techEmployment:', techEmploymentCountryData.length, 'years');
-    
-    const startupDensityCountryData = convertToCountryData(startupDensityData);
-    console.log('   - startupDensity:', startupDensityCountryData.length, 'years');
-    
+
     // Convert unicorn data (single year snapshot) to CountryData format
     const unicornCountryData: CountryData[] = [{
-      year: 2024,
+      year: 2025,
       ...unicornData
     }];
-    console.log('   - unicorns:', unicornCountryData.length, 'years', Object.keys(unicornCountryData[0]).filter(k => k !== 'year').slice(0, 5));
+    console.log('   - unicorns:', unicornCountryData.length, 'years');
 
     const technologyData: TechnologyData = {
       patentApplicationsResident: patentData,
@@ -1931,12 +2022,14 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
     console.log('🔬 ========================================');
     console.log('🔬 Technology Data Fetch Complete!');
     console.log('🔬 Data Sources Used:');
-    console.log('   - World Bank API (primary)');
-    console.log('   - FRED API (US-specific)');
+    console.log('   - World Bank API (primary: patents, R&D, trade, startup density, STEM grads)');
+    console.log('   - FRED API (US-specific tech data)');
     console.log('   - WIPO (global patents up to 2023)');
     console.log('   - Eurostat (EU countries up to 2023)');
     console.log('   - ITU (internet/mobile up to 2024)');
-    console.log('   - Fallback data (historical verified data)');
+    console.log('   - Live: IC.BUS.NDNS.ZS (startup density), SE.TER.GRAD.SC.ZS (STEM grads)');
+    console.log('   - Live proxy: researchers + technicians -> tech employment');
+    console.log('   - Static fallback (VC funding, unicorns, AI patents, e-commerce, digital payments)');
     console.log('🔬 ========================================');
 
     return technologyData;

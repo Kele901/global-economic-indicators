@@ -8,6 +8,7 @@ import {
   type EventImportance,
   type EconomicEvent
 } from '../data/currencyHierarchyData';
+import { useEconomicCalendar, EconomicEvent as LiveEconomicEvent } from '../hooks/useEconomicCalendar';
 
 interface EconomicCalendarProps {
   isDarkMode: boolean;
@@ -65,6 +66,8 @@ const EconomicCalendar: React.FC<EconomicCalendarProps> = ({ isDarkMode }) => {
   const [filterImportance, setFilterImportance] = useState<EventImportance | 'all'>('all');
   const [viewDays, setViewDays] = useState<number>(30);
 
+  const { events: liveEvents, loading, isLive, refetch } = useEconomicCalendar({ days: 90 });
+
   const themeColors = {
     cardBg: isDarkMode ? 'bg-gray-800/50' : 'bg-white',
     text: isDarkMode ? 'text-gray-100' : 'text-gray-900',
@@ -73,26 +76,49 @@ const EconomicCalendar: React.FC<EconomicCalendarProps> = ({ isDarkMode }) => {
     border: isDarkMode ? 'border-gray-700' : 'border-gray-200',
   };
 
+  const allEvents = useMemo(() => {
+    if (liveEvents.length > 0) {
+      return liveEvents.map(e => ({
+        id: e.id,
+        date: e.date,
+        time: e.time,
+        currency: e.currency as CurrencyCode,
+        event: e.event,
+        description: `${e.bank} monetary policy decision`,
+        importance: e.importance,
+        bank: e.bank
+      }));
+    }
+    return ECONOMIC_CALENDAR;
+  }, [liveEvents]);
+
   const filteredEvents = useMemo(() => {
-    let events = getUpcomingEvents(
-      filterCurrency === 'all' ? undefined : filterCurrency,
-      viewDays
-    );
+    const today = new Date();
+    const endDate = new Date(today.getTime() + viewDays * 24 * 60 * 60 * 1000);
+    
+    let events = allEvents.filter(e => {
+      const eventDate = new Date(e.date);
+      return eventDate >= today && eventDate <= endDate;
+    });
+    
+    if (filterCurrency !== 'all') {
+      events = events.filter(e => e.currency === filterCurrency);
+    }
     
     if (filterImportance !== 'all') {
       events = events.filter(e => e.importance === filterImportance);
     }
     
-    return events;
-  }, [filterCurrency, filterImportance, viewDays]);
+    return events.sort((a, b) => a.date.localeCompare(b.date));
+  }, [allEvents, filterCurrency, filterImportance, viewDays]);
 
   const eventsByCurrency = useMemo(() => {
     const counts: Partial<Record<CurrencyCode, number>> = {};
-    ECONOMIC_CALENDAR.forEach(event => {
+    allEvents.forEach(event => {
       counts[event.currency] = (counts[event.currency] || 0) + 1;
     });
     return counts;
-  }, []);
+  }, [allEvents]);
 
   const availableCurrencies = useMemo(() => {
     return Object.keys(eventsByCurrency) as CurrencyCode[];
@@ -146,12 +172,35 @@ const EconomicCalendar: React.FC<EconomicCalendarProps> = ({ isDarkMode }) => {
   return (
     <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Economic Calendar
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          Upcoming central bank meetings and key economic data releases
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Economic Calendar
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              Upcoming central bank meetings and key economic data releases
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
+              <span className={`text-xs ${themeColors.textTertiary}`}>
+                {isLive ? 'Live' : 'Cached'}
+              </span>
+            </div>
+            <button
+              onClick={refetch}
+              disabled={loading}
+              className={`px-2 py-1 text-xs rounded ${
+                isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              } disabled:opacity-50`}
+            >
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="p-6">

@@ -6,6 +6,8 @@ import { CENTRAL_BANK_RATES } from '../data/currencyHierarchyData';
 import { RECENT_DECISIONS, FORWARD_GUIDANCE, type RateDecision } from '../data/monetaryPolicyData';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, ScatterChart, Scatter, Cell, ReferenceLine } from 'recharts';
+import { useCentralBankRates } from '../hooks/useCentralBankRates';
+import { fetchRecentDecisions, RateDecision as LiveRateDecision } from '../services/rateDecisions';
 
 const BANK_COLORS: Record<string, string> = {
   'Federal Reserve': '#8884d8', 'ECB': '#82ca9d', 'Bank of Japan': '#ffc658',
@@ -26,6 +28,22 @@ export default function MonetaryPolicyPage() {
   const [loading, setLoading] = useState(true);
   const [selectedBanks, setSelectedBanks] = useState<string[]>(['Federal Reserve', 'ECB', 'Bank of Japan', 'Bank of England']);
   const [sortBy, setSortBy] = useState<'rate' | 'name'>('rate');
+  const [liveDecisions, setLiveDecisions] = useState<LiveRateDecision[]>([]);
+  const [decisionsLoading, setDecisionsLoading] = useState(false);
+  
+  const { rates: liveRates, isLive: ratesIsLive, loading: ratesLoading, refetch: refetchRates } = useCentralBankRates();
+
+  const refetchDecisions = async () => {
+    setDecisionsLoading(true);
+    try {
+      const decisions = await fetchRecentDecisions();
+      setLiveDecisions(decisions);
+    } catch (e) {
+      console.error('Failed to refetch decisions:', e);
+    } finally {
+      setDecisionsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (isDarkMode) {
@@ -41,6 +59,7 @@ export default function MonetaryPolicyPage() {
 
   useEffect(() => {
     fetchGlobalData().then(d => { setData(d as any); setLoading(false); }).catch(() => setLoading(false));
+    refetchDecisions();
   }, []);
 
   const tc = isDarkMode ? {
@@ -55,12 +74,35 @@ export default function MonetaryPolicyPage() {
     selectBg: 'bg-white text-gray-900 border-gray-300',
   };
 
+  const ratesData = useMemo(() => {
+    if (liveRates.length > 0) {
+      return liveRates.map(r => ({
+        currency: r.currency,
+        bank: r.bank,
+        bankAbbrev: r.bankAbbrev,
+        rate: r.rate,
+        previousRate: r.previousRate,
+        lastUpdated: r.lastUpdated,
+        nextMeeting: r.nextMeeting || '2026-04-01',
+        trend: r.trend
+      }));
+    }
+    return CENTRAL_BANK_RATES;
+  }, [liveRates]);
+
   const sortedRates = useMemo(() => {
-    const rates = [...CENTRAL_BANK_RATES];
+    const rates = [...ratesData];
     if (sortBy === 'rate') rates.sort((a, b) => b.rate - a.rate);
     else rates.sort((a, b) => a.bank.localeCompare(b.bank));
     return rates;
-  }, [sortBy]);
+  }, [sortBy, ratesData]);
+
+  const decisionsData = useMemo(() => {
+    if (liveDecisions.length > 0) {
+      return liveDecisions;
+    }
+    return RECENT_DECISIONS;
+  }, [liveDecisions]);
 
   const ratePathData = useMemo(() => {
     if (!data) return [];
@@ -84,7 +126,7 @@ export default function MonetaryPolicyPage() {
     });
   }, [data, selectedBanks]);
 
-  const uniqueBanks = useMemo(() => Array.from(new Set(RECENT_DECISIONS.map(d => d.bank))), []);
+  const uniqueBanks = useMemo(() => Array.from(new Set(decisionsData.map(d => d.bank))), [decisionsData]);
 
   const BANK_COUNTRY_MAP: Record<string, string> = {
     'Federal Reserve': 'USA', 'ECB': 'France', 'Bank of Japan': 'Japan',
@@ -98,31 +140,31 @@ export default function MonetaryPolicyPage() {
     const inflSeries = (data as any).inflationRates as CountryData[] | undefined;
     if (!inflSeries) return [];
     const latestInflRow = inflSeries[inflSeries.length - 1] || {};
-    return CENTRAL_BANK_RATES.map(r => {
+    return ratesData.map(r => {
       const country = BANK_COUNTRY_MAP[r.bank];
       const infl = country ? Number(latestInflRow[country]) : NaN;
       const inflation = isNaN(infl) ? 0 : infl;
       const realRate = r.rate - inflation;
       return { bank: r.bankAbbrev, nominalRate: r.rate, inflation: parseFloat(inflation.toFixed(2)), realRate: parseFloat(realRate.toFixed(2)) };
     }).sort((a, b) => b.realRate - a.realRate);
-  }, [data]);
+  }, [data, ratesData]);
 
   const rateVsInflationData = useMemo(() => {
     if (!data) return [];
     const inflSeries = (data as any).inflationRates as CountryData[] | undefined;
     if (!inflSeries) return [];
     const latestInflRow = inflSeries[inflSeries.length - 1] || {};
-    return CENTRAL_BANK_RATES.map(r => {
+    return ratesData.map(r => {
       const country = BANK_COUNTRY_MAP[r.bank];
       const infl = country ? Number(latestInflRow[country]) : NaN;
       return { bank: r.bankAbbrev, inflation: isNaN(infl) ? 0 : parseFloat(infl.toFixed(2)), rate: r.rate, color: BANK_COLORS[r.bank] || '#888' };
     });
-  }, [data]);
+  }, [data, ratesData]);
 
   const cyclePhases = useMemo(() => {
     const phases: Record<string, { phase: string; color: string }> = {};
     for (const bank of uniqueBanks) {
-      const decisions = RECENT_DECISIONS.filter(d => d.bank === bank).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3);
+      const decisions = decisionsData.filter(d => d.bank === bank).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3);
       const hikes = decisions.filter(d => d.action === 'hike').length;
       const cuts = decisions.filter(d => d.action === 'cut').length;
       if (hikes >= 2) phases[bank] = { phase: 'Tightening', color: 'text-red-500 bg-red-500/10' };
@@ -130,11 +172,11 @@ export default function MonetaryPolicyPage() {
       else phases[bank] = { phase: 'Neutral', color: 'text-yellow-500 bg-yellow-500/10' };
     }
     return phases;
-  }, [uniqueBanks]);
+  }, [uniqueBanks, decisionsData]);
 
   const rateChangeFreqData = useMemo(() => {
     return uniqueBanks.map(bank => {
-      const decisions = RECENT_DECISIONS.filter(d => d.bank === bank);
+      const decisions = decisionsData.filter(d => d.bank === bank);
       return {
         bank: bank.length > 15 ? bank.split(' ').map(w => w[0]).join('') : bank,
         hikes: decisions.filter(d => d.action === 'hike').length,
@@ -142,23 +184,23 @@ export default function MonetaryPolicyPage() {
         holds: decisions.filter(d => d.action === 'hold').length,
       };
     });
-  }, [uniqueBanks]);
+  }, [uniqueBanks, decisionsData]);
 
   const comparisonTableData = useMemo(() => {
     if (!data) return [];
     const inflSeries = (data as any).inflationRates as CountryData[] | undefined;
     const latestInflRow = inflSeries ? inflSeries[inflSeries.length - 1] : {} as any;
-    return CENTRAL_BANK_RATES.map(r => {
+    return ratesData.map(r => {
       const country = BANK_COUNTRY_MAP[r.bank];
       const infl = country ? Number(latestInflRow?.[country]) : NaN;
       const inflation = isNaN(infl) ? null : parseFloat(infl.toFixed(2));
       const realRate = inflation !== null ? parseFloat((r.rate - inflation).toFixed(2)) : null;
-      const lastDecision = RECENT_DECISIONS.filter(d => d.bank === r.bank).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      const lastDecision = decisionsData.filter(d => d.bank === r.bank).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
       const phase = cyclePhases[r.bank];
       const guidance = FORWARD_GUIDANCE.find(fg => fg.bank === r.bank);
       return { ...r, inflation, realRate, lastDecision, phase, guidance };
     });
-  }, [data, cyclePhases]);
+  }, [data, cyclePhases, ratesData, decisionsData]);
 
   if (loading) {
     return (
@@ -224,7 +266,20 @@ export default function MonetaryPolicyPage() {
         {/* Current Rates Overview */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Current Policy Rates</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-semibold">Current Policy Rates</h2>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${ratesIsLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                <span className={`text-xs ${tc.textSec}`}>{ratesIsLive ? 'Live' : 'Cached'}</span>
+              </div>
+              <button
+                onClick={refetchRates}
+                disabled={ratesLoading}
+                className={`px-2 py-1 text-xs rounded ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} disabled:opacity-50`}
+              >
+                {ratesLoading ? 'Loading...' : 'Refresh'}
+              </button>
+            </div>
             <div className="flex gap-2">
               <button onClick={() => setSortBy('rate')} className={`px-3 py-1 rounded text-xs border ${sortBy === 'rate' ? 'bg-blue-500/20 border-blue-500 text-blue-500' : isDarkMode ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'}`}>By Rate</button>
               <button onClick={() => setSortBy('name')} className={`px-3 py-1 rounded text-xs border ${sortBy === 'name' ? 'bg-blue-500/20 border-blue-500 text-blue-500' : isDarkMode ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'}`}>By Name</button>
@@ -262,9 +317,22 @@ export default function MonetaryPolicyPage() {
 
         {/* Rate Decision Timeline */}
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Recent Rate Decisions</h2>
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xl font-semibold">Recent Rate Decisions</h2>
+            <div className="flex items-center gap-1">
+              <div className={`w-2 h-2 rounded-full ${liveDecisions.length > 0 ? 'bg-green-500' : 'bg-yellow-500'}`} />
+              <span className={`text-xs ${tc.textSec}`}>{liveDecisions.length > 0 ? 'Live (BIS)' : 'Static'}</span>
+            </div>
+            <button
+              onClick={refetchDecisions}
+              disabled={decisionsLoading}
+              className={`px-2 py-1 text-xs rounded ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} disabled:opacity-50`}
+            >
+              {decisionsLoading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
           <div className="space-y-3">
-            {RECENT_DECISIONS.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((decision, idx) => {
+            {decisionsData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 20).map((decision, idx) => {
               const style = ACTION_STYLES[decision.action];
               return (
                 <div key={idx} className={`flex items-start gap-4 p-3 rounded-lg border ${style.bg}`}>

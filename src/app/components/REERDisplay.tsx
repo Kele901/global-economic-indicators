@@ -17,6 +17,7 @@ import {
   type REERData,
   type CurrencyCode
 } from '../data/currencyHierarchyData';
+import { useREERData } from '../hooks/useREERData';
 
 interface REERDisplayProps {
   isDarkMode: boolean;
@@ -47,6 +48,8 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
   const [filterValuation, setFilterValuation] = useState<'all' | 'overvalued' | 'undervalued'>('all');
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode | null>(null);
 
+  const { reerData: liveReerData, loading, isLive, refetch } = useREERData();
+
   const themeColors = {
     cardBg: isDarkMode ? 'bg-gray-800/50' : 'bg-white',
     text: isDarkMode ? 'text-gray-100' : 'text-gray-900',
@@ -56,8 +59,23 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
     gridColor: isDarkMode ? '#374151' : '#e5e7eb'
   };
 
+  const reerDataSource = useMemo(() => {
+    if (liveReerData.length > 0) {
+      return liveReerData.map(d => ({
+        currency: d.currency as CurrencyCode,
+        current: d.current,
+        historicalAverage: d.historicalAverage,
+        deviation: d.deviation,
+        isOvervalued: d.isOvervalued,
+        trend: d.trend,
+        lastUpdated: d.lastUpdated
+      }));
+    }
+    return REER_DATA;
+  }, [liveReerData]);
+
   const filteredData = useMemo(() => {
-    let data = [...REER_DATA];
+    let data = [...reerDataSource];
     
     if (filterValuation === 'overvalued') {
       data = data.filter(d => d.isOvervalued);
@@ -72,7 +90,7 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
     }
     
     return data;
-  }, [sortBy, filterValuation]);
+  }, [sortBy, filterValuation, reerDataSource]);
 
   const chartData = useMemo(() => {
     return filteredData.map(d => ({
@@ -83,10 +101,10 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
   }, [filteredData]);
 
   const stats = useMemo(() => {
-    const overvalued = REER_DATA.filter(d => d.isOvervalued);
-    const undervalued = REER_DATA.filter(d => !d.isOvervalued);
-    const maxOvervalued = REER_DATA.reduce((max, d) => d.deviation > max.deviation ? d : max, REER_DATA[0]);
-    const maxUndervalued = REER_DATA.reduce((min, d) => d.deviation < min.deviation ? d : min, REER_DATA[0]);
+    const overvalued = reerDataSource.filter(d => d.isOvervalued);
+    const undervalued = reerDataSource.filter(d => !d.isOvervalued);
+    const maxOvervalued = reerDataSource.reduce((max, d) => d.deviation > max.deviation ? d : max, reerDataSource[0]);
+    const maxUndervalued = reerDataSource.reduce((min, d) => d.deviation < min.deviation ? d : min, reerDataSource[0]);
     
     return {
       overvaluedCount: overvalued.length,
@@ -94,7 +112,7 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
       maxOvervalued,
       maxUndervalued
     };
-  }, []);
+  }, [reerDataSource]);
 
   const getDeviationColor = (deviation: number): string => {
     if (deviation >= 20) return '#ef4444'; // Very overvalued - red
@@ -130,7 +148,7 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
     if (!active || !payload || !payload.length) return null;
 
     const data = payload[0].payload;
-    const fullData = REER_DATA.find(d => d.currency === data.currency);
+    const fullData = reerDataSource.find(d => d.currency === data.currency);
     
     return (
       <div className={`p-3 rounded-lg shadow-lg border ${
@@ -161,12 +179,35 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
   return (
     <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Real Effective Exchange Rate (REER)
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          Currency valuation relative to historical averages (BIS data)
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Real Effective Exchange Rate (REER)
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              Currency valuation relative to historical averages (BIS data)
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
+              <span className={`text-xs ${themeColors.textTertiary}`}>
+                {isLive ? 'Live' : 'Cached'}
+              </span>
+            </div>
+            <button
+              onClick={refetch}
+              disabled={loading}
+              className={`px-2 py-1 text-xs rounded ${
+                isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              } disabled:opacity-50`}
+            >
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="p-6">

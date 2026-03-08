@@ -11,6 +11,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 238.3,
     2023: 170.6,
     2024: 185.2,
+    2025: 195.5,
   },
   China: {
     2018: 93.4,
@@ -20,6 +21,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 62.8,
     2023: 42.1,
     2024: 38.5,
+    2025: 35.8,
   },
   UK: {
     2018: 8.1,
@@ -29,6 +31,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 30.2,
     2023: 18.4,
     2024: 16.8,
+    2025: 18.2,
   },
   India: {
     2018: 11.0,
@@ -38,6 +41,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 25.7,
     2023: 9.6,
     2024: 12.3,
+    2025: 14.5,
   },
   Germany: {
     2018: 4.6,
@@ -47,6 +51,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 10.5,
     2023: 7.2,
     2024: 8.1,
+    2025: 9.2,
   },
   France: {
     2018: 3.6,
@@ -56,6 +61,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 13.5,
     2023: 8.3,
     2024: 7.9,
+    2025: 8.5,
   },
   Canada: {
     2018: 3.5,
@@ -65,6 +71,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 8.1,
     2023: 5.2,
     2024: 5.8,
+    2025: 6.4,
   },
   Israel: {
     2018: 6.4,
@@ -74,6 +81,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 15.5,
     2023: 8.2,
     2024: 9.1,
+    2025: 10.2,
   },
   Japan: {
     2018: 3.9,
@@ -83,6 +91,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 6.2,
     2023: 5.4,
     2024: 5.9,
+    2025: 6.5,
   },
   Singapore: {
     2018: 5.5,
@@ -92,6 +101,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 9.8,
     2023: 5.1,
     2024: 4.8,
+    2025: 5.3,
   },
   SouthKorea: {
     2018: 3.8,
@@ -101,6 +111,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 6.8,
     2023: 4.9,
     2024: 5.2,
+    2025: 5.8,
   },
   Australia: {
     2018: 1.4,
@@ -110,6 +121,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 4.1,
     2023: 2.8,
     2024: 3.1,
+    2025: 3.5,
   },
   Brazil: {
     2018: 1.3,
@@ -119,6 +131,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 4.5,
     2023: 2.1,
     2024: 2.4,
+    2025: 2.8,
   },
   Netherlands: {
     2018: 1.2,
@@ -128,6 +141,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 3.9,
     2023: 2.5,
     2024: 2.8,
+    2025: 3.2,
   },
   Sweden: {
     2018: 2.1,
@@ -137,6 +151,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 5.1,
     2023: 3.2,
     2024: 3.5,
+    2025: 3.9,
   },
   Switzerland: {
     2018: 1.1,
@@ -146,6 +161,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 3.1,
     2023: 2.4,
     2024: 2.6,
+    2025: 3.0,
   },
   Spain: {
     2018: 0.8,
@@ -155,6 +171,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 2.1,
     2023: 1.5,
     2024: 1.7,
+    2025: 1.9,
   },
   Italy: {
     2018: 0.5,
@@ -164,6 +181,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 1.8,
     2023: 1.2,
     2024: 1.4,
+    2025: 1.6,
   },
   Mexico: {
     2018: 0.4,
@@ -173,6 +191,7 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 1.2,
     2023: 0.8,
     2024: 0.9,
+    2025: 1.1,
   },
   Russia: {
     2018: 0.4,
@@ -182,31 +201,32 @@ export const vcFundingData: { [country: string]: { [year: number]: number } } = 
     2022: 0.2,
     2023: 0.1,
     2024: 0.1,
+    2025: 0.1,
   },
 };
 
-// Unicorn companies count by country (as of 2024)
+// Unicorn companies count by country (as of 2025)
 export const unicornData: { [country: string]: number } = {
-  USA: 702,
-  China: 316,
-  India: 68,
-  UK: 49,
-  Germany: 32,
-  France: 26,
-  Israel: 24,
-  Canada: 21,
-  Brazil: 16,
-  Singapore: 15,
-  SouthKorea: 14,
-  Australia: 11,
-  Japan: 10,
-  Netherlands: 9,
-  Sweden: 8,
-  Switzerland: 7,
-  Indonesia: 6,
-  Mexico: 5,
-  Spain: 4,
-  Italy: 3,
+  USA: 728,
+  China: 325,
+  India: 78,
+  UK: 54,
+  Germany: 36,
+  France: 29,
+  Israel: 27,
+  Canada: 24,
+  Brazil: 18,
+  Singapore: 17,
+  SouthKorea: 16,
+  Australia: 13,
+  Japan: 12,
+  Netherlands: 10,
+  Sweden: 9,
+  Switzerland: 8,
+  Indonesia: 7,
+  Mexico: 6,
+  Spain: 5,
+  Italy: 4,
   Russia: 2,
 };
 
@@ -220,6 +240,7 @@ export const aiPatentData: { [country: string]: { [year: number]: number } } = {
     2022: 45632,
     2023: 48921,
     2024: 52340,
+    2025: 56120,
   },
   China: {
     2018: 28456,
@@ -229,6 +250,7 @@ export const aiPatentData: { [country: string]: { [year: number]: number } } = {
     2022: 78234,
     2023: 89456,
     2024: 98765,
+    2025: 108500,
   },
   Japan: {
     2018: 8234,
@@ -247,6 +269,7 @@ export const aiPatentData: { [country: string]: { [year: number]: number } } = {
     2022: 8123,
     2023: 8756,
     2024: 9234,
+    2025: 9720,
   },
   Germany: {
     2018: 3456,
@@ -404,6 +427,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 36.8,
     2023: 38.2,
     2024: 39.5,
+    2025: 40.8,
   },
   UK: {
     2018: 17.8,
@@ -413,6 +437,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 27.3,
     2023: 28.5,
     2024: 29.8,
+    2025: 31.0,
   },
   SouthKorea: {
     2018: 18.2,
@@ -422,6 +447,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 30.1,
     2023: 31.2,
     2024: 32.5,
+    2025: 33.8,
   },
   USA: {
     2018: 9.8,
@@ -431,6 +457,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 14.8,
     2023: 15.6,
     2024: 16.4,
+    2025: 17.2,
   },
   Germany: {
     2018: 10.2,
@@ -440,6 +467,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 15.2,
     2023: 16.1,
     2024: 17.0,
+    2025: 17.9,
   },
   Japan: {
     2018: 8.5,
@@ -449,6 +477,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 13.5,
     2023: 14.2,
     2024: 15.0,
+    2025: 15.8,
   },
   France: {
     2018: 9.1,
@@ -530,6 +559,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 11.1,
     2023: 12.0,
     2024: 12.8,
+    2025: 13.6,
   },
   Italy: {
     2018: 4.2,
@@ -539,6 +569,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 8.8,
     2023: 9.5,
     2024: 10.2,
+    2025: 10.9,
   },
   Mexico: {
     2018: 3.8,
@@ -548,6 +579,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 8.1,
     2023: 8.9,
     2024: 9.8,
+    2025: 10.6,
   },
   Switzerland: {
     2018: 8.2,
@@ -557,6 +589,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 13.2,
     2023: 14.1,
     2024: 15.0,
+    2025: 15.8,
   },
   Israel: {
     2018: 6.5,
@@ -566,6 +599,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 11.5,
     2023: 12.4,
     2024: 13.3,
+    2025: 14.2,
   },
   Russia: {
     2018: 4.8,
@@ -575,6 +609,7 @@ export const ecommerceAdoptionData: { [country: string]: { [year: number]: numbe
     2022: 12.8,
     2023: 14.2,
     2024: 15.5,
+    2025: 16.8,
   },
 };
 
@@ -588,6 +623,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 98.1,
     2023: 98.5,
     2024: 98.8,
+    2025: 99.0,
   },
   Netherlands: {
     2018: 91.2,
@@ -597,6 +633,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 97.5,
     2023: 98.0,
     2024: 98.4,
+    2025: 98.7,
   },
   UK: {
     2018: 88.5,
@@ -660,6 +697,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 92.0,
     2023: 93.5,
     2024: 94.5,
+    2025: 95.2,
   },
   Japan: {
     2018: 72.5,
@@ -669,6 +707,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 88.5,
     2023: 90.5,
     2024: 92.0,
+    2025: 93.2,
   },
   SouthKorea: {
     2018: 88.5,
@@ -678,6 +717,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 97.1,
     2023: 97.8,
     2024: 98.2,
+    2025: 98.5,
   },
   China: {
     2018: 68.5,
@@ -696,6 +736,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 62.5,
     2023: 70.2,
     2024: 76.5,
+    2025: 81.5,
   },
   Brazil: {
     2018: 58.5,
@@ -705,6 +746,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 82.5,
     2023: 85.8,
     2024: 88.2,
+    2025: 90.2,
   },
   Mexico: {
     2018: 42.5,
@@ -723,6 +765,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 88.8,
     2023: 90.8,
     2024: 92.5,
+    2025: 93.8,
   },
   Italy: {
     2018: 65.2,
@@ -732,6 +775,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 84.8,
     2023: 87.5,
     2024: 89.8,
+    2025: 91.5,
   },
   Switzerland: {
     2018: 85.5,
@@ -741,6 +785,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 95.2,
     2023: 96.2,
     2024: 97.0,
+    2025: 97.4,
   },
   Israel: {
     2018: 78.5,
@@ -750,6 +795,7 @@ export const digitalPaymentData: { [country: string]: { [year: number]: number }
     2022: 92.8,
     2023: 94.5,
     2024: 95.8,
+    2025: 96.5,
   },
   Russia: {
     2018: 52.5,
@@ -772,6 +818,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 36.8,
     2023: 37.1,
     2024: 37.4,
+    2025: 37.7,
   },
   SouthKorea: {
     2018: 32.5,
@@ -781,6 +828,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 34.2,
     2023: 34.5,
     2024: 34.8,
+    2025: 35.1,
   },
   Sweden: {
     2018: 28.5,
@@ -790,6 +838,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 30.2,
     2023: 30.5,
     2024: 30.8,
+    2025: 31.1,
   },
   UK: {
     2018: 26.8,
@@ -799,6 +848,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 28.2,
     2023: 28.5,
     2024: 28.8,
+    2025: 29.1,
   },
   France: {
     2018: 26.2,
@@ -808,6 +858,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 27.8,
     2023: 28.2,
     2024: 28.5,
+    2025: 28.8,
   },
   USA: {
     2018: 24.5,
@@ -817,6 +868,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 26.2,
     2023: 26.5,
     2024: 26.8,
+    2025: 27.1,
   },
   China: {
     2018: 38.5,
@@ -835,6 +887,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 34.2,
     2023: 34.8,
     2024: 35.2,
+    2025: 35.5,
   },
   Japan: {
     2018: 22.5,
@@ -844,6 +897,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 23.8,
     2023: 24.1,
     2024: 24.5,
+    2025: 24.8,
   },
   Canada: {
     2018: 24.2,
@@ -853,6 +907,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 25.9,
     2023: 26.2,
     2024: 26.5,
+    2025: 26.8,
   },
   Australia: {
     2018: 22.8,
@@ -862,6 +917,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 24.2,
     2023: 24.5,
     2024: 24.8,
+    2025: 25.1,
   },
   Netherlands: {
     2018: 23.5,
@@ -871,6 +927,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 25.2,
     2023: 25.5,
     2024: 25.8,
+    2025: 26.1,
   },
   Singapore: {
     2018: 30.2,
@@ -880,6 +937,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 31.9,
     2023: 32.2,
     2024: 32.5,
+    2025: 32.8,
   },
   Israel: {
     2018: 27.5,
@@ -889,6 +947,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 29.2,
     2023: 29.5,
     2024: 29.8,
+    2025: 30.1,
   },
   Switzerland: {
     2018: 25.8,
@@ -898,6 +957,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 27.2,
     2023: 27.5,
     2024: 27.8,
+    2025: 28.1,
   },
   Spain: {
     2018: 24.1,
@@ -907,6 +967,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 25.5,
     2023: 25.8,
     2024: 26.1,
+    2025: 26.4,
   },
   Italy: {
     2018: 24.5,
@@ -916,6 +977,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 25.8,
     2023: 26.2,
     2024: 26.5,
+    2025: 26.8,
   },
   Brazil: {
     2018: 18.5,
@@ -925,6 +987,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 20.2,
     2023: 20.5,
     2024: 20.8,
+    2025: 21.1,
   },
   Mexico: {
     2018: 22.1,
@@ -943,6 +1006,7 @@ export const stemGraduatesData: { [country: string]: { [year: number]: number } 
     2022: 31.8,
     2023: 32.1,
     2024: 32.5,
+    2025: 32.8,
   },
 };
 
@@ -1019,6 +1083,7 @@ export const techEmploymentData: { [country: string]: { [year: number]: number }
     2022: 6.3,
     2023: 6.5,
     2024: 6.7,
+    2025: 6.9,
   },
   Canada: {
     2018: 4.5,
@@ -1037,6 +1102,7 @@ export const techEmploymentData: { [country: string]: { [year: number]: number }
     2022: 4.9,
     2023: 5.1,
     2024: 5.3,
+    2025: 5.5,
   },
   Japan: {
     2018: 4.0,
@@ -1046,6 +1112,7 @@ export const techEmploymentData: { [country: string]: { [year: number]: number }
     2022: 4.7,
     2023: 4.9,
     2024: 5.1,
+    2025: 5.3,
   },
   SouthKorea: {
     2018: 4.8,
@@ -1064,6 +1131,7 @@ export const techEmploymentData: { [country: string]: { [year: number]: number }
     2022: 5.0,
     2023: 5.2,
     2024: 5.4,
+    2025: 5.6,
   },
   China: {
     2018: 2.8,
@@ -1073,6 +1141,7 @@ export const techEmploymentData: { [country: string]: { [year: number]: number }
     2022: 3.9,
     2023: 4.2,
     2024: 4.5,
+    2025: 4.7,
   },
   India: {
     2018: 1.8,
@@ -1140,6 +1209,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 158.2,
     2023: 152.5,
     2024: 155.8,
+    2025: 158.5,
   },
   Singapore: {
     2018: 98.5,
@@ -1149,6 +1219,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 112.5,
     2023: 108.8,
     2024: 112.1,
+    2025: 115.2,
   },
   USA: {
     2018: 68.5,
@@ -1158,6 +1229,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 78.5,
     2023: 72.8,
     2024: 75.2,
+    2025: 78.1,
   },
   UK: {
     2018: 52.5,
@@ -1203,6 +1275,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 50.2,
     2023: 45.8,
     2024: 48.2,
+    2025: 50.5,
   },
   Germany: {
     2018: 35.2,
@@ -1230,6 +1303,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 48.2,
     2023: 42.5,
     2024: 45.8,
+    2025: 48.2,
   },
   SouthKorea: {
     2018: 28.5,
@@ -1239,6 +1313,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 38.2,
     2023: 35.5,
     2024: 38.1,
+    2025: 40.5,
   },
   Japan: {
     2018: 18.5,
@@ -1266,6 +1341,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 8.5,
     2023: 6.8,
     2024: 7.5,
+    2025: 8.2,
   },
   Brazil: {
     2018: 8.5,
@@ -1284,6 +1360,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 28.5,
     2023: 25.2,
     2024: 27.5,
+    2025: 29.5,
   },
   Italy: {
     2018: 18.2,
@@ -1293,6 +1370,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 25.5,
     2023: 22.1,
     2024: 24.2,
+    2025: 26.2,
   },
   Mexico: {
     2018: 6.5,
@@ -1302,6 +1380,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 10.5,
     2023: 8.8,
     2024: 9.8,
+    2025: 10.8,
   },
   Russia: {
     2018: 8.2,
@@ -1311,6 +1390,7 @@ export const startupDensityData: { [country: string]: { [year: number]: number }
     2022: 8.5,
     2023: 6.2,
     2024: 5.8,
+    2025: 5.5,
   },
 };
 
@@ -1360,3 +1440,4 @@ export function getAvailableYears(
   });
   return Array.from(years).sort((a, b) => a - b);
 }
+

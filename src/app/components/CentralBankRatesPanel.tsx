@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  CENTRAL_BANK_RATES,
-  type CentralBankRate
+  CENTRAL_BANK_RATES
 } from '../data/currencyHierarchyData';
+import { useCentralBankRates } from '../hooks/useCentralBankRates';
 
 interface CentralBankRatesPanelProps {
   isDarkMode: boolean;
@@ -34,6 +34,8 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
   const [sortBy, setSortBy] = useState<'rate' | 'currency' | 'trend'>('rate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterTrend, setFilterTrend] = useState<'all' | 'rising' | 'falling' | 'stable'>('all');
+  
+  const { rates: liveRates, loading, error, isLive, lastFetched, refetch } = useCentralBankRates();
 
   const themeColors = {
     cardBg: isDarkMode ? 'bg-gray-800/50' : 'bg-white',
@@ -43,8 +45,24 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
     border: isDarkMode ? 'border-gray-700' : 'border-gray-200',
   };
 
+  const ratesData = useMemo(() => {
+    if (liveRates.length > 0) {
+      return liveRates.map(r => ({
+        currency: r.currency,
+        bank: r.bank,
+        bankAbbrev: r.bankAbbrev,
+        rate: r.rate,
+        previousRate: r.previousRate,
+        lastUpdated: r.lastUpdated,
+        nextMeeting: r.nextMeeting || '2026-04-01',
+        trend: r.trend
+      }));
+    }
+    return CENTRAL_BANK_RATES;
+  }, [liveRates]);
+
   const filteredAndSortedRates = useMemo(() => {
-    let rates = [...CENTRAL_BANK_RATES];
+    let rates = [...ratesData];
     
     // Filter by trend
     if (filterTrend !== 'all') {
@@ -70,19 +88,19 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
     });
     
     return rates;
-  }, [sortBy, sortDirection, filterTrend]);
+  }, [sortBy, sortDirection, filterTrend, ratesData]);
 
   const rateStats = useMemo(() => {
-    const rates = CENTRAL_BANK_RATES.map(r => r.rate);
+    const rates = ratesData.map(r => r.rate);
     return {
       max: Math.max(...rates),
       min: Math.min(...rates),
       avg: rates.reduce((a, b) => a + b, 0) / rates.length,
-      rising: CENTRAL_BANK_RATES.filter(r => r.trend === 'rising').length,
-      falling: CENTRAL_BANK_RATES.filter(r => r.trend === 'falling').length,
-      stable: CENTRAL_BANK_RATES.filter(r => r.trend === 'stable').length
+      rising: ratesData.filter(r => r.trend === 'rising').length,
+      falling: ratesData.filter(r => r.trend === 'falling').length,
+      stable: ratesData.filter(r => r.trend === 'stable').length
     };
-  }, []);
+  }, [ratesData]);
 
   const getTrendIcon = (trend: 'rising' | 'falling' | 'stable') => {
     switch (trend) {
@@ -106,7 +124,7 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
     }
   };
 
-  const getRateChange = (rate: CentralBankRate) => {
+  const getRateChange = (rate: { rate: number; previousRate: number }) => {
     const change = rate.rate - rate.previousRate;
     if (change === 0) return null;
     return change;
@@ -139,12 +157,40 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
   return (
     <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Central Bank Interest Rates
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          Current policy rates and upcoming meeting schedules
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Central Bank Interest Rates
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              Current policy rates and upcoming meeting schedules
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
+              <span className={`text-xs ${themeColors.textTertiary}`}>
+                {isLive ? 'Live' : 'Cached'}
+              </span>
+            </div>
+            <button
+              onClick={refetch}
+              disabled={loading}
+              className={`px-2 py-1 text-xs rounded ${
+                isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              } disabled:opacity-50`}
+            >
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
+        </div>
+        {lastFetched && (
+          <p className={`text-xs mt-1 ${themeColors.textTertiary}`}>
+            Last updated: {new Date(lastFetched).toLocaleTimeString()}
+          </p>
+        )}
       </div>
 
       <div className="p-6">
@@ -154,14 +200,14 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
             <div className={`text-xs ${themeColors.textTertiary}`}>Highest Rate</div>
             <div className={`text-xl font-bold ${themeColors.text}`}>{rateStats.max.toFixed(2)}%</div>
             <div className={`text-xs ${themeColors.textSecondary}`}>
-              {CENTRAL_BANK_RATES.find(r => r.rate === rateStats.max)?.currency}
+              {ratesData.find(r => r.rate === rateStats.max)?.currency}
             </div>
           </div>
           <div className={`p-3 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
             <div className={`text-xs ${themeColors.textTertiary}`}>Lowest Rate</div>
             <div className={`text-xl font-bold ${themeColors.text}`}>{rateStats.min.toFixed(2)}%</div>
             <div className={`text-xs ${themeColors.textSecondary}`}>
-              {CENTRAL_BANK_RATES.find(r => r.rate === rateStats.min)?.currency}
+              {ratesData.find(r => r.rate === rateStats.min)?.currency}
             </div>
           </div>
           <div className={`p-3 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -336,8 +382,8 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
             Upcoming Central Bank Meetings (Next 30 Days)
           </h4>
           <div className="flex flex-wrap gap-2">
-            {CENTRAL_BANK_RATES
-              .filter(r => getDaysUntilMeeting(r.nextMeeting) <= 30 && getDaysUntilMeeting(r.nextMeeting) >= 0)
+            {ratesData
+              .filter(r => r.nextMeeting && getDaysUntilMeeting(r.nextMeeting) <= 30 && getDaysUntilMeeting(r.nextMeeting) >= 0)
               .sort((a, b) => new Date(a.nextMeeting).getTime() - new Date(b.nextMeeting).getTime())
               .map(rate => {
                 const days = getDaysUntilMeeting(rate.nextMeeting);

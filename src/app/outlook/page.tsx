@@ -6,6 +6,7 @@ import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { IMF_GDP_PROJECTIONS, IMF_INFLATION_PROJECTIONS, REGIONAL_GDP_PROJECTIONS, GLOBAL_OUTLOOK_SUMMARY, RISKS } from '../data/imfProjections';
 import { COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, ScatterChart, Scatter, Cell, ZAxis, ReferenceLine, LabelList } from 'recharts';
+import { useIMFProjections } from '../hooks/useIMFProjections';
 
 export default function OutlookPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
@@ -15,6 +16,15 @@ export default function OutlookPage() {
   const [selectedMetric, setSelectedMetric] = useState<'gdp' | 'inflation'>('gdp');
   const [compCountries, setCompCountries] = useState(['USA', 'China', 'India', 'Japan', 'Brazil', 'UK']);
   const [sortConfig, setSortConfig] = useState<{ key: string; dir: 'asc' | 'desc' }>({ key: 'country', dir: 'asc' });
+
+  const { 
+    gdpProjections: liveGdpProjections, 
+    inflationProjections: liveInflationProjections, 
+    loading: projectionsLoading, 
+    isLive: projectionsIsLive,
+    weoInfo,
+    refetch: refetchProjections 
+  } = useIMFProjections();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -32,6 +42,20 @@ export default function OutlookPage() {
     fetchGlobalData().then(d => { setData(d as any); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
+  const gdpProjectionsData = useMemo(() => {
+    if (liveGdpProjections.length > 0) {
+      return liveGdpProjections;
+    }
+    return IMF_GDP_PROJECTIONS;
+  }, [liveGdpProjections]);
+
+  const inflationProjectionsData = useMemo(() => {
+    if (liveInflationProjections.length > 0) {
+      return liveInflationProjections;
+    }
+    return IMF_INFLATION_PROJECTIONS;
+  }, [liveInflationProjections]);
+
   const tc = isDarkMode ? {
     bg: 'bg-gray-900', card: 'bg-gray-800 border-gray-700', text: 'text-white',
     textSec: 'text-gray-400', grid: '#374151', axis: '#9ca3af',
@@ -46,7 +70,7 @@ export default function OutlookPage() {
 
   const forecastChartData = useMemo(() => {
     if (!data) return [];
-    const projections = selectedMetric === 'gdp' ? IMF_GDP_PROJECTIONS : IMF_INFLATION_PROJECTIONS;
+    const projections = selectedMetric === 'gdp' ? gdpProjectionsData : inflationProjectionsData;
     const projection = projections.find(p => p.country === selectedCountry);
     const metricKey = selectedMetric === 'gdp' ? 'gdpGrowth' : 'inflationRates';
     const series = (data as any)[metricKey] as CountryData[] | undefined;
@@ -75,28 +99,28 @@ export default function OutlookPage() {
     }
 
     return points.sort((a, b) => a.year - b.year);
-  }, [data, selectedCountry, selectedMetric]);
+  }, [data, selectedCountry, selectedMetric, gdpProjectionsData, inflationProjectionsData]);
 
   const availableCountries = useMemo(() => {
-    const projections = selectedMetric === 'gdp' ? IMF_GDP_PROJECTIONS : IMF_INFLATION_PROJECTIONS;
+    const projections = selectedMetric === 'gdp' ? gdpProjectionsData : inflationProjectionsData;
     return projections.map(p => p.country);
-  }, [selectedMetric]);
+  }, [selectedMetric, gdpProjectionsData, inflationProjectionsData]);
 
-  const allProjectionCountries = IMF_GDP_PROJECTIONS.filter(p => p.country !== 'World').map(p => p.country);
+  const allProjectionCountries = gdpProjectionsData.filter(p => p.country !== 'World').map(p => p.country);
 
   const multiCountryChartData = useMemo(() => {
     const years = [2024, 2025, 2026, 2027, 2028, 2029];
     return years.map(year => {
       const point: Record<string, number> = { year };
       compCountries.forEach(c => {
-        const proj = IMF_GDP_PROJECTIONS.find(p => p.country === c);
+        const proj = gdpProjectionsData.find(p => p.country === c);
         if (proj?.values[year] !== undefined) {
           point[c] = proj.values[year];
         }
       });
       return point;
     });
-  }, [compCountries]);
+  }, [compCountries, gdpProjectionsData]);
 
   const GDP_THRESHOLD = 2.5;
   const INF_THRESHOLD = 3.0;
@@ -109,10 +133,10 @@ export default function OutlookPage() {
   };
 
   const scatterData = useMemo(() => {
-    return IMF_GDP_PROJECTIONS
+    return gdpProjectionsData
       .filter(p => p.country !== 'World')
       .map(gdpProj => {
-        const infProj = IMF_INFLATION_PROJECTIONS.find(ip => ip.country === gdpProj.country);
+        const infProj = inflationProjectionsData.find(ip => ip.country === gdpProj.country);
         if (!infProj) return null;
         return {
           country: gdpProj.country,
@@ -122,17 +146,17 @@ export default function OutlookPage() {
         };
       })
       .filter(Boolean) as { country: string; label: string; gdp: number; inflation: number }[];
-  }, []);
+  }, [gdpProjectionsData, inflationProjectionsData]);
 
   const revisionData = useMemo(() => {
-    return IMF_GDP_PROJECTIONS
+    return gdpProjectionsData
       .filter(p => p.country !== 'World')
       .map(p => ({
         country: p.country,
         displayName: COUNTRY_DISPLAY_NAMES[p.country as CountryKey] || p.country,
         revision: +(p.values[2025] - p.values[2024]).toFixed(2),
       }));
-  }, []);
+  }, [gdpProjectionsData]);
 
   const advancedVsEmergingData = useMemo(() => {
     const advanced = ['USA', 'UK', 'Japan', 'Germany', 'France', 'Canada', 'Australia', 'SouthKorea'];
@@ -140,10 +164,10 @@ export default function OutlookPage() {
     const years = [2024, 2025, 2026];
     return years.map(year => {
       const advValues = advanced
-        .map(c => IMF_GDP_PROJECTIONS.find(p => p.country === c)?.values[year])
+        .map(c => gdpProjectionsData.find(p => p.country === c)?.values[year])
         .filter((v): v is number => v !== undefined);
       const emValues = emerging
-        .map(c => IMF_GDP_PROJECTIONS.find(p => p.country === c)?.values[year])
+        .map(c => gdpProjectionsData.find(p => p.country === c)?.values[year])
         .filter((v): v is number => v !== undefined);
       return {
         year: String(year),
@@ -151,13 +175,13 @@ export default function OutlookPage() {
         Emerging: +(emValues.reduce((s, v) => s + v, 0) / emValues.length).toFixed(2),
       };
     });
-  }, []);
+  }, [gdpProjectionsData]);
 
   const summaryTableData = useMemo(() => {
-    return IMF_GDP_PROJECTIONS
+    return gdpProjectionsData
       .filter(p => p.country !== 'World')
       .map(gdpProj => {
-        const infProj = IMF_INFLATION_PROJECTIONS.find(ip => ip.country === gdpProj.country);
+        const infProj = inflationProjectionsData.find(ip => ip.country === gdpProj.country);
         return {
           country: gdpProj.country,
           displayName: COUNTRY_DISPLAY_NAMES[gdpProj.country as CountryKey] || gdpProj.country,
@@ -168,7 +192,7 @@ export default function OutlookPage() {
           inf2025: infProj?.values[2025] ?? null,
         };
       });
-  }, []);
+  }, [gdpProjectionsData, inflationProjectionsData]);
 
   const sortedTableData = useMemo(() => {
     const sorted = [...summaryTableData];
@@ -206,8 +230,24 @@ export default function OutlookPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Economic Forecasts & Outlook</h1>
-            <p className={`${tc.textSec}`}>IMF World Economic Outlook projections alongside historical data</p>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold">Economic Forecasts & Outlook</h1>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${projectionsIsLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                <span className={`text-xs ${tc.textSec}`}>{projectionsIsLive ? 'Live' : 'Cached'}</span>
+              </div>
+              <button
+                onClick={refetchProjections}
+                disabled={projectionsLoading}
+                className={`px-2 py-1 text-xs rounded ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} disabled:opacity-50`}
+              >
+                {projectionsLoading ? 'Loading...' : 'Refresh'}
+              </button>
+            </div>
+            <p className={`${tc.textSec}`}>
+              IMF World Economic Outlook projections alongside historical data
+              {weoInfo && <span className="ml-2 text-xs">({weoInfo.lastUpdate})</span>}
+            </p>
           </div>
           <div className="flex items-center space-x-2 flex-shrink-0">
             <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Light</span>
@@ -315,9 +355,10 @@ export default function OutlookPage() {
                   <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
                   <Tooltip contentStyle={tc.tooltip} />
                   <Legend />
-                  <Bar dataKey="y2024" name="2024" fill="#3b82f6" radius={[2, 2, 0, 0]} />
-                  <Bar dataKey="y2025" name="2025" fill="#8b5cf6" radius={[2, 2, 0, 0]} />
-                  <Bar dataKey="y2026" name="2026" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="y2025" name="2025" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="y2026" name="2026" fill="#8b5cf6" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="y2027" name="2027" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="y2028" name="2028" fill="#10b981" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
