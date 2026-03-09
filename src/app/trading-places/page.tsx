@@ -1103,6 +1103,19 @@ const TradingPlacesPage: React.FC = () => {
             {/* ==================== MAP VIEW ==================== */}
             {viewMode === 'map' && (
               <div className="space-y-4">
+                <style>{`
+                  @keyframes flowForward { to { stroke-dashoffset: -24; } }
+                  @keyframes flowReverse { to { stroke-dashoffset: 24; } }
+                  @keyframes flowPulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+                  .trade-flow-line { stroke-dasharray: 8 4; animation: flowForward 1s linear infinite; }
+                  .trade-flow-line.deficit { animation: flowReverse 1s linear infinite; }
+                  .trade-flow-line.active { stroke-dasharray: 12 4; animation-duration: 0.7s; }
+                  .trade-flow-line.dimmed { animation-play-state: paused; }
+                  .trade-flow-bubble { stroke-dasharray: 6 3; animation: flowForward 0.8s linear infinite; }
+                  .trade-flow-bubble.deficit { animation: flowReverse 0.8s linear infinite; }
+                  .trade-flow-bubble.active { stroke-dasharray: 10 3; animation-duration: 0.5s; }
+                  .trade-flow-bubble.dimmed { animation-play-state: paused; }
+                `}</style>
                 <div className={`rounded-xl border overflow-hidden ${tc.card}`}>
                   <div className="relative" style={{ background: tc.ocean }}>
                     <ComposableMap
@@ -1173,11 +1186,12 @@ const TradingPlacesPage: React.FC = () => {
                           }
                         </Geographies>
 
-                        {/* Choropleth: trade flow arcs (interactive) */}
+                        {/* Choropleth: trade flow arcs (interactive, animated) */}
                         {mapStyle === 'choropleth' && detailCountry && TRADE_CENTROIDS[detailCountry] && tradeFlows.map((flow, i) => {
                           const isActive = selectedFlow === i;
                           const isDimmed = selectedFlow !== null && selectedFlow !== i;
                           const baseWidth = Math.max(0.5, (flow.volume / maxFlowVolume) * 3);
+                          const flowClass = `trade-flow-line${flow.balance < 0 ? ' deficit' : ''}${isActive ? ' active' : ''}${isDimmed ? ' dimmed' : ''}`;
                           return (
                             <React.Fragment key={`flow-${i}`}>
                               <MapLine
@@ -1186,7 +1200,8 @@ const TradingPlacesPage: React.FC = () => {
                                 stroke={flow.balance >= 0 ? '#10B981' : '#EF4444'}
                                 strokeWidth={isActive ? baseWidth + 2 : baseWidth}
                                 strokeLinecap="round"
-                                style={{ opacity: isDimmed ? 0.2 : isActive ? 1 : 0.7, transition: 'opacity 0.2s' }}
+                                className={flowClass}
+                                style={{ opacity: isDimmed ? 0.2 : isActive ? 1 : 0.7 }}
                               />
                               <MapLine
                                 from={flow.from}
@@ -1247,11 +1262,12 @@ const TradingPlacesPage: React.FC = () => {
                           );
                         })}
 
-                        {/* Bubble map: connection lines (interactive) */}
+                        {/* Bubble map: connection lines (interactive, animated) */}
                         {mapStyle === 'bubble' && detailCountry && TRADE_CENTROIDS[detailCountry] && tradeFlows.map((flow, i) => {
                           const isActive = selectedFlow === i;
                           const isDimmed = selectedFlow !== null && selectedFlow !== i;
                           const baseWidth = Math.max(0.5, (flow.volume / maxFlowVolume) * 2.5);
+                          const flowClass = `trade-flow-bubble${flow.balance < 0 ? ' deficit' : ''}${isActive ? ' active' : ''}${isDimmed ? ' dimmed' : ''}`;
                           return (
                             <React.Fragment key={`conn-${i}`}>
                               <MapLine
@@ -1260,8 +1276,8 @@ const TradingPlacesPage: React.FC = () => {
                                 stroke={flow.balance >= 0 ? '#10B981' : '#EF4444'}
                                 strokeWidth={isActive ? baseWidth + 2 : baseWidth}
                                 strokeLinecap="round"
-                                strokeDasharray={isActive ? undefined : '4 2'}
-                                style={{ opacity: isDimmed ? 0.2 : isActive ? 1 : 0.6, transition: 'opacity 0.2s' }}
+                                className={flowClass}
+                                style={{ opacity: isDimmed ? 0.2 : isActive ? 1 : 0.6 }}
                               />
                               <MapLine
                                 from={flow.from}
@@ -1366,8 +1382,8 @@ const TradingPlacesPage: React.FC = () => {
                       {mapStyle === 'bubble' && <span className={tc.textSec}>Circle size = metric value</span>}
                       {detailCountry && (
                         <span className={tc.textSec}>
-                          <span className="inline-block w-3 h-0.5 bg-green-500 mr-1 align-middle" /> Surplus
-                          <span className="inline-block w-3 h-0.5 bg-red-500 ml-2 mr-1 align-middle" /> Deficit
+                          <span className="inline-block w-3 h-0.5 bg-green-500 mr-1 align-middle" /> Surplus (flows outward)
+                          <span className="inline-block w-3 h-0.5 bg-red-500 ml-2 mr-1 align-middle" /> Deficit (flows inward)
                         </span>
                       )}
                     </div>
