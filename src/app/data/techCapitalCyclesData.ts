@@ -793,6 +793,105 @@ export const PHASE_DESCRIPTIONS: Record<string, { title: string; description: st
   },
 };
 
+export interface PerezFigureRow {
+  surgeId: number;
+  ordinal: string;
+  dateLine: string;
+  revolutionName: string;
+  coreCountry: string;
+  bubbleLabel: string;
+  bubbleDetail: string;
+  recessionLabel: string;
+  recessionYears: string;
+  goldenAgeLabel: string;
+  goldenAgeDetail: string;
+  maturityNote: string;
+  installStart: number;
+  installEnd: number;
+  tpStart: number;
+  tpEnd: number;
+  deployStart: number;
+  deployEnd: number;
+}
+
+export const PEREZ_FIGURE_DATA: PerezFigureRow[] = [
+  {
+    surgeId: 1, ordinal: '1st', dateLine: '1771',
+    revolutionName: 'The Industrial Revolution',
+    coreCountry: 'Britain',
+    bubbleLabel: 'Canal mania',
+    bubbleDetail: 'UK',
+    recessionLabel: '1793–97',
+    recessionYears: '1793–97',
+    goldenAgeLabel: 'Great British leap',
+    goldenAgeDetail: 'Factory system, British industrial supremacy',
+    maturityNote: '',
+    installStart: 1771, installEnd: 1793,
+    tpStart: 1793, tpEnd: 1797,
+    deployStart: 1798, deployEnd: 1829,
+  },
+  {
+    surgeId: 2, ordinal: '2nd', dateLine: '1829',
+    revolutionName: 'Age of Steam & Railways',
+    coreCountry: 'Britain',
+    bubbleLabel: 'Railway mania',
+    bubbleDetail: 'UK',
+    recessionLabel: '1848–50',
+    recessionYears: '1848–50',
+    goldenAgeLabel: 'The Victorian Boom',
+    goldenAgeDetail: 'Global trade expansion, Great Exhibition 1851',
+    maturityNote: '',
+    installStart: 1829, installEnd: 1848,
+    tpStart: 1848, tpEnd: 1850,
+    deployStart: 1850, deployEnd: 1873,
+  },
+  {
+    surgeId: 3, ordinal: '3rd', dateLine: '1875',
+    revolutionName: 'Age of Steel, Electricity & Engineering',
+    coreCountry: 'USA & Germany',
+    bubbleLabel: 'London funded global market infrastructure build-up',
+    bubbleDetail: '(Argentina, Australia, USA)',
+    recessionLabel: '1890–95',
+    recessionYears: '1890–95',
+    goldenAgeLabel: "Belle Époque (Europe) / Progressive Era (USA)",
+    goldenAgeDetail: 'Electrification, submarine cables, reform era',
+    maturityNote: '* Overlap of more than a decade between Deployment 3 and Installation 4',
+    installStart: 1875, installEnd: 1890,
+    tpStart: 1890, tpEnd: 1895,
+    deployStart: 1895, deployEnd: 1918,
+  },
+  {
+    surgeId: 4, ordinal: '4th', dateLine: '1908',
+    revolutionName: 'Age of Oil, Autos & Mass Production',
+    coreCountry: 'USA',
+    bubbleLabel: 'The roaring twenties USA — Autos, housing, radio, aviation, electricity',
+    bubbleDetail: '',
+    recessionLabel: 'Europe 1929–33 / USA 1929–43',
+    recessionYears: '1929–43',
+    goldenAgeLabel: 'Post-war Golden Age',
+    goldenAgeDetail: 'Suburbanisation, welfare states, Keynesian full employment',
+    maturityNote: '',
+    installStart: 1908, installEnd: 1929,
+    tpStart: 1929, tpEnd: 1943,
+    deployStart: 1943, deployEnd: 1974,
+  },
+  {
+    surgeId: 5, ordinal: '5th', dateLine: '1971',
+    revolutionName: 'Age of ICT & Digital',
+    coreCountry: 'USA',
+    bubbleLabel: 'Internet mania, Telecoms 1990s, emerging markets, global financial casino/housing 2000s',
+    bubbleDetail: '',
+    recessionLabel: '2000–03 / 2007–??',
+    recessionYears: '2000–??',
+    goldenAgeLabel: "Global sustainable 'golden age'?",
+    goldenAgeDetail: 'Green transition, AI-augmented productivity — depends on institutional alignment',
+    maturityNote: '← We are here',
+    installStart: 1971, installEnd: 2000,
+    tpStart: 2000, tpEnd: 2008,
+    deployStart: 2008, deployEnd: 2060,
+  },
+];
+
 export const EXTENDED_QUOTES: { quote: string; author: string; source: string; year: number; relevantView: string }[] = [
   {
     quote: 'Not only does the irruption of each revolution set the stage for a bubble, but also, in the times of paradigm transition, the conditions are especially fertile for the growth of a financial hotbed of decoupled financial capital.',
