@@ -196,6 +196,18 @@ const TechFlowSankey = dynamic(
   }
 );
 
+const TechCapitalCyclesChart = dynamic(
+  () => import('../components/TechCapitalCyclesChart'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
 const TechnologyPage = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [activeSection, setActiveSection] = useState<string>('overview');
@@ -438,6 +450,7 @@ const TechnologyPage = () => {
             { id: 'ai', label: 'AI & Emerging Tech', icon: '🤖' },
             { id: 'digital-economy', label: 'Digital Economy', icon: '💳' },
             { id: 'workforce', label: 'Tech Workforce', icon: '👩‍💻' },
+            { id: 'capital-cycles', label: 'Tech & Capital', icon: '🔄' },
             { id: 'insights', label: 'Insights', icon: '💡' },
           ].map(tab => (
             <button
@@ -942,6 +955,31 @@ const TechnologyPage = () => {
               selectedCountries={selectedCountries}
               onCountryChange={setSelectedCountries}
             />
+          </div>
+        )}
+
+        {/* Section: Tech & Capital Cycles */}
+        {activeSection === 'capital-cycles' && (
+          <div className="space-y-6">
+            <div className={`p-5 rounded-xl border ${themeColors.cardBg} ${themeColors.border}`}>
+              <h2 className={`text-xl font-bold mb-2 ${themeColors.text}`}>
+                Technological Revolutions &amp; Financial Capital
+              </h2>
+              <p className={`text-sm ${themeColors.textSecondary}`}>
+                This section draws on Carlota Perez&apos;s framework of great surges of technological
+                revolution and their relationship with financial capital. Each revolution follows a
+                recurring pattern: an <strong>Installation</strong> period fuelled by speculative financial
+                capital, a <strong>Turning Point</strong> crisis, and a <strong>Deployment</strong> period
+                where production capital drives broad societal adoption. The visualisations below map
+                250 years of this dynamic, from the first Industrial Revolution to the current Age of
+                Information.
+              </p>
+              <p className={`text-xs mt-2 ${themeColors.textSecondary}`}>
+                Sources: Perez (2002), Freeman &amp; Louçã (2001), Schumpeter (1942), Kondratiev (1925),
+                Minsky (1986), Janeway (2012), Smil (2005)
+              </p>
+            </div>
+            <TechCapitalCyclesChart isDarkMode={isDarkMode} />
           </div>
         )}
 
