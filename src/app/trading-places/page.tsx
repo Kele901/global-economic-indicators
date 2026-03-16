@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import {
+import { 
   TrendingUp, TrendingDown, Globe, DollarSign, Package,
   ArrowUpRight, ArrowDownRight, BarChart3, Search, ChevronUp,
   X, Clock, Shield, Map, ZoomIn, ZoomOut, RotateCcw
@@ -16,7 +16,7 @@ import {
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTradeData, useHistoricalTradeData } from '../hooks/useTradeData';
 import { COUNTRY_MAPPINGS } from '../services/tradeData';
-import {
+import { 
   US, CN, DE, JP, GB, IN, BR, KR, CA, AU, MX, RU, SA,
   FR, IT, ES, ID, TR, TH, SG, MY, AR, UY, PY
 } from 'country-flag-icons/react/3x2';
@@ -351,7 +351,7 @@ const TradingPlacesPage: React.FC = () => {
       const te = countries.reduce((s, c) => s + (c.exports || 0), 0);
       const ti = countries.reduce((s, c) => s + (c.imports || 0), 0);
       return { year: Number(year), 'Exports ($B)': Math.round(te * 10) / 10, 'Imports ($B)': Math.round(ti * 10) / 10 };
-    });
+      });
   }, [historicalYearlyData]);
 
   const top5ExporterData = useMemo(() => {
@@ -489,8 +489,8 @@ const TradingPlacesPage: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           <p className={tc.textSec}>Loading trade data...</p>
-        </div>
-      </div>
+          </div>
+              </div>
     );
   }
 
@@ -516,20 +516,20 @@ const TradingPlacesPage: React.FC = () => {
           <div>
             <h1 className={`text-3xl font-bold ${tc.text}`}>Trading Places</h1>
             <p className={tc.textSec}>Global trade flows, tariffs, and economic relationships</p>
-          </div>
+                    </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setEnableRealData(!enableRealData)} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${enableRealData ? 'bg-green-600 text-white border-green-600' : `${tc.card} ${tc.textSec}`}`}>
               {enableRealData ? 'Live Data' : 'Sample'}
-            </button>
-            <div className="flex items-center gap-2">
+                  </button>
+                  <div className="flex items-center gap-2">
               <span className={`text-xs ${tc.textSec}`}>Light</span>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`relative w-11 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}>
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${isDarkMode ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
-              </button>
+                    </button>
               <span className={`text-xs ${tc.textSec}`}>Dark</span>
+                  </div>
+                </div>
             </div>
-          </div>
-        </div>
 
         {/* Info Banner */}
         <div className={`rounded-xl border p-4 mb-6 ${tc.infoBg}`}>
@@ -539,8 +539,8 @@ const TradingPlacesPage: React.FC = () => {
             Country Focus for detailed partner analysis, Historical for long-term trends, Tariffs &amp; Blocs
             for trade disputes and regional agreements, and Trade Map for geographic flow visualization.
           </p>
-        </div>
-
+          </div>
+          
         {/* Global Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[
@@ -557,8 +557,8 @@ const TradingPlacesPage: React.FC = () => {
               <div className={`text-2xl font-bold ${tc.text}`}>{s.value}</div>
             </div>
           ))}
-        </div>
-
+          </div>
+          
         {/* View Mode Selector */}
         <div className={`rounded-xl border p-3 mb-4 ${tc.card}`}>
           <div className="flex flex-wrap gap-2">
@@ -568,9 +568,9 @@ const TradingPlacesPage: React.FC = () => {
                 {vm.label}
               </button>
             ))}
+            </div>
           </div>
-        </div>
-
+          
         {/* Controls Card - shown for Rankings and Country Focus */}
         {(viewMode === 'rankings' || viewMode === 'countryFocus') && (
           <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
@@ -581,13 +581,13 @@ const TradingPlacesPage: React.FC = () => {
                   <select value={filterRegion} onChange={e => setFilterRegion(e.target.value)} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
                     {regions.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
-                </div>
+              </div>
                 <div className="min-w-[140px]">
                   <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Sort By</label>
                   <select value={sortBy} onChange={e => { setSortBy(e.target.value); setSortDir('desc'); }} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
                     {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
-                </div>
+            </div>
               </>
             )}
             <div className="flex-1 min-w-[180px]">
@@ -596,10 +596,10 @@ const TradingPlacesPage: React.FC = () => {
                 <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${tc.textSec}`} />
                 <input value={countrySearch} onChange={e => setCountrySearch(e.target.value)} placeholder="Search countries..."
                   className={`w-full pl-9 pr-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
         {/* Historical controls */}
         {viewMode === 'historical' && (
@@ -609,16 +609,16 @@ const TradingPlacesPage: React.FC = () => {
               <select value={customStartYear} onChange={e => setCustomStartYear(Number(e.target.value))} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
                 {Array.from({ length: 7 }, (_, i) => 1960 + i * 10).map(y => <option key={y} value={y}>{y}</option>)}
               </select>
-            </div>
+                </div>
             <div className="min-w-[120px]">
               <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>End Year</label>
               <select value={customEndYear} onChange={e => setCustomEndYear(Number(e.target.value))} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
                 {Array.from({ length: 7 }, (_, i) => 2023 - i * 5).map(y => <option key={y} value={y}>{y}</option>)}
               </select>
-            </div>
+                </div>
             {historicalLoading && <div className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className={`text-sm ${tc.textSec}`}>Loading...</span></div>}
-          </div>
-        )}
+              </div>
+            )}
 
         {/* Map controls */}
         {viewMode === 'map' && (
@@ -628,31 +628,31 @@ const TradingPlacesPage: React.FC = () => {
               <select value={mapMetric} onChange={e => setMapMetric(e.target.value as MapMetric)} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
                 {MAP_METRICS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
               </select>
-            </div>
+                  </div>
             <div className="min-w-[160px]">
               <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Map Style</label>
               <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: isDarkMode ? '#374151' : '#d1d5db' }}>
                 <button onClick={() => setMapStyle('choropleth')} className={`flex-1 px-3 py-1.5 text-sm font-medium transition-colors ${mapStyle === 'choropleth' ? tc.subtabActive : tc.subtab}`}>
                   Choropleth
-                </button>
+                    </button>
                 <button onClick={() => setMapStyle('bubble')} className={`flex-1 px-3 py-1.5 text-sm font-medium transition-colors ${mapStyle === 'bubble' ? tc.subtabActive : tc.subtab}`}>
                   Bubble
-                </button>
-              </div>
-            </div>
+                      </button>
+                  </div>
+                </div>
             <div className="flex items-end gap-1">
               <button onClick={() => setMapPosition(p => ({ ...p, zoom: Math.min(p.zoom * 1.5, 8) }))} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
               <button onClick={() => setMapPosition(p => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }))} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
               <button onClick={() => setMapPosition({ coordinates: [0, 20], zoom: 1 })} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Reset"><RotateCcw className="w-4 h-4" /></button>
-            </div>
+                          </div>
             {detailCountry && (
               <div className="flex items-end">
                 <button onClick={() => setDetailCountry(null)} className={`px-3 py-1.5 rounded-lg text-sm border ${tc.inactiveBg}`}>
                   Clear Selection
-                </button>
-              </div>
-            )}
-          </div>
+                          </button>
+                          </div>
+                          )}
+                        </div>
         )}
 
         {/* Main Content Area */}
@@ -662,9 +662,9 @@ const TradingPlacesPage: React.FC = () => {
             {/* ==================== RANKINGS VIEW ==================== */}
             {viewMode === 'rankings' && (
               <div className={`rounded-xl border overflow-hidden ${tc.card}`}>
-                <div className="overflow-x-auto">
+                  <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead>
+                      <thead>
                       <tr className={isDarkMode ? 'bg-gray-800/60' : 'bg-gray-50'}>
                         <th className={`px-3 py-3 text-left text-xs font-medium uppercase ${tc.textSec}`} style={{ width: 50 }}>#</th>
                         <th className={`px-3 py-3 text-left text-xs font-medium uppercase ${tc.textSec}`} style={{ minWidth: 160 }}>Country</th>
@@ -676,10 +676,10 @@ const TradingPlacesPage: React.FC = () => {
                           <th key={col.key} onClick={() => toggleSort(col.key)}
                             className={`px-3 py-3 text-right text-xs font-medium uppercase cursor-pointer select-none ${tc.textSec} hover:text-blue-500`} style={{ minWidth: 100 }}>
                             {col.label} {sortBy === col.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
-                          </th>
+                              </th>
                         ))}
-                      </tr>
-                    </thead>
+                        </tr>
+                      </thead>
                     <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
                       {sortedCountries.map((c, i) => (
                         <tr key={c.code} onClick={() => setDetailCountry(prev => prev === c.code ? null : c.code)}
@@ -690,7 +690,7 @@ const TradingPlacesPage: React.FC = () => {
                               <FlagIcon code={c.code} />
                               <span className={`font-medium ${tc.text}`}>{c.name}</span>
                             </div>
-                          </td>
+                              </td>
                           <td className="px-3 py-3 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <div className="w-16 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -698,23 +698,23 @@ const TradingPlacesPage: React.FC = () => {
                               </div>
                               <span className={tc.text}>{formatNumber(c.totalExports)}</span>
                             </div>
-                          </td>
+                              </td>
                           <td className={`px-3 py-3 text-right ${tc.text}`}>{formatNumber(c.totalImports)}</td>
                           <td className={`px-3 py-3 text-right font-medium ${getBalColor(c.tradeBalance)}`}>
                             {c.tradeBalance > 0 ? '+' : ''}{formatNumber(c.tradeBalance)}
-                          </td>
+                              </td>
                           <td className={`px-3 py-3 text-right ${tc.text}`}>{formatPct(c.tradeIntensity)}</td>
                           <td className={`px-3 py-3 text-right font-medium ${c.exportGrowth >= 0 ? tc.positive : tc.negative}`}>
                             {c.exportGrowth > 0 ? '+' : ''}{formatPct(c.exportGrowth)}
-                          </td>
+                              </td>
                           <td className={`px-3 py-3 text-right ${tc.text}`}>{c.diversificationIndex.toFixed(2)}</td>
                         </tr>
                       ))}
-                    </tbody>
-                  </table>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* ==================== COUNTRY FOCUS VIEW ==================== */}
             {viewMode === 'countryFocus' && (
@@ -732,8 +732,8 @@ const TradingPlacesPage: React.FC = () => {
                         <span className="sm:hidden">{c.code}</span>
                       </button>
                     ))}
-                  </div>
-                </div>
+                            </div>
+                    </div>
 
                 {/* Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -754,7 +754,7 @@ const TradingPlacesPage: React.FC = () => {
                         {chartData.importData.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
                       </Pie><Tooltip contentStyle={tc.tooltip} /></RechartsPieChart>
                     </ResponsiveContainer>
-                  </div>
+                </div>
                   {/* Partners Pie */}
                   <div className={`rounded-xl border p-4 ${tc.card}`}>
                     <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>Trading Partners</h3>
@@ -779,7 +779,7 @@ const TradingPlacesPage: React.FC = () => {
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                </div>
+            </div>
 
                 {/* Trade Flows Table */}
                 <div className={`rounded-xl border overflow-hidden ${tc.card}`}>
@@ -800,8 +800,8 @@ const TradingPlacesPage: React.FC = () => {
                           <td className={`px-4 py-2 text-right ${tc.text}`}>${p.tradeVolume.toFixed(1)}</td>
                           <td className={`px-4 py-2 text-right font-medium ${getBalColor(p.balance)}`}>{p.balance > 0 ? '+' : ''}${p.balance.toFixed(1)}</td>
                           <td className={`px-4 py-2 text-right ${tc.text}`}>{p.share}%</td>
-                        </tr>
-                      ))}
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -817,7 +817,7 @@ const TradingPlacesPage: React.FC = () => {
                     <div key={i} className={`rounded-xl border p-3 ${tc.card}`}>
                       <div className={`text-xs uppercase tracking-wide mb-1 ${tc.textSec}`}>{c.label}</div>
                       <div className={`text-lg font-bold ${c.color}`}>{c.value}</div>
-                    </div>
+                  </div>
                   ))}
                 </div>
               </div>
@@ -838,7 +838,7 @@ const TradingPlacesPage: React.FC = () => {
                         <Area type="monotone" dataKey="World Trade ($T)" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.2} />
                       </AreaChart>
                     </ResponsiveContainer>
-                  </div>
+                        </div>
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -856,7 +856,7 @@ const TradingPlacesPage: React.FC = () => {
                           <Area type="monotone" dataKey="Imports ($B)" stroke="#EF4444" fill="#EF4444" fillOpacity={0.15} />
                         </AreaChart>
                       </ResponsiveContainer>
-                    </div>
+                        </div>
                   )}
 
                   {top5ExporterData.data.length > 0 && (
@@ -874,9 +874,9 @@ const TradingPlacesPage: React.FC = () => {
                           ))}
                         </LineChart>
                       </ResponsiveContainer>
-                    </div>
+              </div>
                   )}
-                </div>
+            </div>
 
                 {latestYearSnapshot.length > 0 && (
                   <div className={`rounded-xl border p-4 ${tc.card}`}>
@@ -892,7 +892,7 @@ const TradingPlacesPage: React.FC = () => {
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
-                  </div>
+          </div>
                 )}
 
                 {!globalTradeVolumeData.length && !globalAggregateData.length && !historicalLoading && (
@@ -902,7 +902,7 @@ const TradingPlacesPage: React.FC = () => {
                     <p className={`text-sm mt-1 ${tc.textSec}`}>Enable real data to fetch historical trade trends from the World Bank.</p>
                   </div>
                 )}
-              </div>
+                  </div>
             )}
 
             {/* ==================== TARIFFS & BLOCS VIEW ==================== */}
@@ -917,9 +917,9 @@ const TradingPlacesPage: React.FC = () => {
                     <button key={t.id} onClick={() => setTariffTab(t.id)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tariffTab === t.id ? tc.subtabActive : tc.subtab}`}>
                       {t.label}
-                    </button>
-                  ))}
-                </div>
+                      </button>
+                    ))}
+              </div>
 
                 {/* Disputes */}
                 {tariffTab === 'disputes' && (
@@ -927,7 +927,7 @@ const TradingPlacesPage: React.FC = () => {
                     {tariffData.currentDisputes.map(d => (
                       <div key={d.id} className={`rounded-xl border p-5 ${tc.card}`}>
                         <div className="flex items-start justify-between mb-3">
-                          <div>
+                        <div>
                             <h3 className={`font-semibold text-lg ${tc.text}`}>{d.title}</h3>
                             <p className={`text-sm ${tc.textSec}`}>{d.description}</p>
                           </div>
@@ -939,11 +939,11 @@ const TradingPlacesPage: React.FC = () => {
                           <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>Global Trade Impact</div>
                             <div className={`text-lg font-bold ${tc.negative}`}>{d.impact.globalTrade}%</div>
-                          </div>
+                      </div>
                           <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>GDP Impact</div>
                             <div className={`text-lg font-bold ${tc.negative}`}>{d.impact.gdp}%</div>
-                          </div>
+                    </div>
                           <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>Countries Affected</div>
                             <div className={`text-lg font-bold ${tc.text}`}>{d.impact.affectedCountries}</div>
@@ -956,13 +956,13 @@ const TradingPlacesPage: React.FC = () => {
                               <div key={i} className="flex gap-3 text-sm">
                                 <span className={`font-mono shrink-0 ${tc.textSec}`}>{t.date}</span>
                                 <span className={tc.text}>{t.event}</span>
-                              </div>
-                            ))}
-                          </div>
                         </div>
+                            ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
+                    ))}
+                        </div>
                 )}
 
                 {/* Trends */}
@@ -979,7 +979,7 @@ const TradingPlacesPage: React.FC = () => {
                           <Area type="monotone" dataKey="average" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.2} name="Avg Tariff %" />
                         </AreaChart>
                       </ResponsiveContainer>
-                    </div>
+                        </div>
                     <div className={`rounded-xl border p-4 ${tc.card}`}>
                       <h3 className={`font-semibold mb-3 ${tc.text}`}>Sectoral Impact</h3>
                       <ResponsiveContainer width="100%" height={280}>
@@ -993,8 +993,8 @@ const TradingPlacesPage: React.FC = () => {
                           <Bar dataKey="tradeVolume" fill="#EF4444" name="Trade Vol. %" radius={[0, 4, 4, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
-                    </div>
-                    <div>
+                      </div>
+                  <div>
                       <h3 className={`font-semibold mb-3 ${tc.text}`}>Historical Trade Wars</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {tariffData.historicalWars.map((w, i) => (
@@ -1005,13 +1005,13 @@ const TradingPlacesPage: React.FC = () => {
                             <div className="flex items-center gap-2 text-xs">
                               <span className={`px-2 py-0.5 rounded ${tc.tagBg} ${tc.textSec}`}>Avg Tariff: {w.averageTariff}%</span>
                               <span className={`px-2 py-0.5 rounded ${tc.tagBg} ${tc.textSec}`}>{w.impact}</span>
-                            </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
                 {/* Blocs */}
                 {tariffTab === 'blocs' && (
@@ -1023,24 +1023,24 @@ const TradingPlacesPage: React.FC = () => {
                           <div>
                             <h3 className={`font-semibold ${tc.text}`}>{bloc.name}</h3>
                             <p className={`text-xs ${tc.textSec}`}>{bloc.type} &middot; Est. {bloc.established}</p>
+                  </div>
                           </div>
-                        </div>
                         <div className="flex flex-wrap gap-1.5 mb-3">
                           {bloc.members.map(m => (
                             <span key={m.code} className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${tc.tagBg} ${tc.text}`}>
                               <FlagIcon code={m.code} size="w-4 h-3" />{m.name}
-                            </span>
-                          ))}
-                        </div>
+                          </span>
+                    ))}
+                  </div>
                         <div className="grid grid-cols-3 gap-2 mb-3">
                           <div className={`rounded-lg p-2 text-center ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>GDP</div>
                             <div className={`font-bold ${tc.text}`}>${(bloc.totalGdp / 1000000).toFixed(1)}T</div>
-                          </div>
+                </div>
                           <div className={`rounded-lg p-2 text-center ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>Population</div>
                             <div className={`font-bold ${tc.text}`}>{(bloc.totalPopulation / 1000000).toFixed(0)}M</div>
-                          </div>
+                  </div>
                           <div className={`rounded-lg p-2 text-center ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>Coverage</div>
                             <div className={`font-bold ${tc.text}`}>{bloc.tradeCoverage}%</div>
@@ -1053,8 +1053,8 @@ const TradingPlacesPage: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
+                </div>
+              )}
 
                 {/* Advanced Metrics */}
                 {tariffTab === 'advanced' && (
@@ -1077,7 +1077,7 @@ const TradingPlacesPage: React.FC = () => {
                         const barData = Object.entries(metricsData)
                           .map(([code, vals]) => ({ name: mockTradeData.countries.find(c => c.code === code)?.name || code, code, value: vals[metricKey] ?? 0 }))
                           .sort((a, b) => b.value - a.value);
-                        return (
+                      return (
                           <div key={metricKey} className={`rounded-xl border p-4 ${tc.card}`}>
                             <h3 className={`font-semibold mb-3 capitalize ${tc.text}`}>{metricKey.replace(/([A-Z])/g, ' $1').trim()}</h3>
                             <ResponsiveContainer width="100%" height={300}>
@@ -1091,14 +1091,14 @@ const TradingPlacesPage: React.FC = () => {
                                 </Bar>
                               </BarChart>
                             </ResponsiveContainer>
-                          </div>
-                        );
+                        </div>
+                      );
                       });
                     })()}
                   </div>
                 )}
-              </div>
-            )}
+                </div>
+              )}
 
             {/* ==================== MAP VIEW ==================== */}
             {viewMode === 'map' && (
@@ -1192,7 +1192,7 @@ const TradingPlacesPage: React.FC = () => {
                           const isDimmed = selectedFlow !== null && selectedFlow !== i;
                           const baseWidth = Math.max(0.5, (flow.volume / maxFlowVolume) * 3);
                           const flowClass = `trade-flow-line${flow.balance < 0 ? ' deficit' : ''}${isActive ? ' active' : ''}${isDimmed ? ' dimmed' : ''}`;
-                          return (
+                        return (
                             <React.Fragment key={`flow-${i}`}>
                               <MapLine
                                 from={flow.from}
@@ -1220,8 +1220,8 @@ const TradingPlacesPage: React.FC = () => {
                                 onClick={() => setSelectedFlow(prev => prev === i ? null : i)}
                               />
                             </React.Fragment>
-                          );
-                        })}
+                        );
+                      })}
 
                         {/* Bubble map: circles at centroids */}
                         {mapStyle === 'bubble' && Object.entries(TRADE_CENTROIDS).map(([code, coords]) => {
@@ -1319,8 +1319,8 @@ const TradingPlacesPage: React.FC = () => {
                           {mapMetric === 'tradeIntensity' || mapMetric === 'exportGrowth'
                             ? formatPct(hoveredCountry.value)
                             : formatNumber(hoveredCountry.value)}
-                        </div>
-                      </div>
+                              </div>
+                            </div>
                     )}
 
                     {/* Trade Flow Hover Tooltip */}
@@ -1351,19 +1351,19 @@ const TradingPlacesPage: React.FC = () => {
                             <div className="flex justify-between"><span className="opacity-60">Imports</span><span className="font-medium text-red-500">${flow.imports}B</span></div>
                             <div className="flex justify-between"><span className="opacity-60">Balance</span><span className={`font-medium ${flow.balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>{flow.balance >= 0 ? '+' : ''}{flow.balance}B</span></div>
                             <div className="flex justify-between"><span className="opacity-60">Volume</span><span className="font-medium">${flow.volume}B</span></div>
-                          </div>
-                          <div className="text-[10px] opacity-40 mt-1.5 text-center">Click for details</div>
                         </div>
+                          <div className="text-[10px] opacity-40 mt-1.5 text-center">Click for details</div>
+                      </div>
                       );
                     })()}
-                  </div>
-
+                      </div>
+                      
                   {/* Color Legend */}
                   <div className={`px-4 py-3 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                     <div className="flex items-center justify-between text-xs">
                       <span className={tc.textSec}>
                         {(mapMetric === 'tradeBalance' || mapMetric === 'exportGrowth') ? 'Deficit' : 'Low'}
-                      </span>
+                                </span>
                       <div className="flex-1 mx-3 h-3 rounded-full overflow-hidden flex">
                         {(mapMetric === 'tradeBalance' || mapMetric === 'exportGrowth') ? (
                           <>
@@ -1372,11 +1372,11 @@ const TradingPlacesPage: React.FC = () => {
                         ) : (
                           <div className="flex-1" style={{ background: 'linear-gradient(to right, #dbeafe, #3b82f6, #1e3a8a)' }} />
                         )}
-                      </div>
+                              </div>
                       <span className={tc.textSec}>
                         {(mapMetric === 'tradeBalance' || mapMetric === 'exportGrowth') ? 'Surplus' : 'High'}
-                      </span>
-                    </div>
+                              </span>
+                            </div>
                     <div className="flex items-center gap-4 mt-2 text-xs">
                       <span className={tc.textSec}>{MAP_METRICS.find(m => m.id === mapMetric)?.label}</span>
                       {mapStyle === 'bubble' && <span className={tc.textSec}>Circle size = metric value</span>}
@@ -1386,9 +1386,9 @@ const TradingPlacesPage: React.FC = () => {
                           <span className="inline-block w-3 h-0.5 bg-red-500 ml-2 mr-1 align-middle" /> Deficit (flows inward)
                         </span>
                       )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
                 {/* Selected Flow Detail Card */}
                 {selectedFlow !== null && tradeFlows[selectedFlow] && detailCountryData && (() => {
@@ -1416,25 +1416,25 @@ const TradingPlacesPage: React.FC = () => {
 
                   return (
                     <div className={`rounded-xl border p-5 ${tc.card}`}>
-                      <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3 flex-wrap">
                           <div className="flex items-center gap-2">
                             <FlagIcon code={sourceData.code} size="w-7 h-5" />
                             <span className={`font-bold ${tc.text}`}>{sourceData.name}</span>
-                          </div>
+                            </div>
                           <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${flow.balance >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                             {flow.balance >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {flow.balance >= 0 ? 'Surplus' : 'Deficit'}
-                          </div>
+                              </div>
                           <div className="flex items-center gap-2">
                             <FlagIcon code={flow.partnerCode} size="w-7 h-5" />
                             <span className={`font-bold ${tc.text}`}>{partnerData?.name || flow.partner}</span>
-                          </div>
-                        </div>
+                              </div>
+                            </div>
                         <button onClick={() => setSelectedFlow(null)} className={`p-1.5 rounded-lg ${tc.inactiveBg}`}>
                           <X className="w-4 h-4" />
                         </button>
-                      </div>
+                            </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                         {[
@@ -1446,38 +1446,38 @@ const TradingPlacesPage: React.FC = () => {
                           <div key={idx} className={`rounded-lg p-3 text-center ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>{s.label}</div>
                             <div className={`text-lg font-bold ${s.color}`}>{s.value}</div>
-                          </div>
-                        ))}
-                      </div>
+                                  </div>
+                                ))}
+                              </div>
 
                       <div className={`rounded-lg p-3 mb-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                         <div className="flex items-center justify-between mb-2">
                           <span className={`text-xs font-medium uppercase ${tc.textSec}`}>Trade Share</span>
                           <span className={`text-sm font-bold ${tc.text}`}>{tradeSharePct}%</span>
-                        </div>
+                            </div>
                         <div className={`w-full h-2 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
                           <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${Math.min(Number(tradeSharePct), 100)}%` }} />
-                        </div>
+                              </div>
                         <div className={`text-xs mt-1 ${tc.textSec}`}>
                           {partnerData?.name || flow.partner} accounts for {tradeSharePct}% of {sourceData.name}&apos;s total trade
-                        </div>
-                      </div>
+                              </div>
+                            </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {sharedBlocs.length > 0 && (
                           <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <h4 className={`text-xs font-medium uppercase mb-2 ${tc.textSec}`}>Shared Trade Blocs</h4>
-                            <div className="flex flex-wrap gap-2">
+                              <div className="flex flex-wrap gap-2">
                               {sharedBlocs.map(bloc => (
                                 <div key={bloc.acronym} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs ${tc.tagBg}`}>
                                   <Globe className="w-3 h-3 text-blue-500" />
                                   <span className={`font-medium ${tc.text}`}>{bloc.acronym}</span>
                                   <span className={tc.textSec}>({bloc.type})</span>
-                                </div>
-                              ))}
-                            </div>
                           </div>
-                        )}
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                         {(srcTariff || partTariff) && (
                           <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
@@ -1488,23 +1488,23 @@ const TradingPlacesPage: React.FC = () => {
                                   <div className="flex items-center gap-1.5">
                                     <FlagIcon code={sourceData.code} size="w-4 h-3" />
                                     <span className={tc.text}>{sourceData.name}</span>
-                                  </div>
+                        </div>
                                   <span className={`font-medium ${tc.text}`}>{srcTariff.averageTariff}% avg</span>
-                                </div>
+                        </div>
                               )}
                               {partTariff && partnerData && (
                                 <div className="flex items-center justify-between text-xs">
                                   <div className="flex items-center gap-1.5">
                                     <FlagIcon code={partnerData.code} size="w-4 h-3" />
                                     <span className={tc.text}>{partnerData.name}</span>
-                                  </div>
-                                  <span className={`font-medium ${tc.text}`}>{partTariff.averageTariff}% avg</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
                       </div>
+                                  <span className={`font-medium ${tc.text}`}>{partTariff.averageTariff}% avg</span>
+                    </div>
+                  )}
+                </div>
+                    </div>
+                        )}
+                  </div>
 
                       {relevantDisputes.length > 0 && (
                         <div className={`rounded-lg p-3 mt-4 ${isDarkMode ? 'bg-amber-900/20 border border-amber-800/30' : 'bg-amber-50 border border-amber-100'}`}>
@@ -1517,12 +1517,12 @@ const TradingPlacesPage: React.FC = () => {
                                 <span className={tc.textSec}>Status: <span className={d.status === 'Ongoing' ? 'text-amber-500' : 'text-green-500'}>{d.status}</span></span>
                                 <span className={tc.textSec}>Since {d.startDate.split('-')[0]}</span>
                                 <span className={tc.textSec}>Impact: {d.impact.globalTrade}% global trade</span>
-                              </div>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        ))}
                     </div>
+                  )}
+                        </div>
                   );
                 })()}
 
@@ -1531,7 +1531,7 @@ const TradingPlacesPage: React.FC = () => {
                   <div className={`rounded-xl border p-4 ${tc.card}`}>
                     <h3 className={`font-semibold mb-3 ${tc.text}`}>
                       Trade Flows: {detailCountryData.name}
-                    </h3>
+                  </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-4">
                       {tradeFlows.slice(0, 5).map((flow) => {
                         const partnerCountry = combinedTradeData.countries.find(c => c.code === flow.partnerCode);
@@ -1549,24 +1549,24 @@ const TradingPlacesPage: React.FC = () => {
                               <span className={`text-sm font-medium truncate ${tc.text}`}>
                                 {partnerCountry?.name || flow.partner}
                               </span>
-                            </div>
+                          </div>
                             <div className="grid grid-cols-2 gap-1 text-xs">
-                              <div>
+                          <div>
                                 <span className={tc.textSec}>Exp</span>
                                 <div className="font-medium text-blue-500">${flow.exports}B</div>
-                              </div>
-                              <div>
+                          </div>
+                          <div>
                                 <span className={tc.textSec}>Imp</span>
                                 <div className="font-medium text-red-500">${flow.imports}B</div>
-                              </div>
-                            </div>
+                          </div>
+                          </div>
                             <div className={`text-xs mt-1 font-medium ${flow.balance >= 0 ? tc.positive : tc.negative}`}>
                               {flow.balance >= 0 ? '+' : ''}{flow.balance}B
-                            </div>
                           </div>
+                        </div>
                         );
                       })}
-                    </div>
+                        </div>
 
                     {/* Trade Bloc Badges */}
                     {(() => {
@@ -1581,18 +1581,18 @@ const TradingPlacesPage: React.FC = () => {
                             {memberBlocs.map(bloc => (
                               <span key={bloc.acronym} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm ${tc.tagBg} ${tc.text}`}>
                                 <Globe className="w-3.5 h-3.5 text-blue-500" />
-                                {bloc.acronym}
+                                    {bloc.acronym}
                                 <span className={`text-xs ${tc.textSec}`}>({bloc.type})</span>
-                              </span>
+                                  </span>
                             ))}
-                          </div>
-                        </div>
+                    </div>
+                  </div>
                       );
                     })()}
-                  </div>
+                      </div>
                 )}
-              </div>
-            )}
+                </div>
+              )}
           </div>
 
           {/* ==================== DETAIL PANEL ==================== */}
@@ -1601,13 +1601,13 @@ const TradingPlacesPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <FlagIcon code={detailCountryData.code} size="w-8 h-6" />
-                  <div>
+                    <div>
                     <h2 className={`font-bold text-lg ${tc.text}`}>{detailCountryData.name}</h2>
                     <span className={`text-xs px-2 py-0.5 rounded ${tc.tagBg} ${tc.textSec}`}>{detailCountryData.region}</span>
-                  </div>
+                    </div>
                 </div>
                 <button onClick={() => setDetailCountry(null)} className={`p-1 rounded-lg ${tc.inactiveBg}`}><X className="w-4 h-4" /></button>
-              </div>
+                  </div>
 
               {/* Key Stats */}
               <div className="grid grid-cols-2 gap-3 mb-4">
@@ -1621,8 +1621,8 @@ const TradingPlacesPage: React.FC = () => {
                     <div className={`text-xs ${tc.textSec}`}>{s.label}</div>
                     <div className={`font-bold ${s.color}`}>{s.value}</div>
                   </div>
-                ))}
-              </div>
+                    ))}
+                  </div>
 
               {/* Growth */}
               <div className={`flex gap-4 mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
@@ -1630,31 +1630,31 @@ const TradingPlacesPage: React.FC = () => {
                   {detailCountryData.exportGrowth >= 0 ? <ArrowUpRight className="w-4 h-4 text-green-500" /> : <ArrowDownRight className="w-4 h-4 text-red-500" />}
                   <span className={`text-xs ${tc.textSec}`}>Export Growth</span>
                   <span className={`text-sm font-bold ${detailCountryData.exportGrowth >= 0 ? tc.positive : tc.negative}`}>{detailCountryData.exportGrowth > 0 ? '+' : ''}{formatPct(detailCountryData.exportGrowth)}</span>
-                </div>
+                        </div>
                 <div className="flex items-center gap-1.5">
                   {detailCountryData.importGrowth >= 0 ? <ArrowUpRight className="w-4 h-4 text-green-500" /> : <ArrowDownRight className="w-4 h-4 text-red-500" />}
                   <span className={`text-xs ${tc.textSec}`}>Import Growth</span>
                   <span className={`text-sm font-bold ${detailCountryData.importGrowth >= 0 ? tc.positive : tc.negative}`}>{detailCountryData.importGrowth > 0 ? '+' : ''}{formatPct(detailCountryData.importGrowth)}</span>
-                </div>
-              </div>
+                                          </div>
+                                        </div>
 
               {/* Partners */}
               <div className="mb-4">
                 <h4 className={`text-xs font-medium uppercase mb-2 ${tc.textSec}`}>Top Partners</h4>
-                <div className="space-y-2">
+                                <div className="space-y-2">
                   {detailCountryData.tradePartners.slice(0, 5).map((p: any, i: number) => (
                     <div key={i} className="flex items-center justify-between">
                       <span className={`text-sm ${tc.text}`}>{p.country}</span>
                       <div className="flex items-center gap-2">
                         <div className="w-20 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700">
                           <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(p.share * 2, 100)}%` }} />
-                        </div>
+                                  </div>
                         <span className={`text-xs w-10 text-right ${tc.textSec}`}>{p.share}%</span>
-                      </div>
-                    </div>
+                                  </div>
+                                  </div>
                   ))}
-                </div>
-              </div>
+                                  </div>
+                                </div>
 
               {/* Top Exports/Imports */}
               <div className="mb-4">
@@ -1663,14 +1663,14 @@ const TradingPlacesPage: React.FC = () => {
                   {detailCountryData.topExports.map((e: string, i: number) => (
                     <span key={i} className={`px-2 py-0.5 rounded text-xs ${tc.tagBg} ${tc.text}`}>{e}</span>
                   ))}
-                </div>
+                        </div>
                 <h4 className={`text-xs font-medium uppercase mb-2 ${tc.textSec}`}>Top Imports</h4>
                 <div className="flex flex-wrap gap-1">
                   {detailCountryData.topImports.map((e: string, i: number) => (
                     <span key={i} className={`px-2 py-0.5 rounded text-xs ${tc.tagBg} ${tc.text}`}>{e}</span>
                   ))}
-                </div>
-              </div>
+                                  </div>
+                                </div>
 
               {/* Tariff Info */}
               {countryTariffs[detailCountryData.code] && (
@@ -1679,11 +1679,11 @@ const TradingPlacesPage: React.FC = () => {
                   <div className="flex justify-between text-sm mb-1">
                     <span className={tc.textSec}>Avg. Tariff Rate</span>
                     <span className={`font-medium ${tc.text}`}>{countryTariffs[detailCountryData.code].averageTariff}%</span>
-                  </div>
+                        </div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className={tc.textSec}>Active Tariffs</span>
                     <span className={`font-medium ${tc.text}`}>{countryTariffs[detailCountryData.code].appliedTariffs.filter(t => t.status === 'Active').length}</span>
-                  </div>
+                                        </div>
                   {countryTariffs[detailCountryData.code].tradeDisputes.length > 0 && (
                     <div className="mt-2">
                       <span className={`text-xs ${tc.textSec}`}>Disputes: </span>
@@ -1692,8 +1692,8 @@ const TradingPlacesPage: React.FC = () => {
                       ))}
                     </div>
                   )}
-                </div>
-              )}
+                    </div>
+                  )}
 
               {/* Advanced Summary */}
               {advancedTradeMetrics.economicComplexity[detailCountryData.code] && (
@@ -1704,19 +1704,19 @@ const TradingPlacesPage: React.FC = () => {
                     <div><span className={tc.textSec}>Logistics</span><div className={`font-medium ${tc.text}`}>{advancedTradeMetrics.tradeInfrastructure[detailCountryData.code]?.logisticsIndex}</div></div>
                     <div><span className={tc.textSec}>Partners</span><div className={`font-medium ${tc.text}`}>{advancedTradeMetrics.tradeConnectivity[detailCountryData.code]?.partners}</div></div>
                     <div><span className={tc.textSec}>Market Share</span><div className={`font-medium ${tc.text}`}>{advancedTradeMetrics.tradePerformance[detailCountryData.code]?.marketShare}%</div></div>
-                  </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
         </div>
 
         {/* Scroll to top */}
-        {showScrollTop && (
+      {showScrollTop && (
           <button onClick={scrollToTop} className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50">
-            <ChevronUp className="w-5 h-5" />
-          </button>
-        )}
+          <ChevronUp className="w-5 h-5" />
+        </button>
+      )}
       </div>
     </div>
   );

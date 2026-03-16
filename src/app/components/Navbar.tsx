@@ -81,6 +81,7 @@ const Navbar = () => {
         { href: '/outlook', label: 'Forecasts & Outlook' },
         { href: '/simulator', label: 'Scenario Simulator' },
         { href: '/development', label: 'Development Index' },
+        { href: '/inequality', label: 'Inequality' },
         { href: '/trade-network', label: 'Trade Network' },
         { href: '/economic-gravity', label: 'Economic Gravity' },
         { href: '/economic-cycles', label: 'Economic Cycles' },
