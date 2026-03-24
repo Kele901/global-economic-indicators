@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "global-economic-indicators.vercel.app"
+        }
+      ],
+      "destination": "https://www.globaleconindicators.info/$1",
+      "permanent": true
+    }
+  ]
+}
