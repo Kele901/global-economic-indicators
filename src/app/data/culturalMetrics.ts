@@ -899,6 +899,32 @@ export const webLanguagePresenceByCountry: Record<string, number> = {
   Thailand: 0.3, India: 0.1, Brazil: 2.6, Argentina: 4.7, Mexico: 4.7
 };
 
+// IP receipts fallback (charges for use of IP, receipts, current US$ billions — World Bank/IMF BPM6)
+export const ipReceiptsFallbackData: { year: number; [country: string]: number }[] = [
+  { year: 2010, USA: 124.0, Japan: 21.4, Germany: 15.3, UK: 18.7, France: 13.5, Netherlands: 26.8, Switzerland: 18.2, Sweden: 8.1, SouthKorea: 3.1, Canada: 4.8, Ireland: 5.2, Italy: 3.2, China: 0.8, India: 0.4, Australia: 2.7, Spain: 1.8, Brazil: 0.5 },
+  { year: 2012, USA: 133.8, Japan: 28.5, Germany: 16.1, UK: 20.3, France: 14.8, Netherlands: 29.5, Switzerland: 20.1, Sweden: 10.3, SouthKorea: 4.2, Canada: 5.1, Ireland: 6.8, Italy: 3.5, China: 1.1, India: 0.5, Australia: 2.9, Spain: 2.0, Brazil: 0.6 },
+  { year: 2014, USA: 136.4, Japan: 26.1, Germany: 17.2, UK: 22.4, France: 15.0, Netherlands: 35.0, Switzerland: 22.3, Sweden: 11.2, SouthKorea: 5.5, Canada: 5.5, Ireland: 9.1, Italy: 3.8, China: 1.5, India: 0.7, Australia: 3.0, Spain: 2.2, Brazil: 0.7 },
+  { year: 2016, USA: 128.7, Japan: 30.2, Germany: 18.5, UK: 20.8, France: 14.7, Netherlands: 40.3, Switzerland: 24.5, Sweden: 10.7, SouthKorea: 6.8, Canada: 5.7, Ireland: 15.3, Italy: 3.7, China: 1.2, India: 0.8, Australia: 2.8, Spain: 2.3, Brazil: 0.6 },
+  { year: 2018, USA: 133.3, Japan: 36.4, Germany: 22.0, UK: 23.5, France: 17.1, Netherlands: 52.0, Switzerland: 26.2, Sweden: 12.1, SouthKorea: 8.2, Canada: 6.3, Ireland: 73.6, Italy: 4.1, China: 5.6, India: 1.0, Australia: 3.2, Spain: 2.5, Brazil: 0.7 },
+  { year: 2019, USA: 131.0, Japan: 39.2, Germany: 23.3, UK: 22.8, France: 17.5, Netherlands: 56.1, Switzerland: 27.0, Sweden: 12.5, SouthKorea: 9.1, Canada: 6.5, Ireland: 79.4, Italy: 4.3, China: 6.3, India: 1.1, Australia: 3.3, Spain: 2.6, Brazil: 0.8 },
+  { year: 2020, USA: 119.8, Japan: 37.8, Germany: 23.0, UK: 20.1, France: 16.0, Netherlands: 54.3, Switzerland: 26.8, Sweden: 12.3, SouthKorea: 8.9, Canada: 5.9, Ireland: 82.5, Italy: 4.0, China: 7.9, India: 0.9, Australia: 3.0, Spain: 2.3, Brazil: 0.6 },
+  { year: 2021, USA: 132.5, Japan: 42.1, Germany: 25.4, UK: 23.7, France: 18.2, Netherlands: 58.0, Switzerland: 29.1, Sweden: 13.8, SouthKorea: 10.5, Canada: 6.8, Ireland: 88.0, Italy: 4.5, China: 9.3, India: 1.2, Australia: 3.4, Spain: 2.8, Brazil: 0.8 },
+  { year: 2022, USA: 138.6, Japan: 40.5, Germany: 24.8, UK: 24.1, France: 18.5, Netherlands: 55.2, Switzerland: 28.5, Sweden: 13.5, SouthKorea: 11.2, Canada: 7.0, Ireland: 85.0, Italy: 4.6, China: 10.1, India: 1.4, Australia: 3.5, Spain: 2.9, Brazil: 0.9 },
+];
+
+// IP payments fallback (charges for use of IP, payments, current US$ billions — World Bank/IMF BPM6)
+export const ipPaymentsFallbackData: { year: number; [country: string]: number }[] = [
+  { year: 2010, Ireland: 46.3, USA: 38.2, China: 13.0, Netherlands: 22.3, Japan: 16.4, Germany: 12.1, UK: 10.5, Singapore: 17.8, France: 8.8, SouthKorea: 8.5, Canada: 10.6, India: 3.5, Switzerland: 10.2, Italy: 5.0, Brazil: 3.6, Spain: 3.5, Australia: 4.2, Sweden: 3.5, Russia: 5.9, Mexico: 2.1 },
+  { year: 2012, Ireland: 52.0, USA: 41.5, China: 17.7, Netherlands: 25.1, Japan: 17.5, Germany: 12.8, UK: 11.0, Singapore: 20.5, France: 9.2, SouthKorea: 9.8, Canada: 11.2, India: 4.8, Switzerland: 11.0, Italy: 5.3, Brazil: 4.1, Spain: 3.7, Australia: 4.5, Sweden: 3.8, Russia: 7.6, Mexico: 2.3 },
+  { year: 2014, Ireland: 62.5, USA: 43.0, China: 21.0, Netherlands: 29.8, Japan: 18.8, Germany: 13.5, UK: 12.3, Singapore: 24.0, France: 9.5, SouthKorea: 10.5, Canada: 11.8, India: 5.8, Switzerland: 12.0, Italy: 5.5, Brazil: 4.5, Spain: 3.9, Australia: 4.6, Sweden: 4.0, Russia: 8.2, Mexico: 2.5 },
+  { year: 2016, Ireland: 72.0, USA: 44.2, China: 24.0, Netherlands: 35.6, Japan: 19.5, Germany: 14.2, UK: 11.8, Singapore: 27.3, France: 9.8, SouthKorea: 10.8, Canada: 11.5, India: 6.4, Switzerland: 12.5, Italy: 5.8, Brazil: 3.8, Spain: 4.2, Australia: 4.5, Sweden: 4.3, Russia: 5.5, Mexico: 2.8 },
+  { year: 2018, Ireland: 81.2, USA: 46.0, China: 35.8, Netherlands: 42.0, Japan: 21.3, Germany: 15.8, UK: 13.5, Singapore: 32.5, France: 10.5, SouthKorea: 12.5, Canada: 12.0, India: 7.8, Switzerland: 13.1, Italy: 6.2, Brazil: 4.2, Spain: 4.5, Australia: 4.8, Sweden: 4.7, Russia: 5.8, Mexico: 3.0 },
+  { year: 2019, Ireland: 85.0, USA: 47.5, China: 34.3, Netherlands: 44.2, Japan: 22.5, Germany: 16.5, UK: 14.0, Singapore: 35.0, France: 11.0, SouthKorea: 13.2, Canada: 12.3, India: 8.5, Switzerland: 13.5, Italy: 6.5, Brazil: 4.0, Spain: 4.7, Australia: 5.0, Sweden: 4.8, Russia: 5.5, Mexico: 3.1 },
+  { year: 2020, Ireland: 88.0, USA: 43.5, China: 33.1, Netherlands: 43.0, Japan: 21.0, Germany: 15.5, UK: 12.5, Singapore: 30.0, France: 10.0, SouthKorea: 12.0, Canada: 11.5, India: 7.2, Switzerland: 12.8, Italy: 5.8, Brazil: 3.2, Spain: 4.0, Australia: 4.2, Sweden: 4.5, Russia: 4.8, Mexico: 2.8 },
+  { year: 2021, Ireland: 95.0, USA: 48.0, China: 37.0, Netherlands: 48.0, Japan: 23.0, Germany: 17.0, UK: 14.5, Singapore: 34.0, France: 11.5, SouthKorea: 13.8, Canada: 12.5, India: 8.8, Switzerland: 13.8, Italy: 6.4, Brazil: 3.8, Spain: 4.5, Australia: 4.8, Sweden: 5.0, Russia: 5.0, Mexico: 3.2 },
+  { year: 2022, Ireland: 92.0, USA: 49.5, China: 38.5, Netherlands: 46.0, Japan: 22.5, Germany: 16.8, UK: 14.8, Singapore: 33.0, France: 11.8, SouthKorea: 14.0, Canada: 12.8, India: 9.5, Switzerland: 14.0, Italy: 6.6, Brazil: 4.0, Spain: 4.6, Australia: 5.0, Sweden: 5.1, Russia: 4.5, Mexico: 3.3 },
+];
+
 export function formatNumber(value: number, decimals: number = 0): string {
   if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
   if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';

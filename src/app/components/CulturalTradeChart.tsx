@@ -6,7 +6,7 @@ import {
   ResponsiveContainer, ComposedChart, Line, Cell,
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
-import { culturalChartColors, formatCurrency } from '../data/culturalMetrics';
+import { culturalChartColors, formatCurrency, ipReceiptsFallbackData, ipPaymentsFallbackData } from '../data/culturalMetrics';
 
 interface CulturalTradeChartProps {
   isDarkMode: boolean;
@@ -48,8 +48,12 @@ const CulturalTradeChart: React.FC<CulturalTradeChartProps> = ({
   const balanceNegative = isDarkMode ? '#EF4444' : '#DC2626';
 
   const ipFlowsData = useMemo(() => {
-    const safeReceipts = ipReceipts || [];
-    const safePayments = ipPayments || [];
+    const liveReceipts = ipReceipts || [];
+    const livePayments = ipPayments || [];
+    const usingFallback = liveReceipts.length === 0 && livePayments.length === 0;
+    const safeReceipts = liveReceipts.length > 0 ? liveReceipts : ipReceiptsFallbackData as CountryData[];
+    const safePayments = livePayments.length > 0 ? livePayments : ipPaymentsFallbackData as CountryData[];
+    const scale = usingFallback ? 1e9 : 1;
     const receiptYearSet = new Set(safeReceipts.map(d => d.year));
     const paymentYearSet = new Set(safePayments.map(d => d.year));
     const allYears = new Set<number>([...receiptYearSet, ...paymentYearSet]);
@@ -65,10 +69,10 @@ const CulturalTradeChart: React.FC<CulturalTradeChartProps> = ({
           const rv = receiptsRow?.[country];
           const pv = paymentsRow?.[country];
           if (rv !== undefined && rv !== null && typeof rv === 'number') {
-            entry[`${country}_receipts`] = rv;
+            entry[`${country}_receipts`] = rv * scale;
           }
           if (pv !== undefined && pv !== null && typeof pv === 'number') {
-            entry[`${country}_payments`] = pv;
+            entry[`${country}_payments`] = pv * scale;
           }
         });
         return entry;
@@ -77,8 +81,12 @@ const CulturalTradeChart: React.FC<CulturalTradeChartProps> = ({
   }, [ipReceipts, ipPayments, selectedCountries]);
 
   const tradeBalanceData = useMemo(() => {
-    const safeReceipts = ipReceipts || [];
-    const safePayments = ipPayments || [];
+    const liveReceipts2 = ipReceipts || [];
+    const livePayments2 = ipPayments || [];
+    const usingFallback2 = liveReceipts2.length === 0 && livePayments2.length === 0;
+    const safeReceipts = liveReceipts2.length > 0 ? liveReceipts2 : ipReceiptsFallbackData as CountryData[];
+    const safePayments = livePayments2.length > 0 ? livePayments2 : ipPaymentsFallbackData as CountryData[];
+    const scale = usingFallback2 ? 1e9 : 1;
     const receiptYears = new Set(safeReceipts.map(d => d.year));
     const commonYears = safePayments
       .map(d => d.year)
@@ -95,8 +103,8 @@ const CulturalTradeChart: React.FC<CulturalTradeChartProps> = ({
       .map(country => {
         const r = receiptsRow[country];
         const p = paymentsRow[country];
-        const receipts = typeof r === 'number' ? r : NaN;
-        const payments = typeof p === 'number' ? p : NaN;
+        const receipts = typeof r === 'number' ? r * scale : NaN;
+        const payments = typeof p === 'number' ? p * scale : NaN;
         if (Number.isNaN(receipts) || Number.isNaN(payments)) return null;
         const net = receipts - payments;
         return { country, net, year: latestYear };
