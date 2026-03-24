@@ -111,6 +111,12 @@ const INDICATORS = {
 
   // Live replacements for formerly static-only datasets
   STEM_GRADUATES: 'SE.TER.GRAD.SC.ZS', // STEM graduates (% of total tertiary graduates)
+
+  // Cultural Capital Indicators
+  TOURISM_ARRIVALS: 'ST.INT.ARVL', // International tourism, number of arrivals
+  TOURISM_RECEIPTS_USD: 'ST.INT.RCPT.CD', // International tourism, receipts (current US$)
+  TOURISM_EXPENDITURE_USD: 'ST.INT.XPND.CD', // International tourism, expenditure (current US$)
+  TOURISM_DEPARTURES: 'ST.INT.DPRT', // International tourism, number of departures
 };
 
 // Country codes for major economies
@@ -2070,6 +2076,106 @@ export async function fetchTechnologyData(forceRefresh: boolean = false): Promis
       ictServiceExports: [],
       stemGraduates: [],
       techEmployment: []
+    };
+  }
+}
+
+// Cultural Capital Data Fetching
+export interface CulturalData {
+  tourismArrivals: CountryData[];
+  tourismReceipts: CountryData[];
+  tourismExpenditure: CountryData[];
+  tourismDepartures: CountryData[];
+  educationExpenditure: CountryData[];
+  trademarkApplications: CountryData[];
+  netMigration: CountryData[];
+  ictServiceExports: CountryData[];
+  ipReceipts: CountryData[];
+  ipPayments: CountryData[];
+}
+
+export async function fetchCulturalData(forceRefresh: boolean = false): Promise<CulturalData> {
+  try {
+    const cacheKey = `cultural_data_all_v${CURRENT_CACHE_VERSION}`;
+
+    if (!forceRefresh) {
+      const cached = clientCache.get<CulturalData>(cacheKey);
+      if (cached) {
+        console.log('Using cached cultural data');
+        return cached;
+      }
+    }
+
+    console.log('Fetching Cultural Capital Data...');
+    const startTime = Date.now();
+
+    const results = await Promise.allSettled([
+      fetchIndicatorData(INDICATORS.TOURISM_ARRIVALS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TOURISM_RECEIPTS_USD, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TOURISM_EXPENDITURE_USD, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TOURISM_DEPARTURES, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.EDUCATION_EXPENDITURE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TRADEMARK_APPLICATIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.NET_MIGRATION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ICT_SERVICE_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.IP_RECEIPTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.IP_PAYMENTS, COUNTRY_CODES, !forceRefresh),
+    ]);
+
+    const [
+      tourismArrivalsResult,
+      tourismReceiptsResult,
+      tourismExpenditureResult,
+      tourismDeparturesResult,
+      educationExpenditureResult,
+      trademarkApplicationsResult,
+      netMigrationResult,
+      ictServiceExportsResult,
+      ipReceiptsResult,
+      ipPaymentsResult,
+    ] = results;
+
+    const culturalData: CulturalData = {
+      tourismArrivals: tourismArrivalsResult.status === 'fulfilled' ? tourismArrivalsResult.value : [],
+      tourismReceipts: tourismReceiptsResult.status === 'fulfilled' ? tourismReceiptsResult.value : [],
+      tourismExpenditure: tourismExpenditureResult.status === 'fulfilled' ? tourismExpenditureResult.value : [],
+      tourismDepartures: tourismDeparturesResult.status === 'fulfilled' ? tourismDeparturesResult.value : [],
+      educationExpenditure: educationExpenditureResult.status === 'fulfilled' ? educationExpenditureResult.value : [],
+      trademarkApplications: trademarkApplicationsResult.status === 'fulfilled' ? trademarkApplicationsResult.value : [],
+      netMigration: netMigrationResult.status === 'fulfilled' ? netMigrationResult.value : [],
+      ictServiceExports: ictServiceExportsResult.status === 'fulfilled' ? ictServiceExportsResult.value : [],
+      ipReceipts: ipReceiptsResult.status === 'fulfilled' ? ipReceiptsResult.value : [],
+      ipPayments: ipPaymentsResult.status === 'fulfilled' ? ipPaymentsResult.value : [],
+    };
+
+    const elapsed = Date.now() - startTime;
+    console.log(`Cultural data fetched in ${elapsed}ms`);
+    console.log(`  Tourism Arrivals: ${culturalData.tourismArrivals.length} years`);
+    console.log(`  Tourism Receipts: ${culturalData.tourismReceipts.length} years`);
+    console.log(`  Education Expenditure: ${culturalData.educationExpenditure.length} years`);
+
+    clientCache.set(cacheKey, culturalData, 1000 * 60 * 60 * 24);
+    return culturalData;
+  } catch (error: any) {
+    console.error('Critical error fetching cultural data:', error);
+
+    const cached = clientCache.get<CulturalData>(`cultural_data_all_v${CURRENT_CACHE_VERSION}`);
+    if (cached) {
+      console.warn('Returning stale cached cultural data due to API error');
+      return cached;
+    }
+
+    return {
+      tourismArrivals: [],
+      tourismReceipts: [],
+      tourismExpenditure: [],
+      tourismDepartures: [],
+      educationExpenditure: [],
+      trademarkApplications: [],
+      netMigration: [],
+      ictServiceExports: [],
+      ipReceipts: [],
+      ipPayments: [],
     };
   }
 }

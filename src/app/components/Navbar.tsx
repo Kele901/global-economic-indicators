@@ -94,6 +94,7 @@ const Navbar = () => {
         { href: '/trading-places', label: 'Trading Places' },
         { href: '/inflation', label: 'Inflation' },
         { href: '/technology', label: 'Technology' },
+        { href: '/cultural-capital', label: 'Cultural Capital' },
       ],
     },
     {
