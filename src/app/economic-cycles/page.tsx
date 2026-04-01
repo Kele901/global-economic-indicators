@@ -8,6 +8,13 @@ import DebtCycleChart from '../components/DebtCycleChart';
 import CyclePhaseIndicator from '../components/CyclePhaseIndicator';
 import CrisisComparisonTool from '../components/CrisisComparisonTool';
 import InternationalMacroFrameworks from '../components/InternationalMacroFrameworks';
+import LiveBusinessCycleDashboard from '../components/LiveBusinessCycleDashboard';
+import KondratievWaveChart from '../components/KondratievWaveChart';
+import MarketCycleIndicators from '../components/MarketCycleIndicators';
+import MinskyMomentTracker from '../components/MinskyMomentTracker';
+import MonetaryPolicyRegimeTimeline from '../components/MonetaryPolicyRegimeTimeline';
+import GeopoliticalCycleOverlay from '../components/GeopoliticalCycleOverlay';
+import CycleReportGenerator from '../components/CycleReportGenerator';
 import { 
   crisisEvents, 
   empireCycles, 
@@ -21,7 +28,6 @@ import {
   type CrisisGeneration
 } from '../data/economicCycles';
 
-// Dynamically import the map to avoid SSR issues with react-simple-maps
 const CrisisWorldMap = dynamic(
   () => import('../components/CrisisWorldMap'),
   { 
@@ -88,19 +94,22 @@ const EconomicCyclesPage = () => {
               &quot;This Time is Different&quot;.
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className={themeColors.textSecondary}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${
-                isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${
-                isDarkMode ? 'translate-x-6' : ''
-              }`} />
-            </button>
-            <span className={themeColors.textSecondary}>Dark</span>
+          <div className="flex items-center gap-4">
+            <CycleReportGenerator isDarkMode={isDarkMode} />
+            <div className="flex items-center space-x-2">
+              <span className={themeColors.textSecondary}>Light</span>
+              <button
+                className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${
+                  isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+                onClick={() => setIsDarkMode(!isDarkMode)}
+              >
+                <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${
+                  isDarkMode ? 'translate-x-6' : ''
+                }`} />
+              </button>
+              <span className={themeColors.textSecondary}>Dark</span>
+            </div>
           </div>
         </div>
 
@@ -155,9 +164,12 @@ const EconomicCyclesPage = () => {
         }`}>
           {[
             { id: 'overview', label: 'Cycle Overview', icon: '📊' },
+            { id: 'current', label: 'Current Conditions', icon: '🔴' },
+            { id: 'markets', label: 'Market Cycles', icon: '💹' },
             { id: 'empires', label: 'Empire Cycles', icon: '👑' },
             { id: 'crises', label: 'Crisis History', icon: '⚠️' },
             { id: 'debt', label: 'Debt Cycles', icon: '📈' },
+            { id: 'geopolitical', label: 'Geopolitics', icon: '🌍' },
             { id: 'macro', label: 'Macro Frameworks', icon: '📚' },
             { id: 'compare', label: 'Compare to Today', icon: '🔍' },
           ].map(tab => (
@@ -242,6 +254,128 @@ const EconomicCyclesPage = () => {
                 </div>
               </div>
             </div>
+
+            <div className={`rounded-xl p-5 border ${
+              isDarkMode ? 'bg-gray-800 border-violet-500/40' : 'bg-white border-violet-300'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-violet-400' : 'text-violet-700'}`}>
+                    Kondratiev Long Waves
+                  </h2>
+                  <p className={`text-sm ${themeColors.textSecondary} max-w-2xl`}>
+                    Nikolai Kondratiev identified 50-60 year super-cycles driven by transformative technologies.
+                    Each wave follows four seasons: spring (new technology emerges), summer (broad prosperity),
+                    autumn (speculative excess), and winter (creative destruction). Carlota Perez refined this
+                    framework with her installation-deployment model in &quot;Technological Revolutions and
+                    Financial Capital&quot; (2002).
+                  </p>
+                </div>
+                <a
+                  href="/guides/kondratiev-long-waves"
+                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Read Guide &rarr;
+                </a>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['Steam & Textiles', 'Railways & Steel', 'Electricity', 'Oil & Autos', 'Digital & AI'].map(tag => (
+                  <span key={tag} className={`text-xs px-2 py-1 rounded ${
+                    isDarkMode ? 'bg-violet-900/20 text-violet-400' : 'bg-violet-50 text-violet-700'
+                  }`}>{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            <KondratievWaveChart isDarkMode={isDarkMode} />
+          </div>
+        )}
+
+        {/* Section: Current Conditions */}
+        {activeSection === 'current' && (
+          <div className="space-y-8">
+            <div className={`rounded-xl p-5 border ${
+              isDarkMode ? 'bg-gray-800 border-red-500/40' : 'bg-white border-red-300'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-red-400' : 'text-red-700'}`}>
+                    Live Business Cycle Dashboard
+                  </h2>
+                  <p className={`text-sm ${themeColors.textSecondary} max-w-2xl`}>
+                    Real-time economic indicators that signal where we are in the business cycle.
+                    The yield curve, recession probability models, and credit spreads have historically
+                    been the most reliable leading indicators, predicting recessions 6-18 months in advance.
+                    Data is sourced from the Federal Reserve (FRED) with static fallbacks.
+                  </p>
+                </div>
+                <a
+                  href="/guides/business-cycle-indicators"
+                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Read Guide &rarr;
+                </a>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['Yield Curve', 'Recession Probability', 'Credit Spreads', 'FRED Data'].map(tag => (
+                  <span key={tag} className={`text-xs px-2 py-1 rounded ${
+                    isDarkMode ? 'bg-red-900/20 text-red-400' : 'bg-red-50 text-red-700'
+                  }`}>{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            <LiveBusinessCycleDashboard isDarkMode={isDarkMode} />
+          </div>
+        )}
+
+        {/* Section: Market Cycles */}
+        {activeSection === 'markets' && (
+          <div className="space-y-8">
+            <div className={`rounded-xl p-5 border ${
+              isDarkMode ? 'bg-gray-800 border-emerald-500/40' : 'bg-white border-emerald-300'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                    Market Cycle Indicators
+                  </h2>
+                  <p className={`text-sm ${themeColors.textSecondary} max-w-2xl`}>
+                    Valuation metrics and positioning tools that reveal whether markets are cheap, fair, or
+                    dangerously expensive. The Buffett Indicator (total market cap / GDP) and Shiller CAPE
+                    (cyclically adjusted P/E) are among the most watched long-term valuation gauges. The
+                    sector rotation model and global market clock show how capital flows shift across the cycle.
+                  </p>
+                </div>
+                <a
+                  href="/guides/market-cycle-indicators"
+                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Read Guide &rarr;
+                </a>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['Buffett Indicator', 'Shiller CAPE', 'Sector Rotation', 'Global Market Clock'].map(tag => (
+                  <span key={tag} className={`text-xs px-2 py-1 rounded ${
+                    isDarkMode ? 'bg-emerald-900/20 text-emerald-400' : 'bg-emerald-50 text-emerald-700'
+                  }`}>{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            <MarketCycleIndicators isDarkMode={isDarkMode} />
           </div>
         )}
 
@@ -485,12 +619,131 @@ const EconomicCyclesPage = () => {
                   ))}
               </div>
             </div>
+
+            <div className={`rounded-xl p-5 border ${
+              isDarkMode ? 'bg-gray-800 border-amber-500/40' : 'bg-white border-amber-300'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
+                    Minsky Financial Instability
+                  </h2>
+                  <p className={`text-sm ${themeColors.textSecondary} max-w-2xl`}>
+                    Hyman Minsky&apos;s Financial Instability Hypothesis explains how prolonged stability
+                    breeds instability. As confidence grows, financing evolves from conservative (hedge)
+                    to risky (speculative) to unsustainable (Ponzi). The &quot;Minsky Moment&quot; arrives
+                    when the system can no longer support its leverage, triggering a cascade of forced selling.
+                    This framework became famous after the 2008 crisis validated its predictions.
+                  </p>
+                </div>
+                <a
+                  href="/guides/minsky-financial-instability"
+                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Read Guide &rarr;
+                </a>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['Hedge Finance', 'Speculative Finance', 'Ponzi Finance', 'Minsky Moment'].map(tag => (
+                  <span key={tag} className={`text-xs px-2 py-1 rounded ${
+                    isDarkMode ? 'bg-amber-900/20 text-amber-400' : 'bg-amber-50 text-amber-700'
+                  }`}>{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            <MinskyMomentTracker isDarkMode={isDarkMode} />
+          </div>
+        )}
+
+        {/* Section: Geopolitics */}
+        {activeSection === 'geopolitical' && (
+          <div className="space-y-8">
+            <div className={`rounded-xl p-5 border ${
+              isDarkMode ? 'bg-gray-800 border-sky-500/40' : 'bg-white border-sky-300'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-sky-400' : 'text-sky-700'}`}>
+                    Geopolitical Cycles &amp; Power Transitions
+                  </h2>
+                  <p className={`text-sm ${themeColors.textSecondary} max-w-2xl`}>
+                    Geopolitics and economics are inseparable. Reserve currency status confers enormous
+                    financial privilege, while power transitions between rising and ruling states have
+                    historically been the most dangerous periods for global stability. Graham Allison&apos;s
+                    Thucydides Trap research shows that 12 of 16 historical power transitions resulted in war.
+                    The current US-China dynamic is the defining geopolitical contest of the 21st century.
+                  </p>
+                </div>
+                <a
+                  href="/guides/geopolitical-cycles"
+                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Read Guide &rarr;
+                </a>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['Reserve Currencies', 'Thucydides Trap', 'Conflict & Cycles', 'De-dollarization'].map(tag => (
+                  <span key={tag} className={`text-xs px-2 py-1 rounded ${
+                    isDarkMode ? 'bg-sky-900/20 text-sky-400' : 'bg-sky-50 text-sky-700'
+                  }`}>{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            <GeopoliticalCycleOverlay isDarkMode={isDarkMode} />
           </div>
         )}
 
         {/* Section: International Macro Frameworks */}
         {activeSection === 'macro' && (
           <div className="space-y-8">
+            <div className={`rounded-xl p-5 border ${
+              isDarkMode ? 'bg-gray-800 border-cyan-500/40' : 'bg-white border-cyan-300'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`}>
+                    Monetary Policy Regimes Through History
+                  </h2>
+                  <p className={`text-sm ${themeColors.textSecondary} max-w-2xl`}>
+                    The institutional framework governing money creation and exchange rates fundamentally
+                    shapes economic outcomes. From the Classical Gold Standard&apos;s automatic
+                    discipline to Bretton Woods&apos; dollar-gold peg, the Great Inflation&apos;s policy
+                    failures, and the post-2008 era of quantitative easing, each regime produces distinct
+                    patterns of inflation, growth, and crisis. Understanding regime shifts is essential for
+                    contextualizing today&apos;s unprecedented rate normalization.
+                  </p>
+                </div>
+                <a
+                  href="/guides/monetary-policy-regimes"
+                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                      : 'border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Read Guide &rarr;
+                </a>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['Gold Standard', 'Bretton Woods', 'Great Moderation', 'QE Era', 'Rate Normalization'].map(tag => (
+                  <span key={tag} className={`text-xs px-2 py-1 rounded ${
+                    isDarkMode ? 'bg-cyan-900/20 text-cyan-400' : 'bg-cyan-50 text-cyan-700'
+                  }`}>{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            <MonetaryPolicyRegimeTimeline isDarkMode={isDarkMode} />
             <InternationalMacroFrameworks darkMode={isDarkMode} />
           </div>
         )}
@@ -513,9 +766,11 @@ const EconomicCyclesPage = () => {
               <ul className={`text-sm space-y-1 ${themeColors.textTertiary}`}>
                 <li>• Ray Dalio - &quot;The Changing World Order&quot; (2021)</li>
                 <li>• Reinhart &amp; Rogoff - &quot;This Time is Different&quot; (2009)</li>
+                <li>• Hyman Minsky - Financial Instability Hypothesis</li>
+                <li>• Nikolai Kondratiev - Long Wave Theory (1925)</li>
+                <li>• Robert Shiller - CAPE Ratio / Irrational Exuberance</li>
                 <li>• Federal Reserve Economic Data (FRED)</li>
-                <li>• World Bank Development Indicators</li>
-                <li>• Bank for International Settlements (BIS)</li>
+                <li>• IMF COFER / World Bank / BIS</li>
               </ul>
             </div>
             <div>

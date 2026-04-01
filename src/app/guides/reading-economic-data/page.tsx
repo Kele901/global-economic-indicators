@@ -32,7 +32,7 @@ export default function ReadingEconomicDataGuide() {
             <li>&bull; Rates and ratios (GDP growth, unemployment rate) are better for cross-country comparison than absolute numbers.</li>
             <li>&bull; Always check axis scales, time periods, and data sources before drawing conclusions from charts.</li>
             <li>&bull; Context matters: the same metric can mean different things for developed versus emerging economies.</li>
-            <li>&bull; Use our 20 in-depth guides below to build understanding of specific economic topics.</li>
+            <li>&bull; Use our 25 in-depth guides below to build understanding of specific economic topics.</li>
           </ul>
         </div>
 
@@ -142,6 +142,12 @@ export default function ReadingEconomicDataGuide() {
                 { title: 'Human Development & Inequality', href: '/guides/development-inequality', desc: 'HDI, Gini coefficient, social progress, and sustainability metrics' },
                 { title: 'Trade Networks & Supply Chains', href: '/guides/trade-networks', desc: 'Bilateral trade, trade openness, and supply chain concentration risk' },
                 { title: 'Scenario Analysis & Correlations', href: '/guides/scenario-analysis', desc: 'Correlation vs causation, lagged effects, and simulation confidence' },
+                { title: 'Business Cycle Indicators', href: '/guides/business-cycle-indicators', desc: 'Yield curve, recession probability, credit spreads, and leading indicators' },
+                { title: 'Market Cycle Indicators', href: '/guides/market-cycle-indicators', desc: 'Buffett Indicator, Shiller CAPE, sector rotation, and global market clock' },
+                { title: 'Kondratiev Long Waves', href: '/guides/kondratiev-long-waves', desc: '50-60 year technology-driven super-cycles and the Carlota Perez framework' },
+                { title: 'Minsky Financial Instability', href: '/guides/minsky-financial-instability', desc: 'Hedge, speculative, and Ponzi finance — how stability breeds instability' },
+                { title: 'Monetary Policy Regimes', href: '/guides/monetary-policy-regimes', desc: 'Gold standard to QE: how monetary frameworks shape economic cycles' },
+                { title: 'Geopolitical Cycles', href: '/guides/geopolitical-cycles', desc: 'Reserve currencies, Thucydides Trap, and how conflicts shape the economy' },
               ].map(guide => (
                 <a
                   key={guide.href}
