@@ -25,6 +25,7 @@ import {
   culturalGoodsImportsByCountry,
   languageDiversityIndex,
   endangeredLanguagesByCountry,
+  passportStrengthByCountry,
 } from '../data/culturalMetrics';
 
 const HeritageWorldMap = dynamic(
@@ -185,6 +186,30 @@ const CulturalTradeChart = dynamic(
 
 const LinguisticDiversityChart = dynamic(
   () => import('../components/LinguisticDiversityChart'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
+      </div>
+    )
+  }
+);
+
+const PassportStrengthMap = dynamic(
+  () => import('../components/PassportStrengthMap'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
+      </div>
+    )
+  }
+);
+
+const PassportStrengthChart = dynamic(
+  () => import('../components/PassportStrengthChart'),
   {
     ssr: false,
     loading: () => (
@@ -398,6 +423,7 @@ const CulturalCapitalPage = () => {
             { id: 'participation', label: 'Cultural Participation' },
             { id: 'trade', label: 'Cultural Trade' },
             { id: 'diversity', label: 'Linguistic Diversity' },
+            { id: 'passport', label: 'Passport Strength' },
             { id: 'compare', label: 'Country Comparison' },
             { id: 'insights', label: 'Insights' },
           ].map(tab => (
@@ -680,6 +706,47 @@ const CulturalCapitalPage = () => {
               selectedCountries={selectedCountries}
               onCountryChange={setSelectedCountries}
             />
+          </div>
+        )}
+
+        {/* Passport Strength Section */}
+        {activeSection === 'passport' && (
+          <div className="space-y-8">
+            <div className={`p-4 rounded-lg border ${
+              isDarkMode ? 'bg-gray-800 border-emerald-500/50 text-emerald-400' : 'bg-white border-emerald-400 text-emerald-700'
+            }`}>
+              <h3 className="font-semibold">Global Passport Strength Index</h3>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Based on the Henley Passport Index 2026, the world&apos;s most authoritative passport ranking.
+                Each passport is scored by the number of destinations its holders can access visa-free or with
+                visa-on-arrival, using data from the IATA Timatic database covering 227 travel destinations.
+              </p>
+            </div>
+
+            <div className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className={`px-4 py-3 border-b ${themeColors.border}`}>
+                <h2 className="text-xl font-bold">Passport Power World Map</h2>
+                <p className={`text-sm ${themeColors.textSecondary}`}>
+                  Visa-free access score by country &mdash; hover for details
+                </p>
+              </div>
+              <PassportStrengthMap isDarkMode={isDarkMode} />
+            </div>
+
+            <PassportStrengthChart
+              isDarkMode={isDarkMode}
+              passportData={passportStrengthByCountry}
+              selectedCountries={selectedCountries}
+              onCountryChange={setSelectedCountries}
+            />
+
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+              <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                Source: Henley Passport Index 2026 (Henley &amp; Partners / IATA Timatic). Scores represent
+                visa-free or visa-on-arrival destinations out of 227. Updated quarterly. Year-over-year
+                change compares 2026 Q1 against 2024 mid-year data.
+              </p>
+            </div>
           </div>
         )}
 

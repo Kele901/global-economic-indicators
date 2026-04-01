@@ -925,6 +925,323 @@ export const ipPaymentsFallbackData: { year: number; [country: string]: number }
   { year: 2022, Ireland: 92.0, USA: 49.5, China: 38.5, Netherlands: 46.0, Japan: 22.5, Germany: 16.8, UK: 14.8, Singapore: 33.0, France: 11.8, SouthKorea: 14.0, Canada: 12.8, India: 9.5, Switzerland: 14.0, Italy: 6.6, Brazil: 4.0, Spain: 4.6, Australia: 5.0, Sweden: 5.1, Russia: 4.5, Mexico: 3.3 },
 ];
 
+// Henley Passport Index 2026 — visa-free destinations for tracked countries
+// Source: Henley & Partners / IATA Timatic database (Wikipedia mirror)
+export interface PassportStrengthEntry {
+  visaFreeDestinations: number;
+  rank: number;
+  previousScore: number; // 2024 score
+}
+
+export const passportStrengthByCountry: Record<string, PassportStrengthEntry> = {
+  // Rank 1
+  Singapore:        { visaFreeDestinations: 192, rank: 1,  previousScore: 195 },
+  // Rank 2
+  Japan:            { visaFreeDestinations: 187, rank: 2,  previousScore: 193 },
+  SouthKorea:       { visaFreeDestinations: 187, rank: 2,  previousScore: 192 },
+  // Rank 3
+  Sweden:           { visaFreeDestinations: 186, rank: 3,  previousScore: 192 },
+  UAE:              { visaFreeDestinations: 186, rank: 3,  previousScore: 185 },
+  // Rank 4
+  Belgium:          { visaFreeDestinations: 185, rank: 4,  previousScore: 191 },
+  Denmark:          { visaFreeDestinations: 185, rank: 4,  previousScore: 191 },
+  Finland:          { visaFreeDestinations: 185, rank: 4,  previousScore: 192 },
+  France:           { visaFreeDestinations: 185, rank: 4,  previousScore: 193 },
+  Germany:          { visaFreeDestinations: 185, rank: 4,  previousScore: 193 },
+  Ireland:          { visaFreeDestinations: 185, rank: 4,  previousScore: 192 },
+  Italy:            { visaFreeDestinations: 185, rank: 4,  previousScore: 193 },
+  Luxembourg:       { visaFreeDestinations: 185, rank: 4,  previousScore: 192 },
+  Netherlands:      { visaFreeDestinations: 185, rank: 4,  previousScore: 192 },
+  Norway:           { visaFreeDestinations: 185, rank: 4,  previousScore: 191 },
+  Spain:            { visaFreeDestinations: 185, rank: 4,  previousScore: 193 },
+  Switzerland:      { visaFreeDestinations: 185, rank: 4,  previousScore: 191 },
+  // Rank 5
+  Austria:          { visaFreeDestinations: 184, rank: 5,  previousScore: 192 },
+  Greece:           { visaFreeDestinations: 184, rank: 5,  previousScore: 188 },
+  Malta:            { visaFreeDestinations: 184, rank: 5,  previousScore: 187 },
+  Portugal:         { visaFreeDestinations: 184, rank: 5,  previousScore: 190 },
+  // Rank 6
+  Hungary:          { visaFreeDestinations: 183, rank: 6,  previousScore: 187 },
+  Malaysia:         { visaFreeDestinations: 183, rank: 6,  previousScore: 182 },
+  NewZealand:       { visaFreeDestinations: 183, rank: 6,  previousScore: 191 },
+  Poland:           { visaFreeDestinations: 183, rank: 6,  previousScore: 188 },
+  Slovakia:         { visaFreeDestinations: 183, rank: 6,  previousScore: 184 },
+  Slovenia:         { visaFreeDestinations: 183, rank: 6,  previousScore: 184 },
+  UK:               { visaFreeDestinations: 183, rank: 6,  previousScore: 191 },
+  // Rank 7
+  Australia:        { visaFreeDestinations: 182, rank: 7,  previousScore: 190 },
+  Canada:           { visaFreeDestinations: 182, rank: 7,  previousScore: 187 },
+  CzechRepublic:    { visaFreeDestinations: 182, rank: 7,  previousScore: 190 },
+  Croatia:          { visaFreeDestinations: 182, rank: 7,  previousScore: 183 },
+  Estonia:          { visaFreeDestinations: 182, rank: 7,  previousScore: 185 },
+  Latvia:           { visaFreeDestinations: 182, rank: 7,  previousScore: 184 },
+  // Rank 8
+  Lithuania:        { visaFreeDestinations: 181, rank: 8,  previousScore: 185 },
+  // Rank 9
+  Iceland:          { visaFreeDestinations: 180, rank: 9,  previousScore: 184 },
+  // Rank 10
+  USA:              { visaFreeDestinations: 179, rank: 10, previousScore: 186 },
+  // Rank 11
+  Romania:          { visaFreeDestinations: 177, rank: 11, previousScore: 177 },
+  Bulgaria:         { visaFreeDestinations: 177, rank: 11, previousScore: 177 },
+  // Rank 12
+  Chile:            { visaFreeDestinations: 174, rank: 12, previousScore: 175 },
+  Cyprus:           { visaFreeDestinations: 174, rank: 12, previousScore: 178 },
+  // Rank 15
+  Argentina:        { visaFreeDestinations: 168, rank: 15, previousScore: 172 },
+  Brazil:           { visaFreeDestinations: 168, rank: 15, previousScore: 171 },
+  // Rank 17
+  Israel:           { visaFreeDestinations: 166, rank: 17, previousScore: 170 },
+  // Rank 22
+  Mexico:           { visaFreeDestinations: 157, rank: 22, previousScore: 159 },
+  Uruguay:          { visaFreeDestinations: 155, rank: 23, previousScore: 157 },
+  // Rank 25
+  CostaRica:        { visaFreeDestinations: 148, rank: 25, previousScore: 151 },
+  // Rank 28
+  Paraguay:         { visaFreeDestinations: 145, rank: 28, previousScore: 147 },
+  // Rank 29
+  Ukraine:          { visaFreeDestinations: 143, rank: 29, previousScore: 148 },
+  // Rank 30
+  Peru:             { visaFreeDestinations: 142, rank: 30, previousScore: 141 },
+  // Rank 31
+  Serbia:           { visaFreeDestinations: 136, rank: 31, previousScore: 140 },
+  // Rank 34
+  Colombia:         { visaFreeDestinations: 131, rank: 34, previousScore: 134 },
+  // Rank 42
+  Albania:          { visaFreeDestinations: 120, rank: 42, previousScore: 119 },
+  // Rank 44
+  Venezuela:        { visaFreeDestinations: 116, rank: 44, previousScore: 115 },
+  // Rank 45
+  Turkey:           { visaFreeDestinations: 113, rank: 45, previousScore: 118 },
+  Russia:           { visaFreeDestinations: 113, rank: 45, previousScore: 118 },
+  // Rank 46
+  Qatar:            { visaFreeDestinations: 112, rank: 46, previousScore: 104 },
+  // Rank 47
+  SouthAfrica:      { visaFreeDestinations: 100, rank: 47, previousScore: 96 },
+  // Rank 48
+  Kuwait:           { visaFreeDestinations: 96,  rank: 48, previousScore: 96 },
+  // Rank 49
+  Ecuador:          { visaFreeDestinations: 93,  rank: 49, previousScore: 91 },
+  // Rank 52
+  SaudiArabia:      { visaFreeDestinations: 88,  rank: 52, previousScore: 83 },
+  // Rank 53
+  Bahrain:          { visaFreeDestinations: 87,  rank: 53, previousScore: 84 },
+  // Rank 54
+  Oman:             { visaFreeDestinations: 86,  rank: 54, previousScore: 82 },
+  // Rank 56
+  China:            { visaFreeDestinations: 82,  rank: 56, previousScore: 80 },
+  // Rank 58
+  Kazakhstan:       { visaFreeDestinations: 78,  rank: 58, previousScore: 76 },
+  Thailand:         { visaFreeDestinations: 78,  rank: 58, previousScore: 78 },
+  // Rank 62
+  Indonesia:        { visaFreeDestinations: 72,  rank: 62, previousScore: 72 },
+  Morocco:          { visaFreeDestinations: 72,  rank: 62, previousScore: 71 },
+  // Rank 64
+  Kenya:            { visaFreeDestinations: 69,  rank: 64, previousScore: 65 },
+  // Rank 65
+  Ghana:            { visaFreeDestinations: 68,  rank: 65, previousScore: 65 },
+  // Rank 66
+  Tunisia:          { visaFreeDestinations: 67,  rank: 66, previousScore: 66 },
+  // Rank 68
+  Philippines:      { visaFreeDestinations: 65,  rank: 68, previousScore: 63 },
+  // Rank 75
+  India:            { visaFreeDestinations: 56,  rank: 75, previousScore: 57 },
+  // Rank 81
+  Egypt:            { visaFreeDestinations: 50,  rank: 81, previousScore: 51 },
+  // Rank 83
+  Vietnam:          { visaFreeDestinations: 48,  rank: 83, previousScore: 46 },
+  Cambodia:         { visaFreeDestinations: 48,  rank: 83, previousScore: 47 },
+  // Rank 87
+  Nigeria:          { visaFreeDestinations: 44,  rank: 87, previousScore: 45 },
+  // Rank 88
+  Ethiopia:         { visaFreeDestinations: 43,  rank: 88, previousScore: 42 },
+  // Rank 90
+  Iran:             { visaFreeDestinations: 40,  rank: 90, previousScore: 41 },
+  // Rank 91
+  Bangladesh:       { visaFreeDestinations: 39,  rank: 91, previousScore: 39 },
+  // Rank 94
+  Nepal:            { visaFreeDestinations: 35,  rank: 94, previousScore: 36 },
+  // Rank 96
+  Pakistan:         { visaFreeDestinations: 32,  rank: 96, previousScore: 34 },
+  // Rank 98
+  Iraq:             { visaFreeDestinations: 29,  rank: 98, previousScore: 31 },
+  // Rank 100
+  Afghanistan:      { visaFreeDestinations: 24,  rank: 100, previousScore: 28 },
+};
+
+// Full Henley Passport Index 2026 keyed by ISO 3166-1 numeric code (for world map)
+export const passportStrengthAllCountries: Record<string, { name: string; score: number; rank: number }> = {
+  '702': { name: 'Singapore', score: 192, rank: 1 },
+  '392': { name: 'Japan', score: 187, rank: 2 },
+  '410': { name: 'South Korea', score: 187, rank: 2 },
+  '752': { name: 'Sweden', score: 186, rank: 3 },
+  '784': { name: 'UAE', score: 186, rank: 3 },
+  '056': { name: 'Belgium', score: 185, rank: 4 },
+  '208': { name: 'Denmark', score: 185, rank: 4 },
+  '246': { name: 'Finland', score: 185, rank: 4 },
+  '250': { name: 'France', score: 185, rank: 4 },
+  '276': { name: 'Germany', score: 185, rank: 4 },
+  '372': { name: 'Ireland', score: 185, rank: 4 },
+  '380': { name: 'Italy', score: 185, rank: 4 },
+  '442': { name: 'Luxembourg', score: 185, rank: 4 },
+  '528': { name: 'Netherlands', score: 185, rank: 4 },
+  '578': { name: 'Norway', score: 185, rank: 4 },
+  '724': { name: 'Spain', score: 185, rank: 4 },
+  '756': { name: 'Switzerland', score: 185, rank: 4 },
+  '040': { name: 'Austria', score: 184, rank: 5 },
+  '300': { name: 'Greece', score: 184, rank: 5 },
+  '470': { name: 'Malta', score: 184, rank: 5 },
+  '620': { name: 'Portugal', score: 184, rank: 5 },
+  '348': { name: 'Hungary', score: 183, rank: 6 },
+  '458': { name: 'Malaysia', score: 183, rank: 6 },
+  '554': { name: 'New Zealand', score: 183, rank: 6 },
+  '616': { name: 'Poland', score: 183, rank: 6 },
+  '703': { name: 'Slovakia', score: 183, rank: 6 },
+  '705': { name: 'Slovenia', score: 183, rank: 6 },
+  '826': { name: 'United Kingdom', score: 183, rank: 6 },
+  '036': { name: 'Australia', score: 182, rank: 7 },
+  '124': { name: 'Canada', score: 182, rank: 7 },
+  '191': { name: 'Croatia', score: 182, rank: 7 },
+  '203': { name: 'Czech Republic', score: 182, rank: 7 },
+  '233': { name: 'Estonia', score: 182, rank: 7 },
+  '428': { name: 'Latvia', score: 182, rank: 7 },
+  '438': { name: 'Liechtenstein', score: 181, rank: 8 },
+  '440': { name: 'Lithuania', score: 181, rank: 8 },
+  '352': { name: 'Iceland', score: 180, rank: 9 },
+  '840': { name: 'United States', score: 179, rank: 10 },
+  '100': { name: 'Bulgaria', score: 177, rank: 11 },
+  '642': { name: 'Romania', score: 177, rank: 11 },
+  '152': { name: 'Chile', score: 174, rank: 12 },
+  '196': { name: 'Cyprus', score: 174, rank: 12 },
+  '032': { name: 'Argentina', score: 168, rank: 15 },
+  '076': { name: 'Brazil', score: 168, rank: 15 },
+  '376': { name: 'Israel', score: 166, rank: 17 },
+  '096': { name: 'Brunei', score: 163, rank: 19 },
+  '484': { name: 'Mexico', score: 157, rank: 22 },
+  '858': { name: 'Uruguay', score: 155, rank: 23 },
+  '188': { name: 'Costa Rica', score: 148, rank: 25 },
+  '480': { name: 'Mauritius', score: 148, rank: 25 },
+  '591': { name: 'Panama', score: 147, rank: 26 },
+  '780': { name: 'Trinidad and Tobago', score: 146, rank: 27 },
+  '600': { name: 'Paraguay', score: 145, rank: 28 },
+  '804': { name: 'Ukraine', score: 143, rank: 29 },
+  '604': { name: 'Peru', score: 142, rank: 30 },
+  '688': { name: 'Serbia', score: 136, rank: 31 },
+  '170': { name: 'Colombia', score: 131, rank: 34 },
+  '340': { name: 'Honduras', score: 129, rank: 36 },
+  '499': { name: 'Montenegro', score: 127, rank: 38 },
+  '807': { name: 'North Macedonia', score: 127, rank: 38 },
+  '008': { name: 'Albania', score: 120, rank: 42 },
+  '498': { name: 'Moldova', score: 119, rank: 43 },
+  '862': { name: 'Venezuela', score: 116, rank: 44 },
+  '643': { name: 'Russia', score: 113, rank: 45 },
+  '792': { name: 'Turkey', score: 113, rank: 45 },
+  '634': { name: 'Qatar', score: 112, rank: 46 },
+  '710': { name: 'South Africa', score: 100, rank: 47 },
+  '414': { name: 'Kuwait', score: 96, rank: 48 },
+  '462': { name: 'Maldives', score: 93, rank: 49 },
+  '218': { name: 'Ecuador', score: 93, rank: 49 },
+  '682': { name: 'Saudi Arabia', score: 88, rank: 52 },
+  '048': { name: 'Bahrain', score: 87, rank: 53 },
+  '512': { name: 'Oman', score: 86, rank: 54 },
+  '598': { name: 'Papua New Guinea', score: 84, rank: 55 },
+  '072': { name: 'Botswana', score: 82, rank: 56 },
+  '156': { name: 'China', score: 82, rank: 56 },
+  '398': { name: 'Kazakhstan', score: 78, rank: 58 },
+  '764': { name: 'Thailand', score: 78, rank: 58 },
+  '112': { name: 'Belarus', score: 77, rank: 59 },
+  '068': { name: 'Bolivia', score: 77, rank: 59 },
+  '516': { name: 'Namibia', score: 76, rank: 60 },
+  '360': { name: 'Indonesia', score: 72, rank: 62 },
+  '504': { name: 'Morocco', score: 72, rank: 62 },
+  '214': { name: 'Dominican Republic', score: 71, rank: 63 },
+  '404': { name: 'Kenya', score: 69, rank: 64 },
+  '834': { name: 'Tanzania', score: 69, rank: 64 },
+  '031': { name: 'Azerbaijan', score: 68, rank: 65 },
+  '288': { name: 'Ghana', score: 68, rank: 65 },
+  '646': { name: 'Rwanda', score: 67, rank: 66 },
+  '788': { name: 'Tunisia', score: 67, rank: 66 },
+  '800': { name: 'Uganda', score: 66, rank: 67 },
+  '608': { name: 'Philippines', score: 65, rank: 68 },
+  '894': { name: 'Zambia', score: 65, rank: 68 },
+  '496': { name: 'Mongolia', score: 64, rank: 69 },
+  '716': { name: 'Zimbabwe', score: 62, rank: 70 },
+  '417': { name: 'Kyrgyzstan', score: 60, rank: 71 },
+  '508': { name: 'Mozambique', score: 60, rank: 71 },
+  '860': { name: 'Uzbekistan', score: 60, rank: 71 },
+  '356': { name: 'India', score: 56, rank: 75 },
+  '012': { name: 'Algeria', score: 55, rank: 76 },
+  '762': { name: 'Tajikistan', score: 54, rank: 77 },
+  '818': { name: 'Egypt', score: 50, rank: 81 },
+  '400': { name: 'Jordan', score: 50, rank: 81 },
+  '116': { name: 'Cambodia', score: 48, rank: 83 },
+  '704': { name: 'Vietnam', score: 48, rank: 83 },
+  '120': { name: 'Cameroon', score: 47, rank: 84 },
+  '795': { name: 'Turkmenistan', score: 46, rank: 85 },
+  '418': { name: 'Laos', score: 45, rank: 86 },
+  '566': { name: 'Nigeria', score: 44, rank: 87 },
+  '180': { name: 'DR Congo', score: 43, rank: 88 },
+  '231': { name: 'Ethiopia', score: 43, rank: 88 },
+  '422': { name: 'Lebanon', score: 43, rank: 88 },
+  '104': { name: 'Myanmar', score: 43, rank: 88 },
+  '736': { name: 'Sudan', score: 41, rank: 89 },
+  '364': { name: 'Iran', score: 40, rank: 90 },
+  '050': { name: 'Bangladesh', score: 39, rank: 91 },
+  '434': { name: 'Libya', score: 39, rank: 91 },
+  '144': { name: 'Sri Lanka', score: 39, rank: 91 },
+  '232': { name: 'Eritrea', score: 38, rank: 92 },
+  '408': { name: 'North Korea', score: 36, rank: 93 },
+  '524': { name: 'Nepal', score: 35, rank: 94 },
+  '706': { name: 'Somalia', score: 33, rank: 95 },
+  '586': { name: 'Pakistan', score: 32, rank: 96 },
+  '887': { name: 'Yemen', score: 31, rank: 97 },
+  '368': { name: 'Iraq', score: 29, rank: 98 },
+  '760': { name: 'Syria', score: 26, rank: 99 },
+  '004': { name: 'Afghanistan', score: 24, rank: 100 },
+};
+
+export function getPassportTier(score: number): { label: string; color: string; colorDark: string } {
+  if (score >= 180) return { label: 'Excellent', color: '#059669', colorDark: '#34D399' };
+  if (score >= 160) return { label: 'Very Strong', color: '#10B981', colorDark: '#6EE7B7' };
+  if (score >= 130) return { label: 'Strong', color: '#0891B2', colorDark: '#22D3EE' };
+  if (score >= 80)  return { label: 'Moderate', color: '#D97706', colorDark: '#FBBF24' };
+  if (score >= 50)  return { label: 'Weak', color: '#EA580C', colorDark: '#FB923C' };
+  return { label: 'Very Weak', color: '#DC2626', colorDark: '#F87171' };
+}
+
+// Historical Henley Passport Index scores (selected years) for trend analysis
+// Sources: Henley & Partners / Wikipedia historical tables
+export const passportHistoricalScores: { year: number; [country: string]: number }[] = [
+  { year: 2015, Singapore: 174, Japan: 172, SouthKorea: 172, Germany: 177, Sweden: 176, France: 175, Italy: 175, Spain: 175, UK: 175, Netherlands: 174, Switzerland: 173, Belgium: 174, Norway: 173, USA: 174, Australia: 171, Canada: 172, Portugal: 172, Poland: 163, Chile: 161, Argentina: 163, Brazil: 162, Israel: 149, Mexico: 139, Turkey: 102, Russia: 102, SouthAfrica: 94, SaudiArabia: 69, China: 50, Indonesia: 55, India: 52, Egypt: 49, Nigeria: 44, UAE: 122 },
+  { year: 2017, Singapore: 176, Japan: 175, SouthKorea: 174, Germany: 177, Sweden: 176, France: 175, Italy: 175, Spain: 175, UK: 175, Netherlands: 174, Switzerland: 174, Belgium: 174, Norway: 173, USA: 176, Australia: 171, Canada: 172, Portugal: 172, Poland: 165, Chile: 161, Argentina: 162, Brazil: 161, Israel: 150, Mexico: 139, Turkey: 103, Russia: 105, SouthAfrica: 94, SaudiArabia: 71, China: 60, Indonesia: 57, India: 52, Egypt: 48, Nigeria: 44, UAE: 151 },
+  { year: 2019, Singapore: 190, Japan: 191, SouthKorea: 189, Germany: 189, Sweden: 188, France: 189, Italy: 189, Spain: 189, UK: 187, Netherlands: 188, Switzerland: 186, Belgium: 187, Norway: 186, USA: 185, Australia: 183, Canada: 184, Portugal: 186, Poland: 181, Chile: 174, Argentina: 171, Brazil: 170, Israel: 162, Mexico: 159, Turkey: 111, Russia: 118, SouthAfrica: 100, SaudiArabia: 76, China: 71, Indonesia: 72, India: 58, Egypt: 51, Nigeria: 46, UAE: 172 },
+  { year: 2021, Singapore: 192, Japan: 193, SouthKorea: 191, Germany: 191, Sweden: 190, France: 191, Italy: 191, Spain: 190, UK: 187, Netherlands: 190, Switzerland: 188, Belgium: 189, Norway: 188, USA: 185, Australia: 185, Canada: 185, Portugal: 188, Poland: 183, Chile: 174, Argentina: 171, Brazil: 170, Israel: 161, Mexico: 157, Turkey: 110, Russia: 116, SouthAfrica: 100, SaudiArabia: 79, China: 77, Indonesia: 72, India: 58, Egypt: 51, Nigeria: 46, UAE: 176 },
+  { year: 2024, Singapore: 195, Japan: 193, SouthKorea: 192, Germany: 193, Sweden: 192, France: 193, Italy: 193, Spain: 193, UK: 191, Netherlands: 192, Switzerland: 191, Belgium: 191, Norway: 191, USA: 186, Australia: 190, Canada: 187, Portugal: 190, Poland: 188, Chile: 175, Argentina: 172, Brazil: 171, Israel: 170, Mexico: 159, Turkey: 118, Russia: 118, SouthAfrica: 96, SaudiArabia: 83, China: 80, Indonesia: 72, India: 57, Egypt: 51, Nigeria: 45, UAE: 185 },
+  { year: 2026, Singapore: 192, Japan: 187, SouthKorea: 187, Germany: 185, Sweden: 186, France: 185, Italy: 185, Spain: 185, UK: 183, Netherlands: 185, Switzerland: 185, Belgium: 185, Norway: 185, USA: 179, Australia: 182, Canada: 182, Portugal: 184, Poland: 183, Chile: 174, Argentina: 168, Brazil: 168, Israel: 166, Mexico: 157, Turkey: 113, Russia: 113, SouthAfrica: 100, SaudiArabia: 88, China: 82, Indonesia: 72, India: 56, Egypt: 50, Nigeria: 44, UAE: 186 },
+];
+
+// GDP per capita (PPP, current international $, 2023 estimates) for scatter plot
+// Source: World Bank / IMF World Economic Outlook
+export const gdpPerCapitaByCountry: Record<string, number> = {
+  Singapore: 133895, Luxembourg: 135605, Ireland: 106583, Norway: 82655, Switzerland: 105669,
+  USA: 85373, Denmark: 73167, Iceland: 75194, Netherlands: 72915, Austria: 69460,
+  Sweden: 65842, Australia: 65366, Germany: 63150, Belgium: 62890, Finland: 58345,
+  Canada: 57827, UK: 55881, France: 55493, NewZealand: 49801, Japan: 52120,
+  Italy: 50216, SouthKorea: 53051, Israel: 55533, Spain: 46413, Malta: 52577,
+  Slovenia: 50610, CzechRepublic: 49495, Estonia: 45258, Lithuania: 46479, Latvia: 40895,
+  Portugal: 41993, Poland: 45538, Hungary: 43907, Slovakia: 38620, Croatia: 38284,
+  Romania: 40698, Greece: 38340, Bulgaria: 34164, Chile: 30435, Uruguay: 25041,
+  Argentina: 26505, Turkey: 41887, Malaysia: 34567, Russia: 36485, Mexico: 22402,
+  China: 23382, Brazil: 20809, SouthAfrica: 16796, Thailand: 20438, Colombia: 20347,
+  Peru: 16083, CostaRica: 25012, Serbia: 25043, Ecuador: 12779, Indonesia: 15855,
+  Albania: 19225, Paraguay: 14793, Ukraine: 16502, Philippines: 11389, Vietnam: 14543,
+  Morocco: 10302, Egypt: 16036, India: 9515, Nigeria: 5882, Kenya: 6340,
+  Ghana: 6623, Tunisia: 12789, Bangladesh: 8174, Cambodia: 5817, Nepal: 4725,
+  Pakistan: 6865, Ethiopia: 3270, Iran: 17662, Iraq: 11482, Afghanistan: 1469,
+  UAE: 88962, Qatar: 112283, Kuwait: 53547, SaudiArabia: 65128, Bahrain: 60715,
+  Oman: 46322, Kazakhstan: 32667, Venezuela: 16054, Cyprus: 49450,
+};
+
 export function formatNumber(value: number, decimals: number = 0): string {
   if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
   if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
