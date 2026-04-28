@@ -1057,6 +1057,24 @@ const completeData = {
   }
 }
 
+// Fetch additional named indicators (for pages needing data beyond fetchGlobalData's default set).
+// Accepts a map of { alias: worldBankIndicatorCode } and returns { alias: CountryData[] }.
+export async function fetchExtraIndicators(
+  indicators: Record<string, string>,
+  forceRefresh: boolean = false
+): Promise<Record<string, CountryData[]>> {
+  const entries = Object.entries(indicators);
+  const results = await Promise.allSettled(
+    entries.map(([, code]) => fetchIndicatorData(code, COUNTRY_CODES, !forceRefresh))
+  );
+  const out: Record<string, CountryData[]> = {};
+  entries.forEach(([alias], i) => {
+    const r = results[i];
+    out[alias] = r.status === 'fulfilled' ? r.value : [];
+  });
+  return out;
+}
+
 // Export function to clear cache (useful for testing or manual refresh)
 export function clearDataCache(): void {
   clientCache.clear();

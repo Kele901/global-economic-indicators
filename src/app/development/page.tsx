@@ -2,16 +2,47 @@
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useEffect, useState, useMemo } from 'react';
-import { fetchGlobalData, CountryData } from '../services/worldbank';
+import { fetchGlobalData, fetchExtraIndicators, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, COUNTRY_REGIONS, type CountryKey } from '../utils/countryMappings';
-import { formatMetricValue } from '../utils/metricCategories';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line, ScatterChart, Scatter, Cell } from 'recharts';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart, Line, ScatterChart, Scatter, Cell, ReferenceLine,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+} from 'recharts';
+import dynamic from 'next/dynamic';
+
+const DevelopmentWorldMap = dynamic(() => import('../components/DevelopmentWorldMap'), { ssr: false });
 
 function getLatest(series: CountryData[] | undefined, country: string): number | null {
   if (!series) return null;
   for (let i = series.length - 1; i >= 0; i--) {
     const v = Number(series[i][country]);
     if (!isNaN(v) && v !== 0) return v;
+  }
+  return null;
+}
+
+function getValueAtYear(series: CountryData[] | undefined, country: string, year: number): number | null {
+  if (!series) return null;
+  for (const row of series) {
+    const yr = Number((row as any).date || (row as any).year);
+    if (yr === year) {
+      const v = Number(row[country]);
+      if (!isNaN(v) && v !== 0) return v;
+    }
+  }
+  return null;
+}
+
+function getFirstAvailable(series: CountryData[] | undefined, country: string, minYear: number, maxYear: number): { year: number; value: number } | null {
+  if (!series) return null;
+  const sorted = [...series].sort((a, b) => Number((a as any).date || (a as any).year) - Number((b as any).date || (b as any).year));
+  for (const row of sorted) {
+    const yr = Number((row as any).date || (row as any).year);
+    if (yr >= minYear && yr <= maxYear) {
+      const v = Number(row[country]);
+      if (!isNaN(v) && v !== 0) return { year: yr, value: v };
+    }
   }
   return null;
 }
@@ -24,13 +55,53 @@ function computeHDI(lifeExp: number | null, education: number | null, gdpPc: num
   return parseFloat(((lifeIndex + eduIndex + incomeIndex) / 3).toFixed(3));
 }
 
+// Approximate World Bank Human Capital Index (2020) for tracked countries.
+// Source: World Bank HCI 2020 report. Value ~0-1, higher = better human capital.
+const HCI_2020: Partial<Record<CountryKey, number>> = {
+  USA: 0.70, Canada: 0.80, UK: 0.78, France: 0.76, Germany: 0.75, Italy: 0.73,
+  Japan: 0.80, Australia: 0.77, Mexico: 0.61, SouthKorea: 0.80, Spain: 0.73,
+  Sweden: 0.80, Switzerland: 0.77, Turkey: 0.65, Nigeria: 0.36, China: 0.65,
+  Russia: 0.68, Brazil: 0.55, Chile: 0.65, Argentina: 0.60, India: 0.49,
+  Norway: 0.77, Netherlands: 0.79, Portugal: 0.75, Belgium: 0.76, Indonesia: 0.54,
+  SouthAfrica: 0.43, Poland: 0.75, SaudiArabia: 0.58, Egypt: 0.49,
+};
+
+type DevMetricKey = 'lifeExpectancy' | 'gdpPerCapitaPPP' | 'tertiaryEnrollment' | 'internetUsers' | 'co2Emissions' | 'povertyRate';
+type DevSectionId = 'overview' | 'map' | 'growth' | 'inequality' | 'education' | 'health' | 'environment' | 'sdg' | 'compare';
+const DEV_SECTIONS: { id: DevSectionId; label: string; icon: string }[] = [
+  { id: 'overview', label: 'Overview', icon: '📊' },
+  { id: 'map', label: 'Global Map', icon: '🗺️' },
+  { id: 'growth', label: 'Growth & Trends', icon: '📈' },
+  { id: 'inequality', label: 'Inequality & Gender', icon: '⚖️' },
+  { id: 'education', label: 'Education & Human Capital', icon: '🎓' },
+  { id: 'health', label: 'Health & Basic Services', icon: '🏥' },
+  { id: 'environment', label: 'Sustainability & Demographics', icon: '🌱' },
+  { id: 'sdg', label: 'SDG & Digital', icon: '🎯' },
+  { id: 'compare', label: 'Compare Countries', icon: '🔍' },
+];
+
+const DEV_METRIC_OPTIONS: { key: DevMetricKey; label: string; yLabel: string; format: (v: number) => string }[] = [
+  { key: 'lifeExpectancy', label: 'Life Expectancy', yLabel: 'Years', format: v => v.toFixed(1) },
+  { key: 'gdpPerCapitaPPP', label: 'GDP per Capita (PPP)', yLabel: '$ (current intl)', format: v => `$${v.toLocaleString(undefined, { maximumFractionDigits: 0 })}` },
+  { key: 'tertiaryEnrollment', label: 'Tertiary Enrollment', yLabel: '% gross', format: v => `${v.toFixed(1)}%` },
+  { key: 'internetUsers', label: 'Internet Users', yLabel: '% of pop', format: v => `${v.toFixed(1)}%` },
+  { key: 'co2Emissions', label: 'CO₂ Emissions', yLabel: 'tonnes/cap', format: v => `${v.toFixed(2)}` },
+  { key: 'povertyRate', label: 'Poverty Rate ($2.15/day)', yLabel: '% of pop', format: v => `${v.toFixed(1)}%` },
+];
+
 export default function DevelopmentPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [data, setData] = useState<Record<string, CountryData[]> | null>(null);
+  const [extraData, setExtraData] = useState<Record<string, CountryData[]>>({});
   const [loading, setLoading] = useState(true);
   const [selectedDevCountries, setSelectedDevCountries] = useState<string[]>(['USA', 'Japan', 'Brazil', 'India', 'Nigeria', 'China']);
+  const [devMetric, setDevMetric] = useState<DevMetricKey>('lifeExpectancy');
   const [sortField, setSortField] = useState<string>('hdi');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [mapMetric, setMapMetric] = useState<'hdi' | 'gini' | 'gdpPc' | 'lifeExp'>('hdi');
+  const [radarCountries, setRadarCountries] = useState<CountryKey[]>(['USA', 'Norway', 'Japan', 'India']);
+  const [demoCountry, setDemoCountry] = useState<CountryKey>('Nigeria');
+  const [activeSection, setActiveSection] = useState<DevSectionId>('overview');
 
   useEffect(() => {
     if (isDarkMode) {
@@ -45,7 +116,38 @@ export default function DevelopmentPage() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    fetchGlobalData().then(d => { setData(d as any); setLoading(false); }).catch(() => setLoading(false));
+    fetchGlobalData()
+      .then(d => { setData(d as any); setLoading(false); })
+      .catch(() => setLoading(false));
+
+    fetchExtraIndicators({
+      primaryCompletion: 'SE.PRM.CMPT.ZS',
+      secondaryEnrollment: 'SE.SEC.ENRR',
+      incomeShareLow20: 'SI.DST.FRST.20',
+      incomeShareHigh20: 'SI.DST.05TH.20',
+      birthRate: 'SP.DYN.CBRT.IN',
+      deathRate: 'SP.DYN.CDRT.IN',
+      fertilityRate: 'SP.DYN.TFRT.IN',
+      under5Mortality: 'SH.DYN.MORT',
+      maternalMortality: 'SH.STA.MMRT',
+      physiciansPer1000: 'SH.MED.PHYS.ZS',
+      hospitalBeds: 'SH.MED.BEDS.ZS',
+      immunizationDPT: 'SH.IMM.IDPT',
+      immunizationMeasles: 'SH.IMM.MEAS',
+      electricityAccess: 'EG.ELC.ACCS.ZS',
+      basicWater: 'SH.H2O.BASW.ZS',
+      basicSanitation: 'SH.STA.BASS.ZS',
+      popAge0_14: 'SP.POP.0014.TO.ZS',
+      popAge15_64: 'SP.POP.1564.TO.ZS',
+      popAge65Plus: 'SP.POP.65UP.TO.ZS',
+      lifeExpMale: 'SP.DYN.LE00.MA.IN',
+      lifeExpFemale: 'SP.DYN.LE00.FE.IN',
+      schoolGenderParity: 'SE.ENR.PRSC.FM.ZS',
+      resourceRents: 'NY.GDP.TOTL.RT.ZS',
+      remittances: 'BX.TRF.PWKR.DT.GD.ZS',
+      broadband: 'IT.NET.BBND.P2',
+      mobileSubs: 'IT.CEL.SETS.P2',
+    }).then(setExtraData).catch(() => {});
   }, []);
 
   const tc = isDarkMode ? {
@@ -72,6 +174,118 @@ export default function DevelopmentPage() {
       return { country: ck, hdi, lifeExp, education, gdpPc, gini, poverty, internet, healthcare };
     }).filter(c => c.hdi !== null).sort((a, b) => (b.hdi ?? 0) - (a.hdi ?? 0));
   }, [data]);
+
+  // Convergence: initial (2000) GDP per capita vs annualized growth through latest
+  const convergenceData = useMemo(() => {
+    if (!data?.gdpPerCapitaPPP) return [];
+    return COUNTRY_KEYS.map(ck => {
+      const initial = getValueAtYear(data.gdpPerCapitaPPP, ck, 2000)
+        || getFirstAvailable(data.gdpPerCapitaPPP, ck, 2000, 2005)?.value
+        || null;
+      const latest = getLatest(data.gdpPerCapitaPPP, ck);
+      if (initial === null || latest === null || initial <= 0) return null;
+      const years = 23;
+      const cagr = (Math.pow(latest / initial, 1 / years) - 1) * 100;
+      return {
+        country: COUNTRY_DISPLAY_NAMES[ck],
+        countryKey: ck,
+        initial,
+        latest,
+        growth: parseFloat(cagr.toFixed(2)),
+        fill: COUNTRY_COLORS[ck],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [data]);
+
+  // Education pipeline: primary completion → secondary enrollment → tertiary enrollment
+  const educationPipeline = useMemo(() => {
+    if (!data) return [];
+    return COUNTRY_KEYS.map(ck => {
+      const primary = getLatest(extraData.primaryCompletion, ck);
+      const secondary = getLatest(extraData.secondaryEnrollment, ck);
+      const tertiary = getLatest(data.tertiaryEnrollment, ck);
+      return {
+        country: (COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12),
+        countryKey: ck,
+        Primary: primary !== null ? parseFloat(primary.toFixed(1)) : 0,
+        Secondary: secondary !== null ? parseFloat(secondary.toFixed(1)) : 0,
+        Tertiary: tertiary !== null ? parseFloat(tertiary.toFixed(1)) : 0,
+      };
+    }).filter(d => d.Primary || d.Secondary || d.Tertiary);
+  }, [data, extraData]);
+
+  // HCI vs HDI scatter
+  const hciScatter = useMemo(() => {
+    return scoreCards.map(sc => {
+      const hci = HCI_2020[sc.country];
+      if (hci === undefined || sc.hdi === null) return null;
+      return {
+        country: COUNTRY_DISPLAY_NAMES[sc.country],
+        countryKey: sc.country,
+        hci,
+        hdi: sc.hdi,
+        fill: COUNTRY_COLORS[sc.country],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [scoreCards]);
+
+  // Social mobility: income share bottom 20% vs top 20%, plus ratio
+  const mobilityData = useMemo(() => {
+    return COUNTRY_KEYS.map(ck => {
+      const low = getLatest(extraData.incomeShareLow20, ck);
+      const high = getLatest(extraData.incomeShareHigh20, ck);
+      if (low === null || high === null) return null;
+      return {
+        country: (COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12),
+        countryKey: ck,
+        'Bottom 20%': parseFloat(low.toFixed(1)),
+        'Top 20%': parseFloat(high.toFixed(1)),
+        ratio: parseFloat((high / low).toFixed(2)),
+        fill: COUNTRY_COLORS[ck],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => a.ratio - b.ratio);
+  }, [extraData]);
+
+  // Demographic transition for selected country (birth rate, death rate, fertility, life exp over time)
+  const demoTransition = useMemo(() => {
+    if (!extraData.birthRate) return [];
+    const years = new Set<number>();
+    [extraData.birthRate, extraData.deathRate, extraData.fertilityRate, data?.lifeExpectancy].forEach(s => {
+      s?.forEach((row: any) => {
+        const y = Number(row.date || row.year);
+        if (!isNaN(y) && y >= 1960) years.add(y);
+      });
+    });
+    return Array.from(years).sort((a, b) => a - b).map(year => ({
+      year,
+      'Birth Rate': getValueAtYear(extraData.birthRate, demoCountry, year),
+      'Death Rate': getValueAtYear(extraData.deathRate, demoCountry, year),
+      'Fertility Rate': getValueAtYear(extraData.fertilityRate, demoCountry, year),
+      'Life Expectancy': data ? getValueAtYear(data.lifeExpectancy, demoCountry, year) : null,
+    })).filter(d => d['Birth Rate'] !== null || d['Death Rate'] !== null);
+  }, [extraData, data, demoCountry]);
+
+  // Radar chart: normalized 0-100 scores across 6 dimensions
+  const radarData = useMemo(() => {
+    if (!data) return [];
+    const dimensions = [
+      { key: 'Health', get: (ck: CountryKey) => getLatest(data.lifeExpectancy, ck), normalize: (v: number) => ((v - 50) / (85 - 50)) * 100 },
+      { key: 'Education', get: (ck: CountryKey) => getLatest(data.tertiaryEnrollment, ck), normalize: (v: number) => Math.min(100, v) },
+      { key: 'Income', get: (ck: CountryKey) => getLatest(data.gdpPerCapitaPPP, ck), normalize: (v: number) => ((Math.log(v) - Math.log(1000)) / (Math.log(80000) - Math.log(1000))) * 100 },
+      { key: 'Equality', get: (ck: CountryKey) => getLatest(data.giniCoefficient, ck), normalize: (v: number) => Math.max(0, 100 - ((v - 20) / (60 - 20)) * 100) },
+      { key: 'Digital', get: (ck: CountryKey) => getLatest(data.internetUsers, ck), normalize: (v: number) => v },
+      { key: 'Sustainability', get: (ck: CountryKey) => getLatest(data.renewableEnergy, ck), normalize: (v: number) => v },
+    ];
+    return dimensions.map(dim => {
+      const point: Record<string, any> = { dimension: dim.key };
+      radarCountries.forEach(ck => {
+        const raw = dim.get(ck);
+        point[COUNTRY_DISPLAY_NAMES[ck]] = raw !== null ? Math.max(0, Math.min(100, parseFloat(dim.normalize(raw).toFixed(1)))) : 0;
+      });
+      return point;
+    });
+  }, [data, radarCountries]);
 
   const socialMetrics = useMemo(() => {
     if (!data) return [];
@@ -123,9 +337,12 @@ export default function DevelopmentPage() {
     });
   }, [data]);
 
+  // Development Over Time with selectable metric
   const devOverTimeData = useMemo(() => {
-    if (!data?.lifeExpectancy) return [];
-    return data.lifeExpectancy
+    if (!data) return [];
+    const series = (data as any)[devMetric] as CountryData[] | undefined;
+    if (!series) return [];
+    return series
       .filter((row: any) => {
         const yr = Number(row.date || row.year);
         return !isNaN(yr) && yr >= 2000;
@@ -139,7 +356,7 @@ export default function DevelopmentPage() {
         return point;
       })
       .sort((a: any, b: any) => a.year - b.year);
-  }, [data, selectedDevCountries]);
+  }, [data, selectedDevCountries, devMetric]);
 
   const regionalComparison = useMemo(() => {
     if (scoreCards.length === 0) return [];
@@ -186,7 +403,336 @@ export default function DevelopmentPage() {
     }
   };
 
+  const toggleRadarCountry = (ck: CountryKey) => {
+    setRadarCountries(prev => {
+      if (prev.includes(ck)) return prev.filter(c => c !== ck);
+      if (prev.length >= 6) return prev;
+      return [...prev, ck];
+    });
+  };
+
   const devTimeColors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+
+  // Rises & Falls Leaderboard — HDI delta since 2000
+  const risesFallsData = useMemo(() => {
+    if (!data) return [];
+    return COUNTRY_KEYS.map(ck => {
+      const lifeExpInit = getValueAtYear(data.lifeExpectancy, ck, 2000)
+        || getFirstAvailable(data.lifeExpectancy, ck, 2000, 2005)?.value
+        || null;
+      const eduInit = getValueAtYear(data.tertiaryEnrollment, ck, 2000)
+        || getFirstAvailable(data.tertiaryEnrollment, ck, 2000, 2005)?.value
+        || null;
+      const gdpInit = getValueAtYear(data.gdpPerCapitaPPP, ck, 2000)
+        || getFirstAvailable(data.gdpPerCapitaPPP, ck, 2000, 2005)?.value
+        || null;
+      const hdiInit = computeHDI(lifeExpInit, eduInit, gdpInit);
+      const hdiNow = computeHDI(
+        getLatest(data.lifeExpectancy, ck),
+        getLatest(data.tertiaryEnrollment, ck),
+        getLatest(data.gdpPerCapitaPPP, ck)
+      );
+      if (hdiInit === null || hdiNow === null) return null;
+      const delta = parseFloat((hdiNow - hdiInit).toFixed(3));
+      return {
+        country: COUNTRY_DISPLAY_NAMES[ck],
+        countryKey: ck,
+        hdiInit,
+        hdiNow,
+        delta,
+        fill: delta >= 0 ? '#22c55e' : '#ef4444',
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => b.delta - a.delta);
+  }, [data]);
+
+  // Development Complexity Score — weighted composite
+  const complexityScoreData = useMemo(() => {
+    if (!data) return [];
+    const weights = {
+      hdi: 0.25,
+      equality: 0.15,
+      digital: 0.10,
+      health: 0.15,
+      sustainability: 0.10,
+      gender: 0.10,
+      services: 0.15,
+    };
+    return COUNTRY_KEYS.map(ck => {
+      const lifeExp = getLatest(data.lifeExpectancy, ck);
+      const education = getLatest(data.tertiaryEnrollment, ck);
+      const gdpPc = getLatest(data.gdpPerCapitaPPP, ck);
+      const hdi = computeHDI(lifeExp, education, gdpPc);
+      const gini = getLatest(data.giniCoefficient, ck);
+      const internet = getLatest(data.internetUsers, ck);
+      const under5 = getLatest(extraData.under5Mortality, ck);
+      const renewable = getLatest(data.renewableEnergy, ck);
+      const femaleLabor = getLatest(data.femaleLaborForce, ck);
+      const electricity = getLatest(extraData.electricityAccess, ck);
+      const water = getLatest(extraData.basicWater, ck);
+      const sanitation = getLatest(extraData.basicSanitation, ck);
+
+      const hdiScore = hdi !== null ? hdi * 100 : null;
+      const equalityScore = gini !== null ? Math.max(0, 100 - ((gini - 20) / (60 - 20)) * 100) : null;
+      const digitalScore = internet;
+      const healthScore = under5 !== null ? Math.max(0, 100 - (under5 / 150) * 100) : null;
+      const sustainScore = renewable;
+      const genderScore = femaleLabor;
+      const servicesScore = [electricity, water, sanitation].filter((v): v is number => v !== null);
+      const servicesAvg = servicesScore.length > 0 ? servicesScore.reduce((s, v) => s + v, 0) / servicesScore.length : null;
+
+      const components = [
+        { v: hdiScore, w: weights.hdi },
+        { v: equalityScore, w: weights.equality },
+        { v: digitalScore, w: weights.digital },
+        { v: healthScore, w: weights.health },
+        { v: sustainScore, w: weights.sustainability },
+        { v: genderScore, w: weights.gender },
+        { v: servicesAvg, w: weights.services },
+      ];
+      const validComponents = components.filter(c => c.v !== null) as { v: number; w: number }[];
+      if (validComponents.length === 0) return null;
+      const totalWeight = validComponents.reduce((s, c) => s + c.w, 0);
+      const score = validComponents.reduce((s, c) => s + c.v * c.w, 0) / totalWeight;
+      return {
+        country: COUNTRY_DISPLAY_NAMES[ck],
+        countryKey: ck,
+        score: parseFloat(score.toFixed(1)),
+        components: {
+          HDI: hdiScore,
+          Equality: equalityScore,
+          Digital: digitalScore,
+          Health: healthScore,
+          Sustainability: sustainScore,
+          Gender: genderScore,
+          Services: servicesAvg,
+        },
+        fill: COUNTRY_COLORS[ck],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => b.score - a.score);
+  }, [data, extraData]);
+
+  // Inequality over time — Gini historical series
+  const giniOverTimeData = useMemo(() => {
+    if (!data?.giniCoefficient) return [];
+    return data.giniCoefficient
+      .filter((row: any) => {
+        const yr = Number(row.date || row.year);
+        return !isNaN(yr) && yr >= 1990;
+      })
+      .map((row: any) => {
+        const point: Record<string, any> = { year: Number(row.date || row.year) };
+        selectedDevCountries.forEach(ck => {
+          const v = Number(row[ck]);
+          if (!isNaN(v) && v > 0) point[ck] = v;
+        });
+        return point;
+      })
+      .sort((a: any, b: any) => a.year - b.year);
+  }, [data, selectedDevCountries]);
+
+  // Gender Development Index — male vs female life expectancy + parity
+  const gdiData = useMemo(() => {
+    return COUNTRY_KEYS.map(ck => {
+      const leM = getLatest(extraData.lifeExpMale, ck);
+      const leF = getLatest(extraData.lifeExpFemale, ck);
+      const parity = getLatest(extraData.schoolGenderParity, ck);
+      const femLabor = data ? getLatest(data.femaleLaborForce, ck) : null;
+      if (leM === null && leF === null) return null;
+      const leGap = leM !== null && leF !== null ? parseFloat((leF - leM).toFixed(1)) : null;
+      return {
+        country: (COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12),
+        countryKey: ck,
+        'Life Exp Male': leM !== null ? parseFloat(leM.toFixed(1)) : 0,
+        'Life Exp Female': leF !== null ? parseFloat(leF.toFixed(1)) : 0,
+        leGap,
+        parity,
+        femLabor,
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [extraData, data]);
+
+  // Remittances reliance
+  const remittancesData = useMemo(() => {
+    return COUNTRY_KEYS.map(ck => {
+      const v = getLatest(extraData.remittances, ck);
+      if (v === null) return null;
+      return {
+        country: (COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12),
+        countryKey: ck,
+        remittances: parseFloat(v.toFixed(2)),
+        fill: COUNTRY_COLORS[ck],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => b.remittances - a.remittances);
+  }, [extraData]);
+
+  // Healthcare outcomes
+  const healthOutcomesData = useMemo(() => {
+    return COUNTRY_KEYS.map(ck => ({
+      country: (COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12),
+      countryKey: ck,
+      under5: getLatest(extraData.under5Mortality, ck),
+      maternal: getLatest(extraData.maternalMortality, ck),
+      physicians: getLatest(extraData.physiciansPer1000, ck),
+      hospitalBeds: getLatest(extraData.hospitalBeds, ck),
+      immuneDPT: getLatest(extraData.immunizationDPT, ck),
+      immuneMeasles: getLatest(extraData.immunizationMeasles, ck),
+    }));
+  }, [extraData]);
+
+  // Basic services access (composite infrastructure score)
+  const basicServicesData = useMemo(() => {
+    if (!data) return [];
+    return COUNTRY_KEYS.map(ck => {
+      const elec = getLatest(extraData.electricityAccess, ck);
+      const water = getLatest(extraData.basicWater, ck);
+      const sanit = getLatest(extraData.basicSanitation, ck);
+      const net = getLatest(data.internetUsers, ck);
+      const values = [elec, water, sanit, net].filter((v): v is number => v !== null);
+      if (values.length === 0) return null;
+      const avg = values.reduce((s, v) => s + v, 0) / values.length;
+      return {
+        country: (COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12),
+        countryKey: ck,
+        Electricity: elec !== null ? parseFloat(elec.toFixed(1)) : 0,
+        Water: water !== null ? parseFloat(water.toFixed(1)) : 0,
+        Sanitation: sanit !== null ? parseFloat(sanit.toFixed(1)) : 0,
+        Internet: net !== null ? parseFloat(net.toFixed(1)) : 0,
+        score: parseFloat(avg.toFixed(1)),
+        fill: COUNTRY_COLORS[ck],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => b.score - a.score);
+  }, [data, extraData]);
+
+  // Spending efficiency — healthcare $ vs life expectancy; education $ vs tertiary enrollment
+  const healthSpendingData = useMemo(() => {
+    if (!data) return [];
+    return COUNTRY_KEYS.map(ck => {
+      const spend = getLatest(data.healthcareExpenditure, ck);
+      const outcome = getLatest(data.lifeExpectancy, ck);
+      if (spend === null || outcome === null) return null;
+      return {
+        country: COUNTRY_DISPLAY_NAMES[ck],
+        countryKey: ck,
+        spend: parseFloat(spend.toFixed(2)),
+        outcome: parseFloat(outcome.toFixed(1)),
+        fill: COUNTRY_COLORS[ck],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [data]);
+
+  const eduSpendingData = useMemo(() => {
+    if (!data) return [];
+    return COUNTRY_KEYS.map(ck => {
+      const spend = getLatest(data.educationExpenditure, ck);
+      const outcome = getLatest(data.tertiaryEnrollment, ck);
+      if (spend === null || outcome === null) return null;
+      return {
+        country: COUNTRY_DISPLAY_NAMES[ck],
+        countryKey: ck,
+        spend: parseFloat(spend.toFixed(2)),
+        outcome: parseFloat(outcome.toFixed(1)),
+        fill: COUNTRY_COLORS[ck],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [data]);
+
+  // Population pyramid — age structure for selected country
+  const populationPyramidData = useMemo(() => {
+    const young = getLatest(extraData.popAge0_14, demoCountry);
+    const working = getLatest(extraData.popAge15_64, demoCountry);
+    const old = getLatest(extraData.popAge65Plus, demoCountry);
+    return [
+      { band: '65+', percent: old !== null ? parseFloat(old.toFixed(1)) : 0, fill: '#ef4444' },
+      { band: '15-64', percent: working !== null ? parseFloat(working.toFixed(1)) : 0, fill: '#3b82f6' },
+      { band: '0-14', percent: young !== null ? parseFloat(young.toFixed(1)) : 0, fill: '#22c55e' },
+    ];
+  }, [extraData, demoCountry]);
+
+  const dependencyRatio = useMemo(() => {
+    const young = getLatest(extraData.popAge0_14, demoCountry);
+    const working = getLatest(extraData.popAge15_64, demoCountry);
+    const old = getLatest(extraData.popAge65Plus, demoCountry);
+    if (young === null || working === null || old === null || working === 0) return null;
+    return parseFloat((((young + old) / working) * 100).toFixed(1));
+  }, [extraData, demoCountry]);
+
+  // Resource Curse — resource rents vs HDI
+  const resourceCurseData = useMemo(() => {
+    return scoreCards.map(sc => {
+      const rents = getLatest(extraData.resourceRents, sc.country);
+      if (rents === null || sc.hdi === null) return null;
+      return {
+        country: COUNTRY_DISPLAY_NAMES[sc.country],
+        countryKey: sc.country,
+        rents: parseFloat(rents.toFixed(2)),
+        hdi: sc.hdi,
+        fill: COUNTRY_COLORS[sc.country],
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [scoreCards, extraData]);
+
+  // SDG Progress Tracker — 8 proxy goals
+  const sdgData = useMemo(() => {
+    if (!data) return [];
+    const countryAvg = (series: CountryData[] | undefined, invert = false, scale = 100): number => {
+      if (!series) return 0;
+      const vals = COUNTRY_KEYS.map(ck => getLatest(series, ck)).filter((v): v is number => v !== null);
+      if (vals.length === 0) return 0;
+      const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+      const normalized = Math.max(0, Math.min(100, (avg / scale) * 100));
+      return parseFloat((invert ? 100 - normalized : normalized).toFixed(1));
+    };
+    return [
+      { goal: 'SDG 1 — No Poverty', proxy: 'Poverty rate ($2.15/day)', value: countryAvg(data.povertyRate, true, 100), target: 100, description: 'Share of population above $2.15/day poverty line' },
+      { goal: 'SDG 3 — Good Health', proxy: 'Life expectancy', value: countryAvg(data.lifeExpectancy, false, 90), target: 90, description: 'Life expectancy scaled to 90-year target' },
+      { goal: 'SDG 4 — Quality Education', proxy: 'Tertiary enrollment', value: countryAvg(data.tertiaryEnrollment, false, 80), target: 80, description: 'Tertiary enrollment scaled to 80% target' },
+      { goal: 'SDG 5 — Gender Equality', proxy: 'Female labor force', value: countryAvg(data.femaleLaborForce, false, 100), target: 100, description: 'Female labor participation rate' },
+      { goal: 'SDG 7 — Clean Energy', proxy: 'Renewable energy %', value: countryAvg(data.renewableEnergy, false, 80), target: 80, description: 'Renewable share of final energy consumption' },
+      { goal: 'SDG 8 — Decent Work', proxy: 'Employment rate', value: countryAvg(data.employmentRates, false, 80), target: 80, description: 'Employment to population ratio' },
+      { goal: 'SDG 10 — Reduced Inequality', proxy: 'Gini index inverted', value: countryAvg(data.giniCoefficient, true, 60), target: 100, description: 'Inverted Gini — higher = more equal' },
+      { goal: 'SDG 13 — Climate Action', proxy: 'CO₂ emissions inverted', value: countryAvg(data.co2Emissions, true, 20), target: 100, description: 'Inverted CO₂ per capita — higher = cleaner' },
+    ];
+  }, [data]);
+
+  // Digital divide — internet, mobile, broadband rankings
+  const digitalDivideData = useMemo(() => {
+    if (!data) return { internet: [], mobile: [], broadband: [] };
+    const build = (series: CountryData[] | undefined) => {
+      if (!series) return [];
+      return COUNTRY_KEYS.map(ck => {
+        const v = getLatest(series, ck);
+        if (v === null) return null;
+        return {
+          country: (COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12),
+          countryKey: ck,
+          value: parseFloat(v.toFixed(1)),
+          fill: COUNTRY_COLORS[ck],
+        };
+      }).filter((x): x is NonNullable<typeof x> => x !== null)
+        .sort((a, b) => b.value - a.value);
+    };
+    return {
+      internet: build(data.internetUsers),
+      mobile: build(extraData.mobileSubs),
+      broadband: build(extraData.broadband),
+    };
+  }, [data, extraData]);
+
+  const mapScores = useMemo(() => {
+    return scoreCards.map(sc => ({
+      country: sc.country as CountryKey,
+      hdi: sc.hdi,
+      gini: sc.gini,
+      gdpPc: sc.gdpPc,
+      lifeExp: sc.lifeExp,
+    }));
+  }, [scoreCards]);
+
+  const currentMetricConfig = DEV_METRIC_OPTIONS.find(o => o.key === devMetric)!;
 
   if (loading) {
     return (
@@ -248,6 +794,36 @@ export default function DevelopmentPage() {
           </p>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className={`flex flex-wrap gap-1 p-1 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            {DEV_SECTIONS.map(section => {
+              const active = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
+                    active
+                      ? isDarkMode
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-blue-500 text-white'
+                      : isDarkMode
+                        ? 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                >
+                  <span>{section.icon}</span>
+                  <span>{section.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ================ OVERVIEW ================ */}
+        {activeSection === 'overview' && (
+        <>
         {/* Development Scorecard */}
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <h2 className="text-xl font-semibold mb-4">Development Scorecard (Simplified HDI)</h2>
@@ -270,7 +846,578 @@ export default function DevelopmentPage() {
           </div>
         </div>
 
-        {/* Social Progress Charts */}
+        </>
+        )}
+
+        {/* ================ GLOBAL MAP ================ */}
+        {activeSection === 'map' && (
+        <>
+        {/* Global Development Map */}
+        <div className="mb-8">
+          <div className={`rounded-xl border p-4 mb-3 ${isDarkMode ? 'bg-indigo-900/20 border-indigo-800' : 'bg-indigo-50 border-indigo-200'}`}>
+            <h3 className={`text-sm font-semibold mb-1 ${isDarkMode ? 'text-indigo-300' : 'text-indigo-900'}`}>🗺️ Global Development Map</h3>
+            <p className={`text-xs ${isDarkMode ? 'text-indigo-200/80' : 'text-indigo-800/90'}`}>
+              Choropleth view of HDI, Gini, GDP per capita or life expectancy. Hover a country to see its value. Dark regions have no data in our tracked set.
+            </p>
+          </div>
+          <DevelopmentWorldMap
+            isDarkMode={isDarkMode}
+            scoreCards={mapScores}
+            metric={mapMetric}
+            onMetricChange={setMapMetric}
+          />
+        </div>
+        </>
+        )}
+
+        {/* Convergence Chart — GROWTH */}
+        {activeSection === 'growth' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Development Convergence (2000 → Today)</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Do poor countries catch up? X-axis shows initial GDP/capita (PPP) in 2000; Y-axis shows 23-year annualized growth. A downward slope = convergence
+            (poorer countries grow faster). Flat/upward = divergence.
+          </p>
+          <div className="h-[420px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis
+                  type="number"
+                  dataKey="initial"
+                  name="Initial GDP/cap (2000)"
+                  stroke={tc.axis}
+                  tick={{ fontSize: 11 }}
+                  scale="log"
+                  domain={['auto', 'auto']}
+                  tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
+                  label={{ value: 'Initial GDP per capita, PPP (2000) — log scale', position: 'bottom', offset: 10, fontSize: 11, fill: tc.axis }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="growth"
+                  name="Annualized growth %"
+                  stroke={tc.axis}
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={v => `${v}%`}
+                  label={{ value: 'Annualized GDP/cap growth (%)', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }}
+                />
+                <ReferenceLine y={0} stroke={tc.axis} strokeDasharray="3 3" />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  cursor={{ strokeDasharray: '3 3' }}
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{d.country}</p>
+                        <p>Initial (2000): ${d.initial.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                        <p>Latest: ${d.latest.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                        <p>Annualized growth: {d.growth}%</p>
+                      </div>
+                    );
+                  }}
+                />
+                <Scatter data={convergenceData}>
+                  {convergenceData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Education Pipeline — EDUCATION */}
+        {activeSection === 'education' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Education Pipeline</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            How students progress through education stages (all % gross enrollment / completion).
+            Steep drop-offs from secondary to tertiary often signal opportunity bottlenecks.
+          </p>
+          <div className="h-[420px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={educationPipeline} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="country" stroke={tc.axis} tick={{ fontSize: 9 }} angle={-45} textAnchor="end" height={70} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(v: number) => `${v}%`} />
+                <Legend />
+                <Bar dataKey="Primary" fill="#22c55e" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Secondary" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Tertiary" fill="#8b5cf6" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* HCI vs HDI — EDUCATION */}
+        {activeSection === 'education' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Human Capital vs Human Development</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            World Bank Human Capital Index (HCI 2020, potential productivity of a child born today) vs our computed HDI.
+            Countries above the diagonal over-perform on human capital relative to overall development; below the line under-perform.
+          </p>
+          <div className="h-[420px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis
+                  type="number"
+                  dataKey="hdi"
+                  name="HDI"
+                  stroke={tc.axis}
+                  tick={{ fontSize: 11 }}
+                  domain={[0.3, 1]}
+                  label={{ value: 'Human Development Index (computed)', position: 'bottom', offset: 10, fontSize: 11, fill: tc.axis }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="hci"
+                  name="HCI"
+                  stroke={tc.axis}
+                  tick={{ fontSize: 11 }}
+                  domain={[0.3, 1]}
+                  label={{ value: 'Human Capital Index (WB 2020)', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }}
+                />
+                <ReferenceLine segment={[{ x: 0.3, y: 0.3 }, { x: 1, y: 1 }]} stroke={tc.axis} strokeDasharray="4 4" />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  cursor={{ strokeDasharray: '3 3' }}
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{d.country}</p>
+                        <p>HDI: {d.hdi.toFixed(3)}</p>
+                        <p>HCI: {d.hci.toFixed(2)}</p>
+                        <p className={d.hci >= d.hdi ? 'text-green-500' : 'text-orange-500'}>
+                          {d.hci >= d.hdi ? 'Over-performing on human capital' : 'Human capital lagging'}
+                        </p>
+                      </div>
+                    );
+                  }}
+                />
+                <Scatter data={hciScatter}>
+                  {hciScatter.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Social Mobility: Income Share — INEQUALITY */}
+        {activeSection === 'inequality' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Income Share: Bottom 20% vs Top 20%</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Perfect equality would give each quintile 20% of national income. In practice, the top 20% typically captures 35-50%+ while the bottom 20% gets 3-7%.
+            Countries are sorted by the top-to-bottom ratio (lower = more equal).
+          </p>
+          <div className="h-[420px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={mobilityData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="country" stroke={tc.axis} tick={{ fontSize: 9 }} angle={-45} textAnchor="end" height={70} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  content={({ active, payload, label }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{label}</p>
+                        <p>Bottom 20%: {d['Bottom 20%']}% of income</p>
+                        <p>Top 20%: {d['Top 20%']}% of income</p>
+                        <p className="mt-1 font-medium">Top/Bottom ratio: {d.ratio}x</p>
+                      </div>
+                    );
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="Bottom 20%" fill="#22c55e" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Top 20%" fill="#ef4444" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* ===================== HEALTH TAB ===================== */}
+
+        {/* Healthcare Access & Outcomes — HEALTH */}
+        {activeSection === 'health' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Healthcare Access & Outcomes</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Six core health system indicators: child and maternal mortality (outcomes), physicians and hospital beds
+            (access), DPT and measles immunization (prevention coverage).
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {[
+              { key: 'under5', label: 'Under-5 Mortality', unit: 'per 1,000 live births', good: 'low', format: (v: number) => v.toFixed(1) },
+              { key: 'maternal', label: 'Maternal Mortality', unit: 'per 100,000 live births', good: 'low', format: (v: number) => v.toFixed(0) },
+              { key: 'physicians', label: 'Physicians', unit: 'per 1,000 people', good: 'high', format: (v: number) => v.toFixed(2) },
+              { key: 'hospitalBeds', label: 'Hospital Beds', unit: 'per 1,000 people', good: 'high', format: (v: number) => v.toFixed(2) },
+              { key: 'immuneDPT', label: 'DPT Immunization', unit: '% of children', good: 'high', format: (v: number) => `${v.toFixed(0)}%` },
+              { key: 'immuneMeasles', label: 'Measles Immunization', unit: '% of children', good: 'high', format: (v: number) => `${v.toFixed(0)}%` },
+            ].map(metric => {
+              const rows = healthOutcomesData
+                .map(r => ({ country: r.country, countryKey: r.countryKey, value: (r as any)[metric.key] as number | null }))
+                .filter(r => r.value !== null);
+              const sorted = [...rows].sort((a, b) => metric.good === 'high'
+                ? (b.value! - a.value!)
+                : (a.value! - b.value!));
+              const top3 = sorted.slice(0, 3);
+              const bottom3 = sorted.slice(-3).reverse();
+              return (
+                <div key={metric.key} className={`rounded-lg border p-4 ${tc.card}`}>
+                  <p className="text-sm font-semibold">{metric.label}</p>
+                  <p className={`text-xs mb-2 ${tc.textSec}`}>{metric.unit}</p>
+                  <div className="text-xs">
+                    <p className={`font-medium ${metric.good === 'high' ? 'text-green-500' : 'text-green-500'}`}>Best</p>
+                    {top3.map(r => (
+                      <p key={r.countryKey} className="flex justify-between">
+                        <span className="truncate">{r.country}</span>
+                        <span className="font-mono">{metric.format(r.value!)}</span>
+                      </p>
+                    ))}
+                    <p className={`font-medium mt-2 text-red-500`}>Worst</p>
+                    {bottom3.map(r => (
+                      <p key={r.countryKey} className="flex justify-between">
+                        <span className="truncate">{r.country}</span>
+                        <span className="font-mono">{metric.format(r.value!)}</span>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2">Under-5 Mortality vs Physicians per 1000</h3>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>Each country plotted by doctor density vs child mortality. Top-right = worst (many doctors unable to prevent mortality — rare, often data issues). Bottom-right = best.</p>
+          <div className="h-[380px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" dataKey="physicians" name="Physicians/1000" stroke={tc.axis} tick={{ fontSize: 11 }}
+                  label={{ value: 'Physicians per 1,000 people', position: 'bottom', offset: 10, fontSize: 11, fill: tc.axis }} />
+                <YAxis type="number" dataKey="under5" name="Under-5 Mortality" stroke={tc.axis} tick={{ fontSize: 11 }}
+                  label={{ value: 'Under-5 mortality per 1,000', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  cursor={{ strokeDasharray: '3 3' }}
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{d.country}</p>
+                        <p>Physicians/1000: {d.physicians?.toFixed(2) ?? 'N/A'}</p>
+                        <p>Under-5 mortality: {d.under5?.toFixed(1) ?? 'N/A'} per 1,000</p>
+                      </div>
+                    );
+                  }}
+                />
+                <Scatter data={healthOutcomesData.filter(d => d.physicians !== null && d.under5 !== null).map(d => ({
+                  ...d,
+                  fill: COUNTRY_COLORS[d.countryKey as CountryKey],
+                }))}>
+                  {healthOutcomesData
+                    .filter(d => d.physicians !== null && d.under5 !== null)
+                    .map((e, i) => <Cell key={i} fill={COUNTRY_COLORS[e.countryKey as CountryKey]} />)}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Basic Services Access — HEALTH */}
+        {activeSection === 'health' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Basic Services Access</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            The foundational infrastructure of development: electricity, drinking water, sanitation, and internet.
+            Composite score is the simple average of available indicators per country (0-100%).
+          </p>
+          <div style={{ height: `${Math.max(320, basicServicesData.length * 30)}px` }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={basicServicesData} layout="vertical" margin={{ top: 5, right: 20, left: 100, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" domain={[0, 100]} stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <YAxis type="category" dataKey="country" stroke={tc.axis} tick={{ fontSize: 11 }} width={100} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(v: number) => `${v}%`} />
+                <Legend />
+                <Bar dataKey="Electricity" stackId="a" fill="#f59e0b" />
+                <Bar dataKey="Water" stackId="b" fill="#3b82f6" />
+                <Bar dataKey="Sanitation" stackId="c" fill="#22c55e" />
+                <Bar dataKey="Internet" stackId="d" fill="#8b5cf6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <p className={`text-xs mt-3 ${tc.textSec}`}>
+            Note: bars are shown side-by-side (not stacked) for each of the 4 service types. Countries are sorted by composite score.
+          </p>
+        </div>
+        )}
+
+        {/* Spending Efficiency — HEALTH */}
+        {activeSection === 'health' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Spending Efficiency — Value for Money</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Does more public spending produce better outcomes? Countries <strong>above</strong> the trend are over-performing
+            (good outcomes per dollar spent); <strong>below</strong> the trend are under-performing.
+          </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-sm font-semibold mb-2">Healthcare $ → Life Expectancy</h3>
+              <div className="h-[360px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ScatterChart margin={{ top: 10, right: 20, bottom: 30, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                    <XAxis type="number" dataKey="spend" name="Healthcare %GDP" stroke={tc.axis} tick={{ fontSize: 11 }}
+                      label={{ value: 'Healthcare spending (% GDP)', position: 'bottom', offset: 10, fontSize: 11, fill: tc.axis }} />
+                    <YAxis type="number" dataKey="outcome" name="Life Expectancy" stroke={tc.axis} tick={{ fontSize: 11 }} domain={[50, 90]}
+                      label={{ value: 'Life expectancy (yrs)', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                    <Tooltip
+                      contentStyle={tc.tooltip}
+                      cursor={{ strokeDasharray: '3 3' }}
+                      content={({ active, payload }: any) => {
+                        if (!active || !payload?.length) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                            <p className="font-semibold mb-1">{d.country}</p>
+                            <p>Spending: {d.spend}% of GDP</p>
+                            <p>Life expectancy: {d.outcome} yrs</p>
+                          </div>
+                        );
+                      }}
+                    />
+                    <Scatter data={healthSpendingData}>
+                      {healthSpendingData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                    </Scatter>
+                  </ScatterChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold mb-2">Education $ → Tertiary Enrollment</h3>
+              <div className="h-[360px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ScatterChart margin={{ top: 10, right: 20, bottom: 30, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                    <XAxis type="number" dataKey="spend" name="Education %GDP" stroke={tc.axis} tick={{ fontSize: 11 }}
+                      label={{ value: 'Education spending (% GDP)', position: 'bottom', offset: 10, fontSize: 11, fill: tc.axis }} />
+                    <YAxis type="number" dataKey="outcome" name="Tertiary Enrollment" stroke={tc.axis} tick={{ fontSize: 11 }} domain={[0, 120]}
+                      label={{ value: 'Tertiary enrollment %', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                    <Tooltip
+                      contentStyle={tc.tooltip}
+                      cursor={{ strokeDasharray: '3 3' }}
+                      content={({ active, payload }: any) => {
+                        if (!active || !payload?.length) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                            <p className="font-semibold mb-1">{d.country}</p>
+                            <p>Spending: {d.spend}% of GDP</p>
+                            <p>Tertiary enrollment: {d.outcome}%</p>
+                          </div>
+                        );
+                      }}
+                    />
+                    <Scatter data={eduSpendingData}>
+                      {eduSpendingData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                    </Scatter>
+                  </ScatterChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </div>
+        )}
+
+        {/* Demographic Transition — ENVIRONMENT */}
+        {activeSection === 'environment' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-xl font-semibold mb-1">Demographic Transition</h2>
+              <p className={`text-xs ${tc.textSec}`}>
+                The classic pattern: both birth and death rates fall as development progresses. Life expectancy rises and fertility converges toward replacement (~2.1).
+              </p>
+            </div>
+            <select
+              value={demoCountry}
+              onChange={e => setDemoCountry(e.target.value as CountryKey)}
+              className={`rounded-lg px-3 py-2 text-sm border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            >
+              {COUNTRY_KEYS.map(ck => (
+                <option key={ck} value={ck}>{COUNTRY_DISPLAY_NAMES[ck]}</option>
+              ))}
+            </select>
+          </div>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={demoTransition} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="left" stroke={tc.axis} tick={{ fontSize: 11 }} label={{ value: 'per 1000 / fertility', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                <YAxis yAxisId="right" orientation="right" stroke={tc.axis} tick={{ fontSize: 11 }} label={{ value: 'Life expectancy (yrs)', angle: 90, position: 'insideRight', fontSize: 11, fill: tc.axis }} />
+                <Tooltip contentStyle={tc.tooltip} />
+                <Legend />
+                <Line yAxisId="left" type="monotone" dataKey="Birth Rate" stroke="#3b82f6" strokeWidth={2} dot={false} connectNulls />
+                <Line yAxisId="left" type="monotone" dataKey="Death Rate" stroke="#ef4444" strokeWidth={2} dot={false} connectNulls />
+                <Line yAxisId="left" type="monotone" dataKey="Fertility Rate" stroke="#f59e0b" strokeWidth={2} dot={false} connectNulls />
+                <Line yAxisId="right" type="monotone" dataKey="Life Expectancy" stroke="#22c55e" strokeWidth={2} dot={false} connectNulls />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* ===================== SDG TAB ===================== */}
+
+        {/* SDG Progress Tracker — SDG */}
+        {activeSection === 'sdg' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">SDG Progress Tracker (Tracked-Country Average)</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Progress toward 8 of the 17 UN Sustainable Development Goals, using proxy indicators averaged across tracked countries
+            (0-100 scale, 100 = goal achieved). Bars shows distance to target.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {sdgData.map(goal => {
+              const progress = Math.max(0, Math.min(100, goal.value));
+              const color = progress >= 75 ? '#22c55e' : progress >= 50 ? '#eab308' : progress >= 25 ? '#f97316' : '#ef4444';
+              return (
+                <div key={goal.goal} className={`rounded-lg border p-4 ${tc.card}`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-semibold">{goal.goal}</p>
+                      <p className={`text-xs ${tc.textSec}`}>{goal.proxy}</p>
+                    </div>
+                    <p className="text-lg font-bold" style={{ color }}>{progress.toFixed(0)}</p>
+                  </div>
+                  <div className={`w-full rounded-full h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                    <div className="h-2 rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: color }} />
+                  </div>
+                  <p className={`text-xs mt-2 ${tc.textSec}`}>{goal.description}</p>
+                </div>
+              );
+            })}
+          </div>
+          <div className={`mt-4 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
+            <p className={`text-xs ${tc.textSec}`}>
+              <strong>Note:</strong> These are approximate proxies — the UN tracks 232 indicators across the 17 SDGs.
+              Scores inverted for SDG 1 (poverty), 10 (inequality), and 13 (CO₂): lower raw values = better progress.
+            </p>
+          </div>
+        </div>
+        )}
+
+        {/* Digital Divide — SDG */}
+        {activeSection === 'sdg' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Digital Divide Gradient</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Three dimensions of connectivity ranked side by side. A country can rank high on mobile
+            (cellular leapfrogging) while lagging on fixed broadband — a common pattern in emerging markets.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { title: 'Internet Users (% population)', data: digitalDivideData.internet, suffix: '%', color: '#3b82f6' },
+              { title: 'Mobile Subscriptions (per 100)', data: digitalDivideData.mobile, suffix: '', color: '#8b5cf6' },
+              { title: 'Fixed Broadband (per 100)', data: digitalDivideData.broadband, suffix: '', color: '#ec4899' },
+            ].map(col => (
+              <div key={col.title}>
+                <h3 className="text-sm font-semibold mb-2">{col.title}</h3>
+                <div style={{ height: `${Math.max(280, col.data.length * 24)}px` }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={col.data} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                      <XAxis type="number" stroke={tc.axis} tick={{ fontSize: 10 }} />
+                      <YAxis type="category" dataKey="country" stroke={tc.axis} tick={{ fontSize: 10 }} width={80} />
+                      <Tooltip contentStyle={tc.tooltip} formatter={(v: number) => `${v}${col.suffix}`} />
+                      <Bar dataKey="value" radius={[0, 3, 3, 0]}>
+                        {col.data.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        )}
+
+        {/* Radar Comparison — COMPARE */}
+        {activeSection === 'compare' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex flex-col gap-3 mb-4">
+            <div>
+              <h2 className="text-xl font-semibold mb-1">Multi-Dimensional Country Comparison</h2>
+              <p className={`text-xs ${tc.textSec}`}>
+                Six development dimensions normalized to 0-100. Select up to 6 countries to compare their full development profile.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {COUNTRY_KEYS.map(ck => {
+                const active = radarCountries.includes(ck);
+                return (
+                  <button
+                    key={ck}
+                    onClick={() => toggleRadarCountry(ck)}
+                    className={`px-2 py-1 text-xs rounded-full border transition-colors ${
+                      active
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : isDarkMode
+                          ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
+                          : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'
+                    }`}
+                  >
+                    {(COUNTRY_DISPLAY_NAMES[ck] || ck).slice(0, 12)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="h-[500px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={radarData} outerRadius="75%">
+                <PolarGrid stroke={tc.grid} />
+                <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 12, fill: tc.axis }} />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: tc.axis }} />
+                {radarCountries.map((ck, i) => (
+                  <Radar
+                    key={ck}
+                    name={COUNTRY_DISPLAY_NAMES[ck]}
+                    dataKey={COUNTRY_DISPLAY_NAMES[ck]}
+                    stroke={COUNTRY_COLORS[ck] || devTimeColors[i % devTimeColors.length]}
+                    fill={COUNTRY_COLORS[ck] || devTimeColors[i % devTimeColors.length]}
+                    fillOpacity={0.15}
+                    strokeWidth={2}
+                  />
+                ))}
+                <Legend />
+                <Tooltip contentStyle={tc.tooltip} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Social Progress Charts — INEQUALITY (both charts) */}
+        {activeSection === 'inequality' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className={`rounded-xl border p-6 ${tc.card}`}>
             <h2 className="text-xl font-semibold mb-4">Social Progress Comparison</h2>
@@ -307,8 +1454,10 @@ export default function DevelopmentPage() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* Sustainability: CO2 vs Renewable */}
+        {/* Sustainability: CO2 vs Renewable — ENVIRONMENT */}
+        {activeSection === 'environment' && (
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <h2 className="text-xl font-semibold mb-2">Sustainability: CO2 Emissions vs Renewable Energy</h2>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Ideal position is bottom-right (low CO2, high renewable energy)</p>
@@ -331,8 +1480,116 @@ export default function DevelopmentPage() {
             </ResponsiveContainer>
           </div>
         </div>
+        )}
 
-        {/* HDI Component Breakdown */}
+        {/* Population Pyramid — ENVIRONMENT */}
+        {activeSection === 'environment' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-xl font-semibold mb-1">Population Age Structure</h2>
+              <p className={`text-xs ${tc.textSec}`}>
+                Share of population in each age band. A bottom-heavy pyramid (many young) indicates a potential
+                demographic dividend; a top-heavy one indicates an aging society with rising old-age dependency.
+              </p>
+            </div>
+            <select
+              value={demoCountry}
+              onChange={e => setDemoCountry(e.target.value as CountryKey)}
+              className={`rounded-lg px-3 py-2 text-sm border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            >
+              {COUNTRY_KEYS.map(ck => (
+                <option key={ck} value={ck}>{COUNTRY_DISPLAY_NAMES[ck]}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={populationPyramidData} layout="vertical" margin={{ top: 5, right: 40, left: 40, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                    <XAxis type="number" domain={[0, 100]} stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                    <YAxis type="category" dataKey="band" stroke={tc.axis} tick={{ fontSize: 13, fontWeight: 600 }} width={50} />
+                    <Tooltip contentStyle={tc.tooltip} formatter={(v: number) => `${v}% of population`} />
+                    <Bar dataKey="percent" radius={[0, 6, 6, 0]}>
+                      {populationPyramidData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className={`rounded-lg border p-4 ${tc.card}`}>
+                <p className={`text-xs ${tc.textSec}`}>Total Dependency Ratio</p>
+                <p className="text-2xl font-bold">
+                  {dependencyRatio !== null ? `${dependencyRatio}%` : '—'}
+                </p>
+                <p className={`text-xs mt-1 ${tc.textSec}`}>
+                  Dependents (0-14 &amp; 65+) per 100 working-age. Lower = more demographic dividend potential.
+                </p>
+              </div>
+              <div className={`rounded-lg border p-4 ${tc.card}`}>
+                <p className={`text-xs ${tc.textSec}`}>Interpretation</p>
+                <p className="text-xs mt-1">
+                  {dependencyRatio === null ? 'Data unavailable' :
+                    dependencyRatio < 50 ? '✓ Low dependency — prime working-age economy.' :
+                    dependencyRatio < 70 ? '⚖ Moderate dependency — balanced demographics.' :
+                    '⚠ High dependency — strain on working population.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        )}
+
+        {/* Resource Curse Scatter — ENVIRONMENT */}
+        {activeSection === 'environment' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Resource Curse? Rents vs Development</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Natural resource rents as % of GDP (oil, gas, minerals, forest) plotted against HDI. The
+            &quot;resource curse&quot; hypothesis predicts countries high in resource rents often underperform on development
+            (Venezuela, Nigeria, Saudi Arabia). Norway is the classic counter-example.
+          </p>
+          <div className="h-[420px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" dataKey="rents" name="Resource Rents" stroke={tc.axis} tick={{ fontSize: 11 }}
+                  label={{ value: 'Natural resource rents (% GDP)', position: 'bottom', offset: 10, fontSize: 11, fill: tc.axis }} />
+                <YAxis type="number" dataKey="hdi" name="HDI" stroke={tc.axis} tick={{ fontSize: 11 }} domain={[0.3, 1]}
+                  label={{ value: 'Human Development Index', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                <ReferenceLine y={0.7} stroke={tc.axis} strokeDasharray="3 3" label={{ value: 'HDI 0.70', fill: tc.axis, fontSize: 10, position: 'insideTopRight' }} />
+                <ReferenceLine x={10} stroke={tc.axis} strokeDasharray="3 3" label={{ value: '10% rents', fill: tc.axis, fontSize: 10, position: 'insideTopLeft' }} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  cursor={{ strokeDasharray: '3 3' }}
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    const curse = d.rents > 10 && d.hdi < 0.7;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{d.country}</p>
+                        <p>Resource rents: {d.rents}% GDP</p>
+                        <p>HDI: {d.hdi.toFixed(3)}</p>
+                        {curse && <p className="text-red-500 font-medium mt-1">⚠ Resource curse zone</p>}
+                      </div>
+                    );
+                  }}
+                />
+                <Scatter data={resourceCurseData}>
+                  {resourceCurseData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* HDI Component Breakdown — OVERVIEW */}
+        {activeSection === 'overview' && (
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <h2 className="text-xl font-semibold mb-2">HDI Component Breakdown</h2>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Three dimensions of the Human Development Index scored 0-100 for top 15 countries</p>
@@ -351,11 +1608,32 @@ export default function DevelopmentPage() {
             </ResponsiveContainer>
           </div>
         </div>
+        )}
 
-        {/* Development Over Time */}
+        {/* Development Over Time (with metric selector) — GROWTH */}
+        {activeSection === 'growth' && (
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Development Over Time</h2>
-          <p className={`text-xs mb-3 ${tc.textSec}`}>Life expectancy trends since 2000 for selected countries</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+            <div>
+              <h2 className="text-xl font-semibold mb-1">Development Over Time</h2>
+              <p className={`text-xs ${tc.textSec}`}>Historical trends since 2000 for selected countries and metric.</p>
+            </div>
+            <div className={`flex flex-wrap gap-1 p-1 rounded-lg ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+              {DEV_METRIC_OPTIONS.map(opt => (
+                <button
+                  key={opt.key}
+                  onClick={() => setDevMetric(opt.key)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                    devMetric === opt.key
+                      ? isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-gray-900 shadow'
+                      : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex flex-wrap gap-2 mb-4">
             {COUNTRY_KEYS.map(ck => {
               const active = selectedDevCountries.includes(ck);
@@ -384,7 +1662,45 @@ export default function DevelopmentPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
                 <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
                 <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} domain={['auto', 'auto']}
-                  label={{ value: 'Life Expectancy (yrs)', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                  label={{ value: currentMetricConfig.yLabel, angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  formatter={(value: number) => currentMetricConfig.format(value)}
+                />
+                <Legend />
+                {selectedDevCountries.map((ck, i) => (
+                  <Line
+                    key={ck}
+                    type="monotone"
+                    dataKey={ck}
+                    name={COUNTRY_DISPLAY_NAMES[ck as CountryKey] || ck}
+                    stroke={COUNTRY_COLORS[ck as CountryKey] || devTimeColors[i % devTimeColors.length]}
+                    strokeWidth={2}
+                    dot={false}
+                    connectNulls
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Inequality Over Time — GROWTH */}
+        {activeSection === 'growth' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Inequality Over Time (Gini)</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Gini coefficient historical series for selected countries since 1990. Lower = more equal. Uses the same
+            country selection as &quot;Development Over Time&quot; above.
+          </p>
+          <div className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={giniOverTimeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} domain={['auto', 'auto']}
+                  label={{ value: 'Gini Index', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
                 <Tooltip contentStyle={tc.tooltip} />
                 <Legend />
                 {selectedDevCountries.map((ck, i) => (
@@ -403,8 +1719,10 @@ export default function DevelopmentPage() {
             </ResponsiveContainer>
           </div>
         </div>
+        )}
 
-        {/* Regional Development Comparison */}
+        {/* Regional Development Comparison — GROWTH */}
+        {activeSection === 'growth' && (
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <h2 className="text-xl font-semibold mb-2">Regional Development Comparison</h2>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Average HDI (x100), Gini coefficient, and healthcare spending by region</p>
@@ -423,8 +1741,76 @@ export default function DevelopmentPage() {
             </ResponsiveContainer>
           </div>
         </div>
+        )}
 
-        {/* Poverty & Income Cards */}
+        {/* Gender Development Index — INEQUALITY */}
+        {activeSection === 'inequality' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Gender Development Index</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Male vs female life expectancy side by side. Women typically live 3-7 years longer; a narrow gap may signal
+            maternal or health-system deficits. Hover for school gender parity and female labor force participation.
+          </p>
+          <div className="h-[420px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={gdiData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis dataKey="country" stroke={tc.axis} tick={{ fontSize: 9 }} angle={-45} textAnchor="end" height={70} />
+                <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} domain={[40, 90]}
+                  label={{ value: 'Life expectancy (yrs)', angle: -90, position: 'insideLeft', fontSize: 11, fill: tc.axis }} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  content={({ active, payload, label }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{label}</p>
+                        <p>Male life exp: {d['Life Exp Male']} yrs</p>
+                        <p>Female life exp: {d['Life Exp Female']} yrs</p>
+                        {d.leGap !== null && <p className="font-medium">Gap: +{d.leGap} yrs female</p>}
+                        {d.parity !== null && <p>School gender parity: {d.parity.toFixed(2)}</p>}
+                        {d.femLabor !== null && <p>Female labor: {d.femLabor.toFixed(1)}%</p>}
+                      </div>
+                    );
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="Life Exp Male" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Life Exp Female" fill="#ec4899" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Remittances Reliance — INEQUALITY */}
+        {activeSection === 'inequality' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Remittances as % of GDP</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Personal remittances received (from citizens working abroad). For countries like the Philippines, Tajikistan,
+            Egypt, or Lebanon, remittances can exceed 5-20% of GDP — a critical but volatile income source that also
+            signals outmigration pressure.
+          </p>
+          <div style={{ height: `${Math.max(300, remittancesData.length * 28)}px` }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={remittancesData} layout="vertical" margin={{ top: 5, right: 40, left: 100, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <YAxis type="category" dataKey="country" stroke={tc.axis} tick={{ fontSize: 11 }} width={100} />
+                <Tooltip contentStyle={tc.tooltip} formatter={(v: number) => `${v}% of GDP`} />
+                <Bar dataKey="remittances" radius={[0, 4, 4, 0]}>
+                  {remittancesData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Poverty & Income Cards — INEQUALITY */}
+        {activeSection === 'inequality' && (
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <h2 className="text-xl font-semibold mb-2">Poverty & Income Overview</h2>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Countries sorted by GDP per capita (PPP). Color indicators: Gini green &lt; 30, yellow &lt; 40, red &ge; 40</p>
@@ -455,8 +1841,91 @@ export default function DevelopmentPage() {
             })}
           </div>
         </div>
+        )}
 
-        {/* Development Rankings Table */}
+        {/* Development Complexity Score — OVERVIEW */}
+        {activeSection === 'overview' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Development Complexity Score</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            A custom 7-dimension composite going beyond HDI. Weights: HDI 25%, Equality 15%, Basic Services 15%, Health Outcomes 15%,
+            Digital 10%, Sustainability 10%, Gender 10%. Countries ranked 0-100.
+          </p>
+          <div style={{ height: `${Math.max(320, complexityScoreData.length * 28)}px` }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={complexityScoreData} layout="vertical" margin={{ top: 5, right: 60, left: 100, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" domain={[0, 100]} stroke={tc.axis} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="country" stroke={tc.axis} tick={{ fontSize: 11 }} width={100} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    const comps = d.components;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{d.country}</p>
+                        <p className="font-bold mb-1">Composite: {d.score}</p>
+                        {Object.entries(comps).map(([k, v]: any) => (
+                          <p key={k}>{k}: {v !== null ? v.toFixed(1) : 'N/A'}</p>
+                        ))}
+                      </div>
+                    );
+                  }}
+                />
+                <Bar dataKey="score" radius={[0, 4, 4, 0]}>
+                  {complexityScoreData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Rises & Falls Leaderboard — OVERVIEW */}
+        {activeSection === 'overview' && (
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Development Rises & Falls (2000 → Today)</h2>
+          <p className={`text-xs mb-4 ${tc.textSec}`}>
+            Change in computed HDI from 2000 to latest. Green = gains; red = losses. Reveals which countries have
+            climbed the development ladder fastest and which have regressed.
+          </p>
+          <div style={{ height: `${Math.max(320, risesFallsData.length * 28)}px` }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={risesFallsData} layout="vertical" margin={{ top: 5, right: 40, left: 100, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
+                <XAxis type="number" stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))} />
+                <YAxis type="category" dataKey="country" stroke={tc.axis} tick={{ fontSize: 11 }} width={100} />
+                <ReferenceLine x={0} stroke={tc.axis} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={tc.tooltip} className="px-3 py-2 text-xs">
+                        <p className="font-semibold mb-1">{d.country}</p>
+                        <p>HDI 2000: {d.hdiInit.toFixed(3)}</p>
+                        <p>HDI Today: {d.hdiNow.toFixed(3)}</p>
+                        <p className={d.delta >= 0 ? 'text-green-500 font-bold' : 'text-red-500 font-bold'}>
+                          {d.delta >= 0 ? '+' : ''}{d.delta.toFixed(3)}
+                        </p>
+                      </div>
+                    );
+                  }}
+                />
+                <Bar dataKey="delta" radius={[0, 4, 4, 0]}>
+                  {risesFallsData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        )}
+
+        {/* Development Rankings Table — OVERVIEW */}
+        {activeSection === 'overview' && (
         <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <h2 className="text-xl font-semibold mb-2">Development Rankings</h2>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Click column headers to sort. All countries ranked by key development indicators.</p>
@@ -527,6 +1996,7 @@ export default function DevelopmentPage() {
             </table>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
