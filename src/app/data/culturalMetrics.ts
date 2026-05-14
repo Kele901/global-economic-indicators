@@ -933,6 +933,11 @@ export interface PassportStrengthEntry {
   previousScore: number; // 2024 score
 }
 
+/**
+ * @deprecated Use the live `fetchPassportData()` from `src/app/services/passport.ts`.
+ * Retained as a static fallback so the section can render before the live fetch
+ * resolves or if all three live sources fail.
+ */
 export const passportStrengthByCountry: Record<string, PassportStrengthEntry> = {
   // Rank 1
   Singapore:        { visaFreeDestinations: 192, rank: 1,  previousScore: 195 },
@@ -1070,6 +1075,10 @@ export const passportStrengthByCountry: Record<string, PassportStrengthEntry> = 
 };
 
 // Full Henley Passport Index 2026 keyed by ISO 3166-1 numeric code (for world map)
+/**
+ * @deprecated Static fallback only. Replaced by the live Passport Index Dataset
+ * exposed through `fetchPassportData()` in `src/app/services/passport.ts`.
+ */
 export const passportStrengthAllCountries: Record<string, { name: string; score: number; rank: number }> = {
   '702': { name: 'Singapore', score: 192, rank: 1 },
   '392': { name: 'Japan', score: 187, rank: 2 },
@@ -1209,7 +1218,45 @@ export function getPassportTier(score: number): { label: string; color: string; 
   return { label: 'Very Weak', color: '#DC2626', colorDark: '#F87171' };
 }
 
-// Historical Henley Passport Index scores (selected years) for trend analysis
+// Mapping between the app's internal country keys (used in softPowerRankings,
+// passportHistoricalScores, gdpPerCapitaByCountry, culturalChartColors, etc.)
+// and ISO 3166-1 alpha-2 codes used by the live passport data sources.
+export const INTERNAL_KEY_TO_ISO2: Record<string, string> = {
+  Afghanistan: 'AF', Albania: 'AL', Algeria: 'DZ', Argentina: 'AR', Australia: 'AU',
+  Austria: 'AT', Azerbaijan: 'AZ', Bahrain: 'BH', Bangladesh: 'BD', Belarus: 'BY',
+  Belgium: 'BE', Bolivia: 'BO', Botswana: 'BW', Brazil: 'BR', Brunei: 'BN',
+  Bulgaria: 'BG', Cambodia: 'KH', Cameroon: 'CM', Canada: 'CA', Chile: 'CL',
+  China: 'CN', Colombia: 'CO', CostaRica: 'CR', Croatia: 'HR', Cyprus: 'CY',
+  CzechRepublic: 'CZ', Denmark: 'DK', DRCongo: 'CD', DominicanRepublic: 'DO',
+  Ecuador: 'EC', Egypt: 'EG', Eritrea: 'ER', Estonia: 'EE', Ethiopia: 'ET',
+  Finland: 'FI', France: 'FR', Germany: 'DE', Ghana: 'GH', Greece: 'GR',
+  Honduras: 'HN', Hungary: 'HU', Iceland: 'IS', India: 'IN', Indonesia: 'ID',
+  Iran: 'IR', Iraq: 'IQ', Ireland: 'IE', Israel: 'IL', Italy: 'IT',
+  Japan: 'JP', Jordan: 'JO', Kazakhstan: 'KZ', Kenya: 'KE', Kuwait: 'KW',
+  Kyrgyzstan: 'KG', Laos: 'LA', Latvia: 'LV', Lebanon: 'LB', Libya: 'LY',
+  Liechtenstein: 'LI', Lithuania: 'LT', Luxembourg: 'LU', Malaysia: 'MY',
+  Maldives: 'MV', Malta: 'MT', Mauritius: 'MU', Mexico: 'MX', Moldova: 'MD',
+  Mongolia: 'MN', Montenegro: 'ME', Morocco: 'MA', Mozambique: 'MZ', Myanmar: 'MM',
+  Namibia: 'NA', Nepal: 'NP', Netherlands: 'NL', NewZealand: 'NZ', Nigeria: 'NG',
+  NorthKorea: 'KP', NorthMacedonia: 'MK', Norway: 'NO', Oman: 'OM', Pakistan: 'PK',
+  Panama: 'PA', PapuaNewGuinea: 'PG', Paraguay: 'PY', Peru: 'PE', Philippines: 'PH',
+  Poland: 'PL', Portugal: 'PT', Qatar: 'QA', Romania: 'RO', Russia: 'RU',
+  Rwanda: 'RW', SaudiArabia: 'SA', Serbia: 'RS', Singapore: 'SG', Slovakia: 'SK',
+  Slovenia: 'SI', Somalia: 'SO', SouthAfrica: 'ZA', SouthKorea: 'KR', Spain: 'ES',
+  SriLanka: 'LK', Sudan: 'SD', Sweden: 'SE', Switzerland: 'CH', Syria: 'SY',
+  Taiwan: 'TW', Tajikistan: 'TJ', Tanzania: 'TZ', Thailand: 'TH', TrinidadAndTobago: 'TT',
+  Tunisia: 'TN', Turkey: 'TR', Turkmenistan: 'TM', UAE: 'AE', UK: 'GB',
+  USA: 'US', Uganda: 'UG', Ukraine: 'UA', Uruguay: 'UY', Uzbekistan: 'UZ',
+  Venezuela: 'VE', Vietnam: 'VN', Yemen: 'YE', Zambia: 'ZM', Zimbabwe: 'ZW',
+};
+
+export const ISO2_TO_INTERNAL_KEY: Record<string, string> = Object.fromEntries(
+  Object.entries(INTERNAL_KEY_TO_ISO2).map(([k, v]) => [v, k])
+);
+
+// Historical Henley Passport Index scores (selected years) for trend analysis.
+// This remains static because the live Passport Index source is point-in-time
+// and does not publish historical rankings.
 // Sources: Henley & Partners / Wikipedia historical tables
 export const passportHistoricalScores: { year: number; [country: string]: number }[] = [
   { year: 2015, Singapore: 174, Japan: 172, SouthKorea: 172, Germany: 177, Sweden: 176, France: 175, Italy: 175, Spain: 175, UK: 175, Netherlands: 174, Switzerland: 173, Belgium: 174, Norway: 173, USA: 174, Australia: 171, Canada: 172, Portugal: 172, Poland: 163, Chile: 161, Argentina: 163, Brazil: 162, Israel: 149, Mexico: 139, Turkey: 102, Russia: 102, SouthAfrica: 94, SaudiArabia: 69, China: 50, Indonesia: 55, India: 52, Egypt: 49, Nigeria: 44, UAE: 122 },

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -26,7 +26,10 @@ import {
   languageDiversityIndex,
   endangeredLanguagesByCountry,
   passportStrengthByCountry,
+  INTERNAL_KEY_TO_ISO2,
 } from '../data/culturalMetrics';
+import { fetchPassportData, PassportLiveData, PassportProfile } from '../services/passport';
+import { fetchEducationData, EducationLiveData } from '../services/education';
 
 const HeritageWorldMap = dynamic(
   () => import('../components/HeritageWorldMap'),
@@ -220,6 +223,18 @@ const PassportStrengthChart = dynamic(
   }
 );
 
+const EducationDashboard = dynamic(
+  () => import('../components/EducationDashboard'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading education dashboard...</span>
+      </div>
+    )
+  }
+);
+
 const CulturalCapitalPage = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [activeSection, setActiveSection] = useState<string>('overview');
@@ -228,6 +243,14 @@ const CulturalCapitalPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(defaultCulturalCountries);
+  const [passportLive, setPassportLive] = useState<PassportLiveData | null>(null);
+  const [passportLoading, setPassportLoading] = useState(false);
+  const [passportError, setPassportError] = useState<string | null>(null);
+  const passportLoadingRef = useRef(false);
+  const [educationData, setEducationData] = useState<EducationLiveData | null>(null);
+  const [educationLoading, setEducationLoading] = useState(false);
+  const [educationError, setEducationError] = useState<string | null>(null);
+  const educationLoadingRef = useRef(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -258,6 +281,101 @@ const CulturalCapitalPage = () => {
 
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (activeSection !== 'passport') return;
+    if (passportLive) return;
+    if (passportLoadingRef.current) return;
+
+    let cancelled = false;
+    const loadPassport = async () => {
+      passportLoadingRef.current = true;
+      setPassportLoading(true);
+      setPassportError(null);
+      try {
+        const data = await fetchPassportData();
+        if (cancelled) return;
+        setPassportLive(data);
+        if (Object.keys(data.passports).length === 0) {
+          setPassportError('Live passport data unavailable — showing static fallback.');
+        }
+      } catch (err: any) {
+        if (cancelled) return;
+        console.error('[passport live] failed:', err);
+        setPassportError(err?.message || 'Failed to load live passport data');
+      } finally {
+        passportLoadingRef.current = false;
+        if (!cancelled) setPassportLoading(false);
+      }
+    };
+    loadPassport();
+    return () => { cancelled = true; };
+  }, [activeSection, passportLive]);
+
+  useEffect(() => {
+    if (activeSection !== 'education') return;
+    if (educationData) return;
+    if (educationLoadingRef.current) return;
+
+    let cancelled = false;
+    const loadEducation = async () => {
+      educationLoadingRef.current = true;
+      setEducationLoading(true);
+      setEducationError(null);
+      try {
+        const data = await fetchEducationData();
+        if (cancelled) return;
+        setEducationData(data);
+        if (!data.sources.worldBank) {
+          setEducationError('World Bank indicators unavailable — only PISA and ranking snapshots are shown.');
+        }
+      } catch (err: any) {
+        if (cancelled) return;
+        console.error('[education live] failed:', err);
+        setEducationError(err?.message || 'Failed to load live education data');
+      } finally {
+        educationLoadingRef.current = false;
+        if (!cancelled) setEducationLoading(false);
+      }
+    };
+    loadEducation();
+    return () => { cancelled = true; };
+  }, [activeSection, educationData]);
+
+  const passportFallback: PassportLiveData = React.useMemo(() => {
+    const passports: Record<string, PassportProfile> = {};
+    Object.entries(passportStrengthByCountry).forEach(([internal, entry]) => {
+      const iso2 = INTERNAL_KEY_TO_ISO2[internal];
+      if (!iso2) return;
+      passports[iso2] = {
+        iso2, iso3: '', name: internal, flag: '', flagPng: '', region: '', subregion: '',
+        capital: '', population: 0,
+        totals: {
+          visaFree: entry.visaFreeDestinations,
+          visaOnArrival: 0, eVisa: 0, eta: 0, visaRequired: 0, noAdmission: 0,
+          mobility: entry.visaFreeDestinations,
+        },
+        stay: { avgDays: 0, medianDays: 0, maxDays: 0,
+          bucket0to29: 0, bucket30to89: 0, bucket90to179: 0, bucket180Plus: 0, unlimited: 0 },
+        rank: entry.rank,
+        avgAdvisory: null,
+        destinations: [],
+      };
+    });
+    return {
+      passports,
+      updatedAt: new Date().toISOString(),
+      sources: {
+        passportIndex: { ok: false },
+        restCountries: { ok: false },
+        travelAdvisory: { ok: false },
+      },
+    };
+  }, []);
+
+  const passportToRender: PassportLiveData = passportLive && Object.keys(passportLive.passports).length > 0
+    ? passportLive
+    : passportFallback;
 
   const latestMusicRevenue = React.useMemo(() => {
     const latest = musicRevenueFallbackData[musicRevenueFallbackData.length - 1];
@@ -423,6 +541,7 @@ const CulturalCapitalPage = () => {
             { id: 'participation', label: 'Cultural Participation' },
             { id: 'trade', label: 'Cultural Trade' },
             { id: 'diversity', label: 'Linguistic Diversity' },
+            { id: 'education', label: 'Education' },
             { id: 'passport', label: 'Passport Strength' },
             { id: 'compare', label: 'Country Comparison' },
             { id: 'insights', label: 'Insights' },
@@ -709,42 +828,142 @@ const CulturalCapitalPage = () => {
           </div>
         )}
 
+        {/* Education Section */}
+        {activeSection === 'education' && (
+          <div className="space-y-8">
+            <div className={`p-4 rounded-lg border ${
+              isDarkMode ? 'bg-gray-800 border-blue-500/50 text-blue-400' : 'bg-white border-blue-400 text-blue-700'
+            }`}>
+              <h3 className="font-semibold">Global Education Capital</h3>
+              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Tertiary enrollment, literacy, education spending, graduates &amp; attainment, PISA outcomes,
+                university rankings, research output, and teacher quality — joining live World Bank indicators
+                with curated OECD PISA and QS World University Rankings snapshots.
+              </p>
+              {educationLoading && (
+                <p className={`text-xs mt-2 ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+                  Loading live indicators…
+                </p>
+              )}
+              {educationError && (
+                <p className={`text-xs mt-2 ${isDarkMode ? 'text-amber-300' : 'text-amber-700'}`}>
+                  {educationError}
+                </p>
+              )}
+            </div>
+
+            {educationData ? (
+              <EducationDashboard
+                isDarkMode={isDarkMode}
+                educationData={educationData}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            ) : (
+              <div className={`p-8 rounded-xl border ${themeColors.cardBg} ${themeColors.border} text-center`}>
+                <LoadingSpinner />
+                <p className={`text-sm mt-4 ${themeColors.textSecondary}`}>
+                  Fetching World Bank education indicators across {Object.keys(COUNTRY_NAMES).length} countries…
+                </p>
+              </div>
+            )}
+
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+              <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                Live sources:
+                {' '}
+                <a href="https://data.worldbank.org" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-blue-500">World Bank Indicators</a>
+                {' · '}
+                <a href="https://www.oecd.org/pisa/publications/" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-blue-500">OECD PISA</a>
+                {' · '}
+                <a href="https://www.topuniversities.com/world-university-rankings" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-blue-500">QS World University Rankings</a>
+                . World Bank indicators (tertiary enrolment, literacy, spending, attainment, research output)
+                are fetched live with 24h caching; the most recent non-null year per country is used because
+                emerging-economy education series report infrequently. PISA is a triennial wave —
+                {educationData?.pisaAsOf ? ` snapshot ${educationData.pisaAsOf}` : ' snapshot 2022'} (next wave: 2025 results).
+                QS rankings reflect the
+                {educationData?.rankingsAsOf ? ` ${educationData.rankingsAsOf}` : ' 2025-06-19'} 2026 edition.
+                {educationData?.updatedAt && (
+                  <>
+                    {' '}Last refreshed: {new Date(educationData.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}.
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Passport Strength Section */}
         {activeSection === 'passport' && (
           <div className="space-y-8">
             <div className={`p-4 rounded-lg border ${
               isDarkMode ? 'bg-gray-800 border-emerald-500/50 text-emerald-400' : 'bg-white border-emerald-400 text-emerald-700'
             }`}>
-              <h3 className="font-semibold">Global Passport Strength Index</h3>
+              <h3 className="font-semibold">Global Passport &amp; Visa Intelligence</h3>
               <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Based on the Henley Passport Index 2026, the world&apos;s most authoritative passport ranking.
-                Each passport is scored by the number of destinations its holders can access visa-free or with
-                visa-on-arrival, using data from the IATA Timatic database covering 227 travel destinations.
+                Live mobility scores, per-destination visa types, length-of-stay limits, and travel advisories,
+                sourced from the open Passport Index Dataset, REST Countries, and Travel-Advisory.info.
+                Use the &quot;Visa Details&quot; tab to drill down into the exact technical rules for any
+                passport–destination pair.
               </p>
+              {passportLoading && (
+                <p className={`text-xs mt-2 ${isDarkMode ? 'text-emerald-300' : 'text-emerald-600'}`}>
+                  Loading live data…
+                </p>
+              )}
+              {passportError && (
+                <p className={`text-xs mt-2 ${isDarkMode ? 'text-amber-300' : 'text-amber-700'}`}>
+                  {passportError}
+                </p>
+              )}
             </div>
 
             <div className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
               <div className={`px-4 py-3 border-b ${themeColors.border}`}>
                 <h2 className="text-xl font-bold">Passport Power World Map</h2>
                 <p className={`text-sm ${themeColors.textSecondary}`}>
-                  Visa-free access score by country &mdash; hover for details
+                  Switch metrics to visualize mobility, length of stay, eVisa exposure, or destination safety.
                 </p>
               </div>
-              <PassportStrengthMap isDarkMode={isDarkMode} />
+              <PassportStrengthMap
+                isDarkMode={isDarkMode}
+                passportData={passportToRender.passports}
+              />
             </div>
 
             <PassportStrengthChart
               isDarkMode={isDarkMode}
-              passportData={passportStrengthByCountry}
+              passportData={passportToRender.passports}
               selectedCountries={selectedCountries}
               onCountryChange={setSelectedCountries}
+              updatedAt={passportToRender.updatedAt}
+              sources={passportToRender.sources}
             />
 
             <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
               <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                Source: Henley Passport Index 2026 (Henley &amp; Partners / IATA Timatic). Scores represent
-                visa-free or visa-on-arrival destinations out of 227. Updated quarterly. Year-over-year
-                change compares 2026 Q1 against 2024 mid-year data.
+                Live sources:
+                {' '}
+                <a href="https://github.com/ilyankou/passport-index-dataset" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-emerald-500">Passport Index Dataset (Ilyankou, MIT)</a>
+                {' · '}
+                <a href="https://restcountries.com" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-emerald-500">REST Countries v3.1</a>
+                {' · '}
+                <a href="https://www.travel-advisory.info" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-emerald-500">Travel-Advisory.info</a>
+                . Mobility = visa-free + visa-on-arrival + ETA. Length-of-stay reflects the per-entry day limit
+                published in the destination&apos;s policy; &quot;Unlimited / per visa&quot; applies to mobility
+                blocs (e.g. Schengen, GCC) and bilateral free-movement agreements. Historical trend chart still
+                uses Henley Passport Index figures because the open Passport Index source is point-in-time.
+                {passportToRender.updatedAt && (
+                  <>
+                    {' '}Last refreshed: {new Date(passportToRender.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}.
+                  </>
+                )}
               </p>
             </div>
           </div>
