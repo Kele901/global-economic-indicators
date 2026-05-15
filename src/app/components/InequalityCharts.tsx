@@ -136,7 +136,7 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode }) => {
         if (Date.now() - parsed.ts < 86400000) { setGiniData({ ...OECD_GINI_FALLBACK, ...parsed.data }); return; }
       } catch { /* ignore */ }
     }
-    fetch('https://api.worldbank.org/v2/country/all/indicator/SI.POV.GINI?date=2000:2024&format=json&per_page=5000')
+    fetch('https://api.worldbank.org/v2/country/all/indicator/SI.POV.GINI?date=2000:2026&format=json&per_page=5000')
       .then(r => r.json())
       .then(json => {
         if (!json[1]) return;

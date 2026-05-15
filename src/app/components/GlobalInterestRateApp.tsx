@@ -782,7 +782,7 @@ const GlobalInterestRateApp = () => {
   const [maxYAxis, setMaxYAxis] = useLocalStorage('maxYAxis', 20);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [isGridView, setIsGridView] = useLocalStorage('isGridView', false);
-  const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'population' | 'fdi' | 'trade' | 'spending' | 'productivity' | 'gini' | 'rd' | 'energy' | 'gdpPerCapita' | 'currentAccount' | 'capitalFormation' | 'reserves' | 'exchangeRate' | 'poverty' | 'education' | 'taxRevenue' | 'credit' | 'exports' | 'imports' | 'lifeExpectancy' | 'urbanization' | 'hightech' | 'co2' | 'migration' | 'laborForce' | 'budget' | 'healthcare' | 'eduExpenditure' | 'internet' | 'youthUnemployment' | 'manufacturing' | 'household' | 'renewable' | 'femaleLaborForce' | 'military' | 'marketCap' | 'sciPublications' | 'ictExports' | 'mobile' | 'patents' | 'socialSpending' | 'debtService' | 'services' | 'agriculture' | 'tradeOpen' | 'tariffs' | 'tourism' | 'privateInvest' | 'newBusiness' | 'all'>('selectedMetric', 'all');
+  const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'population' | 'fdi' | 'trade' | 'spending' | 'productivity' | 'gini' | 'rd' | 'energy' | 'gdpPerCapita' | 'currentAccount' | 'capitalFormation' | 'reserves' | 'exchangeRate' | 'poverty' | 'education' | 'taxRevenue' | 'credit' | 'exports' | 'imports' | 'lifeExpectancy' | 'urbanization' | 'hightech' | 'co2' | 'migration' | 'laborForce' | 'budget' | 'healthcare' | 'eduExpenditure' | 'internet' | 'youthUnemployment' | 'manufacturing' | 'household' | 'renewable' | 'femaleLaborForce' | 'military' | 'marketCap' | 'sciPublications' | 'ictExports' | 'mobile' | 'patents' | 'socialSpending' | 'debtService' | 'services' | 'agriculture' | 'tradeOpen' | 'tariffs' | 'tourism' | 'privateInvest' | 'newBusiness' | 'realPolicy' | 'termSpread' | 'govCorruption' | 'govEffectiveness' | 'govStability' | 'govRegulation' | 'govRuleOfLaw' | 'govVoice' | 'popAge014' | 'popAge1564' | 'popAge65Plus' | 'fertility' | 'dependencyRatio' | 'physicians' | 'hospitalBeds' | 'immunDPT' | 'immunMeasles' | 'under5Mortality' | 'maternalMortality' | 'houseRealPrice' | 'housePriceIncome' | 'totalRents' | 'oilRents' | 'mineralRents' | 'incomeTop10' | 'incomeBottom40' | 'palma' | 'externalDebt' | 'reer' | 'pm25' | 'all'>('selectedMetric', 'all');
   
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -844,6 +844,37 @@ const GlobalInterestRateApp = () => {
     tourismReceipts: CountryData[];
     privateInvestment: CountryData[];
     newBusinessDensity: CountryData[];
+    // Tier 1+2 additions
+    governanceCorruption: CountryData[];
+    governanceEffectiveness: CountryData[];
+    governanceStability: CountryData[];
+    governanceRegulation: CountryData[];
+    governanceRuleOfLaw: CountryData[];
+    governanceVoice: CountryData[];
+    popAge014: CountryData[];
+    popAge1564: CountryData[];
+    popAge65Plus: CountryData[];
+    fertilityRate: CountryData[];
+    dependencyRatio: CountryData[];
+    physiciansPer1000: CountryData[];
+    hospitalBeds: CountryData[];
+    immunizationDPT: CountryData[];
+    immunizationMeasles: CountryData[];
+    under5Mortality: CountryData[];
+    maternalMortality: CountryData[];
+    totalResourceRents: CountryData[];
+    oilRents: CountryData[];
+    mineralRents: CountryData[];
+    incomeShareTop10: CountryData[];
+    incomeShareBottom40: CountryData[];
+    palmaRatio: CountryData[];
+    externalDebt: CountryData[];
+    reer: CountryData[];
+    pm25: CountryData[];
+    realPolicyRate: CountryData[];
+    termSpread: CountryData[];
+    houseRealPriceIndex: CountryData[];
+    housePriceToIncome: CountryData[];
   }>({
     interestRates: [],
     employmentRates: [],
@@ -900,7 +931,37 @@ const GlobalInterestRateApp = () => {
     tariffRate: [],
     tourismReceipts: [],
     privateInvestment: [],
-    newBusinessDensity: []
+    newBusinessDensity: [],
+    governanceCorruption: [],
+    governanceEffectiveness: [],
+    governanceStability: [],
+    governanceRegulation: [],
+    governanceRuleOfLaw: [],
+    governanceVoice: [],
+    popAge014: [],
+    popAge1564: [],
+    popAge65Plus: [],
+    fertilityRate: [],
+    dependencyRatio: [],
+    physiciansPer1000: [],
+    hospitalBeds: [],
+    immunizationDPT: [],
+    immunizationMeasles: [],
+    under5Mortality: [],
+    maternalMortality: [],
+    totalResourceRents: [],
+    oilRents: [],
+    mineralRents: [],
+    incomeShareTop10: [],
+    incomeShareBottom40: [],
+    palmaRatio: [],
+    externalDebt: [],
+    reer: [],
+    pm25: [],
+    realPolicyRate: [],
+    termSpread: [],
+    houseRealPriceIndex: [],
+    housePriceToIncome: []
   });
   const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
 
@@ -1382,13 +1443,15 @@ const GlobalInterestRateApp = () => {
             className={`w-full p-2 sm:p-2.5 rounded-md border text-sm ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
             aria-label="Select economic metric"
           >
-            <option value="all">All Metrics (58 Indicators)</option>
+            <option value="all">All Metrics (88 Indicators)</option>
             <optgroup label="Core Economic Indicators">
               <option value="interest">Interest Rates</option>
               <option value="inflation">Inflation Rates</option>
               <option value="gdp">GDP Growth</option>
               <option value="gdpPerCapita">GDP per Capita (PPP)</option>
               <option value="cpi">Consumer Price Index</option>
+              <option value="realPolicy">Real Policy Rate</option>
+              <option value="termSpread">Term Spread (10Y - Policy)</option>
             </optgroup>
             <optgroup label="Employment & Labor">
               <option value="employment">Employment Rates</option>
@@ -1408,6 +1471,7 @@ const GlobalInterestRateApp = () => {
               <option value="military">Military Expenditure</option>
               <option value="debtService">Public Debt Service</option>
               <option value="socialSpending">Social Spending</option>
+              <option value="externalDebt">External Debt (% GNI)</option>
             </optgroup>
             <optgroup label="International Trade & Investment">
               <option value="fdi">Foreign Direct Investment</option>
@@ -1430,6 +1494,7 @@ const GlobalInterestRateApp = () => {
               <option value="household">Household Consumption</option>
               <option value="marketCap">Market Capitalization</option>
               <option value="privateInvest">Private Investment</option>
+              <option value="reer">Real Effective Exchange Rate</option>
             </optgroup>
             <optgroup label="Social & Development">
               <option value="population">Population Growth</option>
@@ -1441,6 +1506,9 @@ const GlobalInterestRateApp = () => {
               <option value="urbanization">Urbanization</option>
               <option value="internet">Internet Users</option>
               <option value="mobile">Mobile Subscriptions</option>
+              <option value="incomeTop10">Income Share Top 10%</option>
+              <option value="incomeBottom40">Income Share Bottom 40%</option>
+              <option value="palma">Palma Ratio (Top10 / Bottom40)</option>
             </optgroup>
             <optgroup label="Innovation & Environment">
               <option value="rd">R&D Spending</option>
@@ -1449,6 +1517,37 @@ const GlobalInterestRateApp = () => {
               <option value="renewable">Renewable Energy</option>
               <option value="sciPublications">Scientific Publications</option>
               <option value="patents">Patent Applications</option>
+              <option value="totalRents">Total Resource Rents</option>
+              <option value="oilRents">Oil Rents</option>
+              <option value="mineralRents">Mineral Rents</option>
+              <option value="pm25">PM2.5 Air Pollution</option>
+            </optgroup>
+            <optgroup label="Governance & Institutions">
+              <option value="govCorruption">Control of Corruption</option>
+              <option value="govEffectiveness">Government Effectiveness</option>
+              <option value="govStability">Political Stability</option>
+              <option value="govRegulation">Regulatory Quality</option>
+              <option value="govRuleOfLaw">Rule of Law</option>
+              <option value="govVoice">Voice & Accountability</option>
+            </optgroup>
+            <optgroup label="Demographics">
+              <option value="popAge014">Population 0-14 (%)</option>
+              <option value="popAge1564">Population 15-64 (%)</option>
+              <option value="popAge65Plus">Population 65+ (%)</option>
+              <option value="fertility">Fertility Rate</option>
+              <option value="dependencyRatio">Old-age Dependency Ratio</option>
+            </optgroup>
+            <optgroup label="Health Systems">
+              <option value="physicians">Physicians (per 1,000)</option>
+              <option value="hospitalBeds">Hospital Beds (per 1,000)</option>
+              <option value="immunDPT">DPT Immunization (%)</option>
+              <option value="immunMeasles">Measles Immunization (%)</option>
+              <option value="under5Mortality">Under-5 Mortality</option>
+              <option value="maternalMortality">Maternal Mortality</option>
+            </optgroup>
+            <optgroup label="Housing">
+              <option value="houseRealPrice">Real House Price Index (OECD)</option>
+              <option value="housePriceIncome">Price-to-Income (OECD)</option>
             </optgroup>
             <optgroup label="Economic Structure">
               <option value="services">Services Value Added</option>
@@ -2153,6 +2252,306 @@ const GlobalInterestRateApp = () => {
             yDomain={[0, 30]}
             subtitle="New businesses registered per 1,000 people ages 15-64, indicating entrepreneurial activity."
             chartType="bar"
+          />
+        )}
+
+        {(selectedMetric === 'realPolicy' || selectedMetric === 'all') && (
+          <Chart
+            title="Real Policy Rate (%)"
+            data={data.realPolicyRate}
+            yDomain={[-15, 15]}
+            subtitle="Nominal policy/short-term rate minus headline inflation. Positive = monetary policy is restrictive; negative = stimulative."
+            chartType="composed"
+          />
+        )}
+
+        {(selectedMetric === 'termSpread' || selectedMetric === 'all') && (
+          <Chart
+            title="Term Spread (10Y - Policy Rate, %)"
+            data={data.termSpread}
+            yDomain={[-3, 6]}
+            subtitle="OECD long-term government bond yield minus short-term policy rate. Negative values often precede recessions."
+            chartType="composed"
+          />
+        )}
+
+        {(selectedMetric === 'govCorruption' || selectedMetric === 'all') && (
+          <Chart
+            title="Control of Corruption (WGI Estimate)"
+            data={data.governanceCorruption}
+            yDomain={[-2.5, 2.5]}
+            subtitle="World Bank Worldwide Governance Indicator. Range -2.5 (weak) to +2.5 (strong) control of corruption."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'govEffectiveness' || selectedMetric === 'all') && (
+          <Chart
+            title="Government Effectiveness (WGI Estimate)"
+            data={data.governanceEffectiveness}
+            yDomain={[-2.5, 2.5]}
+            subtitle="Quality of public services, civil service, and policy formulation. -2.5 (weak) to +2.5 (strong)."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'govStability' || selectedMetric === 'all') && (
+          <Chart
+            title="Political Stability & Absence of Violence (WGI)"
+            data={data.governanceStability}
+            yDomain={[-2.5, 2.5]}
+            subtitle="Likelihood of political instability or politically-motivated violence. -2.5 (unstable) to +2.5 (stable)."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'govRegulation' || selectedMetric === 'all') && (
+          <Chart
+            title="Regulatory Quality (WGI Estimate)"
+            data={data.governanceRegulation}
+            yDomain={[-2.5, 2.5]}
+            subtitle="Ability of government to formulate and implement sound policies that promote private-sector development."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'govRuleOfLaw' || selectedMetric === 'all') && (
+          <Chart
+            title="Rule of Law (WGI Estimate)"
+            data={data.governanceRuleOfLaw}
+            yDomain={[-2.5, 2.5]}
+            subtitle="Confidence in and abidance by the rules of society - contract enforcement, property rights, courts."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'govVoice' || selectedMetric === 'all') && (
+          <Chart
+            title="Voice & Accountability (WGI Estimate)"
+            data={data.governanceVoice}
+            yDomain={[-2.5, 2.5]}
+            subtitle="Extent of citizen participation in selecting government, plus freedom of expression and media."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'popAge014' || selectedMetric === 'all') && (
+          <Chart
+            title="Population Aged 0-14 (% of Total)"
+            data={data.popAge014}
+            yDomain={[10, 50]}
+            subtitle="Share of total population aged 0-14 years. Indicates the size of the future workforce."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'popAge1564' || selectedMetric === 'all') && (
+          <Chart
+            title="Population Aged 15-64 (% of Total)"
+            data={data.popAge1564}
+            yDomain={[40, 80]}
+            subtitle="Share of total population in the working-age bracket. Higher = larger labor pool relative to dependents."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'popAge65Plus' || selectedMetric === 'all') && (
+          <Chart
+            title="Population Aged 65+ (% of Total)"
+            data={data.popAge65Plus}
+            yDomain={[0, 35]}
+            subtitle="Share of total population aged 65 and above. Rising values indicate population ageing pressure."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'fertility' || selectedMetric === 'all') && (
+          <Chart
+            title="Fertility Rate (births per woman)"
+            data={data.fertilityRate}
+            yDomain={[0, 7]}
+            subtitle="Average number of children born to a woman over her lifetime. 2.1 ≈ replacement rate."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'dependencyRatio' || selectedMetric === 'all') && (
+          <Chart
+            title="Old-age Dependency Ratio (%)"
+            data={data.dependencyRatio}
+            yDomain={[0, 60]}
+            subtitle="Population aged 65+ as a share of the working-age population (15-64). Pressure on pensions and healthcare."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'physicians' || selectedMetric === 'all') && (
+          <Chart
+            title="Physicians (per 1,000 people)"
+            data={data.physiciansPer1000}
+            yDomain={[0, 8]}
+            subtitle="Density of medical doctors. Strong proxy for healthcare system capacity."
+            chartType="bar"
+          />
+        )}
+
+        {(selectedMetric === 'hospitalBeds' || selectedMetric === 'all') && (
+          <Chart
+            title="Hospital Beds (per 1,000 people)"
+            data={data.hospitalBeds}
+            yDomain={[0, 15]}
+            subtitle="Inpatient bed density - acute, chronic and psychiatric beds combined."
+            chartType="bar"
+          />
+        )}
+
+        {(selectedMetric === 'immunDPT' || selectedMetric === 'all') && (
+          <Chart
+            title="DPT Immunization (% of children 12-23 mo)"
+            data={data.immunizationDPT}
+            yDomain={[0, 100]}
+            subtitle="Share of children aged 12-23 months who received Diphtheria-Pertussis-Tetanus vaccinations."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'immunMeasles' || selectedMetric === 'all') && (
+          <Chart
+            title="Measles Immunization (% of children 12-23 mo)"
+            data={data.immunizationMeasles}
+            yDomain={[0, 100]}
+            subtitle="Share of children aged 12-23 months who received measles vaccination."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'under5Mortality' || selectedMetric === 'all') && (
+          <Chart
+            title="Under-5 Mortality (per 1,000 live births)"
+            data={data.under5Mortality}
+            yDomain={[0, 150]}
+            subtitle="Probability per 1,000 that a newborn dies before age 5. Lower is better."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'maternalMortality' || selectedMetric === 'all') && (
+          <Chart
+            title="Maternal Mortality (per 100,000 live births)"
+            data={data.maternalMortality}
+            yDomain={[0, 1000]}
+            subtitle="Deaths of women during pregnancy or within 42 days of termination, per 100,000 live births."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'totalRents' || selectedMetric === 'all') && (
+          <Chart
+            title="Total Natural Resource Rents (% of GDP)"
+            data={data.totalResourceRents}
+            yDomain={[0, 50]}
+            subtitle="Sum of oil, natural gas, coal, mineral and forest rents as a share of GDP. High values flag resource dependence."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'oilRents' || selectedMetric === 'all') && (
+          <Chart
+            title="Oil Rents (% of GDP)"
+            data={data.oilRents}
+            yDomain={[0, 50]}
+            subtitle="Difference between crude oil production value and production costs, as a share of GDP."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'mineralRents' || selectedMetric === 'all') && (
+          <Chart
+            title="Mineral Rents (% of GDP)"
+            data={data.mineralRents}
+            yDomain={[0, 25]}
+            subtitle="Difference between value of mineral output and production costs, as a share of GDP."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'incomeTop10' || selectedMetric === 'all') && (
+          <Chart
+            title="Income Share Held by Top 10% (%)"
+            data={data.incomeShareTop10}
+            yDomain={[15, 55]}
+            subtitle="Share of national income held by the wealthiest 10% of the population."
+            chartType="bar"
+          />
+        )}
+
+        {(selectedMetric === 'incomeBottom40' || selectedMetric === 'all') && (
+          <Chart
+            title="Income Share Held by Bottom 40% (%)"
+            data={data.incomeShareBottom40}
+            yDomain={[5, 30]}
+            subtitle="Share of national income held by the poorest 40% of the population."
+            chartType="bar"
+          />
+        )}
+
+        {(selectedMetric === 'palma' || selectedMetric === 'all') && (
+          <Chart
+            title="Palma Ratio (Top 10% / Bottom 40%)"
+            data={data.palmaRatio}
+            yDomain={[0, 8]}
+            subtitle="Income share of the richest 10% divided by the poorest 40%. Higher values indicate sharper inequality."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'externalDebt' || selectedMetric === 'all') && (
+          <Chart
+            title="External Debt Stocks (% of GNI)"
+            data={data.externalDebt}
+            yDomain={[0, 250]}
+            subtitle="Total external debt owed to non-residents as a share of Gross National Income. Reported for developing economies."
+            chartType="area"
+          />
+        )}
+
+        {(selectedMetric === 'reer' || selectedMetric === 'all') && (
+          <Chart
+            title="Real Effective Exchange Rate (Index, 2010 = 100)"
+            data={data.reer}
+            yDomain={[60, 160]}
+            subtitle="Trade-weighted, inflation-adjusted exchange rate index. Above 100 = currency stronger than 2010 baseline."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'pm25' || selectedMetric === 'all') && (
+          <Chart
+            title="PM2.5 Air Pollution (µg/m³)"
+            data={data.pm25}
+            yDomain={[0, 120]}
+            subtitle="Mean annual exposure to PM2.5 fine particulate matter. WHO 2021 guideline = 5 µg/m³."
+            chartType="bar"
+          />
+        )}
+
+        {(selectedMetric === 'houseRealPrice' || selectedMetric === 'all') && (
+          <Chart
+            title="Real House Price Index (OECD, 2015 = 100)"
+            data={data.houseRealPriceIndex}
+            yDomain={[40, 220]}
+            subtitle="Nominal house prices deflated by consumer prices. Values above 100 = real housing is more expensive than 2015. OECD coverage only."
+            chartType="line"
+          />
+        )}
+
+        {(selectedMetric === 'housePriceIncome' || selectedMetric === 'all') && (
+          <Chart
+            title="House Price-to-Income Ratio (OECD, 2015 = 100)"
+            data={data.housePriceToIncome}
+            yDomain={[40, 220]}
+            subtitle="Ratio of nominal house prices to household disposable income per head. Higher = housing less affordable. OECD coverage only."
+            chartType="line"
           />
         )}
       </div>

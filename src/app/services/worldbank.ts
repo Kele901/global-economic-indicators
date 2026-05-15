@@ -2,7 +2,7 @@ import axios from "axios";
 import { clientCache, CacheKeys, CURRENT_CACHE_VERSION } from "./clientCache";
 import { fetchUSADataFromFRED, fetchUSATechDataFromFRED, clearFREDCache, type USADataPoint, type USATechData } from "./fred";
 import { fetchAllPolicyRates, clearPolicyRatesCache, type PolicyRateDataPoint } from "./policyRates";
-import { fetchJapanGovernmentDebtOECD, fetchOECDPolicyRates, fetchJapanPolicyRatesOECD, fetchOECDTechnologyData, clearOECDCache, type OECDDataPoint, type OECDTechData } from "./oecd";
+import { fetchJapanGovernmentDebtOECD, fetchOECDPolicyRates, fetchJapanPolicyRatesOECD, fetchOECDTechnologyData, fetchOECDLongTermRates, fetchOECDHousePrices, clearOECDCache, type OECDDataPoint, type OECDTechData } from "./oecd";
 import { fetchJapanGovernmentDebtIMF, fetchIMFGovernmentDebt, fetchIMFInterestRates, clearIMFCache, type IMFDataPoint } from "./imf";
 import { fetchBISPolicyRates, fetchJapanPolicyRatesBIS, clearBISCache, type BISDataPoint } from "./bis";
 import { TECHNOLOGY_FALLBACK_DATA, type FallbackDataPoint } from "../data/technologyFallbackData";
@@ -117,6 +117,45 @@ const INDICATORS = {
   TOURISM_RECEIPTS_USD: 'ST.INT.RCPT.CD', // International tourism, receipts (current US$)
   TOURISM_EXPENDITURE_USD: 'ST.INT.XPND.CD', // International tourism, expenditure (current US$)
   TOURISM_DEPARTURES: 'ST.INT.DPRT', // International tourism, number of departures
+
+  // Worldwide Governance Indicators (range -2.5 to +2.5, annual)
+  GOVERNANCE_CORRUPTION: 'CC.EST', // Control of Corruption: Estimate
+  GOVERNANCE_EFFECTIVENESS: 'GE.EST', // Government Effectiveness: Estimate
+  GOVERNANCE_STABILITY: 'PV.EST', // Political Stability and Absence of Violence/Terrorism: Estimate
+  GOVERNANCE_REGULATION: 'RQ.EST', // Regulatory Quality: Estimate
+  GOVERNANCE_RULEOFLAW: 'RL.EST', // Rule of Law: Estimate
+  GOVERNANCE_VOICE: 'VA.EST', // Voice and Accountability: Estimate
+
+  // Demographics
+  POP_AGE_0_14: 'SP.POP.0014.TO.ZS', // Population ages 0-14 (% of total)
+  POP_AGE_15_64: 'SP.POP.1564.TO.ZS', // Population ages 15-64 (% of total)
+  POP_AGE_65PLUS: 'SP.POP.65UP.TO.ZS', // Population ages 65 and above (% of total)
+  FERTILITY_RATE: 'SP.DYN.TFRT.IN', // Fertility rate, total (births per woman)
+  DEPENDENCY_RATIO: 'SP.POP.DPND.OL', // Age dependency ratio, old (% of working-age population)
+
+  // Health systems depth
+  PHYSICIANS_PER_1000: 'SH.MED.PHYS.ZS', // Physicians (per 1,000 people)
+  HOSPITAL_BEDS: 'SH.MED.BEDS.ZS', // Hospital beds (per 1,000 people)
+  IMMUNIZATION_DPT: 'SH.IMM.IDPT', // Immunization, DPT (% of children ages 12-23 months)
+  IMMUNIZATION_MEASLES: 'SH.IMM.MEAS', // Immunization, measles (% of children ages 12-23 months)
+  UNDER5_MORTALITY: 'SH.DYN.MORT', // Mortality rate, under-5 (per 1,000 live births)
+  MATERNAL_MORTALITY: 'SH.STA.MMRT', // Maternal mortality ratio (per 100,000 live births)
+
+  // Resource rents
+  TOTAL_RESOURCE_RENTS: 'NY.GDP.TOTL.RT.ZS', // Total natural resources rents (% of GDP)
+  OIL_RENTS: 'NY.GDP.PETR.RT.ZS', // Oil rents (% of GDP)
+  MINERAL_RENTS: 'NY.GDP.MINR.RT.ZS', // Mineral rents (% of GDP)
+
+  // Inequality / income distribution
+  INCOME_SHARE_TOP10: 'SI.DST.10TH.10', // Income share held by highest 10%
+  INCOME_SHARE_BOTTOM40: 'SI.DST.FRST.40', // Income share held by lowest 40%
+
+  // External debt & external balance
+  EXTERNAL_DEBT: 'DT.DOD.DECT.GN.ZS', // External debt stocks (% of GNI)
+  REER: 'PX.REX.REER', // Real effective exchange rate index (2010 = 100)
+
+  // Environment
+  PM25: 'EN.ATM.PM25.MC.M3', // PM2.5 air pollution, mean annual exposure (µg/m³)
 };
 
 // Country codes for major economies
@@ -228,7 +267,7 @@ async function fetchIndicatorData(
     }
 
     const countryString = countries.join(';');
-    const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator}?format=json&per_page=1000&date=1960:2024`;
+    const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator}?format=json&per_page=1000&date=1960:2026`;
     
     console.log(`🌐 Fetching fresh data for ${indicator}...`);
     console.log(`📍 API URL: ${url}`);
@@ -529,6 +568,45 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   tourismReceipts: CountryData[];
   privateInvestment: CountryData[];
   newBusinessDensity: CountryData[];
+  // Worldwide Governance Indicators
+  governanceCorruption: CountryData[];
+  governanceEffectiveness: CountryData[];
+  governanceStability: CountryData[];
+  governanceRegulation: CountryData[];
+  governanceRuleOfLaw: CountryData[];
+  governanceVoice: CountryData[];
+  // Demographics
+  popAge014: CountryData[];
+  popAge1564: CountryData[];
+  popAge65Plus: CountryData[];
+  fertilityRate: CountryData[];
+  dependencyRatio: CountryData[];
+  // Health systems depth
+  physiciansPer1000: CountryData[];
+  hospitalBeds: CountryData[];
+  immunizationDPT: CountryData[];
+  immunizationMeasles: CountryData[];
+  under5Mortality: CountryData[];
+  maternalMortality: CountryData[];
+  // Resource rents
+  totalResourceRents: CountryData[];
+  oilRents: CountryData[];
+  mineralRents: CountryData[];
+  // Inequality / income shares
+  incomeShareTop10: CountryData[];
+  incomeShareBottom40: CountryData[];
+  palmaRatio: CountryData[]; // derived: top10 / bottom40
+  // External / FX
+  externalDebt: CountryData[];
+  reer: CountryData[];
+  // Environment
+  pm25: CountryData[];
+  // Monetary derived/OECD
+  realPolicyRate: CountryData[]; // derived: policy rate - inflation
+  termSpread: CountryData[]; // derived: OECD long-term - short-term rates
+  // Housing (OECD)
+  houseRealPriceIndex: CountryData[];
+  housePriceToIncome: CountryData[];
 }> {
   try {
     // Check cache version - invalidate if outdated
@@ -610,7 +688,33 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.TARIFF_RATE, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.TOURISM_RECEIPTS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.PRIVATE_INVESTMENT, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.NEW_BUSINESS_DENSITY, COUNTRY_CODES, !forceRefresh)
+      fetchIndicatorData(INDICATORS.NEW_BUSINESS_DENSITY, COUNTRY_CODES, !forceRefresh),
+      // Tier 1 + 2 additions
+      fetchIndicatorData(INDICATORS.GOVERNANCE_CORRUPTION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_EFFECTIVENESS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_STABILITY, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_REGULATION, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_RULEOFLAW, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_VOICE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.POP_AGE_0_14, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.POP_AGE_15_64, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.POP_AGE_65PLUS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.FERTILITY_RATE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.DEPENDENCY_RATIO, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.PHYSICIANS_PER_1000, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.HOSPITAL_BEDS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.IMMUNIZATION_DPT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.IMMUNIZATION_MEASLES, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.UNDER5_MORTALITY, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MATERNAL_MORTALITY, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.TOTAL_RESOURCE_RENTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.OIL_RENTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MINERAL_RENTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.INCOME_SHARE_TOP10, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.INCOME_SHARE_BOTTOM40, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.EXTERNAL_DEBT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.REER, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.PM25, COUNTRY_CODES, !forceRefresh)
     ]);
 
     // Extract results and track failures
@@ -670,7 +774,33 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       tariffRateResult,
       tourismReceiptsResult,
       privateInvestmentResult,
-      newBusinessDensityResult
+      newBusinessDensityResult,
+      // Tier 1 + 2 additions
+      governanceCorruptionResult,
+      governanceEffectivenessResult,
+      governanceStabilityResult,
+      governanceRegulationResult,
+      governanceRuleOfLawResult,
+      governanceVoiceResult,
+      popAge014Result,
+      popAge1564Result,
+      popAge65PlusResult,
+      fertilityRateResult,
+      dependencyRatioResult,
+      physiciansPer1000Result,
+      hospitalBedsResult,
+      immunizationDPTResult,
+      immunizationMeaslesResult,
+      under5MortalityResult,
+      maternalMortalityResult,
+      totalResourceRentsResult,
+      oilRentsResult,
+      mineralRentsResult,
+      incomeShareTop10Result,
+      incomeShareBottom40Result,
+      externalDebtResult,
+      reerResult,
+      pm25Result
     ] = results;
 
     // Log any failures
@@ -691,7 +821,16 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       'Scientific Publications', 'ICT Exports', 'Mobile Subscriptions',
       'Patent Applications', 'Social Spending', 'Public Debt Service',
       'Services Value Added', 'Agricultural Value Added', 'Trade Openness',
-      'Tariff Rate', 'Tourism Receipts', 'Private Investment', 'New Business Density'
+      'Tariff Rate', 'Tourism Receipts', 'Private Investment', 'New Business Density',
+      'Control of Corruption', 'Government Effectiveness', 'Political Stability',
+      'Regulatory Quality', 'Rule of Law', 'Voice & Accountability',
+      'Population 0-14 (%)', 'Population 15-64 (%)', 'Population 65+ (%)',
+      'Fertility Rate', 'Old-age Dependency Ratio',
+      'Physicians per 1,000', 'Hospital Beds per 1,000', 'DPT Immunization',
+      'Measles Immunization', 'Under-5 Mortality', 'Maternal Mortality',
+      'Total Resource Rents', 'Oil Rents', 'Mineral Rents',
+      'Income Share Top 10%', 'Income Share Bottom 40%',
+      'External Debt (% GNI)', 'REER (2010=100)', 'PM2.5 Air Pollution'
     ];
     
     let failedCount = 0;
@@ -743,6 +882,35 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
     } catch (error: any) {
       console.warn('⚠️ OECD policy rates fetch failed (non-critical):', error.message);
       console.log('ℹ️ Continuing without OECD policy rates...');
+    }
+
+    // 2a. OECD - Long-term interest rates (10Y govt bond yields)
+    console.log('🏛️ ========================================');
+    console.log('🏛️ OECD: Fetching Long-Term Rates (10Y)...');
+    console.log('🏛️ ========================================');
+    let oecdLongTermRates: { [country: string]: OECDDataPoint[] } = {};
+    try {
+      oecdLongTermRates = await fetchOECDLongTermRates();
+      console.log('🏛️ OECD long-term rates fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ OECD long-term rates fetch failed (non-critical):', error.message);
+      console.log('ℹ️ Continuing without OECD long-term rates...');
+    }
+
+    // 2b. OECD - House prices (Real Price Index + Price-to-Income)
+    console.log('🏠 ========================================');
+    console.log('🏠 OECD: Fetching House Prices...');
+    console.log('🏠 ========================================');
+    let oecdHousePrices: {
+      realPriceIndex: { [country: string]: OECDDataPoint[] };
+      priceToIncome: { [country: string]: OECDDataPoint[] };
+    } = { realPriceIndex: {}, priceToIncome: {} };
+    try {
+      oecdHousePrices = await fetchOECDHousePrices();
+      console.log('🏠 OECD house prices fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ OECD house prices fetch failed (non-critical):', error.message);
+      console.log('ℹ️ Continuing without OECD house prices...');
     }
     
     // 3. FRED - Federal Reserve Economic Data (international OECD data via FRED)
@@ -1024,8 +1192,130 @@ const completeData = {
         privateInvestmentResult.status === 'fulfilled' ? privateInvestmentResult.value : [],
         usaData.privateInvestment
       ),
-      newBusinessDensity: newBusinessDensityResult.status === 'fulfilled' ? newBusinessDensityResult.value : []
+      newBusinessDensity: newBusinessDensityResult.status === 'fulfilled' ? newBusinessDensityResult.value : [],
+      // Worldwide Governance Indicators
+      governanceCorruption: governanceCorruptionResult.status === 'fulfilled' ? governanceCorruptionResult.value : [],
+      governanceEffectiveness: governanceEffectivenessResult.status === 'fulfilled' ? governanceEffectivenessResult.value : [],
+      governanceStability: governanceStabilityResult.status === 'fulfilled' ? governanceStabilityResult.value : [],
+      governanceRegulation: governanceRegulationResult.status === 'fulfilled' ? governanceRegulationResult.value : [],
+      governanceRuleOfLaw: governanceRuleOfLawResult.status === 'fulfilled' ? governanceRuleOfLawResult.value : [],
+      governanceVoice: governanceVoiceResult.status === 'fulfilled' ? governanceVoiceResult.value : [],
+      // Demographics
+      popAge014: popAge014Result.status === 'fulfilled' ? popAge014Result.value : [],
+      popAge1564: popAge1564Result.status === 'fulfilled' ? popAge1564Result.value : [],
+      popAge65Plus: popAge65PlusResult.status === 'fulfilled' ? popAge65PlusResult.value : [],
+      fertilityRate: fertilityRateResult.status === 'fulfilled' ? fertilityRateResult.value : [],
+      dependencyRatio: dependencyRatioResult.status === 'fulfilled' ? dependencyRatioResult.value : [],
+      // Health systems depth
+      physiciansPer1000: physiciansPer1000Result.status === 'fulfilled' ? physiciansPer1000Result.value : [],
+      hospitalBeds: hospitalBedsResult.status === 'fulfilled' ? hospitalBedsResult.value : [],
+      immunizationDPT: immunizationDPTResult.status === 'fulfilled' ? immunizationDPTResult.value : [],
+      immunizationMeasles: immunizationMeaslesResult.status === 'fulfilled' ? immunizationMeaslesResult.value : [],
+      under5Mortality: under5MortalityResult.status === 'fulfilled' ? under5MortalityResult.value : [],
+      maternalMortality: maternalMortalityResult.status === 'fulfilled' ? maternalMortalityResult.value : [],
+      // Resource rents
+      totalResourceRents: totalResourceRentsResult.status === 'fulfilled' ? totalResourceRentsResult.value : [],
+      oilRents: oilRentsResult.status === 'fulfilled' ? oilRentsResult.value : [],
+      mineralRents: mineralRentsResult.status === 'fulfilled' ? mineralRentsResult.value : [],
+      // Inequality / income shares (raw; palmaRatio computed below)
+      incomeShareTop10: incomeShareTop10Result.status === 'fulfilled' ? incomeShareTop10Result.value : [],
+      incomeShareBottom40: incomeShareBottom40Result.status === 'fulfilled' ? incomeShareBottom40Result.value : [],
+      palmaRatio: [] as CountryData[],
+      // External & FX
+      externalDebt: externalDebtResult.status === 'fulfilled' ? externalDebtResult.value : [],
+      reer: reerResult.status === 'fulfilled' ? reerResult.value : [],
+      // Environment
+      pm25: pm25Result.status === 'fulfilled' ? pm25Result.value : [],
+      // Monetary derived/OECD (filled in below)
+      realPolicyRate: [] as CountryData[],
+      termSpread: [] as CountryData[],
+      // Housing (OECD - filled in below)
+      houseRealPriceIndex: [] as CountryData[],
+      housePriceToIncome: [] as CountryData[]
     };
+
+    // ============================================
+    // Derived & OECD-driven metric computation
+    // ============================================
+
+    // Helper: merge an OECDDataPoint dictionary into year-keyed CountryData[]
+    const buildFromOECDDict = (
+      dict: { [country: string]: OECDDataPoint[] }
+    ): CountryData[] => {
+      const byYear: { [year: number]: CountryData } = {};
+      Object.entries(dict).forEach(([country, points]) => {
+        points.forEach(p => {
+          if (!byYear[p.year]) byYear[p.year] = { year: p.year } as CountryData;
+          (byYear[p.year] as any)[country] = p.value;
+        });
+      });
+      return Object.values(byYear).sort((a, b) => a.year - b.year);
+    };
+
+    // Helper: subtract two CountryData[] arrays by year × country (a - b)
+    const subtractSeries = (
+      a: CountryData[],
+      b: CountryData[]
+    ): CountryData[] => {
+      const bByYear: { [year: number]: CountryData } = {};
+      b.forEach(row => { bByYear[row.year] = row; });
+      return a.map(row => {
+        const out: CountryData = { year: row.year };
+        const bRow = bByYear[row.year];
+        Object.keys(row).forEach(key => {
+          if (key === 'year') return;
+          const aVal = (row as any)[key];
+          const bVal = bRow ? (bRow as any)[key] : undefined;
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            (out as any)[key] = aVal - bVal;
+          }
+        });
+        return out;
+      });
+    };
+
+    // Helper: divide two CountryData[] arrays by year × country (a / b)
+    const divideSeries = (
+      a: CountryData[],
+      b: CountryData[]
+    ): CountryData[] => {
+      const bByYear: { [year: number]: CountryData } = {};
+      b.forEach(row => { bByYear[row.year] = row; });
+      return a.map(row => {
+        const out: CountryData = { year: row.year };
+        const bRow = bByYear[row.year];
+        Object.keys(row).forEach(key => {
+          if (key === 'year') return;
+          const aVal = (row as any)[key];
+          const bVal = bRow ? (bRow as any)[key] : undefined;
+          if (typeof aVal === 'number' && typeof bVal === 'number' && bVal !== 0) {
+            (out as any)[key] = aVal / bVal;
+          }
+        });
+        return out;
+      });
+    };
+
+    // Real policy rate = nominal interest/policy rate - inflation rate
+    completeData.realPolicyRate = subtractSeries(
+      completeData.interestRates,
+      completeData.inflationRates
+    );
+
+    // Palma ratio = top 10% income share / bottom 40% income share
+    completeData.palmaRatio = divideSeries(
+      completeData.incomeShareTop10,
+      completeData.incomeShareBottom40
+    );
+
+    // Term spread = OECD long-term rate - OECD policy/short-term rate
+    const oecdLT = buildFromOECDDict(oecdLongTermRates);
+    const oecdST = buildFromOECDDict(oecdPolicyRates);
+    completeData.termSpread = subtractSeries(oecdLT, oecdST);
+
+    // Housing (OECD) - real house price index + price-to-income
+    completeData.houseRealPriceIndex = buildFromOECDDict(oecdHousePrices.realPriceIndex);
+    completeData.housePriceToIncome = buildFromOECDDict(oecdHousePrices.priceToIncome);
 
     // Debug: Check if USA data exists in merged data
     const sampleYear = completeData.interestRates.find(d => d.USA !== undefined);
@@ -1114,7 +1404,7 @@ export async function testCountryDataAvailability(countryCodes: string[] = ['NL'
   
   const testIndicator = INDICATORS.GDP_GROWTH; // Use GDP growth as test indicator
   const countryString = countryCodes.join(';');
-  const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${testIndicator}?format=json&per_page=100&date=2020:2024`;
+  const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${testIndicator}?format=json&per_page=100&date=2020:2026`;
   
   console.log('🧪 Test URL:', url);
   
@@ -1186,7 +1476,7 @@ export async function checkDataAvailability(): Promise<void> {
   for (const indicator of indicatorsToCheck) {
     try {
       const countryString = sampleCountries.join(';');
-      const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator.code}?format=json&per_page=500&date=2020:2024`;
+      const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator.code}?format=json&per_page=500&date=2020:2026`;
       
       const response = await axios.get(url, { timeout: 10000 });
       const data = response.data[1];
@@ -1243,7 +1533,7 @@ export async function testJapanData(): Promise<void> {
   
   for (const test of japanTests) {
     try {
-      const url = `${WORLD_BANK_BASE_URL}/JP/indicator/${test.code}?format=json&per_page=500&date=1960:2024`;
+      const url = `${WORLD_BANK_BASE_URL}/JP/indicator/${test.code}?format=json&per_page=500&date=1960:2026`;
       console.log(`\n📊 Testing: ${test.name}`);
       console.log(`   URL: ${url}`);
       

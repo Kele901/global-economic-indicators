@@ -144,7 +144,7 @@ class TradeDataService {
       const requests = Object.entries(indicators).map(async ([key, indicator]) => {
         try {
           const data = await fetchWithRetry(
-            `${this.WORLD_BANK_BASE}/country/${countryString}/indicator/${indicator}?format=json&date=${startYear}:2023&per_page=1000`
+            `${this.WORLD_BANK_BASE}/country/${countryString}/indicator/${indicator}?format=json&date=${startYear}:2026&per_page=1000`
           );
           return { [key]: data[1] || [] };
         } catch (error) {

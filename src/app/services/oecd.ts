@@ -350,6 +350,226 @@ export async function fetchOECDPolicyRates(): Promise<{ [country: string]: OECDD
 }
 
 /**
+ * Fetch OECD long-term interest rates (10Y government bond yields)
+ * Dataset: DSD_KEI - same as policy rates, but uses key IRLT.LT.
+ */
+export async function fetchOECDLongTermRates(): Promise<{ [country: string]: OECDDataPoint[] }> {
+  try {
+    const cacheKey = 'oecd_long_term_rates';
+    const cached = clientCache.get<{ [country: string]: OECDDataPoint[] }>(cacheKey);
+
+    if (cached) {
+      console.log('✅ Using cached OECD long-term rates');
+      return cached;
+    }
+
+    console.log('🏛️ ========================================');
+    console.log('🏛️ OECD: Fetching long-term interest rates (10Y)...');
+    console.log('🏛️ ========================================');
+
+    const results: { [country: string]: OECDDataPoint[] } = {};
+    const countries = Object.keys(COUNTRY_CODE_MAP);
+
+    for (const country of countries) {
+      try {
+        const oecdCode = COUNTRY_CODE_MAP[country];
+
+        // SDMX key for long-term rates: {country}.M.IR.IRLT.LT.._Z
+        const url = `/api/oecd?dataset=OECD.SDD.STES,DSD_KEI@DF_KEI,1.0/${oecdCode}.M.IR.IRLT.LT.._Z&startPeriod=1990`;
+
+        console.log(`🏛️ OECD: Fetching ${country} long-term rates (${oecdCode})...`);
+
+        const response = await axios.get(url, {
+          timeout: 15000
+        });
+
+        if (response.data?.data?.dataSets?.[0]?.observations) {
+          const observations = response.data.data.dataSets[0].observations;
+          const structure = response.data.data.structure;
+
+          const timeDimension = structure.dimensions?.observation?.find((d: any) =>
+            d.id === 'TIME_PERIOD'
+          );
+
+          if (timeDimension?.values) {
+            const yearlyData: { [year: number]: number[] } = {};
+
+            Object.entries(observations).forEach(([key, observation]: [string, any]) => {
+              const value = observation[0];
+              if (value !== null && !isNaN(value)) {
+                const timeIndex = parseInt(key.split(':').pop() || '0');
+                const timePeriod = timeDimension.values[timeIndex]?.id;
+
+                if (timePeriod) {
+                  const year = parseInt(timePeriod.split('-')[0]);
+                  if (!isNaN(year)) {
+                    if (!yearlyData[year]) {
+                      yearlyData[year] = [];
+                    }
+                    yearlyData[year].push(Number(value));
+                  }
+                }
+              }
+            });
+
+            const data: OECDDataPoint[] = Object.entries(yearlyData).map(([year, values]) => ({
+              country,
+              year: parseInt(year),
+              value: values.reduce((sum, val) => sum + val, 0) / values.length
+            }));
+
+            if (data.length > 0) {
+              results[country] = data.sort((a, b) => a.year - b.year);
+              console.log(`✅ OECD: ${country} long-term rates - ${data.length} years (${data[0].year}-${data[data.length-1].year})`);
+            }
+          }
+        }
+      } catch (error: any) {
+        if (error.response?.status !== 404) {
+          console.warn(`⚠️ OECD: Could not fetch ${country} long-term rates -`, error.message);
+        }
+      }
+
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
+
+    clientCache.set(cacheKey, results, 1000 * 60 * 60 * 24);
+
+    const successCount = Object.keys(results).length;
+    console.log('🏛️ ========================================');
+    console.log(`🏛️ OECD: Successfully fetched long-term rates for ${successCount}/${countries.length} countries`);
+    console.log('🏛️ ========================================');
+
+    return results;
+  } catch (error: any) {
+    console.error('❌ OECD: Error fetching long-term rates:', error.message);
+    return {};
+  }
+}
+
+/**
+ * Fetch OECD Real House Price Index and Price-to-Income ratio
+ * Dataset: OECD.SDD.NAD,DSD_HOUSE_PRICES@DF_HOUSE_PRICES
+ * Returns two series per country: realPriceIndex (RPI) and priceToIncome (PI)
+ */
+export async function fetchOECDHousePrices(): Promise<{
+  realPriceIndex: { [country: string]: OECDDataPoint[] };
+  priceToIncome: { [country: string]: OECDDataPoint[] };
+}> {
+  try {
+    const cacheKey = 'oecd_house_prices';
+    const cached = clientCache.get<{
+      realPriceIndex: { [country: string]: OECDDataPoint[] };
+      priceToIncome: { [country: string]: OECDDataPoint[] };
+    }>(cacheKey);
+
+    if (cached) {
+      console.log('✅ Using cached OECD house prices');
+      return cached;
+    }
+
+    console.log('🏠 ========================================');
+    console.log('🏠 OECD: Fetching house prices (real & price-to-income)...');
+    console.log('🏠 ========================================');
+
+    const realPriceIndex: { [country: string]: OECDDataPoint[] } = {};
+    const priceToIncome: { [country: string]: OECDDataPoint[] } = {};
+    const countries = Object.keys(COUNTRY_CODE_MAP);
+
+    // Helper that runs the SDMX request for a given measure code (RPI / PI)
+    const fetchMeasure = async (
+      oecdCode: string,
+      country: string,
+      measure: 'RPI' | 'PI'
+    ): Promise<OECDDataPoint[]> => {
+      try {
+        // SDMX key roughly: {country}.{measure}.{ref}.{unit}.{adj}
+        // Use a wildcard-friendly query so any release on OECD answers.
+        const url = `/api/oecd?dataset=OECD.SDD.NAD,DSD_HOUSE_PRICES@DF_HOUSE_PRICES,1.0/${oecdCode}.${measure}........&startPeriod=1990`;
+        const response = await axios.get(url, { timeout: 15000 });
+
+        if (!response.data?.data?.dataSets?.[0]?.observations) {
+          return [];
+        }
+
+        const observations = response.data.data.dataSets[0].observations;
+        const structure = response.data.data.structure;
+        const timeDimension = structure.dimensions?.observation?.find((d: any) =>
+          d.id === 'TIME_PERIOD'
+        );
+
+        if (!timeDimension?.values) return [];
+
+        const yearlyData: { [year: number]: number[] } = {};
+
+        Object.entries(observations).forEach(([key, observation]: [string, any]) => {
+          const value = observation[0];
+          if (value !== null && !isNaN(value)) {
+            const timeIndex = parseInt(key.split(':').pop() || '0');
+            const timePeriod = timeDimension.values[timeIndex]?.id;
+
+            if (timePeriod) {
+              const year = parseInt(timePeriod.split('-')[0]);
+              if (!isNaN(year)) {
+                if (!yearlyData[year]) yearlyData[year] = [];
+                yearlyData[year].push(Number(value));
+              }
+            }
+          }
+        });
+
+        return Object.entries(yearlyData)
+          .map(([year, values]) => ({
+            country,
+            year: parseInt(year),
+            value: values.reduce((sum, val) => sum + val, 0) / values.length
+          }))
+          .sort((a, b) => a.year - b.year);
+      } catch (error: any) {
+        if (error.response?.status !== 404) {
+          console.warn(`⚠️ OECD: Could not fetch ${country} ${measure} -`, error.message);
+        }
+        return [];
+      }
+    };
+
+    for (const country of countries) {
+      const oecdCode = COUNTRY_CODE_MAP[country];
+
+      const [rpi, pi] = await Promise.all([
+        fetchMeasure(oecdCode, country, 'RPI'),
+        fetchMeasure(oecdCode, country, 'PI')
+      ]);
+
+      if (rpi.length > 0) {
+        realPriceIndex[country] = rpi;
+        console.log(`✅ OECD: ${country} real house price index - ${rpi.length} years`);
+      }
+      if (pi.length > 0) {
+        priceToIncome[country] = pi;
+        console.log(`✅ OECD: ${country} price-to-income - ${pi.length} years`);
+      }
+
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    const result = { realPriceIndex, priceToIncome };
+    clientCache.set(cacheKey, result, 1000 * 60 * 60 * 24);
+
+    console.log('🏠 ========================================');
+    console.log(`🏠 OECD: House prices fetched (RPI: ${Object.keys(realPriceIndex).length}, PI: ${Object.keys(priceToIncome).length})`);
+    console.log('🏠 ========================================');
+
+    return result;
+  } catch (error: any) {
+    console.error('❌ OECD: Error fetching house prices:', error.message);
+    return { realPriceIndex: {}, priceToIncome: {} };
+  }
+}
+
+/**
  * Fetch Japan policy rates specifically from OECD
  */
 export async function fetchJapanPolicyRatesOECD(): Promise<OECDDataPoint[]> {
@@ -434,6 +654,8 @@ export function clearOECDCache(): void {
   clientCache.delete('oecd_japan_gov_debt');
   clientCache.delete('oecd_policy_rates');
   clientCache.delete('oecd_japan_policy_rates');
+  clientCache.delete('oecd_long_term_rates');
+  clientCache.delete('oecd_house_prices');
   clientCache.delete('oecd_rd_spending');
   clientCache.delete('oecd_researchers');
   clientCache.delete('oecd_patents');

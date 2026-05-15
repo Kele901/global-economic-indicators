@@ -149,7 +149,12 @@ export const clientCache = new ClientCache();
 // v4: Added BIS (Bank for International Settlements) integration
 // v5: Enhanced OECD integration with policy rates
 // v9: Added IP receipts/payments to cultural data
-export const CURRENT_CACHE_VERSION = 9;
+// v10: Added Tier 1+2 dashboard indicators (WGI governance, demographics, health,
+//      resource rents, income shares, palma ratio, external debt, REER, PM2.5,
+//      OECD long-term rates, OECD house prices, derived real policy rate & term spread).
+//      Also extended World Bank fetch window from :2024 to :2026 so newly-published
+//      2025 data is picked up automatically.
+export const CURRENT_CACHE_VERSION = 10;
 
 // Export cache key generators for consistency
 export const CacheKeys = {
