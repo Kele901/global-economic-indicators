@@ -154,7 +154,26 @@ export const clientCache = new ClientCache();
 //      OECD long-term rates, OECD house prices, derived real policy rate & term spread).
 //      Also extended World Bank fetch window from :2024 to :2026 so newly-published
 //      2025 data is picked up automatically.
-export const CURRENT_CACHE_VERSION = 10;
+// v11: Fixed empty Term Spread chart - switched long-term rate source from broken
+//      OECD SDMX key (IRLT.LT) to FRED IRLTLT01XXM156N series (~20 countries),
+//      with OECD as fallback for non-FRED-covered economies.
+// v12: Fixed empty WGI governance charts - World Bank archived legacy CC.EST /
+//      GE.EST / PV.EST / RQ.EST / RL.EST / VA.EST codes in 2024 and moved WGI to
+//      a dedicated database. Switched to new GOV_WGI_*.EST codes with source=3.
+// v13: Fixed empty Bottom 40% / Palma charts (replaced invalid SI.DST.FRST.40
+//      with quintile sum SI.DST.FRST.20 + SI.DST.02ND.20) and empty OECD housing
+//      charts (corrected SDMX dimension order to FREQ.REF_AREA.MEASURE.… and
+//      switched measure code from RPI → RHPI for the real house price index).
+// v14: Re-fixed empty housing charts - OECD renamed the dataset to
+//      DSD_AN_HOUSE_PRICES@DF_HOUSE_PRICES (analytical), and the actual
+//      dimension order is REF_AREA.FREQ.MEASURE.UNIT_MEASURE (no FREQ-first).
+//      Measure codes are RHP (real house price index) and HPI_YDH (price-to-
+//      income ratio), with UNIT_MEASURE = IX (index).
+// v15: OECD SDMX endpoint for house prices still returns 404 - migrated to
+//      FRED-hosted BIS Residential Property Prices (Q{ISO2}R628BIS / N628BIS).
+//      Repurposed Price-to-Income chart as Nominal House Price Index, so both
+//      housing charts now share a single reliable source (BIS via FRED).
+export const CURRENT_CACHE_VERSION = 15;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

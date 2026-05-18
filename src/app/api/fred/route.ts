@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const seriesId = searchParams.get('series_id');
     const startDate = searchParams.get('observation_start') || '1960-01-01';
-    const endDate = searchParams.get('observation_end') || '2024-12-31';
+    const endDate = searchParams.get('observation_end') || '2026-12-31';
 
     if (!seriesId) {
       return NextResponse.json(

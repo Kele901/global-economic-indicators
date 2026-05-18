@@ -83,7 +83,7 @@ export interface USADataPoint {
 async function fetchFREDSeries(
   seriesId: string,
   startDate: string = '1960-01-01',
-  endDate: string = '2024-12-31',
+  endDate: string = '2026-12-31',
   retries: number = 3
 ): Promise<USADataPoint[]> {
   for (let attempt = 0; attempt < retries; attempt++) {

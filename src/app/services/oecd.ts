@@ -374,8 +374,9 @@ export async function fetchOECDLongTermRates(): Promise<{ [country: string]: OEC
       try {
         const oecdCode = COUNTRY_CODE_MAP[country];
 
-        // SDMX key for long-term rates: {country}.M.IR.IRLT.LT.._Z
-        const url = `/api/oecd?dataset=OECD.SDD.STES,DSD_KEI@DF_KEI,1.0/${oecdCode}.M.IR.IRLT.LT.._Z&startPeriod=1990`;
+        // SDMX key for long-term (10Y) rates: subject = IRLTLT (one word).
+        // Use trailing wildcards in case OECD's KEI dataset shape varies by release.
+        const url = `/api/oecd?dataset=OECD.SDD.STES,DSD_KEI@DF_KEI,1.0/${oecdCode}.M.IR.IRLTLT......&startPeriod=1990`;
 
         console.log(`🏛️ OECD: Fetching ${country} long-term rates (${oecdCode})...`);
 
@@ -477,16 +478,22 @@ export async function fetchOECDHousePrices(): Promise<{
     const priceToIncome: { [country: string]: OECDDataPoint[] } = {};
     const countries = Object.keys(COUNTRY_CODE_MAP);
 
-    // Helper that runs the SDMX request for a given measure code (RPI / PI)
+    // Helper that runs the SDMX request for a given measure code.
+    // OECD renamed the dataset in 2025/26 to DSD_AN_HOUSE_PRICES (Analytical
+    // house prices indicators). Dimension order is:
+    //   REF_AREA.FREQ.MEASURE.UNIT_MEASURE   (4 dimensions, no trailing dims)
+    // Measure codes:
+    //   - "RHP"     → Real house price index
+    //   - "HPI_YDH" → Price-to-income ratio
+    //   - "HPI"     → Nominal house price index
+    // Unit is always "IX" (index).
     const fetchMeasure = async (
       oecdCode: string,
       country: string,
-      measure: 'RPI' | 'PI'
+      measure: 'RHP' | 'HPI_YDH'
     ): Promise<OECDDataPoint[]> => {
       try {
-        // SDMX key roughly: {country}.{measure}.{ref}.{unit}.{adj}
-        // Use a wildcard-friendly query so any release on OECD answers.
-        const url = `/api/oecd?dataset=OECD.SDD.NAD,DSD_HOUSE_PRICES@DF_HOUSE_PRICES,1.0/${oecdCode}.${measure}........&startPeriod=1990`;
+        const url = `/api/oecd?dataset=OECD.SDD.NAD,DSD_AN_HOUSE_PRICES@DF_HOUSE_PRICES,1.0/${oecdCode}.A.${measure}.IX&startPeriod=1990`;
         const response = await axios.get(url, { timeout: 15000 });
 
         if (!response.data?.data?.dataSets?.[0]?.observations) {
@@ -538,8 +545,8 @@ export async function fetchOECDHousePrices(): Promise<{
       const oecdCode = COUNTRY_CODE_MAP[country];
 
       const [rpi, pi] = await Promise.all([
-        fetchMeasure(oecdCode, country, 'RPI'),
-        fetchMeasure(oecdCode, country, 'PI')
+        fetchMeasure(oecdCode, country, 'RHP'),
+        fetchMeasure(oecdCode, country, 'HPI_YDH')
       ]);
 
       if (rpi.length > 0) {

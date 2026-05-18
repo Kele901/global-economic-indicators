@@ -1,7 +1,8 @@
 import axios from "axios";
 import { clientCache, CacheKeys, CURRENT_CACHE_VERSION } from "./clientCache";
 import { fetchUSADataFromFRED, fetchUSATechDataFromFRED, clearFREDCache, type USADataPoint, type USATechData } from "./fred";
-import { fetchAllPolicyRates, clearPolicyRatesCache, type PolicyRateDataPoint } from "./policyRates";
+import { fetchAllPolicyRates, fetchAllLongTermRates, clearPolicyRatesCache, type PolicyRateDataPoint } from "./policyRates";
+import { fetchHousePrices, type HousePricePoint } from "./housePrices";
 import { fetchJapanGovernmentDebtOECD, fetchOECDPolicyRates, fetchJapanPolicyRatesOECD, fetchOECDTechnologyData, fetchOECDLongTermRates, fetchOECDHousePrices, clearOECDCache, type OECDDataPoint, type OECDTechData } from "./oecd";
 import { fetchJapanGovernmentDebtIMF, fetchIMFGovernmentDebt, fetchIMFInterestRates, clearIMFCache, type IMFDataPoint } from "./imf";
 import { fetchBISPolicyRates, fetchJapanPolicyRatesBIS, clearBISCache, type BISDataPoint } from "./bis";
@@ -118,13 +119,15 @@ const INDICATORS = {
   TOURISM_EXPENDITURE_USD: 'ST.INT.XPND.CD', // International tourism, expenditure (current US$)
   TOURISM_DEPARTURES: 'ST.INT.DPRT', // International tourism, number of departures
 
-  // Worldwide Governance Indicators (range -2.5 to +2.5, annual)
-  GOVERNANCE_CORRUPTION: 'CC.EST', // Control of Corruption: Estimate
-  GOVERNANCE_EFFECTIVENESS: 'GE.EST', // Government Effectiveness: Estimate
-  GOVERNANCE_STABILITY: 'PV.EST', // Political Stability and Absence of Violence/Terrorism: Estimate
-  GOVERNANCE_REGULATION: 'RQ.EST', // Regulatory Quality: Estimate
-  GOVERNANCE_RULEOFLAW: 'RL.EST', // Rule of Law: Estimate
-  GOVERNANCE_VOICE: 'VA.EST', // Voice and Accountability: Estimate
+  // Worldwide Governance Indicators (range -2.5 to +2.5, annual).
+  // World Bank archived the legacy CC.EST / GE.EST etc. codes in 2024 and
+  // moved WGI into its own database (source=3). New codes are GOV_WGI_<dim>.EST.
+  GOVERNANCE_CORRUPTION: 'GOV_WGI_CC.EST', // Control of Corruption: Estimate
+  GOVERNANCE_EFFECTIVENESS: 'GOV_WGI_GE.EST', // Government Effectiveness: Estimate
+  GOVERNANCE_STABILITY: 'GOV_WGI_PV.EST', // Political Stability and Absence of Violence/Terrorism: Estimate
+  GOVERNANCE_REGULATION: 'GOV_WGI_RQ.EST', // Regulatory Quality: Estimate
+  GOVERNANCE_RULEOFLAW: 'GOV_WGI_RL.EST', // Rule of Law: Estimate
+  GOVERNANCE_VOICE: 'GOV_WGI_VA.EST', // Voice and Accountability: Estimate
 
   // Demographics
   POP_AGE_0_14: 'SP.POP.0014.TO.ZS', // Population ages 0-14 (% of total)
@@ -147,8 +150,11 @@ const INDICATORS = {
   MINERAL_RENTS: 'NY.GDP.MINR.RT.ZS', // Mineral rents (% of GDP)
 
   // Inequality / income distribution
+  // World Bank publishes quintile / decile shares, not a direct "bottom 40%" series.
+  // We compute bottom 40% client-side as FRST.20 + 02ND.20.
   INCOME_SHARE_TOP10: 'SI.DST.10TH.10', // Income share held by highest 10%
-  INCOME_SHARE_BOTTOM40: 'SI.DST.FRST.40', // Income share held by lowest 40%
+  INCOME_SHARE_LOWEST20: 'SI.DST.FRST.20', // Income share held by lowest 20%
+  INCOME_SHARE_SECOND20: 'SI.DST.02ND.20', // Income share held by second 20%
 
   // External debt & external balance
   EXTERNAL_DEBT: 'DT.DOD.DECT.GN.ZS', // External debt stocks (% of GNI)
@@ -240,11 +246,14 @@ async function fetchWithRetry(
   throw new Error('Max retries exceeded');
 }
 
-// Function to fetch data for a specific indicator with caching
+// Function to fetch data for a specific indicator with caching.
+// Optional `source` parameter routes the request to a non-default World Bank
+// database (e.g. source=3 for the Worldwide Governance Indicators).
 async function fetchIndicatorData(
   indicator: string, 
   countries: string[],
-  useCache: boolean = true
+  useCache: boolean = true,
+  source?: number
 ): Promise<CountryData[]> {
   try {
     // Check cache version - invalidate if outdated
@@ -267,7 +276,8 @@ async function fetchIndicatorData(
     }
 
     const countryString = countries.join(';');
-    const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator}?format=json&per_page=1000&date=1960:2026`;
+    const sourceParam = source != null ? `&source=${source}` : '';
+    const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator}?format=json&per_page=1000&date=1960:2026${sourceParam}`;
     
     console.log(`🌐 Fetching fresh data for ${indicator}...`);
     console.log(`📍 API URL: ${url}`);
@@ -604,9 +614,9 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   // Monetary derived/OECD
   realPolicyRate: CountryData[]; // derived: policy rate - inflation
   termSpread: CountryData[]; // derived: OECD long-term - short-term rates
-  // Housing (OECD)
+  // Housing (FRED-BIS primary, OECD fallback)
   houseRealPriceIndex: CountryData[];
-  housePriceToIncome: CountryData[];
+  houseNominalPriceIndex: CountryData[];
 }> {
   try {
     // Check cache version - invalidate if outdated
@@ -690,12 +700,13 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.PRIVATE_INVESTMENT, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.NEW_BUSINESS_DENSITY, COUNTRY_CODES, !forceRefresh),
       // Tier 1 + 2 additions
-      fetchIndicatorData(INDICATORS.GOVERNANCE_CORRUPTION, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.GOVERNANCE_EFFECTIVENESS, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.GOVERNANCE_STABILITY, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.GOVERNANCE_REGULATION, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.GOVERNANCE_RULEOFLAW, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.GOVERNANCE_VOICE, COUNTRY_CODES, !forceRefresh),
+      // WGI indicators require source=3 (Worldwide Governance Indicators database)
+      fetchIndicatorData(INDICATORS.GOVERNANCE_CORRUPTION, COUNTRY_CODES, !forceRefresh, 3),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_EFFECTIVENESS, COUNTRY_CODES, !forceRefresh, 3),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_STABILITY, COUNTRY_CODES, !forceRefresh, 3),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_REGULATION, COUNTRY_CODES, !forceRefresh, 3),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_RULEOFLAW, COUNTRY_CODES, !forceRefresh, 3),
+      fetchIndicatorData(INDICATORS.GOVERNANCE_VOICE, COUNTRY_CODES, !forceRefresh, 3),
       fetchIndicatorData(INDICATORS.POP_AGE_0_14, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.POP_AGE_15_64, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.POP_AGE_65PLUS, COUNTRY_CODES, !forceRefresh),
@@ -711,7 +722,8 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.OIL_RENTS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.MINERAL_RENTS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.INCOME_SHARE_TOP10, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.INCOME_SHARE_BOTTOM40, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.INCOME_SHARE_LOWEST20, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.INCOME_SHARE_SECOND20, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.EXTERNAL_DEBT, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.REER, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.PM25, COUNTRY_CODES, !forceRefresh)
@@ -797,7 +809,8 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       oilRentsResult,
       mineralRentsResult,
       incomeShareTop10Result,
-      incomeShareBottom40Result,
+      incomeShareLowest20Result,
+      incomeShareSecond20Result,
       externalDebtResult,
       reerResult,
       pm25Result
@@ -829,7 +842,7 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       'Physicians per 1,000', 'Hospital Beds per 1,000', 'DPT Immunization',
       'Measles Immunization', 'Under-5 Mortality', 'Maternal Mortality',
       'Total Resource Rents', 'Oil Rents', 'Mineral Rents',
-      'Income Share Top 10%', 'Income Share Bottom 40%',
+      'Income Share Top 10%', 'Income Share Lowest 20%', 'Income Share Second 20%',
       'External Debt (% GNI)', 'REER (2010=100)', 'PM2.5 Air Pollution'
     ];
     
@@ -919,6 +932,34 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
     console.log('🏦 ========================================');
     const policyRatesData = await fetchAllPolicyRates();
     console.log('🏦 FRED policy rates fetch complete. Processing merge...');
+
+    // 3a. FRED - Long-Term (10Y) Government Bond Yields - used for term spread.
+    console.log('🏦 ========================================');
+    console.log('🏦 FRED: Fetching Long-Term (10Y) Bond Yields...');
+    console.log('🏦 ========================================');
+    let fredLongTermRates: { [country: string]: PolicyRateDataPoint[] } = {};
+    try {
+      fredLongTermRates = await fetchAllLongTermRates();
+      console.log('🏦 FRED long-term rates fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ FRED long-term rates fetch failed (non-critical):', error.message);
+    }
+
+    // 3b. FRED-BIS - Real & Nominal Residential Property Price Indices.
+    // Primary source for housing charts; OECD SDMX endpoint is currently 404ing.
+    console.log('🏠 ========================================');
+    console.log('🏠 FRED-BIS: Fetching House Prices...');
+    console.log('🏠 ========================================');
+    let bisHousePrices: {
+      real: { [country: string]: HousePricePoint[] };
+      nominal: { [country: string]: HousePricePoint[] };
+    } = { real: {}, nominal: {} };
+    try {
+      bisHousePrices = await fetchHousePrices();
+      console.log('🏠 FRED-BIS house prices fetch complete.');
+    } catch (error: any) {
+      console.warn('⚠️ FRED-BIS house prices fetch failed (non-critical):', error.message);
+    }
     
     // Fetch OECD government debt data for Japan and others
     console.log('🏛️ ========================================');
@@ -1217,9 +1258,9 @@ const completeData = {
       totalResourceRents: totalResourceRentsResult.status === 'fulfilled' ? totalResourceRentsResult.value : [],
       oilRents: oilRentsResult.status === 'fulfilled' ? oilRentsResult.value : [],
       mineralRents: mineralRentsResult.status === 'fulfilled' ? mineralRentsResult.value : [],
-      // Inequality / income shares (raw; palmaRatio computed below)
+      // Inequality / income shares (raw; bottom40 and palmaRatio computed below)
       incomeShareTop10: incomeShareTop10Result.status === 'fulfilled' ? incomeShareTop10Result.value : [],
-      incomeShareBottom40: incomeShareBottom40Result.status === 'fulfilled' ? incomeShareBottom40Result.value : [],
+      incomeShareBottom40: [] as CountryData[],
       palmaRatio: [] as CountryData[],
       // External & FX
       externalDebt: externalDebtResult.status === 'fulfilled' ? externalDebtResult.value : [],
@@ -1229,9 +1270,9 @@ const completeData = {
       // Monetary derived/OECD (filled in below)
       realPolicyRate: [] as CountryData[],
       termSpread: [] as CountryData[],
-      // Housing (OECD - filled in below)
+      // Housing (FRED-BIS - filled in below)
       houseRealPriceIndex: [] as CountryData[],
-      housePriceToIncome: [] as CountryData[]
+      houseNominalPriceIndex: [] as CountryData[]
     };
 
     // ============================================
@@ -1302,20 +1343,94 @@ const completeData = {
       completeData.inflationRates
     );
 
+    // Helper: add two CountryData[] arrays by year × country (a + b)
+    const addSeries = (
+      a: CountryData[],
+      b: CountryData[]
+    ): CountryData[] => {
+      const bByYear: { [year: number]: CountryData } = {};
+      b.forEach(row => { bByYear[row.year] = row; });
+      return a.map(row => {
+        const out: CountryData = { year: row.year };
+        const bRow = bByYear[row.year];
+        Object.keys(row).forEach(key => {
+          if (key === 'year') return;
+          const aVal = (row as any)[key];
+          const bVal = bRow ? (bRow as any)[key] : undefined;
+          if (typeof aVal === 'number' && typeof bVal === 'number') {
+            (out as any)[key] = aVal + bVal;
+          }
+        });
+        return out;
+      });
+    };
+
+    // Bottom 40% income share = lowest 20% + second 20% (WB only publishes quintiles).
+    const lowest20 = incomeShareLowest20Result.status === 'fulfilled' ? incomeShareLowest20Result.value : [];
+    const second20 = incomeShareSecond20Result.status === 'fulfilled' ? incomeShareSecond20Result.value : [];
+    completeData.incomeShareBottom40 = addSeries(lowest20, second20);
+
     // Palma ratio = top 10% income share / bottom 40% income share
     completeData.palmaRatio = divideSeries(
       completeData.incomeShareTop10,
       completeData.incomeShareBottom40
     );
 
-    // Term spread = OECD long-term rate - OECD policy/short-term rate
-    const oecdLT = buildFromOECDDict(oecdLongTermRates);
-    const oecdST = buildFromOECDDict(oecdPolicyRates);
-    completeData.termSpread = subtractSeries(oecdLT, oecdST);
+    // Term spread = long-term (10Y) rate - short-term policy rate.
+    // Primary source: FRED (consistent, monthly-updated, covers ~20 countries).
+    // Fallback source: OECD SDMX (filled in only where FRED has no series).
+    const fredLTDict: { [country: string]: OECDDataPoint[] } = {};
+    Object.entries(fredLongTermRates).forEach(([country, points]) => {
+      fredLTDict[country] = points.map(p => ({ country, year: p.year, value: p.value }));
+    });
+    const fredSTDict: { [country: string]: OECDDataPoint[] } = {};
+    Object.entries(policyRatesData).forEach(([country, points]) => {
+      fredSTDict[country] = points.map(p => ({ country, year: p.year, value: p.value }));
+    });
 
-    // Housing (OECD) - real house price index + price-to-income
-    completeData.houseRealPriceIndex = buildFromOECDDict(oecdHousePrices.realPriceIndex);
-    completeData.housePriceToIncome = buildFromOECDDict(oecdHousePrices.priceToIncome);
+    // Merge OECD data only for countries FRED didn't cover (so FRED takes priority)
+    const ltMerged: { [country: string]: OECDDataPoint[] } = { ...fredLTDict };
+    Object.entries(oecdLongTermRates).forEach(([country, points]) => {
+      if (!ltMerged[country] || ltMerged[country].length === 0) {
+        ltMerged[country] = points;
+      }
+    });
+    const stMerged: { [country: string]: OECDDataPoint[] } = { ...fredSTDict };
+    Object.entries(oecdPolicyRates).forEach(([country, points]) => {
+      if (!stMerged[country] || stMerged[country].length === 0) {
+        stMerged[country] = points;
+      }
+    });
+
+    const ltSeries = buildFromOECDDict(ltMerged);
+    const stSeries = buildFromOECDDict(stMerged);
+    completeData.termSpread = subtractSeries(ltSeries, stSeries);
+    console.log(`🏦 Term spread computed: ${completeData.termSpread.length} year rows, LT countries=${Object.keys(ltMerged).length}, ST countries=${Object.keys(stMerged).length}`);
+
+    // Housing - FRED-BIS Real + Nominal Residential Property Price indices.
+    // OECD acts as a soft fallback for countries FRED-BIS doesn't cover.
+    const housePointsToCountryData = (
+      dict: { [country: string]: HousePricePoint[] }
+    ): { [country: string]: OECDDataPoint[] } => {
+      const out: { [country: string]: OECDDataPoint[] } = {};
+      Object.entries(dict).forEach(([country, pts]) => {
+        out[country] = pts.map(p => ({ country, year: p.year, value: p.value }));
+      });
+      return out;
+    };
+
+    const realMerged: { [country: string]: OECDDataPoint[] } = housePointsToCountryData(bisHousePrices.real);
+    Object.entries(oecdHousePrices.realPriceIndex).forEach(([country, pts]) => {
+      if (!realMerged[country] || realMerged[country].length === 0) {
+        realMerged[country] = pts;
+      }
+    });
+    completeData.houseRealPriceIndex = buildFromOECDDict(realMerged);
+
+    const nominalMerged: { [country: string]: OECDDataPoint[] } = housePointsToCountryData(bisHousePrices.nominal);
+    completeData.houseNominalPriceIndex = buildFromOECDDict(nominalMerged);
+
+    console.log(`🏠 Housing series populated: real=${completeData.houseRealPriceIndex.length} years, nominal=${completeData.houseNominalPriceIndex.length} years`);
 
     // Debug: Check if USA data exists in merged data
     const sampleYear = completeData.interestRates.find(d => d.USA !== undefined);

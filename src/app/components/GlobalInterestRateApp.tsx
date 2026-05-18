@@ -782,7 +782,7 @@ const GlobalInterestRateApp = () => {
   const [maxYAxis, setMaxYAxis] = useLocalStorage('maxYAxis', 20);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [isGridView, setIsGridView] = useLocalStorage('isGridView', false);
-  const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'population' | 'fdi' | 'trade' | 'spending' | 'productivity' | 'gini' | 'rd' | 'energy' | 'gdpPerCapita' | 'currentAccount' | 'capitalFormation' | 'reserves' | 'exchangeRate' | 'poverty' | 'education' | 'taxRevenue' | 'credit' | 'exports' | 'imports' | 'lifeExpectancy' | 'urbanization' | 'hightech' | 'co2' | 'migration' | 'laborForce' | 'budget' | 'healthcare' | 'eduExpenditure' | 'internet' | 'youthUnemployment' | 'manufacturing' | 'household' | 'renewable' | 'femaleLaborForce' | 'military' | 'marketCap' | 'sciPublications' | 'ictExports' | 'mobile' | 'patents' | 'socialSpending' | 'debtService' | 'services' | 'agriculture' | 'tradeOpen' | 'tariffs' | 'tourism' | 'privateInvest' | 'newBusiness' | 'realPolicy' | 'termSpread' | 'govCorruption' | 'govEffectiveness' | 'govStability' | 'govRegulation' | 'govRuleOfLaw' | 'govVoice' | 'popAge014' | 'popAge1564' | 'popAge65Plus' | 'fertility' | 'dependencyRatio' | 'physicians' | 'hospitalBeds' | 'immunDPT' | 'immunMeasles' | 'under5Mortality' | 'maternalMortality' | 'houseRealPrice' | 'housePriceIncome' | 'totalRents' | 'oilRents' | 'mineralRents' | 'incomeTop10' | 'incomeBottom40' | 'palma' | 'externalDebt' | 'reer' | 'pm25' | 'all'>('selectedMetric', 'all');
+  const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'population' | 'fdi' | 'trade' | 'spending' | 'productivity' | 'gini' | 'rd' | 'energy' | 'gdpPerCapita' | 'currentAccount' | 'capitalFormation' | 'reserves' | 'exchangeRate' | 'poverty' | 'education' | 'taxRevenue' | 'credit' | 'exports' | 'imports' | 'lifeExpectancy' | 'urbanization' | 'hightech' | 'co2' | 'migration' | 'laborForce' | 'budget' | 'healthcare' | 'eduExpenditure' | 'internet' | 'youthUnemployment' | 'manufacturing' | 'household' | 'renewable' | 'femaleLaborForce' | 'military' | 'marketCap' | 'sciPublications' | 'ictExports' | 'mobile' | 'patents' | 'socialSpending' | 'debtService' | 'services' | 'agriculture' | 'tradeOpen' | 'tariffs' | 'tourism' | 'privateInvest' | 'newBusiness' | 'realPolicy' | 'termSpread' | 'govCorruption' | 'govEffectiveness' | 'govStability' | 'govRegulation' | 'govRuleOfLaw' | 'govVoice' | 'popAge014' | 'popAge1564' | 'popAge65Plus' | 'fertility' | 'dependencyRatio' | 'physicians' | 'hospitalBeds' | 'immunDPT' | 'immunMeasles' | 'under5Mortality' | 'maternalMortality' | 'houseRealPrice' | 'houseNominalPrice' | 'totalRents' | 'oilRents' | 'mineralRents' | 'incomeTop10' | 'incomeBottom40' | 'palma' | 'externalDebt' | 'reer' | 'pm25' | 'all'>('selectedMetric', 'all');
   
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -874,7 +874,7 @@ const GlobalInterestRateApp = () => {
     realPolicyRate: CountryData[];
     termSpread: CountryData[];
     houseRealPriceIndex: CountryData[];
-    housePriceToIncome: CountryData[];
+    houseNominalPriceIndex: CountryData[];
   }>({
     interestRates: [],
     employmentRates: [],
@@ -961,7 +961,7 @@ const GlobalInterestRateApp = () => {
     realPolicyRate: [],
     termSpread: [],
     houseRealPriceIndex: [],
-    housePriceToIncome: []
+    houseNominalPriceIndex: []
   });
   const [selectedCountryForSummary, setSelectedCountryForSummary] = useState<string>('');
 
@@ -1546,8 +1546,8 @@ const GlobalInterestRateApp = () => {
               <option value="maternalMortality">Maternal Mortality</option>
             </optgroup>
             <optgroup label="Housing">
-              <option value="houseRealPrice">Real House Price Index (OECD)</option>
-              <option value="housePriceIncome">Price-to-Income (OECD)</option>
+              <option value="houseRealPrice">Real House Price Index (BIS)</option>
+              <option value="houseNominalPrice">Nominal House Price Index (BIS)</option>
             </optgroup>
             <optgroup label="Economic Structure">
               <option value="services">Services Value Added</option>
@@ -2537,20 +2537,20 @@ const GlobalInterestRateApp = () => {
 
         {(selectedMetric === 'houseRealPrice' || selectedMetric === 'all') && (
           <Chart
-            title="Real House Price Index (OECD, 2015 = 100)"
+            title="Real House Price Index (BIS, 2010 = 100)"
             data={data.houseRealPriceIndex}
-            yDomain={[40, 220]}
-            subtitle="Nominal house prices deflated by consumer prices. Values above 100 = real housing is more expensive than 2015. OECD coverage only."
+            yDomain={[20, 220]}
+            subtitle="Nominal house prices deflated by consumer prices. Values above 100 = real housing is more expensive than 2010. Source: BIS Selected Property Prices via FRED."
             chartType="line"
           />
         )}
 
-        {(selectedMetric === 'housePriceIncome' || selectedMetric === 'all') && (
+        {(selectedMetric === 'houseNominalPrice' || selectedMetric === 'all') && (
           <Chart
-            title="House Price-to-Income Ratio (OECD, 2015 = 100)"
-            data={data.housePriceToIncome}
-            yDomain={[40, 220]}
-            subtitle="Ratio of nominal house prices to household disposable income per head. Higher = housing less affordable. OECD coverage only."
+            title="Nominal House Price Index (BIS, 2010 = 100)"
+            data={data.houseNominalPriceIndex}
+            yDomain={[0, 300]}
+            subtitle="Nominal residential property price index. Gap between this and the real index reflects cumulative inflation. Source: BIS Selected Property Prices via FRED."
             chartType="line"
           />
         )}
