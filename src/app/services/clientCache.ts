@@ -173,7 +173,14 @@ export const clientCache = new ClientCache();
 //      FRED-hosted BIS Residential Property Prices (Q{ISO2}R628BIS / N628BIS).
 //      Repurposed Price-to-Income chart as Nominal House Price Index, so both
 //      housing charts now share a single reliable source (BIS via FRED).
-export const CURRENT_CACHE_VERSION = 15;
+// v16: Resource Atlas launch. Extended fetchGlobalData with 7 new World Bank
+//      indicators (coal / gas / forest rents, net energy imports, fuel &
+//      ores/metals exports, electricity access). Added FRED commodity price
+//      series (WTI, Brent, Henry Hub, EU gas, coal, gold, copper, aluminium,
+//      iron ore, nickel, wheat) and EIA-with-static-fallback for oil reserves
+//      and production. Existing users need cache invalidated so new fields
+//      populate.
+export const CURRENT_CACHE_VERSION = 16;
 
 // Export cache key generators for consistency
 export const CacheKeys = {
@@ -204,4 +211,9 @@ export const CacheKeys = {
   
   // Policy rates cache keys
   policyRate: (country: string) => `policy_rate_${country}`,
+
+  // Resource Atlas cache keys (v16)
+  commodity: (id: string) => `commodity_${id}`,
+  eiaOilReserves: () => 'eia_oil_reserves',
+  eiaOilProduction: () => 'eia_oil_production',
 };

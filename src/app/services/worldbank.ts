@@ -148,6 +148,13 @@ const INDICATORS = {
   TOTAL_RESOURCE_RENTS: 'NY.GDP.TOTL.RT.ZS', // Total natural resources rents (% of GDP)
   OIL_RENTS: 'NY.GDP.PETR.RT.ZS', // Oil rents (% of GDP)
   MINERAL_RENTS: 'NY.GDP.MINR.RT.ZS', // Mineral rents (% of GDP)
+  COAL_RENTS: 'NY.GDP.COAL.RT.ZS', // Coal rents (% of GDP)
+  NATURAL_GAS_RENTS: 'NY.GDP.NGAS.RT.ZS', // Natural gas rents (% of GDP)
+  FOREST_RENTS: 'NY.GDP.FRST.RT.ZS', // Forest rents (% of GDP)
+  ENERGY_IMPORTS_NET: 'EG.IMP.CONS.ZS', // Energy imports, net (% of energy use)
+  FOSSIL_FUEL_EXPORTS: 'TX.VAL.FUEL.ZS.UN', // Fuel exports (% of merchandise exports)
+  ORES_METALS_EXPORTS: 'TX.VAL.MMTL.ZS.UN', // Ores and metals exports (% of merchandise exports)
+  ELECTRICITY_ACCESS: 'EG.ELC.ACCS.ZS', // Access to electricity (% of population)
 
   // Inequality / income distribution
   // World Bank publishes quintile / decile shares, not a direct "bottom 40%" series.
@@ -602,6 +609,13 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   totalResourceRents: CountryData[];
   oilRents: CountryData[];
   mineralRents: CountryData[];
+  coalRents: CountryData[];
+  naturalGasRents: CountryData[];
+  forestRents: CountryData[];
+  netEnergyImports: CountryData[];
+  fossilFuelExports: CountryData[];
+  oresMetalsExports: CountryData[];
+  electricityAccess: CountryData[];
   // Inequality / income shares
   incomeShareTop10: CountryData[];
   incomeShareBottom40: CountryData[];
@@ -726,7 +740,15 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.INCOME_SHARE_SECOND20, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.EXTERNAL_DEBT, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.REER, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.PM25, COUNTRY_CODES, !forceRefresh)
+      fetchIndicatorData(INDICATORS.PM25, COUNTRY_CODES, !forceRefresh),
+      // Resource Atlas additions (v16)
+      fetchIndicatorData(INDICATORS.COAL_RENTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.NATURAL_GAS_RENTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.FOREST_RENTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ENERGY_IMPORTS_NET, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.FOSSIL_FUEL_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ORES_METALS_EXPORTS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ELECTRICITY_ACCESS, COUNTRY_CODES, !forceRefresh)
     ]);
 
     // Extract results and track failures
@@ -813,7 +835,15 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       incomeShareSecond20Result,
       externalDebtResult,
       reerResult,
-      pm25Result
+      pm25Result,
+      // Resource Atlas additions (v16)
+      coalRentsResult,
+      naturalGasRentsResult,
+      forestRentsResult,
+      netEnergyImportsResult,
+      fossilFuelExportsResult,
+      oresMetalsExportsResult,
+      electricityAccessResult
     ] = results;
 
     // Log any failures
@@ -843,7 +873,11 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       'Measles Immunization', 'Under-5 Mortality', 'Maternal Mortality',
       'Total Resource Rents', 'Oil Rents', 'Mineral Rents',
       'Income Share Top 10%', 'Income Share Lowest 20%', 'Income Share Second 20%',
-      'External Debt (% GNI)', 'REER (2010=100)', 'PM2.5 Air Pollution'
+      'External Debt (% GNI)', 'REER (2010=100)', 'PM2.5 Air Pollution',
+      // Resource Atlas
+      'Coal Rents', 'Natural Gas Rents', 'Forest Rents',
+      'Net Energy Imports', 'Fossil Fuel Exports', 'Ores & Metals Exports',
+      'Electricity Access'
     ];
     
     let failedCount = 0;
@@ -1258,6 +1292,13 @@ const completeData = {
       totalResourceRents: totalResourceRentsResult.status === 'fulfilled' ? totalResourceRentsResult.value : [],
       oilRents: oilRentsResult.status === 'fulfilled' ? oilRentsResult.value : [],
       mineralRents: mineralRentsResult.status === 'fulfilled' ? mineralRentsResult.value : [],
+      coalRents: coalRentsResult.status === 'fulfilled' ? coalRentsResult.value : [],
+      naturalGasRents: naturalGasRentsResult.status === 'fulfilled' ? naturalGasRentsResult.value : [],
+      forestRents: forestRentsResult.status === 'fulfilled' ? forestRentsResult.value : [],
+      netEnergyImports: netEnergyImportsResult.status === 'fulfilled' ? netEnergyImportsResult.value : [],
+      fossilFuelExports: fossilFuelExportsResult.status === 'fulfilled' ? fossilFuelExportsResult.value : [],
+      oresMetalsExports: oresMetalsExportsResult.status === 'fulfilled' ? oresMetalsExportsResult.value : [],
+      electricityAccess: electricityAccessResult.status === 'fulfilled' ? electricityAccessResult.value : [],
       // Inequality / income shares (raw; bottom40 and palmaRatio computed below)
       incomeShareTop10: incomeShareTop10Result.status === 'fulfilled' ? incomeShareTop10Result.value : [],
       incomeShareBottom40: [] as CountryData[],

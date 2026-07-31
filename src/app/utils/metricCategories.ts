@@ -120,6 +120,22 @@ export const METRIC_CATEGORIES: MetricCategory[] = [
       { key: 'laborProductivity', label: 'Labor Productivity (PPP $)', unit: '$', format: usd },
     ],
   },
+  {
+    id: 'resources',
+    label: 'Natural Resources',
+    metrics: [
+      { key: 'totalResourceRents', label: 'Total Resource Rents (% of GDP)', unit: '%', format: pct, domain: [0, 60] },
+      { key: 'oilRents', label: 'Oil Rents (% of GDP)', unit: '%', format: pct, domain: [0, 50] },
+      { key: 'naturalGasRents', label: 'Natural Gas Rents (% of GDP)', unit: '%', format: pct, domain: [0, 30] },
+      { key: 'coalRents', label: 'Coal Rents (% of GDP)', unit: '%', format: pct, domain: [0, 15] },
+      { key: 'mineralRents', label: 'Mineral Rents (% of GDP)', unit: '%', format: pct, domain: [0, 30] },
+      { key: 'forestRents', label: 'Forest Rents (% of GDP)', unit: '%', format: pct, domain: [0, 20] },
+      { key: 'fossilFuelExports', label: 'Fuel Exports (% of merch.)', unit: '%', format: pct },
+      { key: 'oresMetalsExports', label: 'Ores & Metals Exports (% of merch.)', unit: '%', format: pct },
+      { key: 'netEnergyImports', label: 'Net Energy Imports (% of use)', unit: '%', format: pct, domain: [-500, 100] },
+      { key: 'electricityAccess', label: 'Electricity Access', unit: '%', format: pct, domain: [0, 100] },
+    ],
+  },
 ];
 
 export const ALL_METRICS: MetricDefinition[] = METRIC_CATEGORIES.flatMap(c => c.metrics);
