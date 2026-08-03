@@ -1,19 +1,22 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { CommodityHistory } from '../services/commodities';
+import type { CurrencyRateHistory, FxCategory } from '../services/currencyRates';
 import Sparkline from './Sparkline';
 
 interface Props {
   isDarkMode: boolean;
-  commodities: { [id: string]: CommodityHistory };
+  rates: { [id: string]: CurrencyRateHistory };
   loading?: boolean;
-  onRetry?: () => void;
 }
 
-function formatPrice(value: number): string {
-  const digits = value >= 1000 ? 0 : value >= 100 ? 1 : 2;
-  return `$${value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
+// FX display precision:
+//   pairs whose typical value is <10 (EUR/USD, GBP/USD, AUD, NZD, CHF, CAD) -> 4dp
+//   pairs 10-999 (JPY, INR, MXN) -> 2dp
+//   fallback -> 4dp
+function formatRate(value: number): string {
+  const digits = value < 10 ? 4 : value < 1000 ? 2 : 4;
+  return value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
 function formatDelta(pct: number): string {
@@ -21,8 +24,40 @@ function formatDelta(pct: number): string {
   return `${sign}${pct.toFixed(pct >= 10 || pct <= -10 ? 1 : 2)}%`;
 }
 
-export default function CommodityTicker({ isDarkMode, commodities, loading, onRetry }: Props) {
-  const items = useMemo(() => Object.values(commodities), [commodities]);
+const CATEGORY_LABEL: Record<FxCategory, string> = {
+  majors: 'MAJOR',
+  em: 'EM',
+  crosses: 'CROSS',
+};
+
+function categoryChipClasses(category: FxCategory, isDarkMode: boolean): string {
+  const base = 'text-[9px] uppercase tracking-wider font-medium px-1.5 py-0.5 rounded';
+  switch (category) {
+    case 'majors':
+      return `${base} ${isDarkMode ? 'bg-blue-500/15 text-blue-300' : 'bg-blue-50 text-blue-600'}`;
+    case 'em':
+      return `${base} ${isDarkMode ? 'bg-amber-500/15 text-amber-300' : 'bg-amber-50 text-amber-700'}`;
+    case 'crosses':
+      return `${base} ${isDarkMode ? 'bg-violet-500/15 text-violet-300' : 'bg-violet-50 text-violet-700'}`;
+  }
+}
+
+function LiveBadge({ isDarkMode }: { isDarkMode: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded ${
+        isDarkMode ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-600'
+      }`}
+      title="Same-day ECB reference rate (via Frankfurter)"
+    >
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+      LIVE
+    </span>
+  );
+}
+
+export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
+  const items = useMemo(() => Object.values(rates), [rates]);
 
   if (loading) {
     return (
@@ -32,22 +67,10 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
 
   if (items.length === 0) {
     return (
-      <div className={`h-16 rounded-lg border flex items-center justify-center gap-4 text-sm px-4 ${
+      <div className={`h-16 rounded-lg border flex items-center justify-center text-sm ${
         isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-400' : 'bg-white border-gray-200 text-gray-500'
       }`}>
-        <span>Live commodity prices are temporarily unavailable. FRED sometimes throttles bursty traffic — try again in a minute.</span>
-        {onRetry && (
-          <button
-            onClick={onRetry}
-            className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors ${
-              isDarkMode
-                ? 'bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Retry
-          </button>
-        )}
+        Live FX rates unavailable.
       </div>
     );
   }
@@ -82,15 +105,18 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
                 aria-hidden
               />
               <div className="flex flex-col leading-tight">
-                <span className={`text-[11px] uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {h.meta.label}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-[11px] uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {h.meta.pair}
+                  </span>
+                  <span className={categoryChipClasses(h.meta.category, isDarkMode)}>
+                    {CATEGORY_LABEL[h.meta.category]}
+                  </span>
+                  {h.liveSource === 'Frankfurter' && <LiveBadge isDarkMode={isDarkMode} />}
+                </div>
                 <div className="flex items-baseline gap-2">
                   <span className={`text-sm font-semibold tabular-nums ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {formatPrice(latest.value)}
-                    <span className={`ml-1 font-normal text-[11px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                      {h.meta.unit.replace('$/', '/')}
-                    </span>
+                    {formatRate(latest.value)}
                   </span>
                   {dayPct != null && (
                     <span className={`text-xs font-medium tabular-nums ${dayUp ? 'text-emerald-500' : 'text-rose-500'}`}>
@@ -121,7 +147,7 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
 
       <style jsx>{`
         .ticker-track {
-          animation: ticker-scroll 90s linear infinite;
+          animation: ticker-scroll 140s linear infinite;
           width: max-content;
         }
         .ticker-track:hover {

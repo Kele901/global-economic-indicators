@@ -180,7 +180,33 @@ export const clientCache = new ClientCache();
 //      iron ore, nickel, wheat) and EIA-with-static-fallback for oil reserves
 //      and production. Existing users need cache invalidated so new fields
 //      populate.
-export const CURRENT_CACHE_VERSION = 16;
+// v17: Currency Hierarchy FX ticker. Added FRED daily FX series for 10 major
+//      pairs (EUR/USD, GBP/USD, USD/JPY, USD/CHF, AUD/USD, USD/CAD, NZD/USD,
+//      USD/CNY, USD/INR, USD/BRL) cached under currency_rate_<id>.
+// v18: FX ticker expanded — added 5 more USD pairs (MXN, ZAR, SGD, KRW, HKD)
+//      and 6 derived cross pairs (EUR/JPY, EUR/GBP, GBP/JPY, EUR/CHF, AUD/JPY,
+//      CHF/JPY). CurrencyRateMeta now carries a `direction` field required for
+//      cross derivation, so old cached summaries must be invalidated.
+// v19: FX ticker gains a live-data layer. Added Frankfurter (ECB) as a fresher-
+//      than-FRED "latest" override, a 30-day sparkline field on every pair,
+//      and coverage for pairs FRED doesn't publish (PLN, TRY). 5 more USD
+//      pairs (NOK, SEK, DKK, PLN, TRY, THB) and 5 more crosses (EUR/NOK,
+//      EUR/SEK, EUR/PLN, EUR/AUD, GBP/AUD). CurrencyRateHistory now includes
+//      `sparkline` and `liveSource`, so old cached objects must be refetched.
+// v20: Resource Atlas commodity ticker gains a 30-observation sparkline field on
+//      every series (CommodityHistory.sparkline), so old cached commodity
+//      objects must be invalidated to re-populate the new field.
+// v21: Defense Ledger — worldbank.ts adds 5 new MS.MIL.* series
+//      (militaryExpenditureUsd, militaryPercentGovExp, armsExports, armsImports,
+//      armedForcesPersonnel) to the GlobalData shape and adds Ukraine ('UA')
+//      to the tracked COUNTRY_CODES list. Both changes require the cached
+//      global dataset to be re-fetched.
+// v22: Fix pre-existing units-mismatch bug — militaryExpenditure (% of GDP)
+//      was being FRED-merged with FDEFX (US$ billions), producing USA values
+//      like "1184%". Routed FDEFX into militaryExpenditureUsd (scaled to
+//      absolute US$) instead. Old cached GlobalData carries the poisoned
+//      USA slot on militaryExpenditure, so must be invalidated.
+export const CURRENT_CACHE_VERSION = 22;
 
 // Export cache key generators for consistency
 export const CacheKeys = {
@@ -216,4 +242,10 @@ export const CacheKeys = {
   commodity: (id: string) => `commodity_${id}`,
   eiaOilReserves: () => 'eia_oil_reserves',
   eiaOilProduction: () => 'eia_oil_production',
+
+  // Currency ticker cache keys (v17)
+  currencyRate: (id: string) => `currency_rate_${id}`,
+
+  // FX live-latest snapshot cache key (v19, Frankfurter)
+  frankfurterSnapshot: () => 'frankfurter_snapshot_v1',
 };

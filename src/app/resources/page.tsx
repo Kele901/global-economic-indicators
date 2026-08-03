@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { fetchGlobalData, type CountryData } from '../services/worldbank';
-import { fetchAllCommodityPrices, type CommodityHistory } from '../services/commodities';
+import { fetchAllCommodityPrices, clearCommodityCache, type CommodityHistory } from '../services/commodities';
 import { fetchOilReserves, fetchOilProduction, type ReservesSnapshot, type ProductionSnapshot } from '../services/eia';
 
 const CommodityTicker = dynamic(() => import('../components/CommodityTicker'), { ssr: false });
@@ -109,6 +109,19 @@ export default function ResourcesPage() {
     return () => { cancelled = true; };
   }, []);
 
+  // Re-fetch commodity data on demand (e.g. after a transient FRED / Akamai
+  // block clears). Clears the in-memory cache so we don't just return empty.
+  const retryCommodities = async () => {
+    setCommoditiesLoading(true);
+    clearCommodityCache();
+    try {
+      const cm = await fetchAllCommodityPrices().catch(() => ({} as { [id: string]: CommodityHistory }));
+      setCommodities(cm);
+    } finally {
+      setCommoditiesLoading(false);
+    }
+  };
+
   const topOilRentsCountries = useMemo(() => topCountries(data?.oilRents, 5), [data]);
   const topReserves = useMemo(() => reserves?.data?.slice(0, 5) ?? [], [reserves]);
   const topProducers = useMemo(() => production?.data?.slice(0, 5) ?? [], [production]);
@@ -161,7 +174,12 @@ export default function ResourcesPage() {
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
-          <CommodityTicker isDarkMode={isDarkMode} commodities={commodities} loading={commoditiesLoading} />
+          <CommodityTicker
+            isDarkMode={isDarkMode}
+            commodities={commodities}
+            loading={commoditiesLoading}
+            onRetry={retryCommodities}
+          />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
             {[

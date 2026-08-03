@@ -86,6 +86,7 @@ const Navbar = () => {
         { href: '/economic-gravity', label: 'Economic Gravity' },
         { href: '/economic-cycles', label: 'Economic Cycles' },
         { href: '/resources', label: 'Resource Atlas' },
+        { href: '/defense-ledger', label: 'Defense Ledger' },
       ],
     },
     {

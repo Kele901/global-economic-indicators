@@ -55,6 +55,31 @@ export interface CommodityHistory {
   latest: CommodityObservation | null;
   latestPrior: CommodityObservation | null; // one observation before latest, for daily/monthly delta
   ytdStart: CommodityObservation | null; // first observation of current calendar year
+  // Last ~30 observations for the inline ticker sparkline. Optional so that
+  // legacy cached objects (pre-v20) still deserialize cleanly and only lose
+  // the sparkline, not the whole ticker row.
+  sparkline?: CommodityObservation[];
+}
+
+// Small concurrency limiter — FRED sits behind Akamai edge protection that
+// starts returning 403 when we burst too many concurrent requests, so run
+// fetches in chunks rather than all-at-once.
+async function chunkedParallel<T, R>(
+  items: T[],
+  chunkSize: number,
+  worker: (item: T) => Promise<R>,
+  delayBetweenChunksMs = 150,
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    const chunk = items.slice(i, i + chunkSize);
+    const chunkResults = await Promise.allSettled(chunk.map(worker));
+    results.push(...chunkResults);
+    if (i + chunkSize < items.length && delayBetweenChunksMs > 0) {
+      await new Promise(r => setTimeout(r, delayBetweenChunksMs));
+    }
+  }
+  return results;
 }
 
 // Fetch a single FRED commodity series and return raw observations sorted ascending
@@ -112,6 +137,7 @@ async function fetchCommodityHistory(meta: CommoditySeriesMeta): Promise<Commodi
     const latestPrior = obs.length >= 2 ? obs[obs.length - 2] : null;
     const currentYear = latest ? parseInt(latest.date.split('-')[0]) : new Date().getFullYear();
     const ytdStart = obs.find(o => parseInt(o.date.split('-')[0]) === currentYear) ?? null;
+    const sparkline = obs.slice(-30);
 
     const history: CommodityHistory = {
       meta,
@@ -119,6 +145,7 @@ async function fetchCommodityHistory(meta: CommoditySeriesMeta): Promise<Commodi
       latest,
       latestPrior,
       ytdStart,
+      sparkline,
     };
 
     clientCache.set(cacheKey, history, 1000 * 60 * 60 * 24);
@@ -130,15 +157,15 @@ async function fetchCommodityHistory(meta: CommoditySeriesMeta): Promise<Commodi
   }
 }
 
-// Fetch every configured commodity series in parallel and return a keyed map.
+// Fetch every configured commodity series and return a keyed map.
+// Fetches are chunked (3 concurrent) with a small pause between chunks to avoid
+// tripping FRED's Akamai edge protection.
 export async function fetchAllCommodityPrices(): Promise<{ [id: string]: CommodityHistory }> {
   console.log('🛢️ ========================================');
   console.log('🛢️ Fetching Commodity Prices (FRED)...');
   console.log('🛢️ ========================================');
 
-  const results = await Promise.allSettled(
-    COMMODITY_SERIES.map(meta => fetchCommodityHistory(meta))
-  );
+  const results = await chunkedParallel(COMMODITY_SERIES, 3, fetchCommodityHistory, 200);
 
   const out: { [id: string]: CommodityHistory } = {};
   results.forEach((r, i) => {

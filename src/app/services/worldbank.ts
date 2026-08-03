@@ -79,6 +79,12 @@ const INDICATORS = {
   
   // Advanced Economic & Development Indicators
   MILITARY_EXPENDITURE: 'MS.MIL.XPND.GD.ZS', // Military expenditure (% of GDP)
+  // Defense Ledger additions — SIPRI-sourced series exposed via World Bank
+  MILITARY_EXPENDITURE_USD: 'MS.MIL.XPND.CD', // Military expenditure (current US$)
+  MILITARY_PCT_GOV_EXP: 'MS.MIL.XPND.ZS', // Military expenditure (% of central government expenditure)
+  ARMS_EXPORTS_TIV: 'MS.MIL.XPRT.KD', // Arms exports (SIPRI trend indicator values, constant 1990 US$)
+  ARMS_IMPORTS_TIV: 'MS.MIL.MPRT.KD', // Arms imports (SIPRI trend indicator values, constant 1990 US$)
+  ARMED_FORCES_PERSONNEL: 'MS.MIL.TOTL.P1', // Armed forces personnel, total
   MARKET_CAPITALIZATION: 'CM.MKT.LCAP.GD.ZS', // Market capitalization of listed domestic companies (% of GDP)
   SCIENTIFIC_PUBLICATIONS: 'IP.JRN.ARTC.SC', // Scientific and technical journal articles
   ICT_EXPORTS: 'TX.VAL.ICTG.ZS.UN', // ICT goods exports (% of total goods exports)
@@ -174,7 +180,9 @@ const INDICATORS = {
 // Country codes for major economies
 const COUNTRY_CODES = [
   'US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'AU', 'MX', 'KR', 'ES', 'SE', 'CH', 'TR', 'NG', 'CN', 'RU', 'BR', 'CL', 'AR', 'IN', 'NO',
-  'NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG', 'IL', 'SG'
+  'NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG', 'IL', 'SG',
+  // Defense Ledger (v21) additions
+  'UA'
 ];
 
 // Country name mapping
@@ -210,7 +218,8 @@ const COUNTRY_NAMES: { [key: string]: string } = {
   'SA': 'SaudiArabia',
   'EG': 'Egypt',
   'IL': 'Israel',
-  'SG': 'Singapore'
+  'SG': 'Singapore',
+  'UA': 'Ukraine'
 };
 
 // Function to fetch data with retry logic and exponential backoff
@@ -571,6 +580,12 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   renewableEnergy: CountryData[];
   femaleLaborForce: CountryData[];
   militaryExpenditure: CountryData[];
+  // Defense Ledger (v21) additions
+  militaryExpenditureUsd: CountryData[];
+  militaryPercentGovExp: CountryData[];
+  armsExports: CountryData[];
+  armsImports: CountryData[];
+  armedForcesPersonnel: CountryData[];
   marketCapitalization: CountryData[];
   scientificPublications: CountryData[];
   ictExports: CountryData[];
@@ -699,6 +714,12 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.RENEWABLE_ENERGY, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.FEMALE_LABOR_FORCE, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.MILITARY_EXPENDITURE, COUNTRY_CODES, !forceRefresh),
+      // Defense Ledger (v21) — SIPRI-sourced via WB
+      fetchIndicatorData(INDICATORS.MILITARY_EXPENDITURE_USD, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MILITARY_PCT_GOV_EXP, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ARMS_EXPORTS_TIV, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ARMS_IMPORTS_TIV, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ARMED_FORCES_PERSONNEL, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.MARKET_CAPITALIZATION, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.SCIENTIFIC_PUBLICATIONS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.ICT_EXPORTS, COUNTRY_CODES, !forceRefresh),
@@ -795,6 +816,12 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       renewableEnergyResult,
       femaleLaborForceResult,
       militaryExpenditureResult,
+      // Defense Ledger (v21)
+      militaryExpenditureUsdResult,
+      militaryPercentGovExpResult,
+      armsExportsResult,
+      armsImportsResult,
+      armedForcesPersonnelResult,
       marketCapitalizationResult,
       scientificPublicationsResult,
       ictExportsResult,
@@ -860,7 +887,11 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       'Labor Force Participation', 'Budget Balance', 'Healthcare Expenditure',
       'Education Expenditure', 'Internet Users', 'Youth Unemployment',
       'Manufacturing Value Added', 'Household Consumption', 'Renewable Energy',
-      'Female Labor Force Participation', 'Military Expenditure', 'Market Capitalization',
+      'Female Labor Force Participation', 'Military Expenditure',
+      // Defense Ledger (v21)
+      'Military Expenditure (US$)', 'Military % Gov Expenditure',
+      'Arms Exports (TIV)', 'Arms Imports (TIV)', 'Armed Forces Personnel',
+      'Market Capitalization',
       'Scientific Publications', 'ICT Exports', 'Mobile Subscriptions',
       'Patent Applications', 'Social Spending', 'Public Debt Service',
       'Services Value Added', 'Agricultural Value Added', 'Trade Openness',
@@ -1235,10 +1266,22 @@ const completeData = {
         femaleLaborForceResult.status === 'fulfilled' ? femaleLaborForceResult.value : [],
         usaData.femaleLaborForce
       ),
-      militaryExpenditure: mergeUSADataFromFRED(
-        militaryExpenditureResult.status === 'fulfilled' ? militaryExpenditureResult.value : [],
-        usaData.militaryExpenditure
+      // militaryExpenditure is % of GDP (WB MS.MIL.XPND.GD.ZS).
+      // FRED FDEFX is billions of US$, so merging it into this array produces
+      // nonsense USA values like "1184%". Route FDEFX into militaryExpenditureUsd
+      // (converting billions → absolute US$) instead, and leave this series
+      // untouched.
+      militaryExpenditure: militaryExpenditureResult.status === 'fulfilled' ? militaryExpenditureResult.value : [],
+      // Defense Ledger (v21) — raw SIPRI-via-WB series, with FRED FDEFX
+      // populated as the USA fallback in absolute dollars (FDEFX is in $B).
+      militaryExpenditureUsd: mergeUSADataFromFRED(
+        militaryExpenditureUsdResult.status === 'fulfilled' ? militaryExpenditureUsdResult.value : [],
+        (usaData.militaryExpenditure ?? []).map(p => ({ year: p.year, value: p.value * 1e9 })),
       ),
+      militaryPercentGovExp: militaryPercentGovExpResult.status === 'fulfilled' ? militaryPercentGovExpResult.value : [],
+      armsExports: armsExportsResult.status === 'fulfilled' ? armsExportsResult.value : [],
+      armsImports: armsImportsResult.status === 'fulfilled' ? armsImportsResult.value : [],
+      armedForcesPersonnel: armedForcesPersonnelResult.status === 'fulfilled' ? armedForcesPersonnelResult.value : [],
       marketCapitalization: mergeUSADataFromFRED(
         marketCapitalizationResult.status === 'fulfilled' ? marketCapitalizationResult.value : [],
         usaData.marketCapitalization

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import AdSense from '../components/AdSense';
 import { calculateCurrencyPairs } from '../services/forex';
+import { fetchAllCurrencyRates, type CurrencyRateHistory } from '../services/currencyRates';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import InfoPanel from '../components/InfoPanel';
 import { economicMetrics } from '../data/economicMetrics';
@@ -19,6 +20,7 @@ const SafeHavenIndicator = dynamic(() => import('../components/SafeHavenIndicato
 const REERDisplay = dynamic(() => import('../components/REERDisplay'), { ssr: false });
 const EconomicCalendar = dynamic(() => import('../components/EconomicCalendar'), { ssr: false });
 const CurrencyRegimeInfo = dynamic(() => import('../components/CurrencyRegimeInfo'), { ssr: false });
+const CurrencyTicker = dynamic(() => import('../components/CurrencyTicker'), { ssr: false });
 
 // Tab configuration
 type TabId = 'hierarchy' | 'history' | 'strength' | 'central-banks' | 'correlation' | 'reserves' | 'safe-haven' | 'valuation' | 'calendar' | 'regimes';
@@ -99,7 +101,22 @@ const CurrencyHierarchyPage = () => {
   const [converterAmount, setConverterAmount] = useState<string>('100');
   const [converterFromCurrency, setConverterFromCurrency] = useState<string>('USD');
   const [converterResults, setConverterResults] = useState<{ [key: string]: number }>({});
+  const [tickerRates, setTickerRates] = useState<{ [id: string]: CurrencyRateHistory }>({});
+  const [tickerLoading, setTickerLoading] = useState(true);
 
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rates = await fetchAllCurrencyRates();
+        if (!cancelled) setTickerRates(rates);
+      } finally {
+        if (!cancelled) setTickerLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     // Apply theme changes to DOM
@@ -395,6 +412,11 @@ const CurrencyHierarchyPage = () => {
             <span className="font-semibold text-red-500">Tier 4:</span> Local Currencies
           </div>
         </div>
+      </div>
+
+      {/* Live FX Ticker */}
+      <div className="mb-6">
+        <CurrencyTicker isDarkMode={isDarkMode} rates={tickerRates} loading={tickerLoading} />
       </div>
 
       {/* Tab Navigation */}

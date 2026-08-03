@@ -121,6 +121,18 @@ export const METRIC_CATEGORIES: MetricCategory[] = [
     ],
   },
   {
+    id: 'defense',
+    label: 'Defense',
+    metrics: [
+      { key: 'militaryExpenditure', label: 'Military Expenditure (% GDP)', unit: '%', format: pct, domain: [0, 15] },
+      { key: 'militaryExpenditureUsd', label: 'Military Expenditure (US$)', unit: '$', format: usd },
+      { key: 'militaryPercentGovExp', label: 'Military (% Gov Expenditure)', unit: '%', format: pct, domain: [0, 40] },
+      { key: 'armsExports', label: 'Arms Exports (SIPRI TIV)', unit: '$', format: usd },
+      { key: 'armsImports', label: 'Arms Imports (SIPRI TIV)', unit: '$', format: usd },
+      { key: 'armedForcesPersonnel', label: 'Armed Forces Personnel', unit: 'count', format: num },
+    ],
+  },
+  {
     id: 'resources',
     label: 'Natural Resources',
     metrics: [
