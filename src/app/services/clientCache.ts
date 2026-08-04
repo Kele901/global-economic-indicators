@@ -218,7 +218,13 @@ export const clientCache = new ClientCache();
 //      CountryComparisonDashboard (energyConsumption, etc.) because the
 //      dashboard's `arr[arr.length - 1][country]` pattern can't handle an
 //      empty array. Cache bump forces every WB indicator to be re-fetched.
-export const CURRENT_CACHE_VERSION = 24;
+// v25: Climate Ledger release. GlobalData now carries 8 new World Bank
+//      indicators (EN.ATM.CO2E.KT, EN.ATM.METH.KT.CE, EN.ATM.NOXE.KT.CE,
+//      AG.LND.FRST.ZS, ER.LND.PTLD.ZS, EG.USE.COMM.FO.ZS, EG.ELC.COAL.ZS,
+//      EG.ELC.RNEW.ZS). Cached fetches from v24 lack these fields and
+//      would render the new Climate Ledger with empty charts, so the bump
+//      forces a re-fetch on next visit.
+export const CURRENT_CACHE_VERSION = 25;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

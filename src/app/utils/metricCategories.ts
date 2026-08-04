@@ -101,6 +101,22 @@ export const METRIC_CATEGORIES: MetricCategory[] = [
     ],
   },
   {
+    id: 'climate',
+    label: 'Climate',
+    metrics: [
+      { key: 'co2EmissionsKt', label: 'CO2 Emissions (kt total)', unit: 'kt', format: num },
+      { key: 'methaneEmissions', label: 'Methane (kt CO₂e)', unit: 'kt', format: num },
+      { key: 'nitrousOxideEmissions', label: 'N₂O (kt CO₂e)', unit: 'kt', format: num },
+      { key: 'elecFromCoal', label: 'Electricity from Coal', unit: '%', format: pct, domain: [0, 100] },
+      { key: 'elecFromRenewables', label: 'Electricity from Renewables', unit: '%', format: pct, domain: [0, 100] },
+      { key: 'fossilFuelShare', label: 'Fossil-fuel Share of Energy', unit: '%', format: pct, domain: [0, 100] },
+      { key: 'forestAreaPct', label: 'Forest Area (% of land)', unit: '%', format: pct, domain: [0, 100] },
+      { key: 'protectedAreaPct', label: 'Terrestrial Protected Area', unit: '%', format: pct, domain: [0, 60] },
+      { key: 'pm25', label: 'PM2.5 Exposure', unit: 'µg/m³', format: idx, domain: [0, 100] },
+      { key: 'urbanPopulation', label: 'Urban Population', unit: '%', format: pct, domain: [0, 100] },
+    ],
+  },
+  {
     id: 'financial',
     label: 'Financial Markets',
     metrics: [

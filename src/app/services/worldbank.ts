@@ -179,6 +179,19 @@ const INDICATORS = {
 
   // Environment
   PM25: 'EN.ATM.PM25.MC.M3', // PM2.5 air pollution, mean annual exposure (µg/m³)
+
+  // Climate Ledger (v25) — greenhouse gas totals, land / protected area,
+  // energy-mix composition. urban population (SP.URB.TOTL.IN.ZS) and net
+  // energy imports (EG.IMP.CONS.ZS) are already exposed above via
+  // URBAN_POPULATION and ENERGY_IMPORTS_NET.
+  CO2_EMISSIONS_KT: 'EN.ATM.CO2E.KT', // CO2 emissions (kt)
+  METHANE_EMISSIONS: 'EN.ATM.METH.KT.CE', // Methane emissions (kt of CO2 equivalent)
+  NITROUS_OXIDE_EMISSIONS: 'EN.ATM.NOXE.KT.CE', // N2O emissions (kt of CO2 equivalent)
+  FOREST_AREA_PCT: 'AG.LND.FRST.ZS', // Forest area (% of land area)
+  PROTECTED_AREA_PCT: 'ER.LND.PTLD.ZS', // Terrestrial protected areas (% of total land area)
+  FOSSIL_FUEL_SHARE: 'EG.USE.COMM.FO.ZS', // Fossil fuel energy consumption (% of total)
+  ELEC_FROM_COAL: 'EG.ELC.COAL.ZS', // Electricity production from coal sources (% of total)
+  ELEC_FROM_RENEWABLES: 'EG.ELC.RNEW.ZS', // Renewable electricity output (% of total electricity output)
 };
 
 // Country codes for major economies
@@ -652,6 +665,15 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   // Housing (FRED-BIS primary, OECD fallback)
   houseRealPriceIndex: CountryData[];
   houseNominalPriceIndex: CountryData[];
+  // Climate Ledger (v25) — greenhouse gas totals, land, energy mix
+  co2EmissionsKt: CountryData[];
+  methaneEmissions: CountryData[];
+  nitrousOxideEmissions: CountryData[];
+  forestAreaPct: CountryData[];
+  protectedAreaPct: CountryData[];
+  fossilFuelShare: CountryData[];
+  elecFromCoal: CountryData[];
+  elecFromRenewables: CountryData[];
 }> {
   try {
     // Check cache version - invalidate if outdated
@@ -775,7 +797,16 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.ENERGY_IMPORTS_NET, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.FOSSIL_FUEL_EXPORTS, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.ORES_METALS_EXPORTS, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.ELECTRICITY_ACCESS, COUNTRY_CODES, !forceRefresh)
+      fetchIndicatorData(INDICATORS.ELECTRICITY_ACCESS, COUNTRY_CODES, !forceRefresh),
+      // Climate Ledger (v25) additions
+      fetchIndicatorData(INDICATORS.CO2_EMISSIONS_KT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.METHANE_EMISSIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.NITROUS_OXIDE_EMISSIONS, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.FOREST_AREA_PCT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.PROTECTED_AREA_PCT, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.FOSSIL_FUEL_SHARE, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ELEC_FROM_COAL, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.ELEC_FROM_RENEWABLES, COUNTRY_CODES, !forceRefresh)
     ]);
 
     // Extract results and track failures
@@ -876,7 +907,16 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       netEnergyImportsResult,
       fossilFuelExportsResult,
       oresMetalsExportsResult,
-      electricityAccessResult
+      electricityAccessResult,
+      // Climate Ledger (v25) additions
+      co2EmissionsKtResult,
+      methaneEmissionsResult,
+      nitrousOxideEmissionsResult,
+      forestAreaPctResult,
+      protectedAreaPctResult,
+      fossilFuelShareResult,
+      elecFromCoalResult,
+      elecFromRenewablesResult
     ] = results;
 
     // Log any failures
@@ -1362,7 +1402,16 @@ const completeData = {
       termSpread: [] as CountryData[],
       // Housing (FRED-BIS - filled in below)
       houseRealPriceIndex: [] as CountryData[],
-      houseNominalPriceIndex: [] as CountryData[]
+      houseNominalPriceIndex: [] as CountryData[],
+      // Climate Ledger (v25) additions
+      co2EmissionsKt: co2EmissionsKtResult.status === 'fulfilled' ? co2EmissionsKtResult.value : [],
+      methaneEmissions: methaneEmissionsResult.status === 'fulfilled' ? methaneEmissionsResult.value : [],
+      nitrousOxideEmissions: nitrousOxideEmissionsResult.status === 'fulfilled' ? nitrousOxideEmissionsResult.value : [],
+      forestAreaPct: forestAreaPctResult.status === 'fulfilled' ? forestAreaPctResult.value : [],
+      protectedAreaPct: protectedAreaPctResult.status === 'fulfilled' ? protectedAreaPctResult.value : [],
+      fossilFuelShare: fossilFuelShareResult.status === 'fulfilled' ? fossilFuelShareResult.value : [],
+      elecFromCoal: elecFromCoalResult.status === 'fulfilled' ? elecFromCoalResult.value : [],
+      elecFromRenewables: elecFromRenewablesResult.status === 'fulfilled' ? elecFromRenewablesResult.value : []
     };
 
     // ============================================

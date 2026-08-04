@@ -8,6 +8,7 @@
 // so anything not listed here is invisible to the transparency layer.
 
 import { CURATED_LAST_UPDATED as DEFENSE_CURATED_LAST_UPDATED } from '../services/defenseCurated';
+import { CURATED_LAST_UPDATED as CLIMATE_CURATED_LAST_UPDATED } from '../services/climateCurated';
 
 export type DataCategory =
   | 'macro'
@@ -358,6 +359,110 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     refreshCadence: 'annual',
     live: true,
     lastUpdated: LIVE,
+  },
+
+  // ── Climate Ledger (live) ─────────────────────────────────────────────
+  {
+    id: 'wb-ghg',
+    name: 'Greenhouse gas emissions (CO₂, CH₄, N₂O)',
+    category: 'climate',
+    provider: 'World Bank',
+    seriesIds: ['EN.ATM.CO2E.KT', 'EN.ATM.CO2E.PC', 'EN.ATM.METH.KT.CE', 'EN.ATM.NOXE.KT.CE'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Absolute CO₂ (kt), per-capita CO₂ (t), and methane / N₂O expressed as kt CO₂-equivalent.',
+    sourceUrl: 'https://data.worldbank.org/topic/climate-change',
+  },
+  {
+    id: 'wb-energy-mix',
+    name: 'Electricity generation mix',
+    category: 'climate',
+    provider: 'World Bank',
+    seriesIds: ['EG.ELC.COAL.ZS', 'EG.ELC.RNEW.ZS', 'EG.USE.COMM.FO.ZS', 'EG.FEC.RNEW.ZS'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Coal share, renewables share, fossil-fuel share of total energy consumption.',
+  },
+  {
+    id: 'wb-land-nature',
+    name: 'Land use & protected areas',
+    category: 'climate',
+    provider: 'World Bank',
+    seriesIds: ['AG.LND.FRST.ZS', 'ER.LND.PTLD.ZS'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Forest area (% of land) and terrestrial protected areas (% of land).',
+  },
+  {
+    id: 'wb-air-quality',
+    name: 'PM2.5 air pollution exposure',
+    category: 'climate',
+    provider: 'World Bank',
+    seriesIds: ['EN.ATM.PM25.MC.M3'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Mean annual population-weighted exposure to PM2.5, benchmarked against the WHO 5 µg/m³ guideline.',
+  },
+
+  // ── Climate Ledger (curated snapshots) ────────────────────────────────
+  {
+    id: 'unfccc-ndc',
+    name: 'NDC 2035 targets (top-20 emitters)',
+    category: 'climate',
+    provider: 'UNFCCC',
+    refreshCadence: 'irregular',
+    live: false,
+    lastUpdated: CLIMATE_CURATED_LAST_UPDATED,
+    notes: 'Nationally Determined Contributions submitted to the UNFCCC NDC Registry. Falls back to 2030 target where a 2035 pledge has not yet been submitted.',
+    sourceUrl: 'https://unfccc.int/NDCREG',
+  },
+  {
+    id: 'gem-coal-tracker',
+    name: 'Global Coal Plant Tracker',
+    category: 'climate',
+    provider: 'Global Energy Monitor',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: CLIMATE_CURATED_LAST_UPDATED,
+    notes: 'Operating / under-construction / announced / retired GW of coal generation by country.',
+    sourceUrl: 'https://globalenergymonitor.org/projects/global-coal-plant-tracker/',
+  },
+  {
+    id: 'oecd-gcf-finance',
+    name: 'Climate finance flows (OECD DAC + GCF)',
+    category: 'climate',
+    provider: 'OECD DAC / GCF',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: CLIMATE_CURATED_LAST_UPDATED,
+    notes: 'Cumulative pledged vs disbursed climate finance by donor, plus the annual $100Bn Copenhagen mobilisation series.',
+    sourceUrl: 'https://www.oecd.org/climate-change/finance-usd-100-billion-goal/',
+  },
+  {
+    id: 'emdat-disasters',
+    name: 'EM-DAT climate-related disasters 1990-2024',
+    category: 'climate',
+    provider: 'EM-DAT',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: CLIMATE_CURATED_LAST_UPDATED,
+    notes: 'Annual counts of floods, storms, droughts, wildfires and extreme-temperature events grouped by continent.',
+    sourceUrl: 'https://www.emdat.be/',
+  },
+  {
+    id: 'nasa-gistemp',
+    name: 'Global temperature anomaly (NASA GISTEMP v4)',
+    category: 'climate',
+    provider: 'Curated',
+    refreshCadence: 'monthly',
+    live: false,
+    lastUpdated: CLIMATE_CURATED_LAST_UPDATED,
+    notes: 'Land-ocean temperature anomaly vs 1951-1980 base period. Snapshot of the annual mean series.',
+    sourceUrl: 'https://data.giss.nasa.gov/gistemp/',
   },
 ];
 
