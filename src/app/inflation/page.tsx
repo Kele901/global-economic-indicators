@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchGlobalData } from '../services/worldbank';
+import { latestEntry } from '../utils/countryData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
@@ -1066,11 +1067,10 @@ export default function InflationPage() {
 
   const latestStats = useMemo(() => {
     if (!inflationData.length) return [];
-    const lastYear = inflationData[inflationData.length - 1].year;
-    return selectedCountries.map(country => ({
-      country,
-      value: inflationData[inflationData.length - 1][country],
-    }));
+    return selectedCountries.map(country => {
+      const entry = latestEntry(inflationData, country);
+      return { country, value: entry?.value };
+    });
   }, [inflationData, selectedCountries]);
 
   const handleCountryToggle = (country: string) => {

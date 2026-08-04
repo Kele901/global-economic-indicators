@@ -206,7 +206,19 @@ export const clientCache = new ClientCache();
 //      like "1184%". Routed FDEFX into militaryExpenditureUsd (scaled to
 //      absolute US$) instead. Old cached GlobalData carries the poisoned
 //      USA slot on militaryExpenditure, so must be invalidated.
-export const CURRENT_CACHE_VERSION = 22;
+// v23: World Bank fetches now route through the /api/worldbank server-side
+//      proxy instead of hitting api.worldbank.org directly. This unblocks
+//      series (chiefly the MS.MIL.* family) that the WB WAF was denying
+//      to browser clients, so previously-empty cached slots need to be
+//      refetched now that they can succeed.
+// v24: Invalidate any empty CountryData arrays that were cached during the
+//      first-run window between the v23 bump and the IPv4-first DNS fix on
+//      the /api/worldbank proxy. During that ~few-minute window, requests
+//      hung on IPv6 timeouts and got cached as [], which then crashed
+//      CountryComparisonDashboard (energyConsumption, etc.) because the
+//      dashboard's `arr[arr.length - 1][country]` pattern can't handle an
+//      empty array. Cache bump forces every WB indicator to be re-fetched.
+export const CURRENT_CACHE_VERSION = 24;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

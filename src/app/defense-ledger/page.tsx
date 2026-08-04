@@ -10,6 +10,7 @@ import {
   DEFENSE_COUNTRY_BY_WBKEY,
   SIPRI_MILITARY_SPEND,
 } from '../services/defenseCurated';
+import { worldSum, topNCountries, topNShare, worldYoY } from '../utils/countryData';
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
 const SuperpowerComparisonChart = dynamic(() => import('../components/SuperpowerComparisonChart'), { ssr: false });
@@ -45,99 +46,6 @@ function SkeletonCard({ isDarkMode, className = 'h-64' }: { isDarkMode: boolean;
   return (
     <div className={`${className} rounded-lg animate-pulse ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`} />
   );
-}
-
-// Find the most recent non-null, non-zero value for a country.
-function latest(series: CountryData[] | undefined, country: string): { year: number; value: number } | null {
-  if (!series) return null;
-  for (let i = series.length - 1; i >= 0; i--) {
-    const v = Number(series[i][country]);
-    if (!isNaN(v) && v > 0) return { year: Number(series[i].year), value: v };
-  }
-  return null;
-}
-
-// Aggregate the latest non-zero value across every tracked country.
-// Returns both a sum (for USD series) and a count so callers can compute a
-// mean when the underlying series is a ratio like % of GDP.
-function worldTotal(
-  series: CountryData[] | undefined,
-  maxPlausibleValue: number = Infinity,
-): { total: number; count: number; year: number } {
-  if (!series || series.length === 0) return { total: 0, count: 0, year: 0 };
-  const countries = new Set<string>();
-  series.forEach(row => Object.keys(row).forEach(k => k !== 'year' && countries.add(k)));
-  let total = 0;
-  let count = 0;
-  let maxYear = 0;
-  countries.forEach(c => {
-    const l = latest(series, c);
-    if (l && l.value <= maxPlausibleValue) {
-      total += l.value;
-      count += 1;
-      if (l.year > maxYear) maxYear = l.year;
-    }
-  });
-  return { total, count, year: maxYear };
-}
-
-// Combined share held by the top-N countries in a CountryData series.
-function topNShare(series: CountryData[] | undefined, n: number): number {
-  if (!series || series.length === 0) return 0;
-  const countries = new Set<string>();
-  series.forEach(row => Object.keys(row).forEach(k => k !== 'year' && countries.add(k)));
-  const vals: number[] = [];
-  countries.forEach(c => { const l = latest(series, c); if (l) vals.push(l.value); });
-  const total = vals.reduce((s, v) => s + v, 0);
-  if (total <= 0) return 0;
-  const topSum = vals.sort((a, b) => b - a).slice(0, n).reduce((s, v) => s + v, 0);
-  return (topSum / total) * 100;
-}
-
-// Year-over-year change % of world total (latest year vs prior year).
-function worldYoY(series: CountryData[] | undefined): number | null {
-  if (!series || series.length < 2) return null;
-  const countries = new Set<string>();
-  series.forEach(row => Object.keys(row).forEach(k => k !== 'year' && countries.add(k)));
-  const yearList = series.map(r => Number(r.year));
-  const maxYear = Math.max(...yearList);
-  // Find the latest year that actually has data
-  let totalLatest = 0, totalPrior = 0;
-  let latestYear = 0, priorYear = 0;
-  for (let y = maxYear; y >= maxYear - 5; y--) {
-    const row = series.find(r => Number(r.year) === y);
-    if (!row) continue;
-    const rowTotal = Object.keys(row).filter(k => k !== 'year').reduce((s, k) => {
-      const v = Number(row[k]);
-      return !isNaN(v) && v > 0 ? s + v : s;
-    }, 0);
-    if (rowTotal > 0) {
-      if (!totalLatest) { totalLatest = rowTotal; latestYear = y; }
-      else if (y < latestYear) { totalPrior = rowTotal; priorYear = y; break; }
-    }
-  }
-  void priorYear; // acknowledge computed but unused
-  if (!totalLatest || !totalPrior) return null;
-  return ((totalLatest - totalPrior) / totalPrior) * 100;
-}
-
-// Top spenders in the latest year that has any data. `maxPlausibleValue`
-// filters out obvious unit-mismatch outliers (e.g. an absolute-dollar value
-// leaking into a % GDP series and rendering as "1184%").
-function topSpenders(
-  series: CountryData[] | undefined,
-  n: number,
-  maxPlausibleValue: number = Infinity,
-): { country: string; value: number; year: number }[] {
-  if (!series || series.length === 0) return [];
-  const countries = new Set<string>();
-  series.forEach(row => Object.keys(row).forEach(k => k !== 'year' && countries.add(k)));
-  const items: { country: string; value: number; year: number }[] = [];
-  countries.forEach(c => {
-    const l = latest(series, c);
-    if (l && l.value <= maxPlausibleValue) items.push({ country: c, value: l.value, year: l.year });
-  });
-  return items.sort((a, b) => b.value - a.value).slice(0, n);
 }
 
 function formatUsdShort(value: number): string {
@@ -251,10 +159,10 @@ export default function DefenseLedgerPage() {
   // upstream unit mismatch and should be dropped from the ranking.
   const maxPlausible = spendUnit === 'pct_gdp' ? 30 : Infinity;
 
-  const worldSpend = useMemo(() => worldTotal(spendSeries, maxPlausible), [spendSeries, maxPlausible]);
+  const worldSpend = useMemo(() => worldSum(spendSeries, { maxPlausible }), [spendSeries, maxPlausible]);
   const worldYoyPct = useMemo(() => worldYoY(spendSeries), [spendSeries]);
   const top5ConcPct = useMemo(() => topNShare(spendSeries, 5), [spendSeries]);
-  const spenderTop5 = useMemo(() => topSpenders(spendSeries, 5, maxPlausible), [spendSeries, maxPlausible]);
+  const spenderTop5 = useMemo(() => topNCountries(spendSeries, 5, { maxPlausible }), [spendSeries, maxPlausible]);
   const latestConflicts = ACTIVE_STATE_CONFLICTS[ACTIVE_STATE_CONFLICTS.length - 1];
   const latestPeacekeeping = UN_PEACEKEEPING_BUDGET[UN_PEACEKEEPING_BUDGET.length - 1];
 
@@ -462,7 +370,7 @@ export default function DefenseLedgerPage() {
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
             title="The Superpowers"
-            subtitle="A century-and-a-quarter into the modern defense budget, ten countries account for over three-quarters of it. Watch the US, China and Russia diverge — in dollars, in share of GDP, or both."
+            subtitle="Six-plus decades of defense spending in one view. Ten countries account for over three-quarters of the global total — watch the US, China and Russia diverge from 1960 onwards, in dollars and in share of GDP."
           />
           {loading ? (
             <SkeletonCard isDarkMode={isDarkMode} className="h-[520px]" />

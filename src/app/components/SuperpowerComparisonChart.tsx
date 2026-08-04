@@ -78,7 +78,10 @@ export default function SuperpowerComparisonChart({
 
   const data = useMemo(() => {
     const source = mode === 'usd' ? militaryExpenditureUsd : militaryExpenditurePctGdp;
-    return shapeForChart(source, wbKeys, 2000);
+    // Show the full World Bank window (1960+). Recharts connectNulls will
+    // bridge gaps where individual countries have shorter histories
+    // (e.g. China's MS.MIL.XPND.CD only starts at 1989, Russia at 1988).
+    return shapeForChart(source, wbKeys, 1960);
   }, [mode, militaryExpenditureUsd, militaryExpenditurePctGdp, wbKeys]);
 
   const grid = isDarkMode ? '#374151' : '#e5e7eb';
@@ -101,7 +104,7 @@ export default function SuperpowerComparisonChart({
             Superpowers · Military Spending
           </div>
           <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Top-10 spenders since 2000. Toggle between absolute dollars and share of GDP.
+            Top-10 spenders since 1960. Toggle between absolute dollars and share of GDP.
           </p>
         </div>
         <div className={`inline-flex rounded-md border text-xs overflow-hidden ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>

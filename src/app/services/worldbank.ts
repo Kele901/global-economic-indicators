@@ -28,8 +28,12 @@ export interface CountryData {
   [countryCode: string]: number | string;
 }
 
-// World Bank API configuration
-const WORLD_BANK_BASE_URL = 'https://api.worldbank.org/v2/country';
+// World Bank API — routed through our own Next.js proxy at /api/worldbank
+// instead of api.worldbank.org directly. The public WB endpoint fronts a
+// WAF/CDN that intermittently blocks browser requests for specific series
+// (in particular the MS.MIL.* family) with 403 / HTML challenge pages;
+// making the call server-side sidesteps that fingerprinting.
+const WORLD_BANK_PROXY_URL = '/api/worldbank';
 const INDICATORS = {
   INTEREST_RATE: 'FR.INR.RINR', // Real interest rate
   EMPLOYMENT_RATE: 'SL.EMP.TOTL.SP.ZS', // Employment to population ratio
@@ -293,7 +297,9 @@ async function fetchIndicatorData(
 
     const countryString = countries.join(';');
     const sourceParam = source != null ? `&source=${source}` : '';
-    const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator}?format=json&per_page=1000&date=1960:2026${sourceParam}`;
+    // Talk to our server-side proxy, not api.worldbank.org, so the request
+    // isn't fingerprinted as browser traffic and (soft-)blocked by the WAF.
+    const url = `${WORLD_BANK_PROXY_URL}?countries=${countryString}&indicator=${indicator}&date=1960:2026&per_page=20000${sourceParam}`;
     
     console.log(`🌐 Fetching fresh data for ${indicator}...`);
     console.log(`📍 API URL: ${url}`);
@@ -1603,7 +1609,7 @@ export async function testCountryDataAvailability(countryCodes: string[] = ['NL'
   
   const testIndicator = INDICATORS.GDP_GROWTH; // Use GDP growth as test indicator
   const countryString = countryCodes.join(';');
-  const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${testIndicator}?format=json&per_page=100&date=2020:2026`;
+  const url = `${WORLD_BANK_PROXY_URL}?countries=${countryString}&indicator=${testIndicator}&date=2020:2026&per_page=100`;
   
   console.log('🧪 Test URL:', url);
   
@@ -1675,7 +1681,7 @@ export async function checkDataAvailability(): Promise<void> {
   for (const indicator of indicatorsToCheck) {
     try {
       const countryString = sampleCountries.join(';');
-      const url = `${WORLD_BANK_BASE_URL}/${countryString}/indicator/${indicator.code}?format=json&per_page=500&date=2020:2026`;
+      const url = `${WORLD_BANK_PROXY_URL}?countries=${countryString}&indicator=${indicator.code}&date=2020:2026&per_page=500`;
       
       const response = await axios.get(url, { timeout: 10000 });
       const data = response.data[1];
@@ -1732,7 +1738,7 @@ export async function testJapanData(): Promise<void> {
   
   for (const test of japanTests) {
     try {
-      const url = `${WORLD_BANK_BASE_URL}/JP/indicator/${test.code}?format=json&per_page=500&date=1960:2026`;
+      const url = `${WORLD_BANK_PROXY_URL}?countries=JP&indicator=${test.code}&date=1960:2026&per_page=500`;
       console.log(`\n📊 Testing: ${test.name}`);
       console.log(`   URL: ${url}`);
       
