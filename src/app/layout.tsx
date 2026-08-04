@@ -5,6 +5,7 @@ import Script from 'next/script';
 import Navbar from './components/Navbar';
 import ThemeProvider from './components/ThemeProvider';
 import CookieConsent from './components/CookieConsent';
+import StatusWidget from './components/StatusWidget';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -107,6 +108,9 @@ export default function RootLayout({
                       <a href="/disclaimer" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Disclaimer</a>
                     </div>
                   </div>
+                </div>
+                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end">
+                  <StatusWidget />
                 </div>
               </div>
             </footer>
