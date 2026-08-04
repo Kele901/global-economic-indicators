@@ -230,7 +230,13 @@ export const clientCache = new ClientCache();
 //      v25 are missing rows for the new country columns, so charts and
 //      heatmaps would render them as gaps. Cache bump forces every
 //      indicator to be re-fetched with the fuller country list.
-export const CURRENT_CACHE_VERSION = 26;
+// v27: Trade Ledger release. The Trade Ledger consumes the existing
+//      NE.EXP.GNFS.ZS / NE.IMP.GNFS.ZS / NE.TRD.GNFS.ZS / BN.CAB.XOKA.GD.ZS
+//      / TM.TAX.MRCH.SM.AR.ZS series for the newly-added roster countries
+//      (KE, ET, GH, MA, IR, AE, QA, PK, BD, VN, TH, CO). Bumping ensures
+//      the ledger renders with the fuller country coverage rather than
+//      the v26 cache that was populated before the roster grew.
+export const CURRENT_CACHE_VERSION = 27;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

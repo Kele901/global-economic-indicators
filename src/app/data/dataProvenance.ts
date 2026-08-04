@@ -9,6 +9,7 @@
 
 import { CURATED_LAST_UPDATED as DEFENSE_CURATED_LAST_UPDATED } from '../services/defenseCurated';
 import { CURATED_LAST_UPDATED as CLIMATE_CURATED_LAST_UPDATED } from '../services/climateCurated';
+import { CURATED_LAST_UPDATED as TRADE_CURATED_LAST_UPDATED } from '../services/tradeCurated';
 
 export type DataCategory =
   | 'macro'
@@ -500,6 +501,17 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     lastUpdated: LIVE,
     notes: 'Harvard Growth Lab Atlas of Economic Complexity for product-level exports and IMF Direction of Trade Statistics for bilateral flows. Powers /trade-network.',
     sourceUrl: 'https://atlas.cid.harvard.edu/',
+  },
+  {
+    id: 'trade-ledger-curated',
+    name: 'Trade Ledger curated snapshots',
+    category: 'trade',
+    provider: 'Curated',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: TRADE_CURATED_LAST_UPDATED,
+    notes: 'WTO Applied Tariffs 2024, PIIE US-China tariff timeline 2018-2025, Baltic Dry + Drewry World Container Index snapshots, RCEP/USMCA/CPTPP/EU/AfCFTA membership matrix, USGS + SEMI supply-chain concentration, UNCTAD maritime chokepoints. Powers /trade-ledger.',
+    sourceUrl: 'https://www.wto.org/english/res_e/publications_e/wtp2024_e.htm',
   },
 
   // ── FX correlations ───────────────────────────────────────────────────

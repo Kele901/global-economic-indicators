@@ -110,6 +110,7 @@ const Navbar = () => {
         { href: '/resources', label: 'Resource Atlas' },
         { href: '/defense-ledger', label: 'Defense Ledger' },
         { href: '/climate-ledger', label: 'Climate Ledger' },
+        { href: '/trade-ledger', label: 'Trade Ledger' },
       ],
     },
     {
