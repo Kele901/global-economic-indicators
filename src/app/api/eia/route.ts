@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { memoizeUpstream } from '../_lib/upstreamCache';
 
 // EIA v2 API proxy. Keeps the API key server-side.
 // Docs: https://www.eia.gov/opendata/documentation.php
@@ -35,12 +36,32 @@ export async function GET(request: NextRequest) {
     const url = `${EIA_API_BASE_URL}/${path.replace(/^\/+/, '')}?${forwarded.toString()}`;
     console.log(`[EIA API Route] Fetching ${path}...`);
 
-    const response = await axios.get(url, {
-      timeout: 15000,
-      headers: { 'User-Agent': 'GlobalEconomicIndicators/1.0' },
-    });
+    // Key the memo on the full querystring minus the api_key so a
+    // rotated key doesn't invalidate the whole cache namespace.
+    const memoKey = `eia:${path}:${Array.from(searchParams.entries())
+      .filter(([k]) => k !== 'path')
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`)
+      .join('&')}`;
 
-    return NextResponse.json(response.data);
+    const data = await memoizeUpstream(
+      memoKey,
+      async () => {
+        const response = await axios.get(url, {
+          timeout: 15000,
+          headers: { 'User-Agent': 'GlobalEconomicIndicators/1.0' },
+        });
+        return response.data;
+      },
+      // EIA publishes annually / quarterly; a 1-hour memo is plenty.
+      { tag: 'eia', revalidate: 3600 },
+    );
+
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
   } catch (error: any) {
     console.error('[EIA API Route] Error:', {
       message: error.message,

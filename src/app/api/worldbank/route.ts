@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import axios, { AxiosError } from 'axios';
 import https from 'https';
 import dns from 'dns';
+import { memoizeUpstream } from '../_lib/upstreamCache';
 
 // This route must run in the Node.js runtime — we use the `https` and `dns`
 // modules below which the Edge runtime doesn't ship.
@@ -96,9 +97,19 @@ export async function GET(request: NextRequest) {
     const url = `${WORLD_BANK_BASE_URL}/${countries}/indicator/${indicator}?format=json&per_page=${perPage}&date=${date}${sourceParam}`;
 
     console.log(`[WorldBank Proxy] Fetching ${indicator} for ${countries}...`);
-    const response = await fetchWithRetry(url);
+    const data = await memoizeUpstream(
+      `wb:${countries}:${indicator}:${date}:${perPage}:${source ?? ''}`,
+      async () => {
+        const response = await fetchWithRetry(url);
+        return response.data;
+      },
+      // WB indicators refresh at most once a year — 30-min in-process
+      // memoisation avoids duplicate calls when the whole homepage
+      // hydrates 60+ indicators back-to-back.
+      { tag: 'worldbank', revalidate: 1800 },
+    );
 
-    return NextResponse.json(response.data, {
+    return NextResponse.json(data, {
       headers: {
         // Cache aggressively at the CDN edge — WB indicators refresh at most
         // once a year, so 6h edge cache with 24h stale-while-revalidate is safe.

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { memoizeUpstream } from '../_lib/upstreamCache';
 
 // Frankfurter API proxy — free, no auth required, ECB-backed FX reference rates.
 // Docs: https://frankfurter.dev/
@@ -46,15 +47,24 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Frankfurter API Route] ${endpoint} ${base} ${symbols ?? '(all)'}${start ? ` ${start}..${end ?? ''}` : ''}`);
 
-    const response = await axios.get(url, {
-      timeout: 15000,
-      headers: {
-        'User-Agent': 'GlobalEconomicIndicators/1.0',
-        Accept: 'application/json',
+    const data = await memoizeUpstream(
+      `frankfurter:${endpoint}:${base}:${symbols ?? ''}:${start ?? ''}:${end ?? ''}`,
+      async () => {
+        const response = await axios.get(url, {
+          timeout: 15000,
+          headers: {
+            'User-Agent': 'GlobalEconomicIndicators/1.0',
+            Accept: 'application/json',
+          },
+        });
+        return response.data;
       },
-    });
+      // ECB publishes once per business day — 15-min in-process reuse
+      // is enough to absorb the burst of pair queries the ticker fires.
+      { tag: 'frankfurter', revalidate: 900 },
+    );
 
-    return NextResponse.json(response.data, {
+    return NextResponse.json(data, {
       headers: {
         // Cache at the CDN edge for 30 minutes since ECB publishes once per business day.
         'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600',

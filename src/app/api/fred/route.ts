@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios, { AxiosError } from 'axios';
+import { memoizeUpstream } from '../_lib/upstreamCache';
 
 // FRED API Configuration
 const FRED_API_BASE_URL = 'https://api.stlouisfed.org/fred/series/observations';
@@ -66,11 +67,20 @@ export async function GET(request: NextRequest) {
 
     const url = `${FRED_API_BASE_URL}?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&observation_start=${startDate}&observation_end=${endDate}`;
 
-    const response = await fetchWithRetry(url);
+    // Memoise the upstream fetch — same series + date window within the
+    // same 5-minute window on the same instance is served from memory.
+    const data = await memoizeUpstream(
+      `fred:${seriesId}:${startDate}:${endDate}`,
+      async () => {
+        const response = await fetchWithRetry(url);
+        return response.data;
+      },
+      { tag: 'fred', revalidate: 300 },
+    );
 
     console.log(`[FRED API Route] Successfully fetched ${seriesId}`);
 
-    return NextResponse.json(response.data, {
+    return NextResponse.json(data, {
       headers: {
         // Cache at the CDN edge for 30 minutes to soak up retries and bursts.
         'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400',

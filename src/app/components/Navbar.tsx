@@ -58,6 +58,28 @@ const Navbar = () => {
     };
   }, []);
 
+  // Prefetch the two heaviest client-side bundles (commodity + FX) once
+  // per session so they're warm in the memoize layer before the user
+  // navigates to a ledger page. Fire-and-forget; failures are logged
+  // but never surfaced.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const key = 'nav_prewarm_v1';
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+    // Delay slightly so we don't compete with the initial paint.
+    const timer = setTimeout(() => {
+      // Warm the commodity ticker (a single lightweight FRED probe) and
+      // the FX ticker (Frankfurter latest USD basket). Both are cached at
+      // the CDN edge so a warm-up call primes both memoize and edge cache.
+      fetch('/api/fred?series_id=DCOILWTICO&observation_start=2025-01-01&observation_end=2026-12-31', { cache: 'force-cache' })
+        .catch(err => console.warn('[Navbar prewarm] FRED WTI failed', err));
+      fetch('/api/frankfurter?endpoint=latest&base=USD', { cache: 'force-cache' })
+        .catch(err => console.warn('[Navbar prewarm] Frankfurter USD failed', err));
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => { setIsMobileMenuOpen(false); setOpenDropdown(null); };
 
