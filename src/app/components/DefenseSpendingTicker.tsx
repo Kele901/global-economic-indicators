@@ -135,7 +135,8 @@ export default function DefenseSpendingTicker({
         {onRetry && (
           <button
             onClick={onRetry}
-            className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors ${
+            aria-label="Retry loading defense spending data"
+            className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-transparent ${
               isDarkMode
                 ? 'bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600'
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -151,17 +152,27 @@ export default function DefenseSpendingTicker({
   const doubled = [...rows, ...rows];
 
   return (
-    <div className={`relative overflow-hidden rounded-lg border ${
-      isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
+    <div
+      className={`relative overflow-hidden rounded-lg border ${
+        isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+      }`}
+      role="region"
+      aria-label="Top-15 defense spenders — scrolling live ticker"
+    >
       {unit === 'pct_gdp' && (
-        <div className={`px-4 py-1.5 text-[11px] border-b ${
-          isDarkMode ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-700'
-        }`}>
+        <div
+          role="status"
+          className={`px-4 py-1.5 text-[11px] border-b ${
+            isDarkMode ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-700'
+          }`}
+        >
           Ranked by military expenditure as % of GDP — World Bank absolute-dollar series is temporarily unavailable.
         </div>
       )}
-      <div className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap">
+      <div
+        className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
+        aria-live="off"
+      >
         {doubled.map((r, i) => {
           const latest = r.latest;
           if (!latest) return null;
@@ -169,16 +180,26 @@ export default function DefenseSpendingTicker({
             ? ((latest.value - r.prior.value) / r.prior.value) * 100
             : null;
           const up = yoyPct != null && yoyPct >= 0;
+          const yoyText = yoyPct != null
+            ? `${up ? 'up' : 'down'} ${Math.abs(yoyPct).toFixed(2)} percent year on year`
+            : 'year-on-year change unavailable';
+          const ariaLabel = `${r.name}: ${formatValue(latest.value)} in ${latest.year}, ${yoyText}`;
 
           return (
-            <div key={`${r.iso3}-${i}`} className="flex items-center gap-3 flex-shrink-0">
+            <div
+              key={`${r.iso3}-${i}`}
+              className="flex items-center gap-3 flex-shrink-0"
+              role="group"
+              aria-label={ariaLabel}
+              aria-hidden={i >= rows.length ? 'true' : undefined}
+            >
               <div className={`text-[10px] font-bold w-4 text-right ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                 {r.rank}
               </div>
               <div
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ backgroundColor: r.color }}
-                aria-hidden
+                aria-hidden="true"
               />
               <div className="flex flex-col leading-tight">
                 <span className={`text-[11px] uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -195,7 +216,11 @@ export default function DefenseSpendingTicker({
                   )}
                 </div>
               </div>
-              <Sparkline points={r.spark} isDarkMode={isDarkMode} />
+              <Sparkline
+                points={r.spark}
+                isDarkMode={isDarkMode}
+                ariaLabel={`${r.name} 5-year defense spending`}
+              />
               <span className={`text-[10px] ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>
                 {latest.year}
               </span>

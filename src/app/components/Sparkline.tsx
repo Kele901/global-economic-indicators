@@ -21,6 +21,13 @@ interface SparklineProps {
   strokeColor?: string;
   /** Force an area fill colour (overrides derived light fill) */
   fillColor?: string;
+  /**
+   * Optional textual summary of what the sparkline represents (e.g.
+   * "30-day WTI crude"). When present, we surface it as an accessible
+   * SVG label so screen readers can announce the direction and magnitude
+   * of the trend instead of skipping the graphic entirely.
+   */
+  ariaLabel?: string;
 }
 
 export default function Sparkline({
@@ -30,9 +37,10 @@ export default function Sparkline({
   height = 22,
   strokeColor,
   fillColor,
+  ariaLabel,
 }: SparklineProps) {
   if (!points || points.length < 2) {
-    return <div style={{ width, height }} aria-hidden />;
+    return <div style={{ width, height }} aria-hidden="true" />;
   }
 
   const values = points.map(p => p.value);
@@ -46,7 +54,9 @@ export default function Sparkline({
     return `${x.toFixed(2)},${y.toFixed(2)}`;
   });
 
-  const up = points[points.length - 1].value >= points[0].value;
+  const first = points[0].value;
+  const last = points[points.length - 1].value;
+  const up = last >= first;
   const stroke = strokeColor ?? (up ? '#10b981' : '#ef4444');
   const fill = fillColor ?? (up
     ? (isDarkMode ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.10)')
@@ -55,14 +65,23 @@ export default function Sparkline({
   const polyPoints = coords.join(' ');
   const areaPoints = `0,${height} ${polyPoints} ${width},${height}`;
 
+  // Build an a11y summary. If the caller passed an ariaLabel we prefix
+  // it; otherwise we fall back to a generic "trending X% up/down over N
+  // points" description.
+  const pctChange = first !== 0 ? ((last - first) / Math.abs(first)) * 100 : 0;
+  const direction = up ? 'up' : 'down';
+  const summary = `${ariaLabel ? ariaLabel + ' — ' : ''}trending ${direction} ${Math.abs(pctChange).toFixed(1)}% over ${points.length} points`;
+
   return (
     <svg
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
       className="flex-shrink-0"
-      aria-hidden
+      role="img"
+      aria-label={summary}
     >
+      <title>{summary}</title>
       <polygon points={areaPoints} fill={fill} />
       <polyline
         points={polyPoints}

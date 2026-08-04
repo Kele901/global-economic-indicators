@@ -106,7 +106,8 @@ export default function EmissionsTicker({ isDarkMode, co2EmissionsKt, loading, o
         {onRetry && (
           <button
             onClick={onRetry}
-            className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors ${
+            aria-label="Retry loading CO2 emissions data"
+            className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-transparent ${
               isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -120,22 +121,39 @@ export default function EmissionsTicker({ isDarkMode, co2EmissionsKt, loading, o
   const doubled = [...rows, ...rows];
 
   return (
-    <div className={`relative overflow-hidden rounded-lg border ${
-      isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
-      <div className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap">
+    <div
+      className={`relative overflow-hidden rounded-lg border ${
+        isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+      }`}
+      role="region"
+      aria-label="Top-15 CO2 emitters — scrolling live ticker"
+    >
+      <div
+        className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
+        aria-live="off"
+      >
         {doubled.map((r, i) => {
           const yoyPct = r.prior && r.prior.value !== 0
             ? ((r.latest.value - r.prior.value) / r.prior.value) * 100
             : null;
           const up = yoyPct != null && yoyPct >= 0;
+          const yoyText = yoyPct != null
+            ? `${up ? 'up' : 'down'} ${Math.abs(yoyPct).toFixed(2)} percent year on year`
+            : 'year-on-year change unavailable';
+          const ariaLabel = `${r.name}: ${formatKt(r.latest.value)} in ${r.latest.year}, ${r.worldSharePct.toFixed(1)} percent of tracked world total, ${yoyText}`;
 
           return (
-            <div key={`${r.iso3}-${i}`} className="flex items-center gap-3 flex-shrink-0">
+            <div
+              key={`${r.iso3}-${i}`}
+              className="flex items-center gap-3 flex-shrink-0"
+              role="group"
+              aria-label={ariaLabel}
+              aria-hidden={i >= rows.length ? 'true' : undefined}
+            >
               <div className={`text-[10px] font-bold w-4 text-right ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                 {r.rank}
               </div>
-              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: r.color }} aria-hidden />
+              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: r.color }} aria-hidden="true" />
               <div className="flex flex-col leading-tight">
                 <span className={`text-[11px] uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   {r.name}
@@ -154,7 +172,11 @@ export default function EmissionsTicker({ isDarkMode, co2EmissionsKt, loading, o
                   )}
                 </div>
               </div>
-              <Sparkline points={r.spark} isDarkMode={isDarkMode} />
+              <Sparkline
+                points={r.spark}
+                isDarkMode={isDarkMode}
+                ariaLabel={`${r.name} 10-year CO2 emissions`}
+              />
               <span className={`text-[10px] ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>{r.latest.year}</span>
             </div>
           );

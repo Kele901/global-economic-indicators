@@ -50,7 +50,7 @@ function LiveBadge({ isDarkMode }: { isDarkMode: boolean }) {
       }`}
       title="Same-day ECB reference rate (via Frankfurter)"
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
       LIVE
     </span>
   );
@@ -78,10 +78,17 @@ export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
   const doubled = [...items, ...items];
 
   return (
-    <div className={`relative overflow-hidden rounded-lg border ${
-      isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
-      <div className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap">
+    <div
+      className={`relative overflow-hidden rounded-lg border ${
+        isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+      }`}
+      role="region"
+      aria-label="Live foreign exchange rates — scrolling ticker"
+    >
+      <div
+        className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
+        aria-live="off"
+      >
         {doubled.map((h, i) => {
           const latest = h.latest;
           const prior = h.latestPrior;
@@ -96,13 +103,23 @@ export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
             : null;
 
           const dayUp = dayPct != null && dayPct >= 0;
+          const dayText = dayPct != null
+            ? `${dayUp ? 'up' : 'down'} ${Math.abs(dayPct).toFixed(2)} percent since prior close`
+            : 'daily change unavailable';
+          const ariaLabel = `${h.meta.pair}: ${formatRate(latest.value)} on ${latest.date}, ${dayText}`;
 
           return (
-            <div key={`${h.meta.id}-${i}`} className="flex items-center gap-3 flex-shrink-0">
+            <div
+              key={`${h.meta.id}-${i}`}
+              className="flex items-center gap-3 flex-shrink-0"
+              role="group"
+              aria-label={ariaLabel}
+              aria-hidden={i >= items.length ? 'true' : undefined}
+            >
               <div
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ backgroundColor: h.meta.color }}
-                aria-hidden
+                aria-hidden="true"
               />
               <div className="flex flex-col leading-tight">
                 <div className="flex items-center gap-1.5">
@@ -130,7 +147,11 @@ export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
                   )}
                 </div>
               </div>
-              <Sparkline points={h.sparkline} isDarkMode={isDarkMode} />
+              <Sparkline
+                points={h.sparkline}
+                isDarkMode={isDarkMode}
+                ariaLabel={`${h.meta.pair} 30-day rate`}
+              />
               <span className={`text-[10px] ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>
                 {latest.date}
               </span>

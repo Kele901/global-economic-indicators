@@ -39,7 +39,8 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
         {onRetry && (
           <button
             onClick={onRetry}
-            className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors ${
+            aria-label="Retry loading live commodity prices"
+            className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-transparent ${
               isDarkMode
                 ? 'bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600'
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -55,10 +56,17 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
   const doubled = [...items, ...items];
 
   return (
-    <div className={`relative overflow-hidden rounded-lg border ${
-      isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
-      <div className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap">
+    <div
+      className={`relative overflow-hidden rounded-lg border ${
+        isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+      }`}
+      role="region"
+      aria-label="Live commodity prices — scrolling ticker"
+    >
+      <div
+        className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
+        aria-live="off"
+      >
         {doubled.map((h, i) => {
           const latest = h.latest;
           const prior = h.latestPrior;
@@ -73,13 +81,23 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
             : null;
 
           const dayUp = dayPct != null && dayPct >= 0;
+          const dayText = dayPct != null
+            ? `${dayUp ? 'up' : 'down'} ${Math.abs(dayPct).toFixed(2)} percent since prior close`
+            : 'daily change unavailable';
+          const ariaLabel = `${h.meta.label}: ${formatPrice(latest.value)} ${h.meta.unit} on ${latest.date}, ${dayText}`;
 
           return (
-            <div key={`${h.meta.id}-${i}`} className="flex items-center gap-3 flex-shrink-0">
+            <div
+              key={`${h.meta.id}-${i}`}
+              className="flex items-center gap-3 flex-shrink-0"
+              role="group"
+              aria-label={ariaLabel}
+              aria-hidden={i >= items.length ? 'true' : undefined}
+            >
               <div
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ backgroundColor: h.meta.color }}
-                aria-hidden
+                aria-hidden="true"
               />
               <div className="flex flex-col leading-tight">
                 <span className={`text-[11px] uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -104,7 +122,11 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
                   )}
                 </div>
               </div>
-              <Sparkline points={h.sparkline} isDarkMode={isDarkMode} />
+              <Sparkline
+                points={h.sparkline}
+                isDarkMode={isDarkMode}
+                ariaLabel={`${h.meta.label} 30-day price`}
+              />
               <span className={`text-[10px] ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>
                 {latest.date}
               </span>

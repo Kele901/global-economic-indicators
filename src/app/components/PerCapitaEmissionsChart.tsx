@@ -96,14 +96,21 @@ export default function PerCapitaEmissionsChart({
             Absolute emissions show who is warming the planet. Per-capita show responsibility per citizen.
           </p>
         </div>
-        <div className={`inline-flex rounded-md border text-xs overflow-hidden ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div
+          role="group"
+          aria-label="Display mode for CO2 emissions"
+          className={`inline-flex rounded-md border text-xs overflow-hidden ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
+        >
           <button
+            type="button"
             onClick={() => absoluteHasData && setMode('absolute')}
             disabled={!absoluteHasData}
+            aria-pressed={mode === 'absolute'}
+            aria-label={absoluteHasData ? 'Show absolute CO2 emissions in kilotonnes' : 'Absolute view unavailable — showing per-capita'}
             title={absoluteHasData
               ? undefined
               : `Absolute CO2 series unavailable — only ${absoluteCoverage}/${wbKeys.length} countries returned data`}
-            className={`px-3 py-1.5 ${!absoluteHasData
+            className={`px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset ${!absoluteHasData
               ? (isDarkMode ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 cursor-not-allowed')
               : mode === 'absolute'
                 ? (isDarkMode ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-50 text-emerald-700')
@@ -112,8 +119,11 @@ export default function PerCapitaEmissionsChart({
             Absolute
           </button>
           <button
+            type="button"
             onClick={() => setMode('per_capita')}
-            className={`px-3 py-1.5 border-l ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} ${
+            aria-pressed={mode === 'per_capita'}
+            aria-label="Show per-capita CO2 emissions in tonnes per person"
+            className={`px-3 py-1.5 border-l focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} ${
               mode === 'per_capita'
                 ? (isDarkMode ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-50 text-emerald-700')
                 : (isDarkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50')

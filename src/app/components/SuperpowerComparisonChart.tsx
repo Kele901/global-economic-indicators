@@ -107,14 +107,21 @@ export default function SuperpowerComparisonChart({
             Top-10 spenders since 1960. Toggle between absolute dollars and share of GDP.
           </p>
         </div>
-        <div className={`inline-flex rounded-md border text-xs overflow-hidden ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div
+          role="group"
+          aria-label="Display unit for military spending"
+          className={`inline-flex rounded-md border text-xs overflow-hidden ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
+        >
           <button
+            type="button"
             onClick={() => usdHasData && setMode('usd')}
             disabled={!usdHasData}
+            aria-pressed={mode === 'usd'}
+            aria-label={usdHasData ? 'Show military spending in nominal US dollars' : 'Nominal dollar view unavailable — falling back to % of GDP'}
             title={usdHasData
               ? undefined
               : `USD series unavailable — only ${usdCoverageCount}/${wbKeys.length} superpowers returned data (World Bank blocked MS.MIL.XPND.CD)`}
-            className={`px-3 py-1.5 ${!usdHasData
+            className={`px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset ${!usdHasData
               ? (isDarkMode ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 cursor-not-allowed')
               : mode === 'usd'
                 ? (isDarkMode ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-50 text-blue-700')
@@ -123,8 +130,11 @@ export default function SuperpowerComparisonChart({
             Nominal $
           </button>
           <button
+            type="button"
             onClick={() => setMode('pct_gdp')}
-            className={`px-3 py-1.5 border-l ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} ${mode === 'pct_gdp'
+            aria-pressed={mode === 'pct_gdp'}
+            aria-label="Show military spending as a share of GDP"
+            className={`px-3 py-1.5 border-l focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} ${mode === 'pct_gdp'
               ? (isDarkMode ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-50 text-blue-700')
               : (isDarkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50')}`}
           >
