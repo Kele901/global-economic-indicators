@@ -11,6 +11,7 @@ import { CURATED_LAST_UPDATED as DEFENSE_CURATED_LAST_UPDATED } from '../service
 import { CURATED_LAST_UPDATED as CLIMATE_CURATED_LAST_UPDATED } from '../services/climateCurated';
 import { CURATED_LAST_UPDATED as TRADE_CURATED_LAST_UPDATED } from '../services/tradeCurated';
 import { CURATED_LAST_UPDATED as MIGRATION_CURATED_LAST_UPDATED } from '../services/migrationCurated';
+import { CURATED_LAST_UPDATED as DEBT_CURATED_LAST_UPDATED } from '../services/debtCurated';
 
 export type DataCategory =
   | 'macro'
@@ -563,6 +564,19 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     lastUpdated: MIGRATION_CURATED_LAST_UPDATED,
     notes: 'UNHCR mid-2025 refugee stocks by origin, KNOMAD top-25 remittance corridors, UN DESA International Migrant Stock 2024, Eurostat EU asylum applications 2015-2024, OECD talent migration (brain drain/gain), IOM Missing Migrants Project deaths by route 2014-2024. Powers /migration-ledger.',
     sourceUrl: 'https://www.unhcr.org/refugee-statistics/',
+  },
+
+  // ── Debt Ledger ───────────────────────────────────────────────────────
+  {
+    id: 'debt-ledger-curated',
+    name: 'Debt Ledger curated snapshots',
+    category: 'macro',
+    provider: 'Curated',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: DEBT_CURATED_LAST_UPDATED,
+    notes: 'IMF WEO Oct-2024 general-government debt projections 2019-2029, S&P/Moody\u2019s/Fitch sovereign ratings mid-2025, 5Y sovereign CDS Sep-2025, sovereign default database 2000-2024 (Bank of Canada / Reinhart-Rogoff), Fed/ECB/BOJ/PBOC quarter-end balance sheet snapshots 2007-2025, BIS household debt 2024. Powers /debt.',
+    sourceUrl: 'https://www.imf.org/en/Publications/WEO/weo-database/2024/October',
   },
 
   // ── FX correlations ───────────────────────────────────────────────────

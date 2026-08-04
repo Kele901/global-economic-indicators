@@ -241,7 +241,13 @@ export const clientCache = new ClientCache();
 //      SM.POP.TOTL (migrant stock), SM.POP.REFG.OR (refugees by
 //      origin). v27 caches lack these fields and the ledger would
 //      render empty; bump forces a re-fetch on next visit.
-export const CURRENT_CACHE_VERSION = 28;
+// v29: Debt Ledger release. No new WB indicators, but the /debt
+//      route now consumes the fuller v28 country roster (including
+//      the KE/ET/GH/MA/IR/AE/QA/PK/BD/VN/TH/CO additions from v26)
+//      through the debt-curated join. Bump ensures the DebtLoadTicker
+//      picks up all 20 tracked sovereigns rather than an intermittent
+//      subset carried over from v28 partial fills.
+export const CURRENT_CACHE_VERSION = 29;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

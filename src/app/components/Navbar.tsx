@@ -99,7 +99,7 @@ const Navbar = () => {
       label: 'Analysis',
       children: [
         { href: '/monetary-policy', label: 'Monetary Policy' },
-        { href: '/debt', label: 'Debt Sustainability' },
+        { href: '/debt', label: 'Debt Ledger' },
         { href: '/outlook', label: 'Forecasts & Outlook' },
         { href: '/simulator', label: 'Scenario Simulator' },
         { href: '/development', label: 'Development Index' },
