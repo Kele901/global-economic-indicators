@@ -8,7 +8,12 @@ import CookieConsent from './components/CookieConsent';
 
 const inter = Inter({ subsets: ['latin'] });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  'https://global-economic-indicators.vercel.app';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'Global Economic Indicators Dashboard | World Bank Data Analysis',
   description: 'Comprehensive analysis of global economic indicators including interest rates, employment, GDP, inflation, and debt across major economies. Data sourced from the World Bank.',
   keywords: 'economic indicators, world bank data, global economy, interest rates, employment rates, GDP growth, inflation rates, economic analysis, financial data, economic trends',
@@ -16,6 +21,7 @@ export const metadata: Metadata = {
   creator: 'Global Economic Indicators',
   publisher: 'Global Economic Indicators',
   robots: 'index, follow',
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     title: 'Global Economic Indicators Dashboard',
