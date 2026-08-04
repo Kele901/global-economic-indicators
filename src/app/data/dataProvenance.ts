@@ -20,12 +20,15 @@ export type DataCategory =
   | 'fx'
   | 'housing'
   | 'governance'
-  | 'trade';
+  | 'trade'
+  | 'mobility'
+  | 'technology';
 
 export type DataProvider =
   | 'World Bank'
   | 'FRED'
   | 'BIS via FRED'
+  | 'BIS'
   | 'OECD'
   | 'EIA'
   | 'Frankfurter'
@@ -39,7 +42,15 @@ export type DataProvider =
   | 'UNFCCC'
   | 'OECD DAC / GCF'
   | 'EM-DAT'
-  | 'Curated';
+  | 'Curated'
+  | 'IMF'
+  | 'ITU'
+  | 'WIPO'
+  | 'Eurostat'
+  | 'UNESCO'
+  | 'UNCTAD'
+  | 'UNWTO'
+  | 'Harvard Atlas';
 
 export type RefreshCadence =
   | 'daily'
@@ -464,6 +475,158 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     notes: 'Land-ocean temperature anomaly vs 1951-1980 base period. Snapshot of the annual mean series.',
     sourceUrl: 'https://data.giss.nasa.gov/gistemp/',
   },
+
+  // ── Passport & mobility ───────────────────────────────────────────────
+  {
+    id: 'passport-index',
+    name: 'Passport visa-free access',
+    category: 'mobility',
+    provider: 'Curated',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: '2025-07-01',
+    notes: 'Curated visa policy matrix (visa-free / visa-on-arrival / eTA / visa-required) for major passports, plus mobility & advisory scoring. Powers the /cultural-capital passport tab.',
+    sourceUrl: 'https://www.henleyglobal.com/passport-index',
+  },
+
+  // ── Trade (Harvard Atlas + IMF DOTS) ──────────────────────────────────
+  {
+    id: 'trade-atlas',
+    name: 'Bilateral trade flows (Harvard Atlas + IMF DOTS)',
+    category: 'trade',
+    provider: 'Harvard Atlas',
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Harvard Growth Lab Atlas of Economic Complexity for product-level exports and IMF Direction of Trade Statistics for bilateral flows. Powers /trade-network.',
+    sourceUrl: 'https://atlas.cid.harvard.edu/',
+  },
+
+  // ── FX correlations ───────────────────────────────────────────────────
+  {
+    id: 'currency-correlations',
+    name: 'Currency correlation matrix',
+    category: 'fx',
+    provider: 'Curated',
+    refreshCadence: 'daily',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Rolling 90-day return-correlation matrix computed client-side from FRED + Frankfurter daily rates.',
+  },
+
+  // ── Cultural: UNESCO / UNCTAD / UNWTO ─────────────────────────────────
+  {
+    id: 'unesco-heritage',
+    name: 'UNESCO World Heritage Sites',
+    category: 'cultural',
+    provider: 'UNESCO',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: '2025-07-30',
+    notes: 'Cultural / natural / mixed heritage sites by country, plus UNESCO Creative Cities and creative-goods trade metrics.',
+    sourceUrl: 'https://whc.unesco.org/en/list',
+  },
+  {
+    id: 'unctad-creative-goods',
+    name: 'UNCTAD creative goods trade',
+    category: 'cultural',
+    provider: 'UNCTAD',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: '2025-07-30',
+    notes: 'Creative-industries exports as a share of goods trade, from UNCTAD Creative Economy Outlook.',
+    sourceUrl: 'https://unctad.org/topic/trade-analysis/creative-economy-programme',
+  },
+  {
+    id: 'unwto-tourism',
+    name: 'UNWTO international tourist arrivals',
+    category: 'cultural',
+    provider: 'UNWTO',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: '2025-07-30',
+    notes: 'International tourism receipts and arrivals, from UN Tourism Barometer.',
+    sourceUrl: 'https://www.unwto.org/tourism-statistics',
+  },
+
+  // ── ITU (digital access) ──────────────────────────────────────────────
+  {
+    id: 'itu-digital-access',
+    name: 'Internet users & mobile subscriptions',
+    category: 'technology',
+    provider: 'ITU',
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Individuals using the internet (% of population) and mobile-cellular subscriptions per 100 inhabitants, from the ITU DataHub.',
+    sourceUrl: 'https://datahub.itu.int/',
+  },
+
+  // ── WIPO (patents & innovation) ───────────────────────────────────────
+  {
+    id: 'wipo-patents',
+    name: 'Patent filings (WIPO)',
+    category: 'technology',
+    provider: 'WIPO',
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Resident and non-resident patent applications by country, from WIPO IP Statistics.',
+    sourceUrl: 'https://www.wipo.int/ipstats/en/',
+  },
+
+  // ── Eurostat (EU tech and R&D) ────────────────────────────────────────
+  {
+    id: 'eurostat-tech',
+    name: 'R&D spending, patents & high-tech exports (EU)',
+    category: 'technology',
+    provider: 'Eurostat',
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'EU-27 R&D expenditure, EPO patent applications, and high-tech exports as share of total. Fetched from the Eurostat SDMX endpoint.',
+    sourceUrl: 'https://ec.europa.eu/eurostat/data/database',
+  },
+
+  // ── IMF direct (fallback for policy rates and debt) ───────────────────
+  {
+    id: 'imf-direct',
+    name: 'IMF SDMX (interest rates & government debt)',
+    category: 'macro',
+    provider: 'IMF',
+    seriesIds: ['IFS/*/PMP_IX', 'IFS/*/GGXWDG_GDP'],
+    refreshCadence: 'quarterly',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'IMF International Financial Statistics as a secondary source for policy rates and general-government gross debt, used when FRED / OECD coverage is thin.',
+    sourceUrl: 'https://data.imf.org/',
+  },
+
+  // ── BIS direct (policy rates fallback) ────────────────────────────────
+  {
+    id: 'bis-direct',
+    name: 'BIS SDMX (policy rates, REER)',
+    category: 'rates',
+    provider: 'BIS',
+    refreshCadence: 'monthly',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Direct BIS SDMX feed for central-bank policy rates and real effective exchange rates, used as a fallback layer alongside FRED and OECD.',
+    sourceUrl: 'https://stats.bis.org/',
+  },
+
+  // ── OECD PISA (education) ─────────────────────────────────────────────
+  {
+    id: 'oecd-pisa',
+    name: 'OECD PISA 2022 assessment',
+    category: 'cultural',
+    provider: 'OECD',
+    refreshCadence: 'irregular',
+    live: false,
+    lastUpdated: '2023-12-05',
+    notes: 'PISA is a triennial 15-year-old assessment. The 2022 wave is the current release; the next wave is expected end of 2026. Reading / math / science mean scores by country.',
+    sourceUrl: 'https://www.oecd.org/pisa/',
+  },
 ];
 
 // Helpers for the /data-sources page.
@@ -478,6 +641,8 @@ export const CATEGORY_LABELS: Record<DataCategory, string> = {
   housing: 'Housing',
   governance: 'Governance',
   trade: 'Trade',
+  mobility: 'Mobility & Passport',
+  technology: 'Technology & Innovation',
 };
 
 // Returns true when a curated snapshot is older than `stalenessMonths`.
