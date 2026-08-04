@@ -112,6 +112,7 @@ const Navbar = () => {
         { href: '/climate-ledger', label: 'Climate Ledger' },
         { href: '/trade-ledger', label: 'Trade Ledger' },
         { href: '/migration-ledger', label: 'Migration Ledger' },
+        { href: '/ai-ledger', label: 'AI Ledger' },
       ],
     },
     {

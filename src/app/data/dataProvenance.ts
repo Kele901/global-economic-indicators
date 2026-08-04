@@ -12,6 +12,7 @@ import { CURATED_LAST_UPDATED as CLIMATE_CURATED_LAST_UPDATED } from '../service
 import { CURATED_LAST_UPDATED as TRADE_CURATED_LAST_UPDATED } from '../services/tradeCurated';
 import { CURATED_LAST_UPDATED as MIGRATION_CURATED_LAST_UPDATED } from '../services/migrationCurated';
 import { CURATED_LAST_UPDATED as DEBT_CURATED_LAST_UPDATED } from '../services/debtCurated';
+import { CURATED_LAST_UPDATED as AI_CURATED_LAST_UPDATED } from '../services/aiCurated';
 
 export type DataCategory =
   | 'macro'
@@ -577,6 +578,19 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     lastUpdated: DEBT_CURATED_LAST_UPDATED,
     notes: 'IMF WEO Oct-2024 general-government debt projections 2019-2029, S&P/Moody\u2019s/Fitch sovereign ratings mid-2025, 5Y sovereign CDS Sep-2025, sovereign default database 2000-2024 (Bank of Canada / Reinhart-Rogoff), Fed/ECB/BOJ/PBOC quarter-end balance sheet snapshots 2007-2025, BIS household debt 2024. Powers /debt.',
     sourceUrl: 'https://www.imf.org/en/Publications/WEO/weo-database/2024/October',
+  },
+
+  // ── AI/Technology Ledger ─────────────────────────────────────────────
+  {
+    id: 'ai-ledger-curated',
+    name: 'AI Ledger curated snapshots',
+    category: 'technology',
+    provider: 'Curated',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: AI_CURATED_LAST_UPDATED,
+    notes: 'Stanford AI Index 2024/25 notable-model counts, Epoch AI frontier model release registry 2018-2025, SEMI + TrendForce foundry capacity Q2-2025, Stanford AI Index + CB Insights AI private-market investment 2018-2024, IEA Electricity 2025 data-centre energy projections, MacroPolo Global AI Talent Tracker, 2023-2025 AI regulation timeline (EU AI Act, US EOs, GAISI, PRC generative-AI rules). Powers /ai-ledger.',
+    sourceUrl: 'https://hai.stanford.edu/ai-index',
   },
 
   // ── FX correlations ───────────────────────────────────────────────────

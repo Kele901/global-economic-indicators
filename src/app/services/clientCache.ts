@@ -247,7 +247,12 @@ export const clientCache = new ClientCache();
 //      through the debt-curated join. Bump ensures the DebtLoadTicker
 //      picks up all 20 tracked sovereigns rather than an intermittent
 //      subset carried over from v28 partial fills.
-export const CURRENT_CACHE_VERSION = 29;
+// v30: AI/Technology Ledger release. No new WB indicators; the ledger
+//      reuses IP.PAT.RESD / IP.JRN.ARTC.SC / SP.POP.SCIE.RD.P6 /
+//      GB.XPD.RSDV.GD.ZS already fetched by fetchGlobalData. Bump
+//      keeps the sequence monotonic and forces a fresh join across
+//      the newer research indicators for the AI-country roster.
+export const CURRENT_CACHE_VERSION = 30;
 
 // Export cache key generators for consistency
 export const CacheKeys = {
