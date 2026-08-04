@@ -194,8 +194,9 @@ const INDICATORS = {
   ELEC_FROM_RENEWABLES: 'EG.ELC.RNEW.ZS', // Renewable electricity output (% of total electricity output)
 };
 
-// Country codes for major economies
-const COUNTRY_CODES = [
+// Country codes for major economies (exported for cross-service consistency
+// checks and unit tests — see services/climateCurated roster drift check).
+export const COUNTRY_CODES = [
   'US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'AU', 'MX', 'KR', 'ES', 'SE', 'CH', 'TR', 'NG', 'CN', 'RU', 'BR', 'CL', 'AR', 'IN', 'NO',
   'NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG', 'IL', 'SG',
   // Defense Ledger (v21) additions
@@ -207,8 +208,9 @@ const COUNTRY_CODES = [
   'KE', 'ET', 'GH', 'MA', 'IR', 'AE', 'QA', 'PK', 'BD', 'VN', 'TH', 'CO'
 ];
 
-// Country name mapping
-const COUNTRY_NAMES: { [key: string]: string } = {
+// Country name mapping (exported so ledger roster metas can be validated
+// against it in tests without duplicating the list).
+export const COUNTRY_NAMES: { [key: string]: string } = {
   'US': 'USA',
   'CA': 'Canada',
   'GB': 'UK',
@@ -2759,6 +2761,3 @@ export async function fetchCulturalData(forceRefresh: boolean = false): Promise<
     };
   }
 }
-
-// Export country names for use in components
-export { COUNTRY_NAMES };
