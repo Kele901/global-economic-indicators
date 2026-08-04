@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchCulturalData, CulturalData, CountryData, COUNTRY_NAMES } from '../services/worldbank';
 import { fetchCulturalStaticData, CulturalStaticData } from '../services/culturalData';
+import StalenessBanner from '../components/StalenessBanner';
+import { QS_SNAPSHOT_DATE } from '../data/universityRankings';
 import {
   culturalChartColors,
   defaultCulturalCountries,
@@ -479,6 +481,12 @@ const CulturalCapitalPage = () => {
             <span className={themeColors.textSecondary}>Dark</span>
           </div>
         </div>
+
+        <StalenessBanner
+          lastUpdated={QS_SNAPSHOT_DATE}
+          label="QS World University Rankings 2026 snapshot"
+          isDarkMode={isDarkMode}
+        />
 
         {/* SEO Intro */}
         <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-purple-50'}`}>

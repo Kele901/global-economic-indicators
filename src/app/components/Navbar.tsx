@@ -113,6 +113,7 @@ const Navbar = () => {
       children: [
         { href: '/glossary', label: 'Glossary' },
         { href: '/guides/reading-economic-data', label: 'Guides' },
+        { href: '/data-sources', label: 'Data Sources' },
         { href: '/about', label: 'About' },
       ],
     },

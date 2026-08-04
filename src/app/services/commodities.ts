@@ -1,6 +1,11 @@
 import axios from "axios";
 import { clientCache } from "./clientCache";
 
+// Timestamp for the curated era annotations that ride alongside the live
+// commodity data on /resources (super-cycle break-points, petrostate labels,
+// reserve gauges). Bump this whenever any of the curated content updates.
+export const RESOURCES_CURATED_LAST_UPDATED = '2025-08-01';
+
 // FRED-hosted commodity price series.
 // All series are dollar-denominated. Frequency varies (daily / monthly) but the
 // fetcher aggregates observations into annual averages so downstream callers

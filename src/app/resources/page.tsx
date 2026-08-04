@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { fetchGlobalData, type CountryData } from '../services/worldbank';
-import { fetchAllCommodityPrices, clearCommodityCache, type CommodityHistory } from '../services/commodities';
+import { fetchAllCommodityPrices, clearCommodityCache, RESOURCES_CURATED_LAST_UPDATED, type CommodityHistory } from '../services/commodities';
+import StalenessBanner from '../components/StalenessBanner';
 import { fetchOilReserves, fetchOilProduction, type ReservesSnapshot, type ProductionSnapshot } from '../services/eia';
 
 const CommodityTicker = dynamic(() => import('../components/CommodityTicker'), { ssr: false });
@@ -171,6 +172,12 @@ export default function ResourcesPage() {
             {isDarkMode ? 'Light mode' : 'Dark mode'}
           </button>
         </div>
+
+        <StalenessBanner
+          lastUpdated={RESOURCES_CURATED_LAST_UPDATED}
+          label="Commodity super-cycle era annotations & petrostate curation"
+          isDarkMode={isDarkMode}
+        />
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>

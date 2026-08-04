@@ -11,6 +11,8 @@ import {
   SIPRI_MILITARY_SPEND,
 } from '../services/defenseCurated';
 import { worldSum, topNCountries, topNShare, worldYoY } from '../utils/countryData';
+import StalenessBanner from '../components/StalenessBanner';
+import { CURATED_LAST_UPDATED } from '../services/defenseCurated';
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
 const SuperpowerComparisonChart = dynamic(() => import('../components/SuperpowerComparisonChart'), { ssr: false });
@@ -203,6 +205,12 @@ export default function DefenseLedgerPage() {
             {isDarkMode ? 'Light mode' : 'Dark mode'}
           </button>
         </div>
+
+        <StalenessBanner
+          lastUpdated={CURATED_LAST_UPDATED}
+          label="SIPRI Top 100, NATO expenditure, FAS Nuclear Notebook, UCDP battle deaths"
+          isDarkMode={isDarkMode}
+        />
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
