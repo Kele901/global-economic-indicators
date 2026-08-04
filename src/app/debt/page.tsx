@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, ScatterChart, Scatter, Cell, ReferenceLine } from 'recharts';
+import MethodologyPopover from '../components/MethodologyPopover';
 
 function getLatest(series: CountryData[] | undefined, country: string): number | null {
   if (!series) return null;
@@ -244,7 +245,27 @@ export default function DebtDashboardPage() {
               <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>A deficit (negative balance) means the government spends more than it collects, adding to debt. Surpluses reduce debt.</p>
             </div>
             <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-white'}`}>
-              <p className="text-sm font-semibold mb-1">Sustainability Score</p>
+              <div className="flex items-center gap-1 mb-1">
+                <p className="text-sm font-semibold">Sustainability Score</p>
+                <MethodologyPopover
+                  isDarkMode={isDarkMode}
+                  slug="debt-sustainability-score"
+                  title="Debt sustainability score"
+                  description="Composite 0-100 score. Starts at 100 and subtracts points for high debt levels, heavy debt service, deficits, and unfavourable interest-growth differentials."
+                  formula={`score = 100
+  − (debt > 60 → −10, > 90 → −20, > 120 → −30)
+  − (debtService > 5 → −5, > 10 → −15, > 20 → −25)
+  − (deficit < −3 → −10, < −6 → −20; surplus → +5)
+  − (r − g > 0 → −10, > 3 → −20; else +5)`}
+                  inputs={[
+                    'Debt-to-GDP — WB GC.DOD.TOTL.GD.ZS',
+                    'Debt service — WB DT.TDS.DECT.EX.ZS',
+                    'Budget balance — WB GC.BAL.CASH.GD.ZS',
+                    'Growth — WB NY.GDP.MKTP.KD.ZG',
+                    'Interest — proxied by lending rate FR.INR.LEND',
+                  ]}
+                />
+              </div>
               <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Our composite score (0-100) weighs debt level, debt service burden, budget balance, and the interest-growth differential.</p>
             </div>
           </div>

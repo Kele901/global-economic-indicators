@@ -112,6 +112,111 @@ export default function MethodologyPage() {
             </p>
           </section>
 
+          <section id="derived-metrics">
+            <h2 className="text-2xl font-semibold mb-4">Derived Metrics</h2>
+            <p className="mb-4 text-base leading-relaxed">
+              Some values on the site are not fetched directly from a source — we compute them
+              from one or more raw indicators. The definitions below are the exact formulas the
+              codebase uses. Every chart that shows a derived value has a &ldquo;?&rdquo;
+              methodology popover next to its title that links back to the anchor here.
+            </p>
+
+            <div id="real-policy-rate" className="mb-6 scroll-mt-24">
+              <h3 className="text-lg font-semibold mb-2">Real policy rate</h3>
+              <p className={`text-sm leading-relaxed mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                The nominal short-term policy rate stripped of headline CPI inflation. Captures
+                whether monetary policy is restrictive (positive) or stimulative (negative) in
+                inflation-adjusted terms. Uses the ex-post approximation
+                (nominal − realised inflation) rather than an ex-ante expected-inflation gauge,
+                because real-time inflation expectations are only reliably available for a
+                handful of economies.
+              </p>
+              <pre className={`text-xs rounded p-3 overflow-x-auto ${isDarkMode ? 'bg-gray-800 text-emerald-300' : 'bg-gray-100 text-emerald-700'}`}>
+{`realPolicyRate = policyRate − CPI YoY (%)
+
+Inputs:
+  policyRate  — FRED FEDFUNDS / OECD IRSTCI01 / BIS
+  inflation   — World Bank FP.CPI.TOTL.ZG`}
+              </pre>
+            </div>
+
+            <div id="term-spread" className="mb-6 scroll-mt-24">
+              <h3 className="text-lg font-semibold mb-2">Term spread</h3>
+              <p className={`text-sm leading-relaxed mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                The 10-year sovereign bond yield minus the short-term policy rate — the most
+                common proxy for yield-curve slope. Persistently negative values (an
+                &ldquo;inverted curve&rdquo;) have preceded every US recession in the modern
+                data set. We use BIS long-term rates hosted on FRED because OECD&apos;s SDMX
+                endpoint for IRLTLT is unreliable.
+              </p>
+              <pre className={`text-xs rounded p-3 overflow-x-auto ${isDarkMode ? 'bg-gray-800 text-emerald-300' : 'bg-gray-100 text-emerald-700'}`}>
+{`termSpread = LT bond yield (10Y) − short-term policy rate
+
+Inputs:
+  10Y yield   — FRED-hosted BIS IRLTLT01XXM156N
+  policyRate  — FRED FEDFUNDS / OECD IRSTCI01 / BIS`}
+              </pre>
+            </div>
+
+            <div id="income-share-bottom-40" className="mb-6 scroll-mt-24">
+              <h3 className="text-lg font-semibold mb-2">Income share of bottom 40%</h3>
+              <p className={`text-sm leading-relaxed mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                World Bank publishes income shares by quintile (bottom 20%, second 20%,
+                third 20%, fourth 20%, top 20%). It does not publish the bottom-40 boundary
+                directly, so we sum the two poorest quintiles. This is arithmetic — no
+                estimation or interpolation — but it means bottom-40 is only available for
+                the country-years where both quintile series report.
+              </p>
+              <pre className={`text-xs rounded p-3 overflow-x-auto ${isDarkMode ? 'bg-gray-800 text-emerald-300' : 'bg-gray-100 text-emerald-700'}`}>
+{`bottom40 = SI.DST.FRST.20 + SI.DST.02ND.20`}
+              </pre>
+            </div>
+
+            <div id="palma-ratio" className="mb-6 scroll-mt-24">
+              <h3 className="text-lg font-semibold mb-2">Palma ratio</h3>
+              <p className={`text-sm leading-relaxed mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Cobham &amp; Sumner (2013) proposed the Palma ratio as a more informative
+                inequality gauge than the Gini coefficient, on the argument that the middle
+                50-60% of any distribution moves relatively little and that meaningful
+                inequality changes are concentrated at the tails.
+              </p>
+              <pre className={`text-xs rounded p-3 overflow-x-auto ${isDarkMode ? 'bg-gray-800 text-emerald-300' : 'bg-gray-100 text-emerald-700'}`}>
+{`palma = top10 / (bottom20 + secondBottom20)
+
+Inputs:
+  top10       — WB SI.DST.10TH.10
+  bottom40    — sum of SI.DST.FRST.20 + SI.DST.02ND.20`}
+              </pre>
+            </div>
+
+            <div id="debt-sustainability-score" className="mb-6 scroll-mt-24">
+              <h3 className="text-lg font-semibold mb-2">Debt sustainability score</h3>
+              <p className={`text-sm leading-relaxed mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                A composite 0-100 score used on <a href="/debt" className="text-blue-600 dark:text-blue-400 hover:underline">/debt</a>.
+                Starts at 100 and subtracts points for four warning signals: high debt-to-GDP,
+                heavy debt service, structural deficits, and unfavourable
+                interest-growth differentials. Weights are ordinal — this is a heuristic,
+                not an IMF DSA — but the intuition mirrors standard sovereign-credit
+                frameworks.
+              </p>
+              <pre className={`text-xs rounded p-3 overflow-x-auto ${isDarkMode ? 'bg-gray-800 text-emerald-300' : 'bg-gray-100 text-emerald-700'}`}>
+{`score = 100
+  − debtToGdp brackets     (>60% → −10, >90% → −20, >120% → −30)
+  − debtService brackets   (>5% → −5, >10% → −15, >20% → −25)
+  − budgetBalance brackets (< −3% → −10, < −6% → −20; surplus → +5)
+  − rGrowthGap brackets    (>0 → −10, >3 → −20; else +5)
+score is clamped to [0, 100]
+
+Inputs:
+  debtToGdp     — WB GC.DOD.TOTL.GD.ZS
+  debtService   — WB DT.TDS.DECT.EX.ZS
+  budgetBalance — WB GC.BAL.CASH.GD.ZS
+  growth        — WB NY.GDP.MKTP.KD.ZG
+  interest      — proxied by WB FR.INR.LEND`}
+              </pre>
+            </div>
+          </section>
+
           <section>
             <h2 className="text-2xl font-semibold mb-4">Composite Scores and Rankings</h2>
             <p className="mb-4 text-base leading-relaxed">

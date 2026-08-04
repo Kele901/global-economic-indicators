@@ -8,6 +8,7 @@ import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR,
 import AdSense from './AdSense';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
+import MethodologyPopover, { type MethodologyPopoverProps } from './MethodologyPopover';
 import DataStatusIndicator from './DataStatusIndicator';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -1062,7 +1063,8 @@ const GlobalInterestRateApp = () => {
     yDomain, 
     subtitle,
     summary: SummaryComponent,
-    chartType = 'line'
+    chartType = 'line',
+    methodology,
   }: { 
     title: string;
     data: CountryData[];
@@ -1070,6 +1072,7 @@ const GlobalInterestRateApp = () => {
     subtitle: string;
     summary?: React.ComponentType<{ isDarkMode: boolean }>;
     chartType?: 'line' | 'area' | 'bar' | 'composed';
+    methodology?: Omit<MethodologyPopoverProps, 'isDarkMode'>;
   }) => {
     const chartRef = useRef<HTMLDivElement>(null);
     const renderChart = () => {
@@ -1253,7 +1256,12 @@ const GlobalInterestRateApp = () => {
         className={`mb-6 sm:mb-8 ${isGridView ? 'h-[350px] sm:h-[400px] md:h-[500px]' : ''}`}
       >
         <div className="flex justify-between items-start mb-2 sm:mb-4">
-          <h2 className="text-base sm:text-lg md:text-xl font-semibold">{title}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base sm:text-lg md:text-xl font-semibold">{title}</h2>
+            {methodology && (
+              <MethodologyPopover {...methodology} isDarkMode={isDarkMode} />
+            )}
+          </div>
           <ChartDownloadButton
             chartElement={chartRef.current}
             chartData={{
@@ -2262,6 +2270,17 @@ const GlobalInterestRateApp = () => {
             yDomain={[-15, 15]}
             subtitle="Nominal policy/short-term rate minus headline inflation. Positive = monetary policy is restrictive; negative = stimulative."
             chartType="composed"
+            methodology={{
+              slug: 'real-policy-rate',
+              title: 'Real policy rate',
+              description:
+                'Nominal short-term policy rate stripped of headline inflation. Roughly captures how restrictive or stimulative monetary policy is in real (inflation-adjusted) terms.',
+              formula: 'real = policyRate − CPI YoY (%)',
+              inputs: [
+                'Policy rate — FRED FEDFUNDS / OECD IRSTCI01 / BIS',
+                'Inflation — World Bank FP.CPI.TOTL.ZG',
+              ],
+            }}
           />
         )}
 
@@ -2272,6 +2291,17 @@ const GlobalInterestRateApp = () => {
             yDomain={[-3, 6]}
             subtitle="OECD long-term government bond yield minus short-term policy rate. Negative values often precede recessions."
             chartType="composed"
+            methodology={{
+              slug: 'term-spread',
+              title: 'Term spread',
+              description:
+                'Difference between the 10-year sovereign bond yield and the short-term policy rate. Persistently negative values (an inverted yield curve) have historically preceded US recessions.',
+              formula: 'termSpread = LT bond yield (10Y) − short-term policy rate',
+              inputs: [
+                '10-year yield — FRED-hosted BIS IRLTLT01XXM156N',
+                'Policy rate — FRED FEDFUNDS / OECD IRSTCI01 / BIS',
+              ],
+            }}
           />
         )}
 
@@ -2492,6 +2522,17 @@ const GlobalInterestRateApp = () => {
             yDomain={[5, 30]}
             subtitle="Share of national income held by the poorest 40% of the population."
             chartType="bar"
+            methodology={{
+              slug: 'income-share-bottom-40',
+              title: 'Income share of bottom 40%',
+              description:
+                'World Bank publishes income shares by quintile (bottom 20%, second 20%, ..., top 20%). We add the two poorest quintiles to reconstruct the bottom 40% share, since WB does not publish that boundary directly.',
+              formula: 'bottom40 = SI.DST.FRST.20 + SI.DST.02ND.20',
+              inputs: [
+                'Poorest quintile share — WB SI.DST.FRST.20',
+                'Second quintile share — WB SI.DST.02ND.20',
+              ],
+            }}
           />
         )}
 
@@ -2502,6 +2543,17 @@ const GlobalInterestRateApp = () => {
             yDomain={[0, 8]}
             subtitle="Income share of the richest 10% divided by the poorest 40%. Higher values indicate sharper inequality."
             chartType="line"
+            methodology={{
+              slug: 'palma-ratio',
+              title: 'Palma ratio',
+              description:
+                'Ratio of the income share of the richest 10% to the poorest 40%. Cobham & Sumner argue this ratio is more informative than Gini because most inequality-change happens at the extremes.',
+              formula: 'palma = top10 / (bottom20 + secondBottom20)',
+              inputs: [
+                'Top 10% share — WB SI.DST.10TH.10',
+                'Bottom 40% share — sum of SI.DST.FRST.20 + SI.DST.02ND.20',
+              ],
+            }}
           />
         )}
 
