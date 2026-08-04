@@ -192,6 +192,12 @@ const INDICATORS = {
   FOSSIL_FUEL_SHARE: 'EG.USE.COMM.FO.ZS', // Fossil fuel energy consumption (% of total)
   ELEC_FROM_COAL: 'EG.ELC.COAL.ZS', // Electricity production from coal sources (% of total)
   ELEC_FROM_RENEWABLES: 'EG.ELC.RNEW.ZS', // Renewable electricity output (% of total electricity output)
+
+  // Migration Ledger (v28) — remittances received, migrant stock, refugees
+  // by country of origin. All annual, sparse in some low-income countries.
+  REMITTANCES_RECEIVED_USD: 'BX.TRF.PWKR.CD.DT', // Personal remittances, received (current US$)
+  MIGRANT_STOCK: 'SM.POP.TOTL',                   // International migrant stock, total
+  REFUGEES_BY_ORIGIN: 'SM.POP.REFG.OR',           // Refugee population by country or territory of origin
 };
 
 // Country codes for major economies (exported for cross-service consistency
@@ -694,6 +700,10 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
   fossilFuelShare: CountryData[];
   elecFromCoal: CountryData[];
   elecFromRenewables: CountryData[];
+  // Migration Ledger (v28) — remittances, migrant stock, refugees
+  remittancesReceived: CountryData[];  // BX.TRF.PWKR.CD.DT
+  migrantStock: CountryData[];          // SM.POP.TOTL
+  refugeesByOrigin: CountryData[];      // SM.POP.REFG.OR
 }> {
   try {
     // Check cache version - invalidate if outdated
@@ -826,7 +836,11 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       fetchIndicatorData(INDICATORS.PROTECTED_AREA_PCT, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.FOSSIL_FUEL_SHARE, COUNTRY_CODES, !forceRefresh),
       fetchIndicatorData(INDICATORS.ELEC_FROM_COAL, COUNTRY_CODES, !forceRefresh),
-      fetchIndicatorData(INDICATORS.ELEC_FROM_RENEWABLES, COUNTRY_CODES, !forceRefresh)
+      fetchIndicatorData(INDICATORS.ELEC_FROM_RENEWABLES, COUNTRY_CODES, !forceRefresh),
+      // Migration Ledger (v28) additions
+      fetchIndicatorData(INDICATORS.REMITTANCES_RECEIVED_USD, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.MIGRANT_STOCK, COUNTRY_CODES, !forceRefresh),
+      fetchIndicatorData(INDICATORS.REFUGEES_BY_ORIGIN, COUNTRY_CODES, !forceRefresh)
     ]);
 
     // Extract results and track failures
@@ -936,7 +950,11 @@ export async function fetchGlobalData(forceRefresh: boolean = false): Promise<{
       protectedAreaPctResult,
       fossilFuelShareResult,
       elecFromCoalResult,
-      elecFromRenewablesResult
+      elecFromRenewablesResult,
+      // Migration Ledger (v28) additions
+      remittancesReceivedResult,
+      migrantStockResult,
+      refugeesByOriginResult
     ] = results;
 
     // Log any failures
@@ -1431,7 +1449,11 @@ const completeData = {
       protectedAreaPct: protectedAreaPctResult.status === 'fulfilled' ? protectedAreaPctResult.value : [],
       fossilFuelShare: fossilFuelShareResult.status === 'fulfilled' ? fossilFuelShareResult.value : [],
       elecFromCoal: elecFromCoalResult.status === 'fulfilled' ? elecFromCoalResult.value : [],
-      elecFromRenewables: elecFromRenewablesResult.status === 'fulfilled' ? elecFromRenewablesResult.value : []
+      elecFromRenewables: elecFromRenewablesResult.status === 'fulfilled' ? elecFromRenewablesResult.value : [],
+      // Migration Ledger (v28) additions
+      remittancesReceived: remittancesReceivedResult.status === 'fulfilled' ? remittancesReceivedResult.value : [],
+      migrantStock: migrantStockResult.status === 'fulfilled' ? migrantStockResult.value : [],
+      refugeesByOrigin: refugeesByOriginResult.status === 'fulfilled' ? refugeesByOriginResult.value : [],
     };
 
     // ============================================

@@ -236,7 +236,12 @@ export const clientCache = new ClientCache();
 //      (KE, ET, GH, MA, IR, AE, QA, PK, BD, VN, TH, CO). Bumping ensures
 //      the ledger renders with the fuller country coverage rather than
 //      the v26 cache that was populated before the roster grew.
-export const CURRENT_CACHE_VERSION = 27;
+// v28: Migration Ledger release. Three new WB indicators land in
+//      GlobalData: BX.TRF.PWKR.CD.DT (remittances received),
+//      SM.POP.TOTL (migrant stock), SM.POP.REFG.OR (refugees by
+//      origin). v27 caches lack these fields and the ledger would
+//      render empty; bump forces a re-fetch on next visit.
+export const CURRENT_CACHE_VERSION = 28;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

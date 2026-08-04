@@ -111,6 +111,7 @@ const Navbar = () => {
         { href: '/defense-ledger', label: 'Defense Ledger' },
         { href: '/climate-ledger', label: 'Climate Ledger' },
         { href: '/trade-ledger', label: 'Trade Ledger' },
+        { href: '/migration-ledger', label: 'Migration Ledger' },
       ],
     },
     {

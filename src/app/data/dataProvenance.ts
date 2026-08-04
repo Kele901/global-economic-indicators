@@ -10,6 +10,7 @@
 import { CURATED_LAST_UPDATED as DEFENSE_CURATED_LAST_UPDATED } from '../services/defenseCurated';
 import { CURATED_LAST_UPDATED as CLIMATE_CURATED_LAST_UPDATED } from '../services/climateCurated';
 import { CURATED_LAST_UPDATED as TRADE_CURATED_LAST_UPDATED } from '../services/tradeCurated';
+import { CURATED_LAST_UPDATED as MIGRATION_CURATED_LAST_UPDATED } from '../services/migrationCurated';
 
 export type DataCategory =
   | 'macro'
@@ -23,7 +24,8 @@ export type DataCategory =
   | 'governance'
   | 'trade'
   | 'mobility'
-  | 'technology';
+  | 'technology'
+  | 'migration';
 
 export type DataProvider =
   | 'World Bank'
@@ -514,6 +516,55 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     sourceUrl: 'https://www.wto.org/english/res_e/publications_e/wtp2024_e.htm',
   },
 
+  // ── Migration Ledger ──────────────────────────────────────────────────
+  {
+    id: 'wb-remittances',
+    name: 'Remittances received (World Bank)',
+    category: 'migration',
+    provider: 'World Bank',
+    seriesIds: ['BX.TRF.PWKR.CD.DT'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Personal remittances received (current US$). WB series updated annually; some low-income coverage is sparse.',
+    sourceUrl: 'https://data.worldbank.org/indicator/BX.TRF.PWKR.CD.DT',
+  },
+  {
+    id: 'wb-migrant-stock',
+    name: 'International migrant stock (World Bank)',
+    category: 'migration',
+    provider: 'World Bank',
+    seriesIds: ['SM.POP.TOTL'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Foreign-born population totals, updated via UN DESA into the WB indicator. Powers the Migration Ledger.',
+    sourceUrl: 'https://data.worldbank.org/indicator/SM.POP.TOTL',
+  },
+  {
+    id: 'wb-refugees-origin',
+    name: 'Refugees by country of origin (World Bank)',
+    category: 'migration',
+    provider: 'World Bank',
+    seriesIds: ['SM.POP.REFG.OR'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'UNHCR data surfaced via the World Bank indicator API. Complemented by the curated UNHCR mid-2025 stock snapshot.',
+    sourceUrl: 'https://data.worldbank.org/indicator/SM.POP.REFG.OR',
+  },
+  {
+    id: 'migration-ledger-curated',
+    name: 'Migration Ledger curated snapshots',
+    category: 'migration',
+    provider: 'Curated',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: MIGRATION_CURATED_LAST_UPDATED,
+    notes: 'UNHCR mid-2025 refugee stocks by origin, KNOMAD top-25 remittance corridors, UN DESA International Migrant Stock 2024, Eurostat EU asylum applications 2015-2024, OECD talent migration (brain drain/gain), IOM Missing Migrants Project deaths by route 2014-2024. Powers /migration-ledger.',
+    sourceUrl: 'https://www.unhcr.org/refugee-statistics/',
+  },
+
   // ── FX correlations ───────────────────────────────────────────────────
   {
     id: 'currency-correlations',
@@ -655,6 +706,7 @@ export const CATEGORY_LABELS: Record<DataCategory, string> = {
   trade: 'Trade',
   mobility: 'Mobility & Passport',
   technology: 'Technology & Innovation',
+  migration: 'Migration',
 };
 
 // Returns true when a curated snapshot is older than `stalenessMonths`.
