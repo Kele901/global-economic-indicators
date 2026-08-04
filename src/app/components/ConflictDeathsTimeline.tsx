@@ -18,6 +18,7 @@ import {
   UCDP_REGION_COLORS,
   CURATED_LAST_UPDATED,
 } from '../services/defenseCurated';
+import { useViewportSize } from '../hooks/useViewportSize';
 
 interface Props {
   isDarkMode: boolean;
@@ -36,6 +37,7 @@ const REGION_LABEL: Record<string, string> = {
 };
 
 export default function ConflictDeathsTimeline({ isDarkMode }: Props) {
+  const { isMobile } = useViewportSize();
   const merged = useMemo(() => {
     const conflictsByYear: Record<number, number> = {};
     ACTIVE_STATE_CONFLICTS.forEach(c => { conflictsByYear[c.year] = c.count; });
@@ -98,23 +100,34 @@ export default function ConflictDeathsTimeline({ isDarkMode }: Props) {
       </div>
 
       <div className="p-4 sm:p-6">
-        <div className="h-[420px]">
+        <div className={isMobile ? 'h-[320px]' : 'h-[420px]'}>
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={merged} margin={{ top: 10, right: 30, bottom: 20, left: 20 }}>
+            <ComposedChart
+              data={merged}
+              margin={
+                isMobile
+                  ? { top: 8, right: 8, bottom: 8, left: 0 }
+                  : { top: 10, right: 30, bottom: 20, left: 20 }
+              }
+            >
               <CartesianGrid strokeDasharray="3 3" stroke={grid} />
-              <XAxis dataKey="year" stroke={axis} />
+              <XAxis dataKey="year" stroke={axis} tick={{ fontSize: isMobile ? 10 : 12 }} />
               <YAxis
                 yAxisId="left"
                 stroke={axis}
                 tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
-                label={{ value: 'Battle deaths', angle: -90, position: 'insideLeft', fill: axis, fontSize: 12, offset: 10 }}
+                tick={{ fontSize: isMobile ? 10 : 12 }}
+                width={isMobile ? 36 : 60}
+                label={isMobile ? undefined : { value: 'Battle deaths', angle: -90, position: 'insideLeft', fill: axis, fontSize: 12, offset: 10 }}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
                 stroke={axis}
                 tickFormatter={v => `${v}`}
-                label={{ value: 'Active conflicts', angle: 90, position: 'insideRight', fill: axis, fontSize: 12, offset: 10 }}
+                tick={{ fontSize: isMobile ? 10 : 12 }}
+                width={isMobile ? 28 : 60}
+                label={isMobile ? undefined : { value: 'Active conflicts', angle: 90, position: 'insideRight', fill: axis, fontSize: 12, offset: 10 }}
               />
               <Tooltip
                 contentStyle={tooltipStyle}
@@ -123,10 +136,12 @@ export default function ConflictDeathsTimeline({ isDarkMode }: Props) {
                   return [Number(v).toLocaleString(), REGION_LABEL[name] ?? name];
                 }}
               />
-              <Legend
-                wrapperStyle={{ fontSize: 11 }}
-                formatter={(value: string) => value === 'activeConflicts' ? 'Active conflicts' : (REGION_LABEL[value] ?? value)}
-              />
+              {!isMobile && (
+                <Legend
+                  wrapperStyle={{ fontSize: 11 }}
+                  formatter={(value: string) => value === 'activeConflicts' ? 'Active conflicts' : (REGION_LABEL[value] ?? value)}
+                />
+              )}
               {REGION_ORDER.map(region => (
                 <Area
                   key={region}

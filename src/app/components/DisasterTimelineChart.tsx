@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { EMDAT_DISASTERS_1990_2024 } from '../services/climateCurated';
+import { useViewportSize } from '../hooks/useViewportSize';
 
 interface Props {
   isDarkMode: boolean;
@@ -29,6 +30,7 @@ const REGIONS = [
 ] as const;
 
 export default function DisasterTimelineChart({ isDarkMode }: Props) {
+  const { isMobile } = useViewportSize();
   const grid = isDarkMode ? '#374151' : '#e5e7eb';
   const axis = isDarkMode ? '#9ca3af' : '#6b7280';
   const tooltipStyle: React.CSSProperties = isDarkMode
@@ -57,14 +59,21 @@ export default function DisasterTimelineChart({ isDarkMode }: Props) {
           <span className="ml-2">(+{growthPct.toFixed(0)}%)</span>
         </div>
       </div>
-      <div className="h-[380px]">
+      <div className={isMobile ? 'h-[280px]' : 'h-[380px]'}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={EMDAT_DISASTERS_1990_2024} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
+          <AreaChart
+            data={EMDAT_DISASTERS_1990_2024}
+            margin={
+              isMobile
+                ? { top: 8, right: 8, bottom: 8, left: 0 }
+                : { top: 10, right: 20, bottom: 20, left: 10 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />
-            <XAxis dataKey="year" stroke={axis} />
-            <YAxis stroke={axis} />
+            <XAxis dataKey="year" stroke={axis} tick={{ fontSize: isMobile ? 10 : 12 }} />
+            <YAxis stroke={axis} tick={{ fontSize: isMobile ? 10 : 12 }} width={isMobile ? 36 : 60} />
             <Tooltip contentStyle={tooltipStyle} />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
+            {!isMobile && <Legend wrapperStyle={{ fontSize: 11 }} />}
             {REGIONS.map(r => (
               <Area
                 key={r.key}

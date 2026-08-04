@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import type { CountryData } from '../services/worldbank';
 import { DEFENSE_COUNTRY_META, DEFENSE_COUNTRY_LOOKUP, SUPERPOWER_ISO3 } from '../services/defenseCurated';
+import { useViewportSize } from '../hooks/useViewportSize';
 
 interface Props {
   isDarkMode: boolean;
@@ -75,6 +76,7 @@ export default function SuperpowerComparisonChart({
   const usdHasData = usdCoverageCount >= MIN_USD_COVERAGE;
 
   const [mode, setMode] = useState<Mode>(usdHasData ? 'usd' : 'pct_gdp');
+  const { isMobile } = useViewportSize();
 
   const data = useMemo(() => {
     const source = mode === 'usd' ? militaryExpenditureUsd : militaryExpenditurePctGdp;
@@ -154,12 +156,19 @@ export default function SuperpowerComparisonChart({
         </div>
       )}
 
-      <div className="h-[420px]">
+      <div className={isMobile ? 'h-[320px]' : 'h-[420px]'}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
+          <LineChart
+            data={data}
+            margin={
+              isMobile
+                ? { top: 8, right: 8, bottom: 8, left: 0 }
+                : { top: 10, right: 20, bottom: 20, left: 10 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />
-            <XAxis dataKey="year" stroke={axis} />
-            <YAxis stroke={axis} tickFormatter={yAxisFormatter} />
+            <XAxis dataKey="year" stroke={axis} tick={{ fontSize: isMobile ? 10 : 12 }} />
+            <YAxis stroke={axis} tickFormatter={yAxisFormatter} tick={{ fontSize: isMobile ? 10 : 12 }} width={isMobile ? 40 : 60} />
             <Tooltip
               contentStyle={tooltipStyle}
               formatter={(v: any, name: string) => {
@@ -167,20 +176,22 @@ export default function SuperpowerComparisonChart({
                 return [tooltipValueFormatter(Number(v)), meta?.name ?? name];
               }}
             />
-            <Legend
-              wrapperStyle={{ fontSize: 11 }}
-              formatter={(value: string) => {
-                const meta = superpowers.find(s => s.wbKey === value);
-                return meta?.name ?? value;
-              }}
-            />
+            {!isMobile && (
+              <Legend
+                wrapperStyle={{ fontSize: 11 }}
+                formatter={(value: string) => {
+                  const meta = superpowers.find(s => s.wbKey === value);
+                  return meta?.name ?? value;
+                }}
+              />
+            )}
             {superpowers.map(meta => (
               <Line
                 key={meta.iso3}
                 type="monotone"
                 dataKey={meta.wbKey}
                 stroke={meta.color}
-                strokeWidth={2}
+                strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 connectNulls
               />

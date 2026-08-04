@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import type { CountryData } from '../services/worldbank';
 import { CLIMATE_COUNTRY_META } from '../services/climateCurated';
+import { useViewportSize } from '../hooks/useViewportSize';
 
 interface Props {
   isDarkMode: boolean;
@@ -68,6 +69,7 @@ export default function PerCapitaEmissionsChart({
   const absoluteHasData = absoluteCoverage >= MIN_COVERAGE;
 
   const [mode, setMode] = useState<Mode>(absoluteHasData ? 'absolute' : 'per_capita');
+  const { isMobile } = useViewportSize();
 
   const data = useMemo(() => {
     const source = mode === 'absolute' ? co2EmissionsKt : co2EmissionsPerCapita;
@@ -144,12 +146,19 @@ export default function PerCapitaEmissionsChart({
         </div>
       )}
 
-      <div className="h-[420px]">
+      <div className={isMobile ? 'h-[320px]' : 'h-[420px]'}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
+          <LineChart
+            data={data}
+            margin={
+              isMobile
+                ? { top: 8, right: 8, bottom: 8, left: 0 }
+                : { top: 10, right: 20, bottom: 20, left: 10 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />
-            <XAxis dataKey="year" stroke={axis} />
-            <YAxis stroke={axis} tickFormatter={yFormatter} />
+            <XAxis dataKey="year" stroke={axis} tick={{ fontSize: isMobile ? 10 : 12 }} />
+            <YAxis stroke={axis} tickFormatter={yFormatter} tick={{ fontSize: isMobile ? 10 : 12 }} width={isMobile ? 40 : 60} />
             <Tooltip
               contentStyle={tooltipStyle}
               formatter={(v: any, name: string) => {
@@ -157,17 +166,19 @@ export default function PerCapitaEmissionsChart({
                 return [tooltipFormatter(Number(v)), meta?.name ?? name];
               }}
             />
-            <Legend
-              wrapperStyle={{ fontSize: 11 }}
-              formatter={(value: string) => emitters.find(s => s.wbKey === value)?.name ?? value}
-            />
+            {!isMobile && (
+              <Legend
+                wrapperStyle={{ fontSize: 11 }}
+                formatter={(value: string) => emitters.find(s => s.wbKey === value)?.name ?? value}
+              />
+            )}
             {emitters.map(meta => (
               <Line
                 key={meta.iso3}
                 type="monotone"
                 dataKey={meta.wbKey}
                 stroke={meta.color}
-                strokeWidth={2}
+                strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 connectNulls
               />

@@ -20,6 +20,7 @@ import {
 import type { CountryData } from '../services/worldbank';
 import { CLIMATE_COUNTRY_META } from '../services/climateCurated';
 import { latestEntry } from '../utils/countryData';
+import { useViewportSize } from '../hooks/useViewportSize';
 
 interface Props {
   isDarkMode: boolean;
@@ -36,6 +37,7 @@ interface Row {
 }
 
 export default function EnergyMixChart({ isDarkMode, elecFromCoal, elecFromRenewables }: Props) {
+  const { isMobile } = useViewportSize();
   const rows: Row[] = useMemo(() => {
     return CLIMATE_COUNTRY_META
       .slice(0, 15)
@@ -78,22 +80,37 @@ export default function EnergyMixChart({ isDarkMode, elecFromCoal, elecFromRenew
           Sorted by coal share (highest first). &quot;Other&quot; sweeps up gas, oil and nuclear — the residual that isn&apos;t coal or renewable.
         </p>
       </div>
-      <div className="h-[520px]">
+      <div className={isMobile ? 'h-[420px]' : 'h-[520px]'}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} layout="vertical" margin={{ top: 10, right: 20, bottom: 10, left: 80 }}>
+          <BarChart
+            data={rows}
+            layout="vertical"
+            margin={
+              isMobile
+                ? { top: 8, right: 8, bottom: 8, left: 60 }
+                : { top: 10, right: 20, bottom: 10, left: 80 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />
             <XAxis
               type="number"
               stroke={axis}
               tickFormatter={v => `${v}%`}
               domain={[0, 100]}
+              tick={{ fontSize: isMobile ? 10 : 12 }}
             />
-            <YAxis type="category" dataKey="country" stroke={axis} width={90} tick={{ fontSize: 11 }} />
+            <YAxis
+              type="category"
+              dataKey="country"
+              stroke={axis}
+              width={isMobile ? 70 : 90}
+              tick={{ fontSize: isMobile ? 9 : 11 }}
+            />
             <Tooltip
               contentStyle={tooltipStyle}
               formatter={(v: any, name: string) => [`${Number(v).toFixed(1)}%`, name]}
             />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
+            {!isMobile && <Legend wrapperStyle={{ fontSize: 11 }} />}
             <Bar dataKey="coal" name="Coal" stackId="mix" fill="#78350f" />
             <Bar dataKey="other" name="Other (gas / oil / nuclear)" stackId="mix" fill="#9ca3af" />
             <Bar dataKey="renewables" name="Renewables" stackId="mix" fill="#10b981" />

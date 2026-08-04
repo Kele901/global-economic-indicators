@@ -18,6 +18,7 @@ import {
 } from 'recharts';
 import type { CountryData } from '../services/worldbank';
 import { CLIMATE_COUNTRY_META } from '../services/climateCurated';
+import { useViewportSize } from '../hooks/useViewportSize';
 
 interface Props {
   isDarkMode: boolean;
@@ -49,6 +50,7 @@ export default function RenewablesTransitionChart({ isDarkMode, elecFromRenewabl
   );
 
   const data = useMemo(() => shape(elecFromRenewables, roster.map(r => r.wbKey), 2000), [elecFromRenewables, roster]);
+  const { isMobile } = useViewportSize();
 
   const grid = isDarkMode ? '#374151' : '#e5e7eb';
   const axis = isDarkMode ? '#9ca3af' : '#6b7280';
@@ -77,12 +79,25 @@ export default function RenewablesTransitionChart({ isDarkMode, elecFromRenewabl
           The transition frontrunners (Germany, UK) vs the still-fossil economies (US, China, India, Poland). Reference line at 50% share.
         </p>
       </div>
-      <div className="h-[420px]">
+      <div className={isMobile ? 'h-[320px]' : 'h-[420px]'}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
+          <LineChart
+            data={data}
+            margin={
+              isMobile
+                ? { top: 8, right: 8, bottom: 8, left: 0 }
+                : { top: 10, right: 20, bottom: 20, left: 10 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />
-            <XAxis dataKey="year" stroke={axis} />
-            <YAxis stroke={axis} tickFormatter={v => `${v}%`} domain={[0, 100]} />
+            <XAxis dataKey="year" stroke={axis} tick={{ fontSize: isMobile ? 10 : 12 }} />
+            <YAxis
+              stroke={axis}
+              tickFormatter={v => `${v}%`}
+              domain={[0, 100]}
+              tick={{ fontSize: isMobile ? 10 : 12 }}
+              width={isMobile ? 36 : 60}
+            />
             <ReferenceLine y={50} stroke={isDarkMode ? '#f59e0b' : '#d97706'} strokeDasharray="4 4" />
             <Tooltip
               contentStyle={tooltipStyle}
@@ -91,17 +106,19 @@ export default function RenewablesTransitionChart({ isDarkMode, elecFromRenewabl
                 return [`${Number(v).toFixed(1)}%`, meta?.name ?? name];
               }}
             />
-            <Legend
-              wrapperStyle={{ fontSize: 11 }}
-              formatter={(value: string) => roster.find(s => s.wbKey === value)?.name ?? value}
-            />
+            {!isMobile && (
+              <Legend
+                wrapperStyle={{ fontSize: 11 }}
+                formatter={(value: string) => roster.find(s => s.wbKey === value)?.name ?? value}
+              />
+            )}
             {roster.map(meta => (
               <Line
                 key={meta.iso3}
                 type="monotone"
                 dataKey={meta.wbKey}
                 stroke={meta.color}
-                strokeWidth={2}
+                strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 connectNulls
               />
