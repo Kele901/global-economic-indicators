@@ -38,6 +38,11 @@ export const CLIMATE_COUNTRY_META: ClimateCountryMeta[] = [
   { iso3: 'ZAF', wbKey: 'SouthAfrica',  name: 'South Africa',   color: '#22c55e' },
   { iso3: 'POL', wbKey: 'Poland',       name: 'Poland',         color: '#c026d3' },
   { iso3: 'ARG', wbKey: 'Argentina',    name: 'Argentina',      color: '#0891b2' },
+  // v26 roster expansion — additions that break into the top-20 emitters.
+  { iso3: 'IRN', wbKey: 'Iran',         name: 'Iran',           color: '#65a30d' },
+  { iso3: 'VNM', wbKey: 'Vietnam',      name: 'Vietnam',        color: '#d97706' },
+  { iso3: 'THA', wbKey: 'Thailand',     name: 'Thailand',       color: '#7c3aed' },
+  { iso3: 'PAK', wbKey: 'Pakistan',     name: 'Pakistan',       color: '#0d9488' },
 ];
 
 

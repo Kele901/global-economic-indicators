@@ -199,7 +199,12 @@ const COUNTRY_CODES = [
   'US', 'CA', 'GB', 'FR', 'DE', 'IT', 'JP', 'AU', 'MX', 'KR', 'ES', 'SE', 'CH', 'TR', 'NG', 'CN', 'RU', 'BR', 'CL', 'AR', 'IN', 'NO',
   'NL', 'PT', 'BE', 'ID', 'ZA', 'PL', 'SA', 'EG', 'IL', 'SG',
   // Defense Ledger (v21) additions
-  'UA'
+  'UA',
+  // Roster expansion (v26) — Africa, Middle East, South & Southeast Asia,
+  // Latin America. Chosen to close obvious geographic gaps and enable the
+  // Trade/Migration/AI ledgers to reason over remittance corridors, tariff
+  // walls, and rising-manufacturer economies.
+  'KE', 'ET', 'GH', 'MA', 'IR', 'AE', 'QA', 'PK', 'BD', 'VN', 'TH', 'CO'
 ];
 
 // Country name mapping
@@ -236,7 +241,20 @@ const COUNTRY_NAMES: { [key: string]: string } = {
   'EG': 'Egypt',
   'IL': 'Israel',
   'SG': 'Singapore',
-  'UA': 'Ukraine'
+  'UA': 'Ukraine',
+  // v26 roster expansion
+  'KE': 'Kenya',
+  'ET': 'Ethiopia',
+  'GH': 'Ghana',
+  'MA': 'Morocco',
+  'IR': 'Iran',
+  'AE': 'UAE',
+  'QA': 'Qatar',
+  'PK': 'Pakistan',
+  'BD': 'Bangladesh',
+  'VN': 'Vietnam',
+  'TH': 'Thailand',
+  'CO': 'Colombia'
 };
 
 // Function to fetch data with retry logic and exponential backoff

@@ -224,7 +224,13 @@ export const clientCache = new ClientCache();
 //      EG.ELC.RNEW.ZS). Cached fetches from v24 lack these fields and
 //      would render the new Climate Ledger with empty charts, so the bump
 //      forces a re-fetch on next visit.
-export const CURRENT_CACHE_VERSION = 25;
+// v26: Roster expansion — worldbank.ts COUNTRY_CODES/COUNTRY_NAMES grow
+//      from 33 to 45 tracked economies (added KE, ET, GH, MA, IR, AE, QA,
+//      PK, BD, VN, TH, CO). All existing CountryData arrays cached under
+//      v25 are missing rows for the new country columns, so charts and
+//      heatmaps would render them as gaps. Cache bump forces every
+//      indicator to be re-fetched with the fuller country list.
+export const CURRENT_CACHE_VERSION = 26;
 
 // Export cache key generators for consistency
 export const CacheKeys = {
