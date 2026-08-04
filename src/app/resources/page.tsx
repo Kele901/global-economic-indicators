@@ -90,10 +90,22 @@ export default function ResourcesPage() {
     (async () => {
       try {
         const [wb, cm, res, prod] = await Promise.all([
-          fetchGlobalData().catch(() => null),
-          fetchAllCommodityPrices().catch(() => ({} as { [id: string]: CommodityHistory })),
-          fetchOilReserves().catch(() => null),
-          fetchOilProduction().catch(() => null),
+          fetchGlobalData().catch(err => {
+            console.warn('[resources] fetchGlobalData failed', err);
+            return null;
+          }),
+          fetchAllCommodityPrices().catch(err => {
+            console.warn('[resources] fetchAllCommodityPrices failed', err);
+            return {} as { [id: string]: CommodityHistory };
+          }),
+          fetchOilReserves().catch(err => {
+            console.warn('[resources] fetchOilReserves failed', err);
+            return null;
+          }),
+          fetchOilProduction().catch(err => {
+            console.warn('[resources] fetchOilProduction failed', err);
+            return null;
+          }),
         ]);
         if (cancelled) return;
         setData(wb);

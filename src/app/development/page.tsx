@@ -147,7 +147,9 @@ export default function DevelopmentPage() {
       remittances: 'BX.TRF.PWKR.DT.GD.ZS',
       broadband: 'IT.NET.BBND.P2',
       mobileSubs: 'IT.CEL.SETS.P2',
-    }).then(setExtraData).catch(() => {});
+    }).then(setExtraData).catch(err => {
+      console.warn('[development] fetchExtraIndicators failed', err);
+    });
   }, []);
 
   const tc = isDarkMode ? {

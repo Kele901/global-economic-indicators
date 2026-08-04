@@ -150,7 +150,9 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode }) => {
         setGiniData(map);
         localStorage.setItem('inequality_gini_cache', JSON.stringify({ ts: Date.now(), data: map }));
       })
-      .catch(() => {});
+      .catch(err => {
+        console.warn('[InequalityCharts] Gini fetch failed', err);
+      });
   }, [subView]);
 
   const CustomTooltip = useCallback(({ active, payload, label, suffix, valueFormatter }: any) => {

@@ -71,7 +71,10 @@ export default function ClimateLedgerPage() {
     let cancelled = false;
     (async () => {
       try {
-        const wb = await fetchGlobalData().catch(() => null);
+        const wb = await fetchGlobalData().catch(err => {
+          console.warn('[climate-ledger] fetchGlobalData failed', err);
+          return null;
+        });
         if (cancelled) return;
         setData(wb);
       } finally {
@@ -84,7 +87,10 @@ export default function ClimateLedgerPage() {
   const retry = async () => {
     setLoading(true);
     try {
-      const wb = await fetchGlobalData(true).catch(() => null);
+      const wb = await fetchGlobalData(true).catch(err => {
+        console.warn('[climate-ledger] retry fetchGlobalData failed', err);
+        return null;
+      });
       setData(wb);
     } finally {
       setLoading(false);

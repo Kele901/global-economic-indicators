@@ -110,7 +110,10 @@ export default function DefenseLedgerPage() {
     let cancelled = false;
     (async () => {
       try {
-        const wb = await fetchGlobalData().catch(() => null);
+        const wb = await fetchGlobalData().catch(err => {
+          console.warn('[defense-ledger] fetchGlobalData failed', err);
+          return null;
+        });
         if (cancelled) return;
         setData(wb);
       } finally {
@@ -123,7 +126,10 @@ export default function DefenseLedgerPage() {
   const retryDefense = async () => {
     setLoading(true);
     try {
-      const wb = await fetchGlobalData(true).catch(() => null);
+      const wb = await fetchGlobalData(true).catch(err => {
+        console.warn('[defense-ledger] retry fetchGlobalData failed', err);
+        return null;
+      });
       setData(wb);
     } finally {
       setLoading(false);
