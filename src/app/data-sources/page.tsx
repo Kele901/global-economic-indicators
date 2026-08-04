@@ -15,6 +15,7 @@ import {
   type DataCategory,
   type DataSourceEntry,
 } from '../data/dataProvenance';
+import DataDownloadButton from '../components/DataDownloadButton';
 
 type FreshnessFilter = 'all' | 'live' | 'curated';
 
@@ -140,6 +141,26 @@ export default function DataSourcesPage() {
                   ? 'bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500'
                   : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
               }`}
+            />
+            <DataDownloadButton
+              isDarkMode={isDarkMode}
+              filename="data-sources-registry"
+              label="Export registry"
+              size="md"
+              getData={() =>
+                filtered.map(entry => ({
+                  id: entry.id,
+                  name: entry.name,
+                  category: entry.category,
+                  provider: entry.provider,
+                  live: entry.live,
+                  refreshCadence: entry.refreshCadence,
+                  lastUpdated: entry.lastUpdated,
+                  seriesIds: entry.seriesIds?.join('; ') ?? '',
+                  sourceUrl: entry.sourceUrl ?? '',
+                  notes: entry.notes ?? '',
+                }))
+              }
             />
           </div>
         </div>

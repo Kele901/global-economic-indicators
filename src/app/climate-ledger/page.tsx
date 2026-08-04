@@ -16,6 +16,7 @@ import {
 } from '../services/climateCurated';
 import { worldSum, topNCountries, topNShare, worldYoY, latestEntry } from '../utils/countryData';
 import StalenessBanner from '../components/StalenessBanner';
+import DataDownloadButton from '../components/DataDownloadButton';
 
 const EmissionsTicker           = dynamic(() => import('../components/EmissionsTicker'),           { ssr: false });
 const PerCapitaEmissionsChart   = dynamic(() => import('../components/PerCapitaEmissionsChart'),   { ssr: false });
@@ -207,9 +208,24 @@ export default function ClimateLedgerPage() {
             </div>
           </div>
 
-          <div className={`mt-4 text-xs ${textMuted}`}>
-            Live: World Bank climate series (EN.ATM.*, EG.ELC.*, EG.USE.*, AG.LND.*, ER.LND.*, SP.URB.*).
-            Curated: UNFCCC NDC Registry, Global Energy Monitor coal tracker, OECD DAC + GCF finance, EM-DAT, NASA GISTEMP.
+          <div className={`mt-4 flex items-center justify-between gap-3 flex-wrap text-xs ${textMuted}`}>
+            <div className="flex-1 min-w-[240px]">
+              Live: World Bank climate series (EN.ATM.*, EG.ELC.*, EG.USE.*, AG.LND.*, ER.LND.*, SP.URB.*).
+              Curated: UNFCCC NDC Registry, Global Energy Monitor coal tracker, OECD DAC + GCF finance, EM-DAT, NASA GISTEMP.
+            </div>
+            <DataDownloadButton
+              isDarkMode={isDarkMode}
+              filename="climate-ledger-data"
+              label="Data"
+              getData={() => {
+                const rows: Record<string, unknown>[] = [];
+                (co2Kt ?? []).forEach(row => rows.push({ series: 'CO2 kt', ...row }));
+                (co2Pc ?? []).forEach(row => rows.push({ series: 'CO2 per capita', ...row }));
+                (data?.elecFromCoal ?? []).forEach(row => rows.push({ series: 'Electricity from coal (%)', ...row }));
+                (data?.elecFromRenewables ?? []).forEach(row => rows.push({ series: 'Electricity from renewables (%)', ...row }));
+                return rows;
+              }}
+            />
           </div>
         </div>
 

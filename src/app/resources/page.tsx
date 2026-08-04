@@ -6,6 +6,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { fetchGlobalData, type CountryData } from '../services/worldbank';
 import { fetchAllCommodityPrices, clearCommodityCache, RESOURCES_CURATED_LAST_UPDATED, type CommodityHistory } from '../services/commodities';
 import StalenessBanner from '../components/StalenessBanner';
+import DataDownloadButton from '../components/DataDownloadButton';
 import { fetchOilReserves, fetchOilProduction, type ReservesSnapshot, type ProductionSnapshot } from '../services/eia';
 
 const CommodityTicker = dynamic(() => import('../components/CommodityTicker'), { ssr: false });
@@ -190,6 +191,40 @@ export default function ResourcesPage() {
           label="Commodity super-cycle era annotations & petrostate curation"
           isDarkMode={isDarkMode}
         />
+
+        <div className="mb-6 flex justify-end">
+          <DataDownloadButton
+            isDarkMode={isDarkMode}
+            filename="resource-atlas-data"
+            label="Data"
+            getData={() => {
+              const rows: Record<string, unknown>[] = [];
+              Object.values(commodities).forEach(h => {
+                (h.annual ?? []).forEach(p => {
+                  rows.push({
+                    commodity: h.meta.label,
+                    id: h.meta.id,
+                    unit: h.meta.unit,
+                    year: p.year,
+                    value: p.value,
+                    frequency: 'annual',
+                  });
+                });
+                (h.sparkline ?? []).forEach(o => {
+                  rows.push({
+                    commodity: h.meta.label,
+                    id: h.meta.id,
+                    unit: h.meta.unit,
+                    date: o.date,
+                    value: o.value,
+                    frequency: 'daily (sparkline)',
+                  });
+                });
+              });
+              return rows;
+            }}
+          />
+        </div>
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>

@@ -12,6 +12,7 @@ import {
 } from '../services/defenseCurated';
 import { worldSum, topNCountries, topNShare, worldYoY } from '../utils/countryData';
 import StalenessBanner from '../components/StalenessBanner';
+import DataDownloadButton from '../components/DataDownloadButton';
 import { CURATED_LAST_UPDATED } from '../services/defenseCurated';
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
@@ -217,6 +218,22 @@ export default function DefenseLedgerPage() {
           label="SIPRI Top 100, NATO expenditure, FAS Nuclear Notebook, UCDP battle deaths"
           isDarkMode={isDarkMode}
         />
+
+        <div className="mb-6 flex justify-end">
+          <DataDownloadButton
+            isDarkMode={isDarkMode}
+            filename="defense-ledger-data"
+            label="Data"
+            getData={() => {
+              const rows: Record<string, unknown>[] = [];
+              spendUsd.merged.forEach(row => rows.push({ series: 'Military spending (USD)', ...row }));
+              spendPct.merged.forEach(row => rows.push({ series: 'Military spending (% GDP)', ...row }));
+              (data?.armsExports ?? []).forEach(row => rows.push({ series: 'Arms exports (TIV)', ...row }));
+              (data?.armsImports ?? []).forEach(row => rows.push({ series: 'Arms imports (TIV)', ...row }));
+              return rows;
+            }}
+          />
+        </div>
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
