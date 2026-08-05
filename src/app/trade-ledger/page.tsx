@@ -96,7 +96,7 @@ export default function TradeLedgerPage() {
   const imports = data?.imports ?? [];
   const currentAccount = data?.currentAccount ?? [];
   const tradeOpenness = data?.tradeOpenness ?? [];
-  const tariffRate = data?.tariffs ?? [];
+  const tariffRate = data?.tariffRate ?? [];
 
   const topExporters = useMemo(() => topNCountries(exports, 3), [exports]);
   const avgWtoTariff = useMemo(() =>
