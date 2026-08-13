@@ -95,6 +95,7 @@ const Navbar = () => {
     { href: '/', label: 'Dashboard' },
     { href: '/compare', label: 'Compare' },
     { href: '/global-heatmap', label: 'Heatmap' },
+    { href: '/learn', label: 'Learn' },
     {
       label: 'Analysis',
       children: [
