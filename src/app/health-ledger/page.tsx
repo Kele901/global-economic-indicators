@@ -23,6 +23,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 
 const HealthSpendTicker         = dynamic(() => import('../components/HealthSpendTicker'),         { ssr: false });
 const SpendVsOutcomeChart       = dynamic(() => import('../components/SpendVsOutcomeChart'),       { ssr: false });
@@ -220,19 +221,21 @@ export default function HealthLedgerPage() {
           <DualBurdenChart isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
-            title="The Mental-Health Gap"
-            subtitle="What share of people with a diagnosable mental disorder receive no treatment? Roughly half in the OECD, 90%+ in low-income countries. Psychiatrist density is the strongest system-level predictor." />
-          <MentalHealthGapTable isDarkMode={isDarkMode} />
-        </section>
+        <LazyMount isDarkMode={isDarkMode}>
+          <section className="mb-14">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
+              title="The Mental-Health Gap"
+              subtitle="What share of people with a diagnosable mental disorder receive no treatment? Roughly half in the OECD, 90%+ in low-income countries. Psychiatrist density is the strongest system-level predictor." />
+            <MentalHealthGapTable isDarkMode={isDarkMode} />
+          </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
-            title="Disease Burden Shift 1990-2023"
-            subtitle="Global DALY rates by broad cause. Communicable-disease burden collapsed; NCDs and mental health held steady. COVID temporarily reversed some of the progress in 2020-21." />
-          <DiseaseBurdenTimeline isDarkMode={isDarkMode} />
-        </section>
+          <section className="mb-14">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
+              title="Disease Burden Shift 1990-2023"
+              subtitle="Global DALY rates by broad cause. Communicable-disease burden collapsed; NCDs and mental health held steady. COVID temporarily reversed some of the progress in 2020-21." />
+            <DiseaseBurdenTimeline isDarkMode={isDarkMode} />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/health-ledger" isDarkMode={isDarkMode} />
 

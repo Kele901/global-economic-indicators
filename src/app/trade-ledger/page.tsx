@@ -23,6 +23,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 
 const ExportTicker                  = dynamic(() => import('../components/ExportTicker'),                  { ssr: false });
 const TradeBalanceChart             = dynamic(() => import('../components/TradeBalanceChart'),             { ssr: false });
@@ -313,27 +314,29 @@ export default function TradeLedgerPage() {
           <TradeAgreementsTable isDarkMode={isDarkMode} />
         </section>
 
-        {/* Chapter 7 — Supply-Chain Concentration */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 7"
-            title="Supply-Chain Concentration"
-            subtitle="Where the world's critical inputs come from. Rare earths, lithium, cobalt, semiconductors, solar PV — any product where the top-3 producers combine for &gt;90% is a real single-point-of-failure risk."
-          />
-          <SupplyChainConcentrationTable isDarkMode={isDarkMode} />
-        </section>
+        <LazyMount isDarkMode={isDarkMode}>
+          {/* Chapter 7 — Supply-Chain Concentration */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 7"
+              title="Supply-Chain Concentration"
+              subtitle="Where the world's critical inputs come from. Rare earths, lithium, cobalt, semiconductors, solar PV — any product where the top-3 producers combine for &gt;90% is a real single-point-of-failure risk."
+            />
+            <SupplyChainConcentrationTable isDarkMode={isDarkMode} />
+          </section>
 
-        {/* Chapter 8 — Trade Wars */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 8"
-            title="Trade Wars"
-            subtitle="Every major tariff, sanction, export-control and chokepoint event since 2018, colour-coded by severity. Filter to see only the systemic ones."
-          />
-          <TradeFrictionsTimeline isDarkMode={isDarkMode} />
-        </section>
+          {/* Chapter 8 — Trade Wars */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 8"
+              title="Trade Wars"
+              subtitle="Every major tariff, sanction, export-control and chokepoint event since 2018, colour-coded by severity. Filter to see only the systemic ones."
+            />
+            <TradeFrictionsTimeline isDarkMode={isDarkMode} />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/trade-ledger" isDarkMode={isDarkMode} />
 

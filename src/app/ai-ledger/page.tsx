@@ -25,6 +25,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 
 const ComputeTicker            = dynamic(() => import('../components/ComputeTicker'),            { ssr: false });
 const ModelReleasesTimeline    = dynamic(() => import('../components/ModelReleasesTimeline'),    { ssr: false });
@@ -265,27 +266,29 @@ export default function AiLedgerPage() {
           <DataCenterEnergyChart isDarkMode={isDarkMode} />
         </section>
 
-        {/* Chapter 7 — Talent & Research */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 7"
-            title="Talent & Research"
-            subtitle="MacroPolo tracks the world's top-tier AI researchers by undergraduate origin and current host country. The gap reveals brain-drain direction: China produces 47% of the world's top-tier undergraduates but hosts only 12% at PhD level."
-          />
-          <AiTalentGrid isDarkMode={isDarkMode} />
-        </section>
+        <LazyMount isDarkMode={isDarkMode}>
+          {/* Chapter 7 — Talent & Research */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 7"
+              title="Talent & Research"
+              subtitle="MacroPolo tracks the world's top-tier AI researchers by undergraduate origin and current host country. The gap reveals brain-drain direction: China produces 47% of the world's top-tier undergraduates but hosts only 12% at PhD level."
+            />
+            <AiTalentGrid isDarkMode={isDarkMode} />
+          </section>
 
-        {/* Chapter 8 — AI Regulation */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 8"
-            title="AI Regulation"
-            subtitle="Landmark AI laws, executive orders and safety institutes 2023-2025. The EU AI Act is the world's first horizontal AI regulation; the US pivoted from Biden's risk EO to Trump's AI-leadership mandate in January 2025."
-          />
-          <AiRegulationTimeline isDarkMode={isDarkMode} />
-        </section>
+          {/* Chapter 8 — AI Regulation */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 8"
+              title="AI Regulation"
+              subtitle="Landmark AI laws, executive orders and safety institutes 2023-2025. The EU AI Act is the world's first horizontal AI regulation; the US pivoted from Biden's risk EO to Trump's AI-leadership mandate in January 2025."
+            />
+            <AiRegulationTimeline isDarkMode={isDarkMode} />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/ai-ledger" isDarkMode={isDarkMode} />
 

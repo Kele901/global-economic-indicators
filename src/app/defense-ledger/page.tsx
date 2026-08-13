@@ -17,6 +17,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 import { CURATED_LAST_UPDATED } from '../services/defenseCurated';
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
@@ -479,43 +480,45 @@ export default function DefenseLedgerPage() {
           <NuclearArsenalGrid isDarkMode={isDarkMode} />
         </section>
 
-        {/* Chapter 7 — The Human Cost */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 7"
-            title="The Human Cost"
-            subtitle="Battle deaths were sliding through the 2000s. Syria in the 2010s and Ukraine plus Gaza in the 2020s reversed the trend."
-          />
-          <ConflictDeathsTimeline isDarkMode={isDarkMode} />
-        </section>
-
-        {/* Chapter 8 — Guns vs Butter */}
-        <section className="mb-6">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 8"
-            title="Guns vs Butter"
-            subtitle="Every dollar a government spends on defense is a dollar it isn&apos;t spending on schools, hospitals, or transfers. Here&apos;s where each economy sits on that trade-off."
-          />
-          {loading ? (
-            <SkeletonCard isDarkMode={isDarkMode} className="h-[520px]" />
-          ) : data ? (
-            <GunsVsButterQuadrant
+        <LazyMount isDarkMode={isDarkMode}>
+          {/* Chapter 7 — The Human Cost */}
+          <section className="mb-14">
+            <ChapterHeader
               isDarkMode={isDarkMode}
-              militaryExpenditurePctGdp={spendPct.merged}
-              educationExpenditurePctGdp={data.educationExpenditure}
-              gdpPerCapita={data.gdpPerCapitaPPP}
+              chapter="Chapter 7"
+              title="The Human Cost"
+              subtitle="Battle deaths were sliding through the 2000s. Syria in the 2010s and Ukraine plus Gaza in the 2020s reversed the trend."
             />
-          ) : null}
+            <ConflictDeathsTimeline isDarkMode={isDarkMode} />
+          </section>
 
-          <div className={`mt-4 text-sm ${textSec}`}>
-            Want to see how these trade-offs interact with the rest of the fiscal picture?{' '}
-            <a href="/global-heatmap" className={`underline underline-offset-2 ${isDarkMode ? 'text-rose-400 hover:text-rose-300' : 'text-rose-600 hover:text-rose-700'}`}>
-              Explore the global heatmap →
-            </a>
-          </div>
-        </section>
+          {/* Chapter 8 — Guns vs Butter */}
+          <section className="mb-6">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 8"
+              title="Guns vs Butter"
+              subtitle="Every dollar a government spends on defense is a dollar it isn&apos;t spending on schools, hospitals, or transfers. Here&apos;s where each economy sits on that trade-off."
+            />
+            {loading ? (
+              <SkeletonCard isDarkMode={isDarkMode} className="h-[520px]" />
+            ) : data ? (
+              <GunsVsButterQuadrant
+                isDarkMode={isDarkMode}
+                militaryExpenditurePctGdp={spendPct.merged}
+                educationExpenditurePctGdp={data.educationExpenditure}
+                gdpPerCapita={data.gdpPerCapitaPPP}
+              />
+            ) : null}
+
+            <div className={`mt-4 text-sm ${textSec}`}>
+              Want to see how these trade-offs interact with the rest of the fiscal picture?{' '}
+              <a href="/global-heatmap" className={`underline underline-offset-2 ${isDarkMode ? 'text-rose-400 hover:text-rose-300' : 'text-rose-600 hover:text-rose-700'}`}>
+                Explore the global heatmap →
+              </a>
+            </div>
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/defense-ledger" isDarkMode={isDarkMode} />
 

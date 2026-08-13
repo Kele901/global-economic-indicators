@@ -26,6 +26,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 
 const WageTicker                = dynamic(() => import('../components/WageTicker'),                { ssr: false });
 const WagesChart                = dynamic(() => import('../components/WagesChart'),                { ssr: false });
@@ -220,19 +221,21 @@ export default function LaborLedgerPage() {
           <AiDisplacementRiskTable isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
-            title="The Gender Gap"
-            subtitle="Male vs female labour-force participation. Nordic countries lead on parity; India, Mexico and Turkey have gaps of 30-50pp. Closing the gender gap is one of the largest untapped growth signals in labour economics." />
-          <GenderGapChart isDarkMode={isDarkMode} />
-        </section>
+        <LazyMount isDarkMode={isDarkMode}>
+          <section className="mb-14">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
+              title="The Gender Gap"
+              subtitle="Male vs female labour-force participation. Nordic countries lead on parity; India, Mexico and Turkey have gaps of 30-50pp. Closing the gender gap is one of the largest untapped growth signals in labour economics." />
+            <GenderGapChart isDarkMode={isDarkMode} />
+          </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
-            title="Youth Unemployment 2010-2024"
-            subtitle="ILO estimates by development band. COVID spike in 2020-21 was the sharpest short-term shock in the modern era. Emerging-market youth consistently run 3-4pp above the developing-country average." />
-          <YouthUnemploymentTimeline isDarkMode={isDarkMode} />
-        </section>
+          <section className="mb-14">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
+              title="Youth Unemployment 2010-2024"
+              subtitle="ILO estimates by development band. COVID spike in 2020-21 was the sharpest short-term shock in the modern era. Emerging-market youth consistently run 3-4pp above the developing-country average." />
+            <YouthUnemploymentTimeline isDarkMode={isDarkMode} />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/labor-ledger" isDarkMode={isDarkMode} />
 

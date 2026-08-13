@@ -30,6 +30,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 
 const DebtLoadTicker              = dynamic(() => import('../components/DebtLoadTicker'),              { ssr: false });
@@ -426,32 +427,34 @@ export default function DebtLedgerPage() {
           <CentralBankBalanceSheetChart isDarkMode={isDarkMode} />
         </section>
 
-        {/* Chapter 7 — Household Debt */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 7"
-            title="Household Debt"
-            subtitle="The private side of the leverage story. BIS 2024 household debt in % of GDP. Spain deleveraged the most since 2010; South Korea and Australia levered up the fastest."
-          />
-          <HouseholdDebtChart isDarkMode={isDarkMode} />
-        </section>
+        <LazyMount isDarkMode={isDarkMode}>
+          {/* Chapter 7 — Household Debt */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 7"
+              title="Household Debt"
+              subtitle="The private side of the leverage story. BIS 2024 household debt in % of GDP. Spain deleveraged the most since 2010; South Korea and Australia levered up the fastest."
+            />
+            <HouseholdDebtChart isDarkMode={isDarkMode} />
+          </section>
 
-        {/* Chapter 8 — Fiscal Reckoning */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 8"
-            title="Fiscal Reckoning"
-            subtitle="The equation that ends the story: when interest rates exceed growth (r > g), debt compounds. Countries in the top-right quadrant are structurally in a debt spiral. Japan sits stubbornly in the bottom-right."
-          />
-          <FiscalReckoningQuadrant
-            isDarkMode={isDarkMode}
-            governmentDebt={governmentDebt}
-            gdpGrowth={gdpGrowth}
-            interestRates={interestRates}
-          />
-        </section>
+          {/* Chapter 8 — Fiscal Reckoning */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 8"
+              title="Fiscal Reckoning"
+              subtitle="The equation that ends the story: when interest rates exceed growth (r > g), debt compounds. Countries in the top-right quadrant are structurally in a debt spiral. Japan sits stubbornly in the bottom-right."
+            />
+            <FiscalReckoningQuadrant
+              isDarkMode={isDarkMode}
+              governmentDebt={governmentDebt}
+              gdpGrowth={gdpGrowth}
+              interestRates={interestRates}
+            />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/debt" isDarkMode={isDarkMode} />
 

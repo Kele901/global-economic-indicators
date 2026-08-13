@@ -21,6 +21,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 
 const EmissionsTicker           = dynamic(() => import('../components/EmissionsTicker'),           { ssr: false });
 const PerCapitaEmissionsChart   = dynamic(() => import('../components/PerCapitaEmissionsChart'),   { ssr: false });
@@ -336,36 +337,38 @@ export default function ClimateLedgerPage() {
           <ClimateFinanceFlows isDarkMode={isDarkMode} />
         </section>
 
-        {/* Chapter 7 — Physical Risk */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 7"
-            title="Physical Risk"
-            subtitle="The other side of the ledger: what a warmer planet does to the people on it. Air quality now, disasters over the last three decades."
-          />
-          <div className="grid grid-cols-1 gap-4">
-            <AirPollutionGrid
+        <LazyMount isDarkMode={isDarkMode}>
+          {/* Chapter 7 — Physical Risk */}
+          <section className="mb-14">
+            <ChapterHeader
               isDarkMode={isDarkMode}
-              pm25={data?.pm25 ?? []}
+              chapter="Chapter 7"
+              title="Physical Risk"
+              subtitle="The other side of the ledger: what a warmer planet does to the people on it. Air quality now, disasters over the last three decades."
             />
-            <DisasterTimelineChart isDarkMode={isDarkMode} />
-          </div>
-        </section>
+            <div className="grid grid-cols-1 gap-4">
+              <AirPollutionGrid
+                isDarkMode={isDarkMode}
+                pm25={data?.pm25 ?? []}
+              />
+              <DisasterTimelineChart isDarkMode={isDarkMode} />
+            </div>
+          </section>
 
-        {/* Chapter 8 — The Pledges */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 8"
-            title="The Pledges"
-            subtitle="Every top-20 emitter has a Paris pledge. The actual-vs-target column shows how many are on track — and how many are trending in the wrong direction."
-          />
-          <NdcTargetTable
-            isDarkMode={isDarkMode}
-            co2EmissionsKt={co2Kt}
-          />
-        </section>
+          {/* Chapter 8 — The Pledges */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 8"
+              title="The Pledges"
+              subtitle="Every top-20 emitter has a Paris pledge. The actual-vs-target column shows how many are on track — and how many are trending in the wrong direction."
+            />
+            <NdcTargetTable
+              isDarkMode={isDarkMode}
+              co2EmissionsKt={co2Kt}
+            />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/climate-ledger" isDarkMode={isDarkMode} />
 

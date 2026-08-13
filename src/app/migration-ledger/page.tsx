@@ -23,6 +23,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 
 const MigrationTicker            = dynamic(() => import('../components/MigrationTicker'),            { ssr: false });
 const RefugeeFlowsChart          = dynamic(() => import('../components/RefugeeFlowsChart'),          { ssr: false });
@@ -297,30 +298,32 @@ export default function MigrationLedgerPage() {
           <BrainMigrationTable isDarkMode={isDarkMode} />
         </section>
 
-        {/* Chapter 7 — Diaspora Contributions */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 7"
-            title="Diaspora Contributions"
-            subtitle="Remittances scaled against GDP. Small figures for absolute-USD giants like India (2% of GDP), massive figures for Nepal, Tajikistan, El Salvador (&gt;20% of GDP)."
-          />
-          <DiasporaContributionsChart
-            isDarkMode={isDarkMode}
-            remittances={remittances}
-          />
-        </section>
+        <LazyMount isDarkMode={isDarkMode}>
+          {/* Chapter 7 — Diaspora Contributions */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 7"
+              title="Diaspora Contributions"
+              subtitle="Remittances scaled against GDP. Small figures for absolute-USD giants like India (2% of GDP), massive figures for Nepal, Tajikistan, El Salvador (&gt;20% of GDP)."
+            />
+            <DiasporaContributionsChart
+              isDarkMode={isDarkMode}
+              remittances={remittances}
+            />
+          </section>
 
-        {/* Chapter 8 — Border & Policy */}
-        <section className="mb-14">
-          <ChapterHeader
-            isDarkMode={isDarkMode}
-            chapter="Chapter 8"
-            title="Border &amp; Policy"
-            subtitle="The Mediterranean central route has killed nearly 25,000 people since 2014 — the deadliest border in the world. IOM Missing Migrants Project cumulative counts."
-          />
-          <MigrantSafetyTimeline isDarkMode={isDarkMode} />
-        </section>
+          {/* Chapter 8 — Border & Policy */}
+          <section className="mb-14">
+            <ChapterHeader
+              isDarkMode={isDarkMode}
+              chapter="Chapter 8"
+              title="Border &amp; Policy"
+              subtitle="The Mediterranean central route has killed nearly 25,000 people since 2014 — the deadliest border in the world. IOM Missing Migrants Project cumulative counts."
+            />
+            <MigrantSafetyTimeline isDarkMode={isDarkMode} />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/migration-ledger" isDarkMode={isDarkMode} />
 

@@ -26,6 +26,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import LazyMount from '../components/LazyMount';
 
 const EnergyTicker            = dynamic(() => import('../components/EnergyTicker'),            { ssr: false });
 const ElectricityMixChart     = dynamic(() => import('../components/ElectricityMixChart'),     { ssr: false });
@@ -217,19 +218,21 @@ export default function EnergyLedgerPage() {
           <CapacityFactorGrid isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
-            title="Reserves Reranked"
-            subtitle="Oil + gas + coal converted to a common barrel-of-oil-equivalent basis. Russia and the US lead on combined reserves; Venezuela and Saudi Arabia lead on crude alone; China and Australia hold most of the coal." />
-          <ReservesRankingChart isDarkMode={isDarkMode} />
-        </section>
+        <LazyMount isDarkMode={isDarkMode}>
+          <section className="mb-14">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
+              title="Reserves Reranked"
+              subtitle="Oil + gas + coal converted to a common barrel-of-oil-equivalent basis. Russia and the US lead on combined reserves; Venezuela and Saudi Arabia lead on crude alone; China and Australia hold most of the coal." />
+            <ReservesRankingChart isDarkMode={isDarkMode} />
+          </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
-            title="Energy Intensity per GDP"
-            subtitle="Primary energy per unit of GDP-PPP. Lower = more efficient. YoY change shows which economies are getting more efficient (bottom-left quadrant). Middle East petrostates sit in the top-right." />
-          <EnergyIntensityQuadrant isDarkMode={isDarkMode} />
-        </section>
+          <section className="mb-14">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
+              title="Energy Intensity per GDP"
+              subtitle="Primary energy per unit of GDP-PPP. Lower = more efficient. YoY change shows which economies are getting more efficient (bottom-left quadrant). Middle East petrostates sit in the top-right." />
+            <EnergyIntensityQuadrant isDarkMode={isDarkMode} />
+          </section>
+        </LazyMount>
 
         <RelatedPages currentPath="/energy-ledger" isDarkMode={isDarkMode} />
 

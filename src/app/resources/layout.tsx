@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: 'Resource Atlas | Global Economic Indicators',
   description:

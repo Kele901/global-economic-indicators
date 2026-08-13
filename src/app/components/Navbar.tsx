@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import ExploreProgressBadge from './ExploreProgressBadge';
 
 interface NavItem {
@@ -173,7 +174,14 @@ const Navbar = () => {
             <div className={`flex items-center space-x-3 text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-6 ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>
-              <img src="/logo.png" alt="Global Economic Indicators Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+              <Image
+                src="/logo.png"
+                alt="Global Economic Indicators Logo"
+                width={40}
+                height={40}
+                priority
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+              />
               <span>Global Economic Indicators</span>
             </div>
 
