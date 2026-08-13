@@ -89,7 +89,7 @@ export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
       <ChartA11yCaption
         title="Live foreign exchange rates"
         precision={4}
-        rows={items.map(h => ({ label: h.label ?? h.id, value: h.latest?.value ?? null }))}
+        rows={items.map(h => ({ label: h.meta.pair, value: h.latest?.value ?? null }))}
       />
       <div
         className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"

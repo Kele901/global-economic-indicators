@@ -68,7 +68,7 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
         title="Live commodity prices"
         unit=" USD"
         precision={2}
-        rows={items.map(i => ({ label: i.label ?? i.id, value: i.latestPrice ?? null }))}
+        rows={items.map(i => ({ label: i.meta.label, value: i.latest?.value ?? null }))}
       />
       <div
         className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
