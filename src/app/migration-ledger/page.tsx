@@ -21,6 +21,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 
 const MigrationTicker            = dynamic(() => import('../components/MigrationTicker'),            { ssr: false });
 const RefugeeFlowsChart          = dynamic(() => import('../components/RefugeeFlowsChart'),          { ssr: false });
@@ -149,6 +151,12 @@ export default function MigrationLedgerPage() {
           label="UNHCR mid-2025 refugee stocks, KNOMAD corridors, UN DESA migrant stock 2024, Eurostat EU asylum, OECD brain-migration, IOM Missing Migrants Project"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="wb-remittances" isDarkMode={isDarkMode} />
+          <ChartMeta sourceId="migration-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>

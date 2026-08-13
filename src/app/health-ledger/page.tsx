@@ -21,6 +21,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 
 const HealthSpendTicker         = dynamic(() => import('../components/HealthSpendTicker'),         { ssr: false });
 const SpendVsOutcomeChart       = dynamic(() => import('../components/SpendVsOutcomeChart'),       { ssr: false });
@@ -124,6 +126,11 @@ export default function HealthLedgerPage() {
           label="WHO GHED 2023, IHME GBD 2023, JHU GHS Index 2021 + JEE, Pharma Intelligence R&D 2024, WHO Mental Health Atlas 2020, IEA and UN DESA 2024 snapshots"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="health-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <HealthSpendTicker isDarkMode={isDarkMode} />

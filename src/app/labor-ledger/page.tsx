@@ -24,6 +24,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 
 const WageTicker                = dynamic(() => import('../components/WageTicker'),                { ssr: false });
 const WagesChart                = dynamic(() => import('../components/WagesChart'),                { ssr: false });
@@ -121,6 +123,11 @@ export default function LaborLedgerPage() {
           label="ILO Wage Report 2024, OECD/ICTWSS union density 2023, ILO informal employment 2023, UN DESA WPP 2024, OECD AI exposure 2024, ILO youth unemployment 2024"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="labor-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <WageTicker isDarkMode={isDarkMode} />

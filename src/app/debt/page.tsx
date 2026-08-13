@@ -28,6 +28,8 @@ import DataDownloadButton from '../components/DataDownloadButton';
 import MethodologyPopover from '../components/MethodologyPopover';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 
 const DebtLoadTicker              = dynamic(() => import('../components/DebtLoadTicker'),              { ssr: false });
@@ -226,6 +228,12 @@ export default function DebtLedgerPage() {
           label="IMF WEO Oct-2024 debt projections, S&P / Moody's / Fitch ratings mid-2025, 5Y CDS Sep-2025, sovereign default history 2000-2024, Fed / ECB / BOJ / PBOC balance sheets, BIS household debt 2024"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="debt-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="estimate" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <DebtLoadTicker

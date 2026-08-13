@@ -78,6 +78,8 @@ export type RefreshCadence =
   | 'irregular'
   | 'ad-hoc';
 
+export type QualityFlag = 'estimate' | 'curated' | 'frozen' | 'revised';
+
 export interface DataSourceEntry {
   id: string;
   name: string;
@@ -89,6 +91,7 @@ export interface DataSourceEntry {
   lastUpdated: string; // ISO date for curated, 'live' for live series
   notes?: string;
   sourceUrl?: string;
+  qualityFlags?: QualityFlag[];
 }
 
 // Convenience string that reads as "live" instead of an ISO date.
@@ -201,6 +204,7 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     lastUpdated: LIVE,
     notes: 'Control of Corruption, Government Effectiveness, Political Stability, Regulatory Quality, Rule of Law, Voice & Accountability. Fetched via source=3 (dedicated WGI database).',
     sourceUrl: 'https://www.worldbank.org/en/publication/worldwide-governance-indicators',
+    qualityFlags: ['estimate'],
   },
 
   // ── Housing (BIS via FRED) ────────────────────────────────────────────
@@ -310,6 +314,7 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     live: false,
     lastUpdated: DEFENSE_CURATED_LAST_UPDATED,
     notes: 'Curated 2018-2024 spending for 15 major spenders. Used as a fallback layer when the live WB fetch is unavailable; live values always win where present.',
+    qualityFlags: ['frozen', 'curated'],
   },
   {
     id: 'nato-defense-expenditure',
@@ -591,6 +596,7 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     lastUpdated: DEBT_CURATED_LAST_UPDATED,
     notes: 'IMF WEO Oct-2024 general-government debt projections 2019-2029, S&P/Moody\u2019s/Fitch sovereign ratings mid-2025, 5Y sovereign CDS Sep-2025, sovereign default database 2000-2024 (Bank of Canada / Reinhart-Rogoff), Fed/ECB/BOJ/PBOC quarter-end balance sheet snapshots 2007-2025, BIS household debt 2024. Powers /debt.',
     sourceUrl: 'https://www.imf.org/en/Publications/WEO/weo-database/2024/October',
+    qualityFlags: ['estimate', 'curated'],
   },
 
   // ── Health Ledger (curated snapshots) ────────────────────────────────

@@ -19,6 +19,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 
 const EmissionsTicker           = dynamic(() => import('../components/EmissionsTicker'),           { ssr: false });
 const PerCapitaEmissionsChart   = dynamic(() => import('../components/PerCapitaEmissionsChart'),   { ssr: false });
@@ -162,6 +164,14 @@ export default function ClimateLedgerPage() {
           label="NDC targets, coal pipeline (GEM), climate finance (OECD DAC / GCF), EM-DAT disasters"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="wb-ghg" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="revised" isDarkMode={isDarkMode} />
+          <span className={`text-[11px] ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>|</span>
+          <ChartMeta sourceId="unfccc-ndc" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>

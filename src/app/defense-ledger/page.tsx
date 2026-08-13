@@ -15,6 +15,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 import { CURATED_LAST_UPDATED } from '../services/defenseCurated';
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
@@ -221,6 +223,14 @@ export default function DefenseLedgerPage() {
           label="SIPRI Top 100, NATO expenditure, FAS Nuclear Notebook, UCDP battle deaths"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="wb-military-spend" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="revised" isDarkMode={isDarkMode} />
+          <span className={`text-[11px] ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>|</span>
+          <ChartMeta sourceId="sipri-military-spend-fallback" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="frozen" isDarkMode={isDarkMode} />
+        </div>
 
         <div className="mb-6 flex justify-end">
           <DataDownloadButton

@@ -23,6 +23,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 
 const ComputeTicker            = dynamic(() => import('../components/ComputeTicker'),            { ssr: false });
 const ModelReleasesTimeline    = dynamic(() => import('../components/ModelReleasesTimeline'),    { ssr: false });
@@ -138,6 +140,11 @@ export default function AiLedgerPage() {
           label="Stanford AI Index 2024/25 notable models, Epoch AI release history 2018-2025, SEMI + TrendForce fab capacity Q2-2025, IEA Electricity 2025 data-centre projections, MacroPolo talent flows, 2023-2025 AI policy timeline"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="ai-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <ComputeTicker isDarkMode={isDarkMode} />

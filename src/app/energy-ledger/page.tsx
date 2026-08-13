@@ -24,6 +24,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 
 const EnergyTicker            = dynamic(() => import('../components/EnergyTicker'),            { ssr: false });
 const ElectricityMixChart     = dynamic(() => import('../components/ElectricityMixChart'),     { ssr: false });
@@ -118,6 +120,11 @@ export default function EnergyLedgerPage() {
           label="IEA Electricity 2025, BNEF Global Storage Outlook 2024, IGU World LNG Report 2024, IAEA PRIS Sep-2025, EIA International Energy Statistics 2024"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="energy-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <EnergyTicker isDarkMode={isDarkMode} />

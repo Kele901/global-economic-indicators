@@ -21,6 +21,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 
 const ExportTicker                  = dynamic(() => import('../components/ExportTicker'),                  { ssr: false });
 const TradeBalanceChart             = dynamic(() => import('../components/TradeBalanceChart'),             { ssr: false });
@@ -160,6 +162,12 @@ export default function TradeLedgerPage() {
           label="WTO applied tariffs, US-China tariff timeline, BDI/WCI freight indices, RCEP/USMCA/CPTPP/EU/AfCFTA membership, supply-chain concentration (USGS + SEMI)"
           isDarkMode={isDarkMode}
         />
+
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <ChartMeta sourceId="trade-atlas" isDarkMode={isDarkMode} />
+          <ChartMeta sourceId="trade-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
+        </div>
 
         {/* Hero: ticker + KPI cards */}
         <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
