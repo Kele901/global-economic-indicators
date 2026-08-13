@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import ExploreProgressBadge from './ExploreProgressBadge';
 
 interface NavItem {
   href?: string;
@@ -223,6 +224,7 @@ const Navbar = () => {
                                 {child.label}
                               </a>
                             ))}
+                            {item.label === 'Info' && <ExploreProgressBadge isDarkMode={isDarkMode} />}
                           </div>
                         )}
                       </div>

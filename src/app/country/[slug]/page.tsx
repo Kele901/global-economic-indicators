@@ -9,6 +9,7 @@ import { METRIC_CATEGORIES, getMetricByKey, formatMetricValue } from '../../util
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { US, GB, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
 import CountryBrief from '../../components/CountryBrief';
+import WatchlistChip from '../../components/WatchlistChip';
 
 const FLAG_MAP: Record<string, React.ComponentType<any>> = {
   USA: US, UK: GB, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
@@ -285,8 +286,11 @@ export default function CountryProfilePage() {
               const prev = getPreviousValue(mk);
               const trend = val !== null && prev !== null ? val - prev : null;
               return (
-                <div key={mk} className={`p-4 rounded-lg border ${tc.card}`}>
-                  <p className={`text-xs uppercase tracking-wider ${tc.textSec}`}>{metric?.label || mk}</p>
+                <div key={mk} className={`p-4 rounded-lg border ${tc.card} relative`}>
+                  <div className="absolute top-2 right-2">
+                    <WatchlistChip country={countryKey} metric={mk} isDarkMode={isDarkMode} />
+                  </div>
+                  <p className={`text-xs uppercase tracking-wider ${tc.textSec} pr-16`}>{metric?.label || mk}</p>
                   <p className="text-2xl font-bold mt-1">{val !== null ? formatMetricValue(mk, val) : 'N/A'}</p>
                   {trend !== null && (
                     <p className={`text-sm mt-1 ${trend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
