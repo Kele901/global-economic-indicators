@@ -9,6 +9,7 @@ import type { CountryData } from '../services/worldbank';
 import { MIGRATION_COUNTRY_META } from '../services/migrationCurated';
 import { latestEntry } from '../utils/countryData';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -120,6 +121,12 @@ export default function MigrationTicker({ isDarkMode, remittances, loading, onRe
       role="region"
       aria-label="Top-15 remittance-receiving economies — scrolling ticker"
     >
+      <ChartA11yCaption
+        title="Top remittance-receiving economies (USD)"
+        unit=" USD"
+        precision={0}
+        rows={rows.map(r => ({ label: r.name, value: r.latest.value }))}
+      />
       <div
         className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
         aria-live="off"

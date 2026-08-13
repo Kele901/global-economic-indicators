@@ -9,6 +9,7 @@
 import { useMemo } from 'react';
 import { NOTABLE_MODELS_2019_2024, AI_COUNTRY_META, type NotableModelsByCountry } from '../services/aiCurated';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -62,6 +63,12 @@ export default function ComputeTicker({ isDarkMode }: Props) {
       role="region"
       aria-label="Notable ML model producers — scrolling ticker"
     >
+      <ChartA11yCaption
+        title="Notable ML model producers, 2024"
+        unit=" models"
+        precision={0}
+        rows={rows.map(r => ({ label: r.name, value: r.latest }))}
+      />
       <div className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap" aria-live="off">
         {doubled.map((r, i) => {
           const delta = r.latest - r.prior;

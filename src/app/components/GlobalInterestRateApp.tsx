@@ -8,6 +8,7 @@ import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR,
 import AdSense from './AdSense';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
+import ChartA11yCaption from './ChartA11yCaption';
 import MethodologyPopover, { type MethodologyPopoverProps } from './MethodologyPopover';
 import DataStatusIndicator from './DataStatusIndicator';
 import LoadingSpinner from './LoadingSpinner';
@@ -1278,6 +1279,23 @@ const GlobalInterestRateApp = () => {
           {subtitle}
         </div>
          {!isGridView && SummaryComponent && <SummaryComponent isDarkMode={isDarkMode} />}
+        {(() => {
+          const filtered = filterData(selectedPeriod, data);
+          const last = filtered[filtered.length - 1];
+          if (!last) return null;
+          const rows = selectedCountries
+            .map(c => ({
+              label: c,
+              value: typeof last[c] === 'number' ? (last[c] as number) : null,
+            }));
+          return (
+            <ChartA11yCaption
+              title={`${title} (${last.year})`}
+              precision={2}
+              rows={rows}
+            />
+          );
+        })()}
         <div className={`${isGridView ? 'h-[200px] sm:h-[250px] md:h-[350px]' : 'h-[250px] sm:h-[300px] md:h-[400px]'} w-full`}>
           <ResponsiveContainer>
             {renderChart()}

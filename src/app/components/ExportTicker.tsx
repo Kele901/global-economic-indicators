@@ -9,6 +9,7 @@ import type { CountryData } from '../services/worldbank';
 import { TRADE_COUNTRY_META } from '../services/tradeCurated';
 import { latestEntry } from '../utils/countryData';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -114,6 +115,12 @@ export default function ExportTicker({ isDarkMode, exports, loading, onRetry }: 
       role="region"
       aria-label="Top-15 exporters — scrolling live ticker"
     >
+      <ChartA11yCaption
+        title="Top exporters (share of GDP)"
+        unit="%"
+        precision={1}
+        rows={rows.map(r => ({ label: r.name, value: r.latest.value }))}
+      />
       <div
         className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
         aria-live="off"

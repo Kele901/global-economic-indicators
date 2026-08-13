@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { RESERVES_2024, ENERGY_COUNTRY_META } from '../services/energyCurated';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props { isDarkMode: boolean; }
 
@@ -17,6 +18,12 @@ export default function EnergyTicker({ isDarkMode }: Props) {
 
   return (
     <div className={`rounded-lg border bg-gradient-to-r overflow-hidden ${bg}`} role="marquee" aria-label="Top oil-reserve holders">
+      <ChartA11yCaption
+        title="Top oil-reserve holders, 2024"
+        unit=" Bbbl"
+        precision={0}
+        rows={rows.map(r => ({ label: r.name, value: r.oilReservesBnBarrels }))}
+      />
       <div className="flex gap-6 py-3 px-4 overflow-x-auto whitespace-nowrap text-sm">
         {rows.concat(rows).map((r, i) => (
           <span key={i} className="inline-flex items-center gap-2">

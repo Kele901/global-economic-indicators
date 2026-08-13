@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import type { CurrencyRateHistory, FxCategory } from '../services/currencyRates';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -85,6 +86,11 @@ export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
       role="region"
       aria-label="Live foreign exchange rates — scrolling ticker"
     >
+      <ChartA11yCaption
+        title="Live foreign exchange rates"
+        precision={4}
+        rows={items.map(h => ({ label: h.label ?? h.id, value: h.latest?.value ?? null }))}
+      />
       <div
         className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
         aria-live="off"

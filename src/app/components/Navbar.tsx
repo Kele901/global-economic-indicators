@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import ExploreProgressBadge from './ExploreProgressBadge';
+import ColorSchemeToggle from './ColorSchemeToggle';
 
 interface NavItem {
   href?: string;
@@ -232,7 +233,12 @@ const Navbar = () => {
                                 {child.label}
                               </a>
                             ))}
-                            {item.label === 'Info' && <ExploreProgressBadge isDarkMode={isDarkMode} />}
+                            {item.label === 'Info' && (
+                              <>
+                                <ExploreProgressBadge isDarkMode={isDarkMode} />
+                                <ColorSchemeToggle isDarkMode={isDarkMode} />
+                              </>
+                            )}
                           </div>
                         )}
                       </div>

@@ -10,6 +10,7 @@ import type { CountryData } from '../services/worldbank';
 import { DEBT_COUNTRY_META } from '../services/debtCurated';
 import { latestEntry } from '../utils/countryData';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -114,6 +115,12 @@ export default function DebtLoadTicker({ isDarkMode, governmentDebt, loading, on
       role="region"
       aria-label="Top-15 sovereigns by government debt-to-GDP — scrolling live ticker"
     >
+      <ChartA11yCaption
+        title="Top sovereigns by government debt (% of GDP)"
+        unit="%"
+        precision={0}
+        rows={rows.map(r => ({ label: r.name, value: r.latest.value }))}
+      />
       <div className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap" aria-live="off">
         {doubled.map((r, i) => {
           const yoyPct = r.prior && r.prior.value !== 0 ? r.latest.value - r.prior.value : null;

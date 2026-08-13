@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { SPEND_OUTCOME_2023, HEALTH_COUNTRY_META } from '../services/healthCurated';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props { isDarkMode: boolean; }
 
@@ -17,6 +18,12 @@ export default function HealthSpendTicker({ isDarkMode }: Props) {
 
   return (
     <div className={`rounded-lg border bg-gradient-to-r overflow-hidden ${bg}`} role="marquee" aria-label="Top health spenders per capita">
+      <ChartA11yCaption
+        title="Top health spenders per capita, 2023"
+        unit=" USD"
+        precision={0}
+        rows={rows.map(r => ({ label: r.name, value: r.healthSpendPerCapUsd }))}
+      />
       <div className="flex gap-6 py-3 px-4 overflow-x-auto whitespace-nowrap text-sm">
         {rows.concat(rows).map((r, i) => (
           <span key={i} className="inline-flex items-center gap-2">

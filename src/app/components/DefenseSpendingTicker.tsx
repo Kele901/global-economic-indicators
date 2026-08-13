@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import type { CountryData } from '../services/worldbank';
 import { DEFENSE_COUNTRY_META } from '../services/defenseCurated';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -159,6 +160,12 @@ export default function DefenseSpendingTicker({
       role="region"
       aria-label="Top-15 defense spenders — scrolling live ticker"
     >
+      <ChartA11yCaption
+        title={`Top defense spenders (${unit === 'usd' ? 'USD' : '% of GDP'})`}
+        unit={unit === 'usd' ? ' USD' : '%'}
+        precision={unit === 'usd' ? 0 : 2}
+        rows={rows.map(r => ({ label: r.name, value: r.latest?.value ?? null }))}
+      />
       {unit === 'pct_gdp' && (
         <div
           role="status"

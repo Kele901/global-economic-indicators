@@ -9,6 +9,7 @@ import type { CountryData } from '../services/worldbank';
 import { CLIMATE_COUNTRY_META } from '../services/climateCurated';
 import { latestEntry } from '../utils/countryData';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -128,6 +129,12 @@ export default function EmissionsTicker({ isDarkMode, co2EmissionsKt, loading, o
       role="region"
       aria-label="Top-15 CO2 emitters — scrolling live ticker"
     >
+      <ChartA11yCaption
+        title="Top CO2 emitters (kilotonnes)"
+        unit=" kt"
+        precision={0}
+        rows={rows.map(r => ({ label: r.name, value: r.latest.value }))}
+      />
       <div
         className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
         aria-live="off"

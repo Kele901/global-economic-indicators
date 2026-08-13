@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import type { CommodityHistory } from '../services/commodities';
 import Sparkline from './Sparkline';
+import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
@@ -63,6 +64,12 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
       role="region"
       aria-label="Live commodity prices — scrolling ticker"
     >
+      <ChartA11yCaption
+        title="Live commodity prices"
+        unit=" USD"
+        precision={2}
+        rows={items.map(i => ({ label: i.label ?? i.id, value: i.latestPrice ?? null }))}
+      />
       <div
         className="ticker-track flex items-center gap-8 py-3 px-6 whitespace-nowrap"
         aria-live="off"
