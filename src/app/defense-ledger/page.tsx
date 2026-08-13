@@ -18,7 +18,19 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import { CURATED_LAST_UPDATED } from '../services/defenseCurated';
+
+const DEFENSE_TOUR_STEPS: TourStep[] = [
+  { chapter: 'Chapter 1', title: 'Snapshot', body: 'Start here. Aggregate world spending, five heaviest hitters, and the year-on-year delta.' },
+  { chapter: 'Chapter 2', title: 'Superpower balance', body: 'Nominal + %-GDP spend for the USA, China, Russia, India and the EU28. Toggle the axes.' },
+  { chapter: 'Chapter 3', title: 'NATO scorecard', body: 'Which 32 members hit the 2% target? Which are furthest behind? Historical trend included.' },
+  { chapter: 'Chapter 4', title: 'The arms trade', body: 'Top-10 exporters and importers by SIPRI TIV over the last 5 years.' },
+  { chapter: 'Chapter 5', title: 'The arms industry', body: 'SIPRI Top 100 defense companies ranked by 2023 arms revenue. US firms dominate; Chinese firms are climbing fast.' },
+  { chapter: 'Chapter 6', title: 'Nuclear balance', body: 'Nine nuclear states, stockpile totals, and warhead status. Russia + US still ~90% of the total.' },
+  { chapter: 'Chapter 7', title: 'The human cost', body: 'UCDP battle deaths back to 1989. Note the Syria and Ukraine + Gaza inflections.' },
+  { chapter: 'Chapter 8', title: 'Guns vs butter', body: 'Where does each economy sit on the defense-vs-education trade-off?' },
+];
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
 const SuperpowerComparisonChart = dynamic(() => import('../components/SuperpowerComparisonChart'), { ssr: false });
@@ -207,16 +219,23 @@ export default function DefenseLedgerPage() {
               the arms trade, the industry, the arsenals, the conflicts and the trade-offs against everything else.
             </p>
           </div>
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`hidden sm:flex items-center gap-2 text-xs px-3 py-2 rounded-md border transition-colors ${
-              isDarkMode
-                ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white'
-                : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900'
-            }`}
-          >
-            {isDarkMode ? 'Light mode' : 'Dark mode'}
-          </button>
+          <div className="hidden sm:flex flex-col items-end gap-2">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`flex items-center gap-2 text-xs px-3 py-2 rounded-md border transition-colors ${
+                isDarkMode
+                  ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white'
+                  : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900'
+              }`}
+            >
+              {isDarkMode ? 'Light mode' : 'Dark mode'}
+            </button>
+            <GuidedTour
+              storageKey="defense-ledger-tour-seen"
+              steps={DEFENSE_TOUR_STEPS}
+              isDarkMode={isDarkMode}
+            />
+          </div>
         </div>
 
         <StalenessBanner

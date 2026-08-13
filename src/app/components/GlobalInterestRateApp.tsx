@@ -9,6 +9,7 @@ import AdSense from './AdSense';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
 import ChartA11yCaption from './ChartA11yCaption';
+import AnomalyBanner from './AnomalyBanner';
 import MethodologyPopover, { type MethodologyPopoverProps } from './MethodologyPopover';
 import DataStatusIndicator from './DataStatusIndicator';
 import LoadingSpinner from './LoadingSpinner';
@@ -1356,6 +1357,7 @@ const GlobalInterestRateApp = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-3 sm:p-4">
+      <AnomalyBanner isDarkMode={isDarkMode} />
       <div className="mb-4 sm:mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Global Economic Indicators</h1>

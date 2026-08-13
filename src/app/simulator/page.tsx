@@ -10,6 +10,7 @@ import {
   computeCorrelationMatrix, computeLaggedCorrelations,
   extractTimeSeries, alignTimeSeries,
 } from '../utils/correlationEngine';
+import { HISTORICAL_PRESETS } from '../data/scenarioPresets';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line, Legend,
@@ -108,6 +109,27 @@ export default function SimulatorPage() {
     setResults(impacts);
     pushHistory(country, metric, magnitude, impacts);
   }, [data, country, pushHistory]);
+
+  // Historical preset picker: applies the last shock (used to set the
+  // country/input/magnitude sliders) and records every shock in the
+  // scenario history so the reader can see the full episode.
+  const applyPreset = useCallback((presetId: string) => {
+    if (!data) return;
+    const preset = HISTORICAL_PRESETS.find(p => p.id === presetId);
+    if (!preset || preset.steps.length === 0) return;
+    let lastImpacts: ScenarioImpact[] = [];
+    preset.steps.forEach(step => {
+      const outputs = OUTPUT_METRICS.filter(m => m !== step.inputMetric);
+      const impacts = simulateScenario(data, step.country, step.inputMetric, step.changeMagnitude, outputs);
+      lastImpacts = impacts;
+      pushHistory(step.country, step.inputMetric, step.changeMagnitude, impacts);
+    });
+    const lastStep = preset.steps[preset.steps.length - 1];
+    setCountry(lastStep.country);
+    setInputMetric(lastStep.inputMetric);
+    setChangeMagnitude(lastStep.changeMagnitude);
+    setResults(lastImpacts);
+  }, [data, pushHistory]);
 
   const chartData = useMemo(() => {
     return results.slice(0, 8).map(r => {
@@ -317,6 +339,31 @@ export default function SimulatorPage() {
                     : 'bg-gray-100 hover:bg-blue-50 hover:border-blue-300 text-gray-700 border-gray-300'
                 }`}>
                 {tpl.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Historical Replay Presets */}
+        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <h2 className="text-xl font-semibold mb-2">Historical replays</h2>
+          <p className={`text-sm mb-4 ${tc.textSec}`}>Trigger a real historical episode. Each preset applies a chain of shocks and records the sequence in your scenario history below.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {HISTORICAL_PRESETS.map(preset => (
+              <button
+                key={preset.id}
+                onClick={() => applyPreset(preset.id)}
+                className={`text-left px-4 py-3 rounded-lg border transition-all ${
+                  isDarkMode
+                    ? 'bg-gray-800 border-gray-700 hover:border-blue-500 hover:bg-gray-700/60'
+                    : 'bg-white border-gray-200 hover:border-blue-500 hover:bg-blue-50/40'
+                }`}
+              >
+                <div className="flex items-baseline justify-between gap-2 mb-1">
+                  <span className="text-sm font-semibold">{preset.title}</span>
+                  <span className={`text-[11px] tabular-nums ${tc.textSec}`}>{preset.year}</span>
+                </div>
+                <p className={`text-xs leading-snug ${tc.textSec}`}>{preset.summary}</p>
               </button>
             ))}
           </div>

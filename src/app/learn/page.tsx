@@ -14,6 +14,7 @@ import ProgressBar from '../components/learn/ProgressBar';
 import ModuleCard from '../components/learn/ModuleCard';
 import WrapUpQuiz from '../components/learn/WrapUpQuiz';
 import Certificate from '../components/learn/Certificate';
+import LearnPrintPack from '../components/learn/LearnPrintPack';
 
 const WRAP_UP_LESSON_ID = 'wrap-up';
 
@@ -51,7 +52,18 @@ export default function LearnPage() {
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="flex justify-end mb-4 print:hidden">
+        <div className="flex justify-end mb-4 gap-2 print:hidden">
+          <button
+            onClick={() => window.print()}
+            className={`text-xs px-3 py-2 rounded-md border transition-colors ${
+              isDarkMode
+                ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white'
+                : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900'
+            }`}
+            aria-label="Download printable lesson pack"
+          >
+            Download printable lesson pack
+          </button>
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className={`text-xs px-3 py-2 rounded-md border transition-colors ${
@@ -72,17 +84,20 @@ export default function LearnPage() {
         />
 
         {MODULES.map((mod, i) => (
-          <ModuleCard
-            key={mod.id}
-            module={mod}
-            index={i + 1}
-            lessons={lessonsByModule(mod.id)}
-            isDarkMode={isDarkMode}
-            completedLessons={state.completedLessons}
-            quizScores={state.quizScores}
-            onComplete={markComplete}
-          />
+          <div key={mod.id} className="print:hidden">
+            <ModuleCard
+              module={mod}
+              index={i + 1}
+              lessons={lessonsByModule(mod.id)}
+              isDarkMode={isDarkMode}
+              completedLessons={state.completedLessons}
+              quizScores={state.quizScores}
+              onComplete={markComplete}
+            />
+          </div>
         ))}
+
+        <LearnPrintPack modules={MODULES} lessonsByModule={lessonsByModule} />
 
         {/* Wrap-up quiz gate */}
         <section id="wrap-up" className="mt-16 print:hidden">

@@ -8,6 +8,7 @@ import CookieConsent from './components/CookieConsent';
 import StatusWidget from './components/StatusWidget';
 import CommandPalette from './components/CommandPalette';
 import RouteTracker from './components/RouteTracker';
+import CitationDropdown from './components/CitationDropdown';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -111,7 +112,8 @@ export default function RootLayout({
                     </div>
                   </div>
                 </div>
-                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end">
+                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 flex-wrap">
+                  <CitationDropdown />
                   <StatusWidget />
                 </div>
               </div>

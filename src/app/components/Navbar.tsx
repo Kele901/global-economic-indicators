@@ -120,6 +120,7 @@ const Navbar = () => {
         { href: '/monetary-policy', label: 'Monetary Policy' },
         { href: '/outlook', label: 'Forecasts & Outlook' },
         { href: '/simulator', label: 'Scenario Simulator' },
+        { href: '/correlation-lab', label: 'Correlation Lab' },
         { href: '/development', label: 'Development Index' },
         { href: '/inequality', label: 'Inequality' },
         { href: '/trade-network', label: 'Trade Network' },
@@ -144,6 +145,7 @@ const Navbar = () => {
         { href: '/watchlist', label: 'Watchlist & Alerts' },
         { href: '/reports', label: 'Report Builder' },
         { href: '/embed-builder', label: 'Embed Builder' },
+        { href: '/embed-gallery', label: 'Embed Gallery' },
       ],
     },
     {
@@ -152,6 +154,7 @@ const Navbar = () => {
         { href: '/glossary', label: 'Glossary' },
         { href: '/guides/reading-economic-data', label: 'Guides' },
         { href: '/data-sources', label: 'Data Sources' },
+        { href: '/changelog', label: 'Changelog' },
         { href: '/about', label: 'About' },
       ],
     },
