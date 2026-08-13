@@ -13,6 +13,8 @@ import {
 import { worldSum, topNCountries, topNShare, worldYoY } from '../utils/countryData';
 import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
+import Breadcrumbs from '../components/Breadcrumbs';
+import RelatedPages from '../components/RelatedPages';
 import { CURATED_LAST_UPDATED } from '../services/defenseCurated';
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
@@ -187,6 +189,7 @@ export default function DefenseLedgerPage() {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${pageBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <Breadcrumbs isDarkMode={isDarkMode} />
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
@@ -503,6 +506,8 @@ export default function DefenseLedgerPage() {
             </a>
           </div>
         </section>
+
+        <RelatedPages currentPath="/defense-ledger" isDarkMode={isDarkMode} />
 
         <div className={`text-xs mt-8 pt-6 border-t space-y-2 ${isDarkMode ? 'border-gray-800 text-gray-500' : 'border-gray-200 text-gray-500'}`}>
           <p>

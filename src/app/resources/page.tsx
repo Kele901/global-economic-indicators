@@ -7,6 +7,8 @@ import { fetchGlobalData, type CountryData } from '../services/worldbank';
 import { fetchAllCommodityPrices, clearCommodityCache, RESOURCES_CURATED_LAST_UPDATED, type CommodityHistory } from '../services/commodities';
 import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
+import Breadcrumbs from '../components/Breadcrumbs';
+import RelatedPages from '../components/RelatedPages';
 import { fetchOilReserves, fetchOilProduction, type ReservesSnapshot, type ProductionSnapshot } from '../services/eia';
 
 const CommodityTicker = dynamic(() => import('../components/CommodityTicker'), { ssr: false });
@@ -160,6 +162,7 @@ export default function ResourcesPage() {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${pageBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <Breadcrumbs isDarkMode={isDarkMode} />
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
@@ -429,6 +432,8 @@ export default function ResourcesPage() {
             </a>
           </div>
         </section>
+
+        <RelatedPages currentPath="/resources" isDarkMode={isDarkMode} />
 
         <div className={`text-xs text-center mt-16 pb-6 ${textMuted}`}>
           Data sources: FRED (via EIA, IMF, LBMA); World Bank; EIA International Energy Statistics (falls back to

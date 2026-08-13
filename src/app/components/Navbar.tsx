@@ -97,10 +97,24 @@ const Navbar = () => {
     { href: '/global-heatmap', label: 'Heatmap' },
     { href: '/learn', label: 'Learn' },
     {
+      label: 'Ledgers',
+      children: [
+        { href: '/defense-ledger', label: 'Defense Ledger' },
+        { href: '/climate-ledger', label: 'Climate Ledger' },
+        { href: '/trade-ledger', label: 'Trade Ledger' },
+        { href: '/migration-ledger', label: 'Migration Ledger' },
+        { href: '/debt', label: 'Debt Ledger' },
+        { href: '/ai-ledger', label: 'AI Ledger' },
+        { href: '/health-ledger', label: 'Health Ledger' },
+        { href: '/energy-ledger', label: 'Energy Ledger' },
+        { href: '/labor-ledger', label: 'Labor Ledger' },
+        { href: '/resources', label: 'Resource Atlas' },
+      ],
+    },
+    {
       label: 'Analysis',
       children: [
         { href: '/monetary-policy', label: 'Monetary Policy' },
-        { href: '/debt', label: 'Debt Ledger' },
         { href: '/outlook', label: 'Forecasts & Outlook' },
         { href: '/simulator', label: 'Scenario Simulator' },
         { href: '/development', label: 'Development Index' },
@@ -108,12 +122,6 @@ const Navbar = () => {
         { href: '/trade-network', label: 'Trade Network' },
         { href: '/economic-gravity', label: 'Economic Gravity' },
         { href: '/economic-cycles', label: 'Economic Cycles' },
-        { href: '/resources', label: 'Resource Atlas' },
-        { href: '/defense-ledger', label: 'Defense Ledger' },
-        { href: '/climate-ledger', label: 'Climate Ledger' },
-        { href: '/trade-ledger', label: 'Trade Ledger' },
-        { href: '/migration-ledger', label: 'Migration Ledger' },
-        { href: '/ai-ledger', label: 'AI Ledger' },
       ],
     },
     {
@@ -169,6 +177,20 @@ const Navbar = () => {
             </div>
 
             <div className="hidden md:flex items-center">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent('cursor:cmd-palette:open'))}
+                aria-label="Search (Ctrl+K)"
+                className={`mr-3 hidden lg:flex items-center gap-2 text-xs px-2 py-1 rounded border ${
+                  isDarkMode ? 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500' : 'border-gray-200 text-gray-500 hover:text-gray-900 hover:border-gray-400'
+                } transition-colors`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                </svg>
+                <span>Search</span>
+                <kbd className={`text-[9px] px-1 py-0.5 rounded border ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`}>Ctrl K</kbd>
+              </button>
               <div className="flex items-center space-x-0">
                 {navItems.map((item, index) => (
                   <div key={item.label} className="flex items-center">

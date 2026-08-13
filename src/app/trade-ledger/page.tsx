@@ -19,6 +19,8 @@ import {
 import { topNCountries, latestEntry } from '../utils/countryData';
 import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
+import Breadcrumbs from '../components/Breadcrumbs';
+import RelatedPages from '../components/RelatedPages';
 
 const ExportTicker                  = dynamic(() => import('../components/ExportTicker'),                  { ssr: false });
 const TradeBalanceChart             = dynamic(() => import('../components/TradeBalanceChart'),             { ssr: false });
@@ -126,6 +128,7 @@ export default function TradeLedgerPage() {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${pageBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <Breadcrumbs isDarkMode={isDarkMode} />
         <div className="flex items-start justify-between mb-6">
           <div>
             <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
@@ -323,6 +326,8 @@ export default function TradeLedgerPage() {
           />
           <TradeFrictionsTimeline isDarkMode={isDarkMode} />
         </section>
+
+        <RelatedPages currentPath="/trade-ledger" isDarkMode={isDarkMode} />
 
         <footer className={`mt-16 pt-6 border-t text-xs ${textMuted} ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           Live trade data via World Bank API proxy. Curated snapshots refreshed {CURATED_LAST_UPDATED}.

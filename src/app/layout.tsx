@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import ThemeProvider from './components/ThemeProvider';
 import CookieConsent from './components/CookieConsent';
 import StatusWidget from './components/StatusWidget';
+import CommandPalette from './components/CommandPalette';
+import RouteTracker from './components/RouteTracker';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -116,6 +118,8 @@ export default function RootLayout({
             </footer>
           </div>
           <CookieConsent />
+          <CommandPalette />
+          <RouteTracker />
         </ThemeProvider>
       </body>
     </html>
