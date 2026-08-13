@@ -252,7 +252,13 @@ export const clientCache = new ClientCache();
 //      GB.XPD.RSDV.GD.ZS already fetched by fetchGlobalData. Bump
 //      keeps the sequence monotonic and forces a fresh join across
 //      the newer research indicators for the AI-country roster.
-export const CURRENT_CACHE_VERSION = 30;
+// v31: Health/Energy/Labor Ledger releases. No new WB indicators, but
+//      the three new ledgers depend on the fuller v28+ country roster
+//      when joining live WB series (SH.XPD.CHEX.GD.ZS, SP.DYN.LE00.IN,
+//      EG.ELC.COAL.ZS, EG.ELC.RNEW.ZS, SL.UEM.TOTL.ZS, SL.TLF.CACT.ZS,
+//      SL.UEM.1524.ZS) with the curated snapshots. Bump forces a clean
+//      re-fetch so all 24 new chart components pick up complete rows.
+export const CURRENT_CACHE_VERSION = 31;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

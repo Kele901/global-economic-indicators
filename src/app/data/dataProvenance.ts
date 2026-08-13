@@ -13,6 +13,9 @@ import { CURATED_LAST_UPDATED as TRADE_CURATED_LAST_UPDATED } from '../services/
 import { CURATED_LAST_UPDATED as MIGRATION_CURATED_LAST_UPDATED } from '../services/migrationCurated';
 import { CURATED_LAST_UPDATED as DEBT_CURATED_LAST_UPDATED } from '../services/debtCurated';
 import { CURATED_LAST_UPDATED as AI_CURATED_LAST_UPDATED } from '../services/aiCurated';
+import { CURATED_LAST_UPDATED as HEALTH_CURATED_LAST_UPDATED } from '../services/healthCurated';
+import { CURATED_LAST_UPDATED as ENERGY_CURATED_LAST_UPDATED } from '../services/energyCurated';
+import { CURATED_LAST_UPDATED as LABOR_CURATED_LAST_UPDATED } from '../services/laborCurated';
 
 export type DataCategory =
   | 'macro'
@@ -27,7 +30,10 @@ export type DataCategory =
   | 'trade'
   | 'mobility'
   | 'technology'
-  | 'migration';
+  | 'migration'
+  | 'health'
+  | 'energy'
+  | 'labor';
 
 export type DataProvider =
   | 'World Bank'
@@ -55,7 +61,14 @@ export type DataProvider =
   | 'UNESCO'
   | 'UNCTAD'
   | 'UNWTO'
-  | 'Harvard Atlas';
+  | 'Harvard Atlas'
+  | 'WHO'
+  | 'IHME'
+  | 'JHU'
+  | 'BNEF'
+  | 'IGU'
+  | 'IAEA'
+  | 'ILO';
 
 export type RefreshCadence =
   | 'daily'
@@ -580,6 +593,45 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     sourceUrl: 'https://www.imf.org/en/Publications/WEO/weo-database/2024/October',
   },
 
+  // ── Health Ledger (curated snapshots) ────────────────────────────────
+  {
+    id: 'health-ledger-curated',
+    name: 'Health Ledger curated snapshots',
+    category: 'health',
+    provider: 'Curated',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: HEALTH_CURATED_LAST_UPDATED,
+    notes: 'WHO Global Health Expenditure Database 2023 spend-outcome pairs, IHME Global Burden of Disease 2023 DALY series, Johns Hopkins Global Health Security Index 2021 + WHO JEE core capacity, Pharma Intelligence top-15 R&D 2024, WHO Mental Health Atlas 2020 prevalence + treatment gap, dual-burden obesity/undernutrition (WHO NCD Atlas 2022). Powers /health-ledger.',
+    sourceUrl: 'https://www.who.int/data/gho',
+  },
+
+  // ── Energy Ledger (curated snapshots) ────────────────────────────────
+  {
+    id: 'energy-ledger-curated',
+    name: 'Energy Ledger curated snapshots',
+    category: 'energy',
+    provider: 'Curated',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: ENERGY_CURATED_LAST_UPDATED,
+    notes: 'IEA Electricity 2025 generation mix, BNEF Global Storage Outlook 2024 battery build-out 2015-2030, IGU World LNG Report 2024 top flows, IAEA PRIS Sep-2025 reactor status + policy stance, EIA International Energy Statistics 2024 + BP Statistical Review proven reserves, IEA WEO 2024 capacity factors, IEA Efficiency 2024 intensity. Powers /energy-ledger.',
+    sourceUrl: 'https://www.iea.org/reports/electricity-2025',
+  },
+
+  // ── Labor Ledger (curated snapshots) ─────────────────────────────────
+  {
+    id: 'labor-ledger-curated',
+    name: 'Labor Ledger curated snapshots',
+    category: 'labor',
+    provider: 'Curated',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: LABOR_CURATED_LAST_UPDATED,
+    notes: 'ILO Global Wage Report 2024 median PPP hourly wages + real growth, OECD/ICTWSS union density 2023, ILO informal employment 2023, UN DESA World Population Prospects 2024 working-age 2000-2050, OECD Employment Outlook 2024 AI exposure + complementarity, ILO gender-LFP 2023, ILO youth-unemployment 2024. Powers /labor-ledger.',
+    sourceUrl: 'https://ilostat.ilo.org/',
+  },
+
   // ── AI/Technology Ledger ─────────────────────────────────────────────
   {
     id: 'ai-ledger-curated',
@@ -735,6 +787,9 @@ export const CATEGORY_LABELS: Record<DataCategory, string> = {
   mobility: 'Mobility & Passport',
   technology: 'Technology & Innovation',
   migration: 'Migration',
+  health: 'Health',
+  energy: 'Energy',
+  labor: 'Labor',
 };
 
 // Returns true when a curated snapshot is older than `stalenessMonths`.

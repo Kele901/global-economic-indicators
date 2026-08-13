@@ -8,6 +8,7 @@ import { COUNTRY_SLUGS, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG, COUNTRY_COLO
 import { METRIC_CATEGORIES, getMetricByKey, formatMetricValue } from '../../utils/metricCategories';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { US, GB, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
+import CountryBrief from '../../components/CountryBrief';
 
 const FLAG_MAP: Record<string, React.ComponentType<any>> = {
   USA: US, UK: GB, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
@@ -297,6 +298,8 @@ export default function CountryProfilePage() {
             })}
           </div>
         </div>
+
+        <CountryBrief countryKey={countryKey} displayName={displayName} isDarkMode={isDarkMode} />
 
         <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${isDarkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-blue-50 border-blue-200'}`}>
           <h2 className="text-lg sm:text-xl font-semibold mb-3">About Country Profiles</h2>
