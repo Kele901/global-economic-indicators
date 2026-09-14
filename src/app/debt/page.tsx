@@ -34,6 +34,8 @@ import LazyMount from '../components/LazyMount';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 
 const DebtLoadTicker              = dynamic(() => import('../components/DebtLoadTicker'),              { ssr: false });
+const DebtTrajectoryChart         = dynamic(() => import('../components/DebtTrajectoryChart'),         { ssr: false });
+const DebtBuildupWaterfall        = dynamic(() => import('../components/DebtBuildupWaterfall'),        { ssr: false });
 const PublicPrivateDebtChart      = dynamic(() => import('../components/PublicPrivateDebtChart'),      { ssr: false });
 const DebtServicePeaksTable       = dynamic(() => import('../components/DebtServicePeaksTable'),       { ssr: false });
 const RatingsAndCdsGrid           = dynamic(() => import('../components/RatingsAndCdsGrid'),           { ssr: false });
@@ -369,6 +371,13 @@ export default function DebtLedgerPage() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+          </div>
+
+          <div className="mt-6">
+            <DebtTrajectoryChart isDarkMode={isDarkMode} governmentDebt={governmentDebt} />
+          </div>
+          <div className="mt-6">
+            <DebtBuildupWaterfall isDarkMode={isDarkMode} governmentDebt={governmentDebt} />
           </div>
         </section>
 

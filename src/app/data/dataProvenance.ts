@@ -61,7 +61,6 @@ export type DataProvider =
   | 'UNESCO'
   | 'UNCTAD'
   | 'UNWTO'
-  | 'Harvard Atlas'
   | 'WHO'
   | 'IHME'
   | 'JHU'
@@ -169,6 +168,19 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     lastUpdated: LIVE,
   },
   {
+    id: 'wb-labor-market',
+    name: 'Labour market: participation and youth unemployment',
+    category: 'labor',
+    provider: 'World Bank',
+    seriesIds: ['SL.TLF.CACT.ZS', 'SL.UEM.1524.ZS', 'SL.TLF.CACT.FE.ZS'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Labour force participation, youth (15-24) unemployment and female participation. ILO modelled estimates redistributed by the World Bank, so values are model output rather than direct survey counts. Powers Chapter 1 of /labor-ledger.',
+    sourceUrl: 'https://data.worldbank.org/indicator/SL.UEM.1524.ZS',
+    qualityFlags: ['estimate'],
+  },
+  {
     id: 'wb-government-debt',
     name: 'Central government debt, total (% of GDP)',
     category: 'macro',
@@ -187,6 +199,33 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     refreshCadence: 'annual',
     live: true,
     lastUpdated: LIVE,
+  },
+
+  // ── Inequality ────────────────────────────────────────────────────────
+  {
+    id: 'wb-gini',
+    name: 'Gini index',
+    category: 'macro',
+    provider: 'World Bank',
+    seriesIds: ['SI.POV.GINI'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Household income or consumption Gini from national surveys. Coverage is uneven and survey years differ by country, so the "latest" value can be several years old for some economies. Powers /inequality.',
+    sourceUrl: 'https://data.worldbank.org/indicator/SI.POV.GINI',
+    qualityFlags: ['estimate'],
+  },
+  {
+    id: 'inequality-curated',
+    name: 'Historical inequality series (Piketty / WID)',
+    category: 'macro',
+    provider: 'Curated',
+    refreshCadence: 'irregular',
+    live: false,
+    lastUpdated: '2025-09-01',
+    notes: 'Long-run r-vs-g, capital/income ratios, top income and wealth shares, the elephant curve, inheritance flows and top marginal tax rates, transcribed from Piketty (2014), Piketty & Saez (2003), the World Inequality Database, Milanovic (2016) and Saez & Zucman (2019). Historical figures before 1950 are reconstructions from tax and estate records, not survey data.',
+    sourceUrl: 'https://wid.world/',
+    qualityFlags: ['estimate', 'curated'],
   },
 
   // ── Governance (Worldwide Governance Indicators, WB source=3) ─────────
@@ -420,6 +459,30 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     notes: 'Coal share, renewables share, fossil-fuel share of total energy consumption.',
   },
   {
+    id: 'wb-energy-dependence',
+    name: 'Net energy imports & electricity access',
+    category: 'energy',
+    provider: 'World Bank',
+    seriesIds: ['EG.IMP.CONS.ZS', 'EG.ELC.ACCS.ZS'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Net energy imports as a share of energy use (negative = net exporter) and share of population with electricity access. The import series lags by several years for most countries. Powers Chapter 1 of /energy-ledger.',
+    sourceUrl: 'https://data.worldbank.org/indicator/EG.IMP.CONS.ZS',
+  },
+  {
+    id: 'wb-health-spend',
+    name: 'Health expenditure & life expectancy',
+    category: 'health',
+    provider: 'World Bank',
+    seriesIds: ['SH.XPD.CHEX.GD.ZS', 'SP.DYN.LE00.IN', 'SH.DYN.MORT', 'SH.MED.PHYS.ZS'],
+    refreshCadence: 'annual',
+    live: true,
+    lastUpdated: LIVE,
+    notes: 'Current health expenditure (% of GDP), life expectancy at birth, under-5 mortality and physician density. Expenditure figures originate in the WHO Global Health Expenditure Database and typically lag by two to three years. Powers Chapter 1 of /health-ledger.',
+    sourceUrl: 'https://data.worldbank.org/indicator/SH.XPD.CHEX.GD.ZS',
+  },
+  {
     id: 'wb-land-nature',
     name: 'Land use & protected areas',
     category: 'climate',
@@ -512,17 +575,30 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     sourceUrl: 'https://www.henleyglobal.com/passport-index',
   },
 
-  // ── Trade (Harvard Atlas + IMF DOTS) ──────────────────────────────────
+  // ── Trade (UN Comtrade live + curated bilateral flows) ────────────────
   {
-    id: 'trade-atlas',
-    name: 'Bilateral trade flows (Harvard Atlas + IMF DOTS)',
+    id: 'un-comtrade',
+    name: 'Bilateral goods trade by partner (UN Comtrade)',
     category: 'trade',
-    provider: 'Harvard Atlas',
-    refreshCadence: 'annual',
+    provider: 'UN',
+    refreshCadence: 'monthly',
     live: true,
     lastUpdated: LIVE,
-    notes: 'Harvard Growth Lab Atlas of Economic Complexity for product-level exports and IMF Direction of Trade Statistics for bilateral flows. Powers /trade-network.',
-    sourceUrl: 'https://atlas.cid.harvard.edu/',
+    notes: 'Partner-level goods exports and imports from the UN Comtrade public API, used to compute partner diversity and concentration. Powers the live-data mode of /trading-places. Free-tier rate limits mean coverage can be partial.',
+    sourceUrl: 'https://comtradeplus.un.org/',
+    qualityFlags: ['estimate'],
+  },
+  {
+    id: 'bilateral-trade-curated',
+    name: 'Bilateral trade flow estimates (curated)',
+    category: 'trade',
+    provider: 'Curated',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: '2025-09-15',
+    notes: 'Hand-compiled 2025 bilateral goods flow estimates between major economies, reconciled from national statistics offices and UN Comtrade. These are estimates, not an official series. Powers the /trade-network flow diagram.',
+    sourceUrl: 'https://comtradeplus.un.org/',
+    qualityFlags: ['estimate', 'curated'],
   },
   {
     id: 'trade-ledger-curated',
@@ -656,11 +732,12 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     id: 'currency-correlations',
     name: 'Currency correlation matrix',
     category: 'fx',
-    provider: 'Curated',
+    provider: 'Frankfurter',
     refreshCadence: 'daily',
     live: true,
     lastUpdated: LIVE,
-    notes: 'Rolling 90-day return-correlation matrix computed client-side from FRED + Frankfurter daily rates.',
+    notes: 'Rolling 90-day return-correlation matrix computed client-side from FRED + Frankfurter daily rates. Derived rather than published, so it moves whenever the underlying rates move.',
+    qualityFlags: ['estimate'],
   },
 
   // ── Cultural: UNESCO / UNCTAD / UNWTO ─────────────────────────────────
@@ -705,10 +782,11 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     category: 'technology',
     provider: 'ITU',
     refreshCadence: 'annual',
-    live: true,
-    lastUpdated: LIVE,
-    notes: 'Individuals using the internet (% of population) and mobile-cellular subscriptions per 100 inhabitants, from the ITU DataHub.',
+    live: false,
+    lastUpdated: '2025-02-01',
+    notes: 'Individuals using the internet (% of population) and mobile-cellular subscriptions per 100 inhabitants, covering 2018-2024. The ITU DataHub publishes no open REST API, so /api/itu serves a transcribed snapshot of their published tables rather than fetching live.',
     sourceUrl: 'https://datahub.itu.int/',
+    qualityFlags: ['curated', 'frozen'],
   },
 
   // ── WIPO (patents & innovation) ───────────────────────────────────────
@@ -718,10 +796,24 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     category: 'technology',
     provider: 'WIPO',
     refreshCadence: 'annual',
+    live: false,
+    lastUpdated: '2025-02-01',
+    notes: 'Resident and non-resident patent applications by country, covering 2018-2023. WIPO IP Statistics is published as bulk downloads with no open REST API, so /api/wipo serves a transcribed snapshot rather than fetching live.',
+    sourceUrl: 'https://www.wipo.int/ipstats/en/',
+    qualityFlags: ['curated', 'frozen'],
+  },
+
+  {
+    id: 'wb-digital-adoption',
+    name: 'Internet use & mobile subscriptions',
+    category: 'technology',
+    provider: 'World Bank',
+    seriesIds: ['IT.NET.USER.ZS', 'IT.CEL.SETS.P2'],
+    refreshCadence: 'annual',
     live: true,
     lastUpdated: LIVE,
-    notes: 'Resident and non-resident patent applications by country, from WIPO IP Statistics.',
-    sourceUrl: 'https://www.wipo.int/ipstats/en/',
+    notes: 'Individuals using the internet (% of population) and mobile cellular subscriptions per 100 people, originally compiled by the ITU and redistributed by the World Bank. The internet series counts any use in the previous three months at any speed, so it measures reach rather than quality of access. Subscriptions exceed 100 in many countries because of dual-SIM use.',
+    sourceUrl: 'https://data.worldbank.org/indicator/IT.NET.USER.ZS',
   },
 
   // ── Eurostat (EU tech and R&D) ────────────────────────────────────────
@@ -773,8 +865,9 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     refreshCadence: 'irregular',
     live: false,
     lastUpdated: '2023-12-05',
-    notes: 'PISA is a triennial 15-year-old assessment. The 2022 wave is the current release; the next wave is expected end of 2026. Reading / math / science mean scores by country.',
+    notes: 'PISA is a triennial 15-year-old assessment, so this is the oldest snapshot on the site by design rather than by neglect. The 2022 wave is the current release; the next wave is expected end of 2026. Reading / math / science mean scores by country.',
     sourceUrl: 'https://www.oecd.org/pisa/',
+    qualityFlags: ['frozen', 'curated'],
   },
 ];
 

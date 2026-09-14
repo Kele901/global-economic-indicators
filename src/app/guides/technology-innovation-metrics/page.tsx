@@ -152,7 +152,7 @@ export default function TechInnovationGuide() {
               <li><a href="/guides/digital-economy-and-ai" className="text-blue-600 dark:text-blue-400 hover:underline">Digital Economy and AI</a> &mdash; AI patents and digital transformation</li>
               <li><a href="/guides/global-trade-explained" className="text-blue-600 dark:text-blue-400 hover:underline">Global Trade Explained</a> &mdash; How tech exports fit into trade</li>
               <li><a href="/guides/emerging-vs-developed-economies" className="text-blue-600 dark:text-blue-400 hover:underline">Emerging vs Developed Economies</a> &mdash; Innovation across income groups</li>
-              <li><a href="/guides/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
+              <li><a href="/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
             </ul>
           </section>
         </div>

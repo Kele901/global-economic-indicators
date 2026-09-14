@@ -1,11 +1,11 @@
 'use client';
 
 // Wrap-up quiz — the 10-question final assessment gate for the
-// certificate. Locked until all 15 lessons are marked complete, then
+// certificate. Locked until every lesson is marked complete, then
 // opens the door to Certificate.tsx once the user submits.
 
 import { useState } from 'react';
-import type { QuizQuestion } from '../../learn/lessons';
+import { TOTAL_LESSONS, type QuizQuestion } from '../../learn/lessons';
 import type { QuizScore } from '../../hooks/useLearnProgress';
 import QuizBlock from './QuizBlock';
 
@@ -43,7 +43,7 @@ export default function WrapUpQuiz({ isDarkMode, questions, unlocked, existingSc
 
       {!unlocked ? (
         <div className={`mt-5 rounded-md border p-3 text-sm ${isDarkMode ? 'bg-gray-900 border-gray-700 text-gray-400' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
-          🔒 Complete all 15 lessons above to unlock this quiz.
+          🔒 Complete all {TOTAL_LESSONS} lessons above to unlock this quiz.
         </div>
       ) : !started ? (
         <button

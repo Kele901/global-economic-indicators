@@ -24,17 +24,36 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import GuidedTour, { type TourStep } from '../components/GuidedTour';
+import SkeletonCard from '../components/SkeletonCard';
 
-const HealthSpendTicker         = dynamic(() => import('../components/HealthSpendTicker'),         { ssr: false });
-const SpendVsOutcomeChart       = dynamic(() => import('../components/SpendVsOutcomeChart'),       { ssr: false });
-const LifeExpectancyDivergenceChart = dynamic(() => import('../components/LifeExpectancyDivergenceChart'), { ssr: false });
-const PandemicReadinessGrid     = dynamic(() => import('../components/PandemicReadinessGrid'),     { ssr: false });
-const PharmaConcentrationTable  = dynamic(() => import('../components/PharmaConcentrationTable'),  { ssr: false });
-const DualBurdenChart           = dynamic(() => import('../components/DualBurdenChart'),           { ssr: false });
-const MentalHealthGapTable      = dynamic(() => import('../components/MentalHealthGapTable'),      { ssr: false });
-const DiseaseBurdenTimeline     = dynamic(() => import('../components/DiseaseBurdenTimeline'),     { ssr: false });
+const skeleton = (label: string, height?: string) => {
+  const Loading = () => <SkeletonCard height={height} label={label} />;
+  return Loading;
+};
+
+const HealthSpendTicker         = dynamic(() => import('../components/HealthSpendTicker'),         { ssr: false, loading: skeleton('Loading health spend ticker', 'h-[64px]') });
+const HealthCommitmentChart     = dynamic(() => import('../components/HealthCommitmentChart'),     { ssr: false, loading: skeleton('Loading health commitment chart', 'h-[560px]') });
+const SpendVsOutcomeChart       = dynamic(() => import('../components/SpendVsOutcomeChart'),       { ssr: false, loading: skeleton('Loading spend vs outcome') });
+const LifeExpectancyDivergenceChart = dynamic(() => import('../components/LifeExpectancyDivergenceChart'), { ssr: false, loading: skeleton('Loading life-expectancy divergence') });
+const PandemicReadinessGrid     = dynamic(() => import('../components/PandemicReadinessGrid'),     { ssr: false, loading: skeleton('Loading pandemic readiness') });
+const PharmaConcentrationTable  = dynamic(() => import('../components/PharmaConcentrationTable'),  { ssr: false, loading: skeleton('Loading pharma concentration') });
+const DualBurdenChart           = dynamic(() => import('../components/DualBurdenChart'),           { ssr: false, loading: skeleton('Loading dual burden') });
+const MentalHealthGapTable      = dynamic(() => import('../components/MentalHealthGapTable'),      { ssr: false, loading: skeleton('Loading mental-health gap') });
+const DiseaseBurdenTimeline     = dynamic(() => import('../components/DiseaseBurdenTimeline'),     { ssr: false, loading: skeleton('Loading disease burden timeline') });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
+
+const TOUR_STEPS: TourStep[] = [
+  { chapter: 'Chapter 1', title: 'What each country commits', body: 'Live health spending as a share of GDP for the whole roster, with life expectancy overlaid. The two lines pointedly do not track each other.' },
+  { chapter: 'Chapter 2', title: 'Spending against outcomes', body: 'The same question in per-capita dollars. Most countries sit on a curve of diminishing returns; the US pays far more and lives shorter.' },
+  { chapter: 'Chapter 3', title: 'Divergence', body: 'Life expectancy by World Bank income group since 1990. Convergence stalled after 2015 and reversed during COVID.' },
+  { chapter: 'Chapter 4', title: 'Preparedness', body: 'Johns Hopkins GHS Index and WHO JEE capacity scores — and why the highest-ranked countries still failed in 2020.' },
+  { chapter: 'Chapter 5', title: 'The pharma industry', body: 'Who actually funds drug discovery: the top 15 firms by R&D spend, concentrated in the US, Europe and Japan.' },
+  { chapter: 'Chapter 6', title: 'The double burden', body: 'Obesity and undernutrition rising in the same populations at the same time.' },
+  { chapter: 'Chapter 7', title: 'The mental-health gap', body: 'The share of people with a diagnosable disorder who get no treatment — roughly half in the OECD, over 90% in low-income countries.' },
+  { chapter: 'Chapter 8', title: 'The burden shift', body: 'Communicable-disease DALYs collapsed since 1990 while non-communicable disease held steady. That shift is what health systems now have to be built for.' },
+];
 
 function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; }) {
   return (
@@ -48,7 +67,7 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: b
 
 export default function HealthLedgerPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
-  const [_data, setData] = useState<GlobalData | null>(null);
+  const [data, setData] = useState<GlobalData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -122,13 +141,21 @@ export default function HealthLedgerPage() {
           >{isDarkMode ? 'Light mode' : 'Dark mode'}</button>
         </div>
 
+        <GuidedTour
+          storageKey="tour-health-ledger"
+          steps={TOUR_STEPS}
+          isDarkMode={isDarkMode}
+          ctaLabel="Take the 60-second tour of the 8 chapters"
+        />
+
         <StalenessBanner
           lastUpdated={CURATED_LAST_UPDATED}
           label="WHO GHED 2023, IHME GBD 2023, JHU GHS Index 2021 + JEE, Pharma Intelligence R&D 2024, WHO Mental Health Atlas 2020, IEA and UN DESA 2024 snapshots"
           isDarkMode={isDarkMode}
         />
 
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2 mb-4 mt-4 flex-wrap">
+          <ChartMeta sourceId="wb-health-spend" isDarkMode={isDarkMode} />
           <ChartMeta sourceId="health-ledger-curated" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
@@ -182,8 +209,13 @@ export default function HealthLedgerPage() {
 
         <section className="mb-14">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
-            title="The Health Spending Landscape"
-            subtitle="Top per-capita spenders in USD. The US pays more than double most of the OECD; low-income countries spend less than $100 per person per year on health. The ticker above cycles through the top 12." />
+            title="What Each Country Commits"
+            subtitle="Live health expenditure as a share of GDP across the full roster, with life expectancy overlaid on the right axis. The bars are sorted by spending and the line refuses to follow them — the first and most important fact about health systems is that money alone does not buy years." />
+          <HealthCommitmentChart
+            isDarkMode={isDarkMode}
+            healthcareExpenditure={data?.healthcareExpenditure}
+            lifeExpectancy={data?.lifeExpectancy}
+          />
         </section>
 
         <section className="mb-14">

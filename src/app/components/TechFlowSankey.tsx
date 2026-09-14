@@ -1,8 +1,16 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+// The innovation pipeline for one country: R&D money and STEM graduates in,
+// patents/publications/researchers in the middle, exports/employment/VC out.
+//
+// The SVG layout used to live here. It now lives in charts/FlowDiagram, and
+// this file's only job is to turn the nine World Bank series into the
+// columns/nodes/links that diagram expects.
+
+import React, { useMemo, useState } from 'react';
 import { CountryData } from '../services/worldbank';
-import { techChartColors, formatNumber, formatPercent } from '../data/technologyIndicators';
+import { formatNumber } from '../data/technologyIndicators';
+import FlowDiagram, { type FlowColumn, type FlowNode, type FlowLink } from './charts/FlowDiagram';
 
 interface TechFlowSankeyProps {
   isDarkMode: boolean;
@@ -17,25 +25,19 @@ interface TechFlowSankeyProps {
   selectedYear: number;
 }
 
-interface SankeyNode {
-  id: string;
-  label: string;
-  category: 'input' | 'process' | 'output';
-  value: number;
-  x: number;
-  y: number;
-  height: number;
-  color: string;
-}
-
-interface SankeyLink {
-  source: string;
-  target: string;
-  value: number;
-  sourceY: number;
-  targetY: number;
-  height: number;
-}
+// Node heights are driven by each metric's value as a share of a plausible
+// ceiling, because the raw units (% of GDP, patent counts, $bn) are not
+// comparable. These ceilings are rough global maxima, not data.
+const CEILINGS = {
+  rdSpending: 5,
+  stemGraduates: 40,
+  patents: 500_000,
+  publications: 500_000,
+  researchers: 10_000,
+  hightechExports: 40,
+  techEmployment: 10,
+  vcFunding: 350,
+} as const;
 
 const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
   isDarkMode,
@@ -47,10 +49,9 @@ const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
   hightechExports,
   techEmployment,
   vcFunding,
-  selectedYear
+  selectedYear,
 }) => {
   const [selectedCountry, setSelectedCountry] = useState<string>('USA');
-  const [highlightedNode, setHighlightedNode] = useState<string | null>(null);
 
   const themeColors = {
     cardBg: isDarkMode ? 'bg-gray-800' : 'bg-white',
@@ -58,14 +59,12 @@ const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
     textSecondary: isDarkMode ? 'text-gray-300' : 'text-gray-600',
     textTertiary: isDarkMode ? 'text-gray-400' : 'text-gray-500',
     border: isDarkMode ? 'border-gray-700' : 'border-gray-200',
-    linkColor: isDarkMode ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)',
-    linkHighlight: isDarkMode ? 'rgba(99, 102, 241, 0.6)' : 'rgba(99, 102, 241, 0.4)'
   };
 
-  const nodeColors = {
+  const columnColors = {
     input: isDarkMode ? '#3B82F6' : '#2563EB',
     process: isDarkMode ? '#8B5CF6' : '#7C3AED',
-    output: isDarkMode ? '#10B981' : '#059669'
+    output: isDarkMode ? '#10B981' : '#059669',
   };
 
   const availableCountries = useMemo(() => {
@@ -75,9 +74,7 @@ const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
         const yearData = data.find(d => d.year === selectedYear) || data[data.length - 1];
         if (yearData) {
           Object.keys(yearData).forEach(k => {
-            if (k !== 'year' && typeof yearData[k] === 'number') {
-              countries.add(k);
-            }
+            if (k !== 'year' && typeof yearData[k] === 'number') countries.add(k);
           });
         }
       }
@@ -85,257 +82,83 @@ const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
     return Array.from(countries).sort();
   }, [rdSpending, stemGraduates, patentData, hightechExports, selectedYear]);
 
-  const getValue = (data: CountryData[], country: string): number => {
-    if (!data?.length) return 0;
-    const yearData = data.find(d => d.year === selectedYear) || data[data.length - 1];
-    if (!yearData) return 0;
-    const value = yearData[country];
-    return typeof value === 'number' ? value : 0;
-  };
-
-  const countryData = useMemo(() => {
+  const values = useMemo(() => {
+    const read = (data: CountryData[]): number => {
+      if (!data?.length) return 0;
+      const yearData = data.find(d => d.year === selectedYear) || data[data.length - 1];
+      if (!yearData) return 0;
+      const value = yearData[selectedCountry];
+      return typeof value === 'number' ? value : 0;
+    };
     return {
-      rdSpending: getValue(rdSpending, selectedCountry),
-      stemGraduates: getValue(stemGraduates, selectedCountry),
-      patents: getValue(patentData, selectedCountry),
-      publications: getValue(scientificPublications, selectedCountry),
-      researchers: getValue(researchersData, selectedCountry),
-      hightechExports: getValue(hightechExports, selectedCountry),
-      techEmployment: getValue(techEmployment, selectedCountry),
-      vcFunding: getValue(vcFunding, selectedCountry)
+      rdSpending: read(rdSpending),
+      stemGraduates: read(stemGraduates),
+      patents: read(patentData),
+      publications: read(scientificPublications),
+      researchers: read(researchersData),
+      hightechExports: read(hightechExports),
+      techEmployment: read(techEmployment),
+      vcFunding: read(vcFunding),
     };
   }, [rdSpending, stemGraduates, patentData, scientificPublications, researchersData, hightechExports, techEmployment, vcFunding, selectedCountry, selectedYear]);
 
-  const normalizeValue = (value: number, max: number): number => {
-    if (max === 0) return 0;
-    return Math.min((value / max) * 100, 100);
-  };
+  const columns: FlowColumn[] = [
+    { id: 'input',   label: 'Inputs',          color: columnColors.input },
+    { id: 'process', label: 'Research output',  color: columnColors.process },
+    { id: 'output',  label: 'Outcomes',         color: columnColors.output },
+  ];
 
-  const maxValues = useMemo(() => ({
-    rdSpending: 5,
-    stemGraduates: 40,
-    patents: 500000,
-    publications: 500000,
-    researchers: 10000,
-    hightechExports: 40,
-    techEmployment: 10,
-    vcFunding: 350
-  }), []);
-
-  const normalizedData = useMemo(() => ({
-    rdSpending: normalizeValue(countryData.rdSpending, maxValues.rdSpending),
-    stemGraduates: normalizeValue(countryData.stemGraduates, maxValues.stemGraduates),
-    patents: normalizeValue(countryData.patents, maxValues.patents),
-    publications: normalizeValue(countryData.publications, maxValues.publications),
-    researchers: normalizeValue(countryData.researchers, maxValues.researchers),
-    hightechExports: normalizeValue(countryData.hightechExports, maxValues.hightechExports),
-    techEmployment: normalizeValue(countryData.techEmployment, maxValues.techEmployment),
-    vcFunding: normalizeValue(countryData.vcFunding, maxValues.vcFunding)
-  }), [countryData, maxValues]);
-
-  const svgWidth = 800;
-  const svgHeight = 400;
-  const nodeWidth = 20;
-  const padding = 60;
-
-  const nodes: SankeyNode[] = useMemo(() => {
-    const inputX = padding;
-    const processX = svgWidth / 2 - nodeWidth / 2;
-    const outputX = svgWidth - padding - nodeWidth;
-
-    const inputTotal = normalizedData.rdSpending + normalizedData.stemGraduates;
-    const processTotal = normalizedData.patents + normalizedData.publications + normalizedData.researchers;
-    const outputTotal = normalizedData.hightechExports + normalizedData.techEmployment + normalizedData.vcFunding;
-
-    const scaleHeight = (value: number, total: number) => {
-      if (total === 0) return 30;
-      return Math.max((value / total) * (svgHeight - 100), 30);
-    };
-
-    let inputY = 50;
-    let processY = 30;
-    let outputY = 40;
-
+  const nodes: FlowNode[] = useMemo(() => {
+    const share = (value: number, ceiling: number) => (ceiling > 0 ? Math.min(value / ceiling, 1) : 0);
     return [
-      {
-        id: 'rdSpending',
-        label: 'R&D Spending',
-        category: 'input' as const,
-        value: countryData.rdSpending,
-        x: inputX,
-        y: inputY,
-        height: scaleHeight(normalizedData.rdSpending, inputTotal),
-        color: nodeColors.input
-      },
-      {
-        id: 'stemGraduates',
-        label: 'STEM Graduates',
-        category: 'input' as const,
-        value: countryData.stemGraduates,
-        x: inputX,
-        y: inputY + scaleHeight(normalizedData.rdSpending, inputTotal) + 20,
-        height: scaleHeight(normalizedData.stemGraduates, inputTotal),
-        color: nodeColors.input
-      },
-      {
-        id: 'patents',
-        label: 'Patents',
-        category: 'process' as const,
-        value: countryData.patents,
-        x: processX,
-        y: processY,
-        height: scaleHeight(normalizedData.patents, processTotal),
-        color: nodeColors.process
-      },
-      {
-        id: 'publications',
-        label: 'Publications',
-        category: 'process' as const,
-        value: countryData.publications,
-        x: processX,
-        y: processY + scaleHeight(normalizedData.patents, processTotal) + 15,
-        height: scaleHeight(normalizedData.publications, processTotal),
-        color: nodeColors.process
-      },
-      {
-        id: 'researchers',
-        label: 'Researchers',
-        category: 'process' as const,
-        value: countryData.researchers,
-        x: processX,
-        y: processY + scaleHeight(normalizedData.patents, processTotal) + scaleHeight(normalizedData.publications, processTotal) + 30,
-        height: scaleHeight(normalizedData.researchers, processTotal),
-        color: nodeColors.process
-      },
-      {
-        id: 'hightechExports',
-        label: 'High-Tech Exports',
-        category: 'output' as const,
-        value: countryData.hightechExports,
-        x: outputX,
-        y: outputY,
-        height: scaleHeight(normalizedData.hightechExports, outputTotal),
-        color: nodeColors.output
-      },
-      {
-        id: 'techEmployment',
-        label: 'Tech Employment',
-        category: 'output' as const,
-        value: countryData.techEmployment,
-        x: outputX,
-        y: outputY + scaleHeight(normalizedData.hightechExports, outputTotal) + 15,
-        height: scaleHeight(normalizedData.techEmployment, outputTotal),
-        color: nodeColors.output
-      },
-      {
-        id: 'vcFunding',
-        label: 'VC Funding',
-        category: 'output' as const,
-        value: countryData.vcFunding,
-        x: outputX,
-        y: outputY + scaleHeight(normalizedData.hightechExports, outputTotal) + scaleHeight(normalizedData.techEmployment, outputTotal) + 30,
-        height: scaleHeight(normalizedData.vcFunding, outputTotal),
-        color: nodeColors.output
-      }
+      { id: 'rdSpending',      label: 'R&D spending',     column: 'input',   value: share(values.rdSpending, CEILINGS.rdSpending),           valueLabel: `${values.rdSpending.toFixed(1)}% GDP` },
+      { id: 'stemGraduates',   label: 'STEM graduates',   column: 'input',   value: share(values.stemGraduates, CEILINGS.stemGraduates),     valueLabel: `${values.stemGraduates.toFixed(1)}% of grads` },
+      { id: 'patents',         label: 'Patents',          column: 'process', value: share(values.patents, CEILINGS.patents),                 valueLabel: formatNumber(values.patents) },
+      { id: 'publications',    label: 'Publications',     column: 'process', value: share(values.publications, CEILINGS.publications),       valueLabel: formatNumber(values.publications) },
+      { id: 'researchers',     label: 'Researchers',      column: 'process', value: share(values.researchers, CEILINGS.researchers),         valueLabel: `${formatNumber(values.researchers)}/M people` },
+      { id: 'hightechExports', label: 'High-tech exports',column: 'output',  value: share(values.hightechExports, CEILINGS.hightechExports), valueLabel: `${values.hightechExports.toFixed(1)}% of exports` },
+      { id: 'techEmployment',  label: 'Tech employment',  column: 'output',  value: share(values.techEmployment, CEILINGS.techEmployment),   valueLabel: `${values.techEmployment.toFixed(1)}% of jobs` },
+      { id: 'vcFunding',       label: 'VC funding',       column: 'output',  value: share(values.vcFunding, CEILINGS.vcFunding),             valueLabel: `$${values.vcFunding.toFixed(1)}B` },
     ];
-  }, [normalizedData, countryData, nodeColors]);
+  }, [values]);
 
-  const links: SankeyLink[] = useMemo(() => {
-    const getNode = (id: string) => nodes.find(n => n.id === id)!;
-    
-    const createLink = (sourceId: string, targetId: string, valueRatio: number): SankeyLink => {
-      const source = getNode(sourceId);
-      const target = getNode(targetId);
-      const linkHeight = Math.max(source.height * valueRatio, 5);
-      
-      return {
-        source: sourceId,
-        target: targetId,
-        value: valueRatio,
-        sourceY: source.y + (source.height - linkHeight) / 2,
-        targetY: target.y + (target.height - linkHeight) / 2,
-        height: linkHeight
-      };
-    };
-
-    return [
-      createLink('rdSpending', 'patents', 0.5),
-      createLink('rdSpending', 'publications', 0.3),
-      createLink('rdSpending', 'researchers', 0.2),
-      createLink('stemGraduates', 'researchers', 0.4),
-      createLink('stemGraduates', 'patents', 0.3),
-      createLink('stemGraduates', 'publications', 0.3),
-      createLink('patents', 'hightechExports', 0.5),
-      createLink('patents', 'vcFunding', 0.5),
-      createLink('publications', 'hightechExports', 0.3),
-      createLink('publications', 'techEmployment', 0.7),
-      createLink('researchers', 'techEmployment', 0.6),
-      createLink('researchers', 'hightechExports', 0.4)
-    ];
-  }, [nodes]);
-
-  const createPath = (link: SankeyLink): string => {
-    const source = nodes.find(n => n.id === link.source)!;
-    const target = nodes.find(n => n.id === link.target)!;
-    
-    const x1 = source.x + nodeWidth;
-    const y1 = link.sourceY + link.height / 2;
-    const x2 = target.x;
-    const y2 = link.targetY + link.height / 2;
-    
-    const midX = (x1 + x2) / 2;
-    
-    return `M ${x1} ${y1 - link.height/2}
-            C ${midX} ${y1 - link.height/2}, ${midX} ${y2 - link.height/2}, ${x2} ${y2 - link.height/2}
-            L ${x2} ${y2 + link.height/2}
-            C ${midX} ${y2 + link.height/2}, ${midX} ${y1 + link.height/2}, ${x1} ${y1 + link.height/2}
-            Z`;
-  };
-
-  const formatNodeValue = (node: SankeyNode): string => {
-    switch (node.id) {
-      case 'rdSpending':
-        return `${node.value.toFixed(1)}% GDP`;
-      case 'stemGraduates':
-        return `${node.value.toFixed(1)}%`;
-      case 'patents':
-      case 'publications':
-        return formatNumber(node.value);
-      case 'researchers':
-        return `${formatNumber(node.value)}/M`;
-      case 'hightechExports':
-        return `${node.value.toFixed(1)}%`;
-      case 'techEmployment':
-        return `${node.value.toFixed(1)}%`;
-      case 'vcFunding':
-        return `$${node.value.toFixed(1)}B`;
-      default:
-        return formatNumber(node.value);
-    }
-  };
+  // Ribbon weights are a stylised account of how innovation inputs feed
+  // outputs, not measured flows — there is no dataset that traces a specific
+  // R&D dollar to a specific patent.
+  const links: FlowLink[] = [
+    { source: 'rdSpending',    target: 'patents',         value: 0.5 },
+    { source: 'rdSpending',    target: 'publications',    value: 0.3 },
+    { source: 'rdSpending',    target: 'researchers',     value: 0.2 },
+    { source: 'stemGraduates', target: 'researchers',     value: 0.4 },
+    { source: 'stemGraduates', target: 'patents',         value: 0.3 },
+    { source: 'stemGraduates', target: 'publications',    value: 0.3 },
+    { source: 'patents',       target: 'hightechExports', value: 0.5 },
+    { source: 'patents',       target: 'vcFunding',       value: 0.5 },
+    { source: 'publications',  target: 'hightechExports', value: 0.3 },
+    { source: 'publications',  target: 'techEmployment',  value: 0.7 },
+    { source: 'researchers',   target: 'techEmployment',  value: 0.6 },
+    { source: 'researchers',   target: 'hightechExports', value: 0.4 },
+  ];
 
   return (
     <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-            Tech Ecosystem Flow
-          </h3>
+          <h3 className={`text-lg font-semibold ${themeColors.text}`}>Tech Ecosystem Flow</h3>
           <p className={`text-sm ${themeColors.textSecondary}`}>
             Innovation pipeline from inputs to outcomes ({selectedYear})
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <label className="sr-only" htmlFor="tech-flow-country">Country</label>
           <select
+            id="tech-flow-country"
             value={selectedCountry}
             onChange={(e) => setSelectedCountry(e.target.value)}
-            className={`px-3 py-1.5 rounded-lg text-sm ${
-              isDarkMode 
-                ? 'bg-gray-700 text-white border-gray-600' 
-                : 'bg-white text-gray-900 border-gray-300'
-            } border`}
+            className={`px-3 py-1.5 rounded-lg text-sm border ${
+              isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'
+            }`}
           >
             {availableCountries.map(country => (
               <option key={country} value={country}>{country}</option>
@@ -344,135 +167,57 @@ const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
         </div>
       </div>
 
-      {/* Legend */}
       <div className="flex flex-wrap items-center gap-6 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: nodeColors.input }}></div>
-          <span className={`text-sm ${themeColors.textSecondary}`}>Inputs (Investment)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: nodeColors.process }}></div>
-          <span className={`text-sm ${themeColors.textSecondary}`}>Process (Research Output)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: nodeColors.output }}></div>
-          <span className={`text-sm ${themeColors.textSecondary}`}>Outcomes (Economic Impact)</span>
-        </div>
+        {[
+          { color: columnColors.input,   label: 'Inputs (investment)' },
+          { color: columnColors.process, label: 'Process (research output)' },
+          { color: columnColors.output,  label: 'Outcomes (economic impact)' },
+        ].map(l => (
+          <div key={l.label} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: l.color }} />
+            <span className={`text-sm ${themeColors.textSecondary}`}>{l.label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Sankey Diagram */}
-      <div className="overflow-x-auto">
-        <svg width={svgWidth} height={svgHeight} className="mx-auto">
-          <defs>
-            <linearGradient id="linkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={nodeColors.input} stopOpacity="0.3" />
-              <stop offset="50%" stopColor={nodeColors.process} stopOpacity="0.3" />
-              <stop offset="100%" stopColor={nodeColors.output} stopOpacity="0.3" />
-            </linearGradient>
-          </defs>
+      <FlowDiagram
+        isDarkMode={isDarkMode}
+        columns={columns}
+        nodes={nodes}
+        links={links}
+        ariaLabel={`Innovation pipeline for ${selectedCountry} in ${selectedYear}, from R&D spending and STEM graduates through patents, publications and researchers to high-tech exports, tech employment and venture capital.`}
+      />
 
-          {/* Links */}
-          {links.map((link, index) => (
-            <path
-              key={`link-${index}`}
-              d={createPath(link)}
-              fill={highlightedNode && (highlightedNode === link.source || highlightedNode === link.target)
-                ? themeColors.linkHighlight
-                : themeColors.linkColor
-              }
-              opacity={highlightedNode && highlightedNode !== link.source && highlightedNode !== link.target ? 0.2 : 1}
-              className="transition-all duration-200"
-            />
-          ))}
-
-          {/* Nodes */}
-          {nodes.map((node) => (
-            <g
-              key={node.id}
-              onMouseEnter={() => setHighlightedNode(node.id)}
-              onMouseLeave={() => setHighlightedNode(null)}
-              className="cursor-pointer"
-            >
-              <rect
-                x={node.x}
-                y={node.y}
-                width={nodeWidth}
-                height={node.height}
-                fill={node.color}
-                rx={4}
-                className={`transition-all duration-200 ${
-                  highlightedNode === node.id ? 'filter brightness-110' : ''
-                }`}
-              />
-              <text
-                x={node.category === 'input' ? node.x - 5 : node.category === 'output' ? node.x + nodeWidth + 5 : node.x + nodeWidth / 2}
-                y={node.y + node.height / 2}
-                textAnchor={node.category === 'input' ? 'end' : node.category === 'output' ? 'start' : 'middle'}
-                dominantBaseline="middle"
-                fill={isDarkMode ? '#E5E7EB' : '#374151'}
-                fontSize={11}
-                fontWeight={highlightedNode === node.id ? 'bold' : 'normal'}
-              >
-                {node.label}
-              </text>
-              <text
-                x={node.category === 'input' ? node.x - 5 : node.category === 'output' ? node.x + nodeWidth + 5 : node.x + nodeWidth / 2}
-                y={node.y + node.height / 2 + 14}
-                textAnchor={node.category === 'input' ? 'end' : node.category === 'output' ? 'start' : 'middle'}
-                dominantBaseline="middle"
-                fill={isDarkMode ? '#9CA3AF' : '#6B7280'}
-                fontSize={10}
-              >
-                {formatNodeValue(node)}
-              </text>
-            </g>
-          ))}
-
-          {/* Column Labels */}
-          <text x={padding} y={20} fill={nodeColors.input} fontSize={12} fontWeight="bold">
-            INPUTS
-          </text>
-          <text x={svgWidth / 2} y={20} fill={nodeColors.process} fontSize={12} fontWeight="bold" textAnchor="middle">
-            RESEARCH OUTPUT
-          </text>
-          <text x={svgWidth - padding} y={20} fill={nodeColors.output} fontSize={12} fontWeight="bold" textAnchor="end">
-            OUTCOMES
-          </text>
-        </svg>
-      </div>
-
-      {/* Country Stats */}
       <div className={`mt-6 p-4 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
         <h4 className={`text-sm font-semibold mb-3 ${themeColors.text}`}>
-          {selectedCountry} Innovation Pipeline Summary
+          {selectedCountry} innovation pipeline summary
         </h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <p className={themeColors.textTertiary}>Total R&D Investment</p>
-            <p className={`font-medium ${themeColors.text}`}>{countryData.rdSpending.toFixed(2)}% of GDP</p>
+            <p className={themeColors.textTertiary}>Total R&D investment</p>
+            <p className={`font-medium ${themeColors.text}`}>{values.rdSpending.toFixed(2)}% of GDP</p>
           </div>
           <div>
-            <p className={themeColors.textTertiary}>Research Output</p>
-            <p className={`font-medium ${themeColors.text}`}>{formatNumber(countryData.patents + countryData.publications)} patents + publications</p>
+            <p className={themeColors.textTertiary}>Research output</p>
+            <p className={`font-medium ${themeColors.text}`}>{formatNumber(values.patents + values.publications)} patents + publications</p>
           </div>
           <div>
             <p className={themeColors.textTertiary}>Workforce</p>
-            <p className={`font-medium ${themeColors.text}`}>{formatNumber(countryData.researchers)} researchers/M</p>
+            <p className={`font-medium ${themeColors.text}`}>{formatNumber(values.researchers)} researchers per million</p>
           </div>
           <div>
-            <p className={themeColors.textTertiary}>Economic Output</p>
-            <p className={`font-medium ${themeColors.text}`}>{countryData.hightechExports.toFixed(1)}% high-tech exports</p>
+            <p className={themeColors.textTertiary}>Economic output</p>
+            <p className={`font-medium ${themeColors.text}`}>{values.hightechExports.toFixed(1)}% high-tech exports</p>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
       <div className={`mt-4 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700/30' : 'bg-gray-100'}`}>
         <p className={`text-xs ${themeColors.textTertiary}`}>
-          This diagram shows the flow of innovation from <strong>inputs</strong> (R&D investment, education) 
-          through <strong>research outputs</strong> (patents, publications, researchers) to 
-          <strong> economic outcomes</strong> (exports, employment, venture capital). 
-          Hover over nodes to highlight connections.
+          Node size is each metric as a share of a plausible global ceiling, because the underlying
+          units are not comparable with each other. The ribbons are a stylised account of how inputs
+          feed outputs — no dataset traces a specific R&amp;D dollar to a specific patent — so read
+          them as structure, not measurement. Hover or tab to a node to highlight its connections.
         </p>
       </div>
     </div>

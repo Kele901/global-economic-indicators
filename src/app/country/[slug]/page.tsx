@@ -7,17 +7,9 @@ import { fetchGlobalData, CountryData } from '../../services/worldbank';
 import { COUNTRY_SLUGS, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG, COUNTRY_COLORS, COUNTRY_KEYS, COUNTRY_REGIONS, type CountryKey } from '../../utils/countryMappings';
 import { METRIC_CATEGORIES, getMetricByKey, formatMetricValue } from '../../utils/metricCategories';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
-import { US, GB, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
+import { COUNTRY_FLAGS as FLAG_MAP } from '../../components/CountryFlag';
 import CountryBrief from '../../components/CountryBrief';
 import WatchlistChip from '../../components/WatchlistChip';
-
-const FLAG_MAP: Record<string, React.ComponentType<any>> = {
-  USA: US, UK: GB, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
-  Australia: AU, Mexico: MX, SouthKorea: KR, Spain: ES, Sweden: SE, Switzerland: CH,
-  Turkey: TR, Nigeria: NG, China: CN, Russia: RU, Brazil: BR, Chile: CL,
-  Argentina: AR, India: IN, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
-  Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG,
-};
 
 const HEADLINE_METRICS = ['gdpGrowth', 'inflationRates', 'interestRates', 'unemploymentRates'];
 const KEY_INDICATOR_METRICS = [

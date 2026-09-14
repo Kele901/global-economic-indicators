@@ -927,6 +927,48 @@ export const REGION_COLORS: Record<string, string> = {
   'Oceania': '#06B6D4',
 };
 
+// The Piketty-derived series in this file are keyed by human-readable name
+// ("South Africa"), not by the internal wbKey used as a column name in World Bank
+// rows ("SouthAfrica"). Anything that joins these series to live data must
+// translate through this map rather than comparing strings directly; the roster
+// test asserts every target here is a country we actually fetch.
+export const INEQUALITY_NAME_TO_WB_KEY: Record<string, string> = {
+  'USA': 'USA',
+  'UK': 'UK',
+  'France': 'France',
+  'Germany': 'Germany',
+  'Japan': 'Japan',
+  'China': 'China',
+  'Sweden': 'Sweden',
+  'Canada': 'Canada',
+  'Brazil': 'Brazil',
+  'India': 'India',
+  'South Africa': 'SouthAfrica',
+  'South Korea': 'SouthKorea',
+  'Australia': 'Australia',
+  'Russia': 'Russia',
+  'Mexico': 'Mexico',
+  'Indonesia': 'Indonesia',
+  'Colombia': 'Colombia',
+  'Chile': 'Chile',
+  'Argentina': 'Argentina',
+  'Nigeria': 'Nigeria',
+  'Kenya': 'Kenya',
+  'Ethiopia': 'Ethiopia',
+  'Italy': 'Italy',
+  'Spain': 'Spain',
+  'Netherlands': 'Netherlands',
+  'Switzerland': 'Switzerland',
+  'Norway': 'Norway',
+  'Poland': 'Poland',
+  'Greece': 'Greece',
+  'Turkey': 'Turkey',
+};
+
+export function toWbKey(displayName: string): string | undefined {
+  return INEQUALITY_NAME_TO_WB_KEY[displayName];
+}
+
 export const COUNTRY_COLORS: Record<string, string> = {
   'USA': '#3B82F6',
   'UK': '#EF4444',

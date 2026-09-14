@@ -1,10 +1,41 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   DATA_SOURCES,
   CATEGORY_LABELS,
   isStale,
   type DataSourceEntry,
+  type DataProvider,
 } from '../dataProvenance';
+
+// Which module is responsible for actually going out to the network for each
+// provider. The guard below reads these files and fails if a provider is marked
+// live while its module never makes an outbound call — the exact way the ITU and
+// WIPO entries once claimed to be live while serving hardcoded tables.
+const PROVIDER_FETCHERS: Partial<Record<DataProvider, string[]>> = {
+  'World Bank': ['src/app/services/worldbank.ts', 'src/app/api/worldbank/route.ts'],
+  FRED: ['src/app/api/fred/route.ts'],
+  'BIS via FRED': ['src/app/api/fred/route.ts'],
+  BIS: ['src/app/api/bis/route.ts'],
+  OECD: ['src/app/api/oecd/route.ts'],
+  EIA: ['src/app/api/eia/route.ts'],
+  Frankfurter: ['src/app/api/frankfurter/route.ts'],
+  Eurostat: ['src/app/api/eurostat/route.ts'],
+  IMF: ['src/app/api/imf-weo/route.ts'],
+  UN: ['src/app/services/tradeData.ts'],
+  ITU: ['src/app/api/itu/route.ts'],
+  WIPO: ['src/app/api/wipo/route.ts'],
+  UNESCO: ['src/app/api/unesco/route.ts'],
+};
+
+const OUTBOUND_CALL = /(axios\s*\.\s*(get|post|request)\s*\(|await\s+fetch\s*\()/;
+
+function makesOutboundCall(relPath: string): boolean {
+  const full = resolve(process.cwd(), relPath);
+  if (!existsSync(full)) return false;
+  return OUTBOUND_CALL.test(readFileSync(full, 'utf8'));
+}
 
 describe('dataProvenance registry', () => {
   it('has a non-empty registry', () => {
@@ -44,6 +75,34 @@ describe('dataProvenance registry', () => {
         expect(Number.isNaN(Date.parse(entry.lastUpdated))).toBe(false);
       }
     }
+  });
+
+  it('never marks a curated-provider entry as live', () => {
+    const contradictions = DATA_SOURCES.filter(e => e.provider === 'Curated' && e.live);
+    expect(contradictions.map(e => e.id)).toEqual([]);
+  });
+
+  it('declares a fetcher module for every provider that has a live entry', () => {
+    const liveProviders = [...new Set(DATA_SOURCES.filter(e => e.live).map(e => e.provider))];
+    const undeclared = liveProviders.filter(p => !PROVIDER_FETCHERS[p]?.length);
+    expect(undeclared).toEqual([]);
+  });
+
+  it('only marks an entry live when its provider really performs an outbound fetch', () => {
+    const liars = DATA_SOURCES.filter(entry => {
+      if (!entry.live) return false;
+      const modules = PROVIDER_FETCHERS[entry.provider] ?? [];
+      return !modules.some(makesOutboundCall);
+    }).map(e => `${e.id} (${e.provider})`);
+
+    expect(liars).toEqual([]);
+  });
+
+  it('resolves every declared fetcher module to a file that exists', () => {
+    const missing = Object.entries(PROVIDER_FETCHERS)
+      .flatMap(([, paths]) => paths ?? [])
+      .filter(p => !existsSync(resolve(process.cwd(), p)));
+    expect(missing).toEqual([]);
   });
 
   describe('isStale', () => {

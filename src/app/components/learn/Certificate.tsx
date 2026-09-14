@@ -7,6 +7,7 @@
 // certificate itself.
 
 import { useState } from 'react';
+import { TOTAL_LESSONS } from '../../learn/lessons';
 
 interface Props {
   isDarkMode: boolean;
@@ -103,7 +104,7 @@ export default function Certificate({ isDarkMode, studentName, completionDate, o
           </text>
           <line x1="220" y1="270" x2="580" y2="270" stroke="#d97706" strokeWidth="1" />
           <text x="400" y="315" textAnchor="middle" fontFamily="Georgia, serif" fontSize="15" fill="#374151">
-            for successfully completing the 15-lesson course
+            for successfully completing the {TOTAL_LESSONS}-lesson course
           </text>
           <text x="400" y="345" textAnchor="middle" fontFamily="Georgia, serif" fontSize="18" fontStyle="italic" fill="#111827">
             &ldquo;A Beginner&apos;s Guide to the Global Economy&rdquo;

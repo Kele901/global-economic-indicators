@@ -9,28 +9,31 @@ import StatusWidget from './components/StatusWidget';
 import CommandPalette from './components/CommandPalette';
 import RouteTracker from './components/RouteTracker';
 import CitationDropdown from './components/CitationDropdown';
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from './lib/site';
 
 const inter = Inter({ subsets: ['latin'] });
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  'https://global-economic-indicators.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'Global Economic Indicators Dashboard | World Bank Data Analysis',
-  description: 'Comprehensive analysis of global economic indicators including interest rates, employment, GDP, inflation, and debt across major economies. Data sourced from the World Bank.',
+  description: SITE_DESCRIPTION,
   keywords: 'economic indicators, world bank data, global economy, interest rates, employment rates, GDP growth, inflation rates, economic analysis, financial data, economic trends',
-  authors: [{ name: 'Global Economic Indicators' }],
-  creator: 'Global Economic Indicators',
-  publisher: 'Global Economic Indicators',
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
   robots: 'index, follow',
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     title: 'Global Economic Indicators Dashboard',
     description: 'Comprehensive analysis of global economic indicators from the World Bank',
-    siteName: 'Global Economic Indicators',
+    siteName: SITE_NAME,
+    url: '/',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Global Economic Indicators Dashboard',
+    description: 'Comprehensive analysis of global economic indicators from the World Bank',
   },
 };
 
@@ -48,6 +51,21 @@ export default function RootLayout({
     <html lang="en" data-theme="light">
       <head>
         <meta charSet="utf-8" />
+        {/*
+          Theme, applied before the browser paints.
+
+          Every page holds `isDarkMode` in localStorage via useLocalStorage,
+          which cannot read storage until the React tree mounts. Without this
+          script a returning dark-mode reader gets one white frame on every
+          navigation. Kept as a raw inline script rather than next/script so
+          it is guaranteed to run before first paint, and wrapped in try/catch
+          because storage access throws outright in some privacy modes.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('isDarkMode');var d=s==='true';var r=document.documentElement;r.setAttribute('data-theme',d?'dark':'light');if(d){r.classList.add('dark')}}catch(e){}})();`,
+          }}
+        />
         <meta name="google-adsense-account" content="ca-pub-1726759813423594" />
         <Script
           async
@@ -55,7 +73,6 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
-        <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.className} min-h-screen`}>
         <ThemeProvider>
@@ -88,8 +105,8 @@ export default function RootLayout({
                       <a href="/guides/understanding-interest-rates" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Understanding Interest Rates</a>
                       <a href="/guides/inflation-guide" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Understanding Inflation</a>
                       <a href="/guides/how-central-banks-work" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">How Central Banks Work</a>
-                      <a href="/guides/glossary" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Glossary</a>
-                      <a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200 font-medium mt-1">View All Guides &rarr;</a>
+                      <a href="/glossary" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Glossary</a>
+                      <a href="/guides" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200 font-medium mt-1">View All Guides &rarr;</a>
                     </div>
                   </div>
                   <div>
@@ -115,6 +132,9 @@ export default function RootLayout({
                 <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 flex-wrap">
                   <CitationDropdown />
                   <StatusWidget />
+                </div>
+                <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400 transition-colors duration-200">
+                  Site Created by Kelechi Okoye-Ahaneku
                 </div>
               </div>
             </footer>

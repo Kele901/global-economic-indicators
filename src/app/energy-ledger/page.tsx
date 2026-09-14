@@ -27,17 +27,37 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import GuidedTour, { type TourStep } from '../components/GuidedTour';
+import SkeletonCard from '../components/SkeletonCard';
 
-const EnergyTicker            = dynamic(() => import('../components/EnergyTicker'),            { ssr: false });
-const ElectricityMixChart     = dynamic(() => import('../components/ElectricityMixChart'),     { ssr: false });
-const StorageBuildoutChart    = dynamic(() => import('../components/StorageBuildoutChart'),    { ssr: false });
-const LngFlowsTable           = dynamic(() => import('../components/LngFlowsTable'),           { ssr: false });
-const NuclearStatusTable      = dynamic(() => import('../components/NuclearStatusTable'),      { ssr: false });
-const CapacityFactorGrid      = dynamic(() => import('../components/CapacityFactorGrid'),      { ssr: false });
-const ReservesRankingChart    = dynamic(() => import('../components/ReservesRankingChart'),    { ssr: false });
-const EnergyIntensityQuadrant = dynamic(() => import('../components/EnergyIntensityQuadrant'), { ssr: false });
+const skeleton = (label: string, height?: string) => {
+  const Loading = () => <SkeletonCard height={height} label={label} />;
+  return Loading;
+};
+
+const EnergyTicker            = dynamic(() => import('../components/EnergyTicker'),            { ssr: false, loading: skeleton('Loading energy ticker', 'h-[64px]') });
+const EnergyDependenceChart   = dynamic(() => import('../components/EnergyDependenceChart'),   { ssr: false, loading: skeleton('Loading import dependence', 'h-[520px]') });
+const ElectricityMixChart     = dynamic(() => import('../components/ElectricityMixChart'),     { ssr: false, loading: skeleton('Loading electricity mix') });
+const ElectricityMixTreemap   = dynamic(() => import('../components/ElectricityMixTreemap'),   { ssr: false, loading: skeleton('Loading generation composition', 'h-[380px]') });
+const StorageBuildoutChart    = dynamic(() => import('../components/StorageBuildoutChart'),    { ssr: false, loading: skeleton('Loading storage build-out') });
+const LngFlowsTable           = dynamic(() => import('../components/LngFlowsTable'),           { ssr: false, loading: skeleton('Loading LNG flows') });
+const NuclearStatusTable      = dynamic(() => import('../components/NuclearStatusTable'),      { ssr: false, loading: skeleton('Loading nuclear status') });
+const CapacityFactorGrid      = dynamic(() => import('../components/CapacityFactorGrid'),      { ssr: false, loading: skeleton('Loading capacity factors') });
+const ReservesRankingChart    = dynamic(() => import('../components/ReservesRankingChart'),    { ssr: false, loading: skeleton('Loading reserves ranking') });
+const EnergyIntensityQuadrant = dynamic(() => import('../components/EnergyIntensityQuadrant'), { ssr: false, loading: skeleton('Loading energy intensity') });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
+
+const TOUR_STEPS: TourStep[] = [
+  { chapter: 'Chapter 1', title: 'Who depends on whom', body: 'Live net energy imports for every country in the roster. Positive means it buys more energy than it produces; negative means it sells the surplus. Bar colour carries the renewable share.' },
+  { chapter: 'Chapter 2', title: 'The generation mix', body: 'Where each economy\'s electricity actually comes from. Geology sets part of it (hydro in Norway, gas in Qatar) and policy sets the rest (nuclear in France, coal in India).' },
+  { chapter: 'Chapter 3', title: 'Storage', body: 'Grid batteries went from novelty to infrastructure in about five years. This is the chart that decides how far renewables can go.' },
+  { chapter: 'Chapter 4', title: 'LNG', body: 'The post-2022 redraw: US LNG displaced Qatar as the largest exporter and Europe displaced Asia as the premium buyer.' },
+  { chapter: 'Chapter 5', title: 'Nuclear', body: 'Operable reactors, the build pipeline and each country\'s current policy stance. China dominates the queue.' },
+  { chapter: 'Chapter 6', title: 'Capacity factors', body: 'What share of nameplate capacity each source actually delivers over a year, next to its lifecycle CO₂ intensity. This is why storage exists.' },
+  { chapter: 'Chapter 7', title: 'Reserves', body: 'Oil, gas and coal on a common barrel-of-oil-equivalent basis — the flip side of Chapter 1\'s importers.' },
+  { chapter: 'Chapter 8', title: 'Energy intensity', body: 'Primary energy per unit of GDP. Lower is more efficient, and the year-on-year change shows who is actually improving.' },
+];
 
 function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; }) {
   return (
@@ -51,7 +71,7 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: b
 
 export default function EnergyLedgerPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
-  const [_data, setData] = useState<GlobalData | null>(null);
+  const [data, setData] = useState<GlobalData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -116,13 +136,21 @@ export default function EnergyLedgerPage() {
           >{isDarkMode ? 'Light mode' : 'Dark mode'}</button>
         </div>
 
+        <GuidedTour
+          storageKey="tour-energy-ledger"
+          steps={TOUR_STEPS}
+          isDarkMode={isDarkMode}
+          ctaLabel="Take the 60-second tour of the 8 chapters"
+        />
+
         <StalenessBanner
           lastUpdated={CURATED_LAST_UPDATED}
           label="IEA Electricity 2025, BNEF Global Storage Outlook 2024, IGU World LNG Report 2024, IAEA PRIS Sep-2025, EIA International Energy Statistics 2024"
           isDarkMode={isDarkMode}
         />
 
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2 mb-4 mt-4 flex-wrap">
+          <ChartMeta sourceId="wb-energy-dependence" isDarkMode={isDarkMode} />
           <ChartMeta sourceId="energy-ledger-curated" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
@@ -179,8 +207,13 @@ export default function EnergyLedgerPage() {
 
         <section className="mb-14">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
-            title="The Reserves Snapshot"
-            subtitle="Ticker of top hydrocarbon reserves holders. A handful of countries own the bulk of remaining oil, gas and coal; Chapters 4 and 7 show where those reserves flow." />
+            title="Who Depends on Whom"
+            subtitle="Live net energy imports as a share of energy use. Above zero the country is buying energy in; below zero it is selling a surplus. Bar colour carries the renewable share of final consumption, which is the only thing that structurally shrinks the exposure." />
+          <EnergyDependenceChart
+            isDarkMode={isDarkMode}
+            netEnergyImports={data?.netEnergyImports}
+            renewableEnergy={data?.renewableEnergy}
+          />
         </section>
 
         <section className="mb-14">
@@ -188,6 +221,9 @@ export default function EnergyLedgerPage() {
             title="Electricity Generation Mix"
             subtitle="Stacked bars showing where each major economy's electricity actually comes from in 2023. The mix reflects both geology (hydro-rich Norway, gas-rich Qatar) and policy (nuclear-heavy France, coal-heavy India)." />
           <ElectricityMixChart isDarkMode={isDarkMode} />
+          <div className="mt-6">
+            <ElectricityMixTreemap isDarkMode={isDarkMode} />
+          </div>
         </section>
 
         <section className="mb-14">

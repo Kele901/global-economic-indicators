@@ -219,6 +219,144 @@ export const MARITIME_CHOKEPOINTS: ChokepointRow[] = [
   { name: 'Turkish Straits',      dailyBarrelsMn: 2.4,  containerShareGlobalPct: 2,  seabornTradeSharePct: 4,  note: 'Bosphorus + Dardanelles' },
 ];
 
+// ── Re-export hubs (entrepôt trade) ─────────────────────────────────────
+// A large slice of world "exports" is goods passing through a hub, not goods
+// made there. This is why bilateral balances are so easy to misread: a
+// Chinese good landed in Rotterdam and trucked to Germany counts as a Dutch
+// export to Germany. Figures are curated 2024 estimates from national
+// statistics offices (CBS Netherlands, Enterprise Singapore, HK Census and
+// Statistics Department, Dubai Customs, NBB Belgium) and UNCTAD; origin and
+// destination splits are approximations from those offices' published
+// breakdowns, so they are directionally right rather than exact.
+export interface ReExportHubRow {
+  hub: string;
+  iso3: string;
+  reExportsBnUsd: number;
+  shareOfGoodsExportsPct: number;
+  // Where the goods come from, and where they go on to. Shares of the hub's
+  // re-export total, summing to roughly 100 each.
+  origins: { region: string; sharePct: number }[];
+  destinations: { region: string; sharePct: number }[];
+  note: string;
+}
+
+export const RE_EXPORT_HUBS_2024: ReExportHubRow[] = [
+  {
+    hub: 'Hong Kong',
+    iso3: 'HKG',
+    reExportsBnUsd: 550,
+    shareOfGoodsExportsPct: 99,
+    origins: [
+      { region: 'Mainland China', sharePct: 60 },
+      { region: 'East Asia', sharePct: 22 },
+      { region: 'Southeast Asia', sharePct: 10 },
+      { region: 'Rest of world', sharePct: 8 },
+    ],
+    destinations: [
+      { region: 'Mainland China', sharePct: 57 },
+      { region: 'North America', sharePct: 12 },
+      { region: 'Europe', sharePct: 11 },
+      { region: 'Southeast Asia', sharePct: 12 },
+      { region: 'Rest of world', sharePct: 8 },
+    ],
+    note: 'Almost nothing Hong Kong "exports" is made in Hong Kong. Most of it is mainland Chinese goods routed out, or foreign goods routed in.',
+  },
+  {
+    hub: 'Netherlands',
+    iso3: 'NLD',
+    reExportsBnUsd: 320,
+    shareOfGoodsExportsPct: 46,
+    origins: [
+      { region: 'Mainland China', sharePct: 24 },
+      { region: 'East Asia', sharePct: 14 },
+      { region: 'North America', sharePct: 18 },
+      { region: 'Europe', sharePct: 26 },
+      { region: 'Rest of world', sharePct: 18 },
+    ],
+    destinations: [
+      { region: 'Europe', sharePct: 74 },
+      { region: 'North America', sharePct: 8 },
+      { region: 'Rest of world', sharePct: 18 },
+    ],
+    note: 'The "Rotterdam effect": roughly half of Dutch goods exports are imports that cleared customs in Rotterdam and left again, mostly into Germany.',
+  },
+  {
+    hub: 'Singapore',
+    iso3: 'SGP',
+    reExportsBnUsd: 270,
+    shareOfGoodsExportsPct: 47,
+    origins: [
+      { region: 'Mainland China', sharePct: 20 },
+      { region: 'East Asia', sharePct: 24 },
+      { region: 'Southeast Asia', sharePct: 22 },
+      { region: 'North America', sharePct: 16 },
+      { region: 'Rest of world', sharePct: 18 },
+    ],
+    destinations: [
+      { region: 'Southeast Asia', sharePct: 38 },
+      { region: 'Mainland China', sharePct: 16 },
+      { region: 'East Asia', sharePct: 14 },
+      { region: 'Europe', sharePct: 12 },
+      { region: 'Rest of world', sharePct: 20 },
+    ],
+    note: 'Electronics and refined fuel dominate. Singapore is the clearing house for intra-ASEAN trade as well as a bridge into China.',
+  },
+  {
+    hub: 'UAE',
+    iso3: 'ARE',
+    reExportsBnUsd: 175,
+    shareOfGoodsExportsPct: 40,
+    origins: [
+      { region: 'Mainland China', sharePct: 30 },
+      { region: 'South Asia', sharePct: 16 },
+      { region: 'Europe', sharePct: 18 },
+      { region: 'East Asia', sharePct: 14 },
+      { region: 'Rest of world', sharePct: 22 },
+    ],
+    destinations: [
+      { region: 'Middle East', sharePct: 34 },
+      { region: 'Sub-Saharan Africa', sharePct: 20 },
+      { region: 'South Asia', sharePct: 18 },
+      { region: 'Rest of world', sharePct: 28 },
+    ],
+    note: 'Jebel Ali and the Dubai free zones supply the Gulf, East Africa and South Asia — and, since 2022, have become a significant conduit for goods flowing to Russia.',
+  },
+  {
+    hub: 'Belgium',
+    iso3: 'BEL',
+    reExportsBnUsd: 105,
+    shareOfGoodsExportsPct: 21,
+    origins: [
+      { region: 'Europe', sharePct: 34 },
+      { region: 'Mainland China', sharePct: 16 },
+      { region: 'North America', sharePct: 16 },
+      { region: 'Rest of world', sharePct: 34 },
+    ],
+    destinations: [
+      { region: 'Europe', sharePct: 78 },
+      { region: 'Rest of world', sharePct: 22 },
+    ],
+    note: 'Antwerp plays the same role as Rotterdam for chemicals, pharmaceuticals and diamonds.',
+  },
+  {
+    hub: 'Panama',
+    iso3: 'PAN',
+    reExportsBnUsd: 14,
+    shareOfGoodsExportsPct: 82,
+    origins: [
+      { region: 'Mainland China', sharePct: 34 },
+      { region: 'North America', sharePct: 26 },
+      { region: 'East Asia', sharePct: 14 },
+      { region: 'Rest of world', sharePct: 26 },
+    ],
+    destinations: [
+      { region: 'Latin America', sharePct: 82 },
+      { region: 'Rest of world', sharePct: 18 },
+    ],
+    note: 'The Colón Free Zone is small in dollar terms but supplies most of Central America and the northern Andes.',
+  },
+];
+
 // ── Trade frictions timeline ────────────────────────────────────────────
 // Major trade-war and sanctions events since 2018. Used for the epic
 // timeline in Chapter 8.

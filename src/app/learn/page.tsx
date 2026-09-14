@@ -10,6 +10,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useLearnProgress } from '../hooks/useLearnProgress';
 import { MODULES, TOTAL_LESSONS, WRAP_UP_QUIZ, lessonsByModule } from './lessons';
 import LearnHero from '../components/learn/LearnHero';
+import WorkshopStrip from '../components/learn/WorkshopStrip';
 import ProgressBar from '../components/learn/ProgressBar';
 import ModuleCard from '../components/learn/ModuleCard';
 import WrapUpQuiz from '../components/learn/WrapUpQuiz';
@@ -82,6 +83,8 @@ export default function LearnPage() {
           total={TOTAL_LESSONS}
           studentName={state.studentName}
         />
+
+        <WorkshopStrip isDarkMode={isDarkMode} />
 
         {MODULES.map((mod, i) => (
           <div key={mod.id} className="print:hidden">

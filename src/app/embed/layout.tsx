@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '../lib/site';
 
 export const metadata: Metadata = {
   title: 'Economic Chart Widget | Global Economic Indicators',
@@ -11,7 +12,7 @@ export default function EmbedLayout({ children }: { children: React.ReactNode })
       {children}
       <div className="text-center py-1">
         <a
-          href="https://global-economic-indicators.vercel.app"
+          href={SITE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="text-[10px] text-gray-400 hover:text-blue-500 transition-colors"

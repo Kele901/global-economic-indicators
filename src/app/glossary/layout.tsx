@@ -1,17 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Glossary | Global Economic Indicators',
+  title: 'Economic Glossary: Metrics and Terms | Global Economic Indicators',
   description:
-    'Definitions for every metric, ratio and derived indicator the site tracks — GDP, inflation, Palma ratio, real policy rate, term spread and more.',
+    'Two glossaries in one. Metrics: the formula, unit and source behind every indicator charted on the site. Terms: plain-English definitions of macroeconomic vocabulary from aggregate demand to the zero lower bound.',
   keywords:
-    'economics glossary, GDP definition, inflation definition, Palma ratio, real policy rate, term spread, monetary policy terms, macro terminology',
+    'economics glossary, economic terms dictionary, GDP definition, inflation definition, Palma ratio, real policy rate, term spread, monetary policy terms, macro terminology',
   alternates: { canonical: '/glossary' },
   openGraph: {
     type: 'article',
-    title: 'Glossary — every metric explained',
+    title: 'Economic Glossary: metrics and terms',
     description:
-      'Compact, jargon-light definitions for the indicators used across the site.',
+      'Compact, jargon-light definitions for every indicator on the site plus the macroeconomic vocabulary behind them.',
+    url: '/glossary',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Economic Glossary: metrics and terms',
+    description: 'Definitions for every indicator on the site plus the macro vocabulary behind them.',
   },
 };
 

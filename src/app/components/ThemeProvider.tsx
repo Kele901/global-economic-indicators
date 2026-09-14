@@ -1,57 +1,48 @@
 'use client';
 
+// Keeps the document-level theme classes in step with the stored
+// preference. The pre-paint script in layout.tsx sets them before first
+// paint; this keeps them correct afterwards, including for pages whose
+// own dark-mode state lives in a child component.
+//
+// This used to poll localStorage every 100ms because nothing in the app
+// announced a theme change reliably. useLocalStorage now dispatches both
+// `themeChange` and a `local-storage:isDarkMode` event on every write, so
+// the interval is gone.
+
 import { useEffect } from 'react';
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Function to update theme
     const updateTheme = () => {
-      if (typeof window === 'undefined') return;
-      
-      const isDarkMode = localStorage.getItem('isDarkMode');
-      const isDark = isDarkMode ? JSON.parse(isDarkMode) : false;
-      
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.body.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.setAttribute('data-theme', 'light');
-        document.body.classList.remove('dark');
+      let isDark = false;
+      try {
+        isDark = localStorage.getItem('isDarkMode') === 'true';
+      } catch {
+        // Storage is unavailable in some privacy modes; light mode is the
+        // documented default.
       }
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.body.classList.toggle('dark', isDark);
     };
 
-    // Initial theme setup - run immediately
     updateTheme();
 
-    // Listen for storage changes (when theme is toggled in other tabs)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'isDarkMode') {
-        updateTheme();
-      }
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'isDarkMode') updateTheme();
     };
 
-    // Listen for custom theme change events (from same tab)
-    const handleThemeChange = () => {
-      // Use setTimeout to ensure localStorage has been updated
-      setTimeout(updateTheme, 0);
-    };
-
-    // Listen for any event that might indicate a theme change
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('themeChange', handleThemeChange);
-
-    // Aggressive polling for immediate updates (every 100ms)
-    const pollInterval = setInterval(updateTheme, 100);
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('themeChange', updateTheme);
+    window.addEventListener('local-storage:isDarkMode', updateTheme);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('themeChange', handleThemeChange);
-      clearInterval(pollInterval);
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('themeChange', updateTheme);
+      window.removeEventListener('local-storage:isDarkMode', updateTheme);
     };
   }, []);
 
   return <>{children}</>;
 }
-

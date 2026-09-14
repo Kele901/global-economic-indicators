@@ -57,6 +57,12 @@ export const RELATED_PAGES: Record<string, { href: string; label: string }[]> = 
     { href: '/inequality',       label: 'Inequality' },
     { href: '/migration-ledger', label: 'Migration Ledger' },
   ],
+  '/inequality': [
+    { href: '/labor-ledger',     label: 'Labor Ledger' },
+    { href: '/development',      label: 'Development Index' },
+    { href: '/health-ledger',    label: 'Health Ledger' },
+    { href: '/migration-ledger', label: 'Migration Ledger' },
+  ],
   '/resources': [
     { href: '/energy-ledger',    label: 'Energy Ledger' },
     { href: '/trade-ledger',     label: 'Trade Ledger' },

@@ -2,7 +2,7 @@
 
 // Print-only view of every lesson body. Hidden on screen (max-h-0
 // + hidden print:block), fully expanded when the user hits print
-// so the whole 15-lesson curriculum comes out in a single PDF /
+// so the whole 23-lesson curriculum comes out in a single PDF /
 // paper pack. The button lives on the /learn page and calls
 // window.print().
 

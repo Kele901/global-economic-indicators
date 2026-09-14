@@ -14,6 +14,8 @@ import {
   AreaChart, Area, BarChart, Bar
 } from 'recharts';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 import { useTradeData, useHistoricalTradeData } from '../hooks/useTradeData';
 import { COUNTRY_MAPPINGS } from '../services/tradeData';
 import { 
@@ -196,7 +198,7 @@ const MAP_METRICS: { id: MapMetric; label: string }[] = [
 
 const TradingPlacesPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
-  const [enableRealData, setEnableRealData] = useLocalStorage('enableRealData', false);
+  const [enableRealData, setEnableRealData] = useLocalStorage('enableRealData', true);
   const [viewMode, setViewMode] = useLocalStorage<ViewMode>('tradingPlacesViewMode', 'rankings');
   const [selectedCountry, setSelectedCountry] = useState(mockTradeData.countries[0]);
   const [detailCountry, setDetailCountry] = useState<string | null>(null);
@@ -310,6 +312,10 @@ const TradingPlacesPage: React.FC = () => {
     }
     return mockTradeData;
   }, [enableRealData, realTradeData]);
+
+  // True whenever the figures on screen are the illustrative fallback rather than
+  // merged live values, either because the toggle is off or the fetch returned nothing.
+  const showingSample = !enableRealData || realTradeData.length === 0;
 
   useEffect(() => {
     const updated = combinedTradeData.countries.find(c => c.code === selectedCountry.code);
@@ -518,8 +524,12 @@ const TradingPlacesPage: React.FC = () => {
             <p className={tc.textSec}>Global trade flows, tariffs, and economic relationships</p>
                     </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setEnableRealData(!enableRealData)} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${enableRealData ? 'bg-green-600 text-white border-green-600' : `${tc.card} ${tc.textSec}`}`}>
-              {enableRealData ? 'Live Data' : 'Sample'}
+            <button
+              onClick={() => setEnableRealData(!enableRealData)}
+              aria-pressed={enableRealData}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${enableRealData ? 'bg-green-600 text-white border-green-600' : 'bg-amber-500 text-white border-amber-500'}`}
+            >
+              {enableRealData ? 'Live Data' : 'Sample data'}
                   </button>
                   <div className="flex items-center gap-2">
               <span className={`text-xs ${tc.textSec}`}>Light</span>
@@ -531,6 +541,30 @@ const TradingPlacesPage: React.FC = () => {
                 </div>
             </div>
 
+        {/* Provenance: says plainly whether the numbers on screen are measured or illustrative. */}
+        {showingSample && (
+          <div
+            role="status"
+            className={`rounded-xl border p-4 mb-6 ${isDarkMode ? 'bg-amber-900/25 border-amber-700' : 'bg-amber-50 border-amber-300'}`}
+          >
+            <h3 className={`font-semibold mb-1 ${isDarkMode ? 'text-amber-200' : 'text-amber-900'}`}>
+              {loading ? 'Loading live trade data…' : 'You are viewing sample data'}
+            </h3>
+            <p className={`text-sm ${isDarkMode ? 'text-amber-200/80' : 'text-amber-800'}`}>
+              {loading
+                ? 'Illustrative figures are shown until the World Bank and UN Comtrade responses arrive.'
+                : 'These are illustrative figures for 18 economies, not measured statistics. Switch the toggle above to Live Data to pull real World Bank and UN Comtrade values.'}
+            </p>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <ChartMeta sourceId="wb-trade-balance" isDarkMode={isDarkMode} />
+          <ChartMeta sourceId="un-comtrade" isDarkMode={isDarkMode} />
+          <ChartMeta sourceId="trade-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag={showingSample ? 'estimate' : 'revised'} isDarkMode={isDarkMode} />
+        </div>
+
         {/* Info Banner */}
         <div className={`rounded-xl border p-4 mb-6 ${tc.infoBg}`}>
           <h3 className={`font-semibold mb-1 ${tc.text}`}>Understanding Global Trade</h3>
@@ -538,6 +572,10 @@ const TradingPlacesPage: React.FC = () => {
             Explore trade relationships between 18 major economies. Use Rankings to compare countries,
             Country Focus for detailed partner analysis, Historical for long-term trends, Tariffs &amp; Blocs
             for trade disputes and regional agreements, and Trade Map for geographic flow visualization.
+          </p>
+          <p className={`text-xs mt-2 ${tc.textSec}`}>
+            The tariff disputes, trade-bloc membership and advanced complexity tables are curated
+            snapshots. They do not change with the live-data toggle.
           </p>
           </div>
           

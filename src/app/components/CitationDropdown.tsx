@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { SITE_URL, SITE_NAME } from '../lib/site';
 
 type Format = 'apa' | 'mla' | 'chicago' | 'bibtex' | 'url';
 
@@ -12,8 +13,8 @@ const FORMAT_LABEL: Record<Format, string> = {
   url:     'URL',
 };
 
-const SITE_TITLE = 'Global Economic Indicators';
-const SITE_ORIGIN = 'https://www.globaleconindicators.info';
+const SITE_TITLE = SITE_NAME;
+const SITE_ORIGIN = SITE_URL;
 
 function toBibKey(url: string): string {
   const slug = url.replace(/^https?:\/\//, '').replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');

@@ -32,6 +32,8 @@ const TariffWallChart               = dynamic(() => import('../components/Tariff
 const ShippingIndexChart            = dynamic(() => import('../components/ShippingIndexChart'),            { ssr: false });
 const TradeAgreementsTable          = dynamic(() => import('../components/TradeAgreementsTable'),          { ssr: false });
 const SupplyChainConcentrationTable = dynamic(() => import('../components/SupplyChainConcentrationTable'), { ssr: false });
+const SupplyChainTreemap            = dynamic(() => import('../components/SupplyChainTreemap'),            { ssr: false });
+const TradeReExportFlow             = dynamic(() => import('../components/TradeReExportFlow'),             { ssr: false });
 const TradeFrictionsTimeline        = dynamic(() => import('../components/TradeFrictionsTimeline'),        { ssr: false });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
@@ -165,7 +167,7 @@ export default function TradeLedgerPage() {
         />
 
         <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <ChartMeta sourceId="trade-atlas" isDarkMode={isDarkMode} />
+          <ChartMeta sourceId="wb-trade-balance" isDarkMode={isDarkMode} />
           <ChartMeta sourceId="trade-ledger-curated" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
@@ -268,6 +270,9 @@ export default function TradeLedgerPage() {
             subtitle="Current-account balance as % of GDP — who is a net creditor to the world, who is a net debtor. Persistent surpluses (Germany, China) and deficits (US, UK) reveal structural asymmetries in savings vs consumption."
           />
           <TradeBalanceChart isDarkMode={isDarkMode} currentAccount={currentAccount} />
+          <div className="mt-6">
+            <TradeReExportFlow isDarkMode={isDarkMode} />
+          </div>
         </section>
 
         {/* Chapter 3 — The Openness Race */}
@@ -323,6 +328,9 @@ export default function TradeLedgerPage() {
               title="Supply-Chain Concentration"
               subtitle="Where the world's critical inputs come from. Rare earths, lithium, cobalt, semiconductors, solar PV — any product where the top-3 producers combine for &gt;90% is a real single-point-of-failure risk."
             />
+            <div className="mb-6">
+              <SupplyChainTreemap isDarkMode={isDarkMode} />
+            </div>
             <SupplyChainConcentrationTable isDarkMode={isDarkMode} />
           </section>
 

@@ -6,8 +6,11 @@ import { CENTRAL_BANK_RATES } from '../data/currencyHierarchyData';
 import { RECENT_DECISIONS, FORWARD_GUIDANCE, type RateDecision } from '../data/monetaryPolicyData';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, ScatterChart, Scatter, Cell, ReferenceLine } from 'recharts';
+import dynamic from 'next/dynamic';
 import { useCentralBankRates } from '../hooks/useCentralBankRates';
 import { fetchRecentDecisions, RateDecision as LiveRateDecision } from '../services/rateDecisions';
+
+const PhillipsCurveChart = dynamic(() => import('../components/PhillipsCurveChart'), { ssr: false });
 
 const BANK_COLORS: Record<string, string> = {
   'Federal Reserve': '#8884d8', 'ECB': '#82ca9d', 'Bank of Japan': '#ffc658',
@@ -455,6 +458,15 @@ export default function MonetaryPolicyPage() {
               </span>
             ))}
           </div>
+        </div>
+
+        {/* Phillips curve — the trade-off the rates above are supposed to manage */}
+        <div className="mb-8">
+          <PhillipsCurveChart
+            isDarkMode={isDarkMode}
+            unemploymentRates={(data as any)?.unemploymentRates}
+            inflationRates={(data as any)?.inflationRates}
+          />
         </div>
 
         {/* Rate Change Frequency */}

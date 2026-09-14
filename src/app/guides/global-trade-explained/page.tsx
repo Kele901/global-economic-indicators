@@ -151,7 +151,7 @@ export default function GlobalTradeGuide() {
               <li><a href="/economic-gravity" className="text-blue-600 dark:text-blue-400 hover:underline">Economic Gravity Model</a> &mdash; Visualize bilateral trade relationships</li>
               <li><a href="/guides/currencies-and-exchange-rates" className="text-blue-600 dark:text-blue-400 hover:underline">Currencies and Exchange Rates</a> &mdash; How currencies affect trade</li>
               <li><a href="/guides/emerging-vs-developed-economies" className="text-blue-600 dark:text-blue-400 hover:underline">Emerging vs Developed Economies</a> &mdash; Trade patterns by income group</li>
-              <li><a href="/guides/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
+              <li><a href="/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
             </ul>
           </section>
         </div>

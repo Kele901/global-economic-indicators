@@ -152,7 +152,7 @@ const Navbar = () => {
       label: 'Info',
       children: [
         { href: '/glossary', label: 'Glossary' },
-        { href: '/guides/reading-economic-data', label: 'Guides' },
+        { href: '/guides', label: 'Guides' },
         { href: '/data-sources', label: 'Data Sources' },
         { href: '/changelog', label: 'Changelog' },
         { href: '/about', label: 'About' },

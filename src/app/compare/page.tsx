@@ -1,12 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { fetchGlobalData } from '../services/worldbank';
 import CountryComparisonDashboard from '../components/CountryComparisonDashboard';
 import AdSense from '../components/AdSense';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+
+const CountryRankBump      = dynamic(() => import('../components/CountryRankBump'),      { ssr: false });
+const MetricSparklineGrid  = dynamic(() => import('../components/MetricSparklineGrid'),  { ssr: false });
 
 const StaticIntroContent = ({ isDarkMode }: { isDarkMode: boolean }) => (
   <div className={`rounded-xl border p-4 sm:p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -121,6 +125,16 @@ export default function ComparePage() {
         
         {/* Main content */}
         {contentReady && <CountryComparisonDashboard data={data} isDarkMode={isDarkMode} />}
+
+        {/* Two whole-roster views that the four-country comparison above
+            cannot give you: how the league table reshuffled, and whether a
+            pattern seen in a handful of countries holds everywhere. */}
+        {contentReady && (
+          <div className="space-y-6">
+            <CountryRankBump isDarkMode={isDarkMode} data={data} />
+            <MetricSparklineGrid isDarkMode={isDarkMode} data={data} />
+          </div>
+        )}
         
         {/* Bottom ad - only when content is ready */}
         <AdSense show={contentReady} />

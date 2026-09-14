@@ -30,7 +30,7 @@ export default function LearnHero({ isDarkMode, completed, total, studentName }:
         A Beginner&apos;s Guide to the Global Economy
       </h1>
       <p className={`text-base sm:text-lg max-w-2xl mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-        Fifteen short lessons across four modules. Real-world analogies, quick
+        Twenty-three short lessons across five modules. Real-world analogies, quick
         interactive demos, and a mini quiz at the end of each lesson. Finish
         them all and you unlock a printable certificate.
       </p>

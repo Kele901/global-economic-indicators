@@ -2,11 +2,19 @@
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useEffect, useState } from 'react';
+import { CONTACT_EMAIL } from '../lib/site';
+
+// Hosted form endpoint (Formspree or compatible). When it is unset the form is
+// replaced by a mailto link rather than silently swallowing the message.
+const FORM_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT ?? '';
 
 export default function ContactPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [honeypot, setHoneypot] = useState('');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   useEffect(() => {
@@ -21,9 +29,43 @@ export default function ContactPage() {
     }
   }, [isDarkMode]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (status === 'sending') return;
+
+    // Bots fill the hidden field; humans never see it. Show success either way so
+    // the bot learns nothing, but skip the network call.
+    if (honeypot) {
+      setSubmitted(true);
+      return;
+    }
+
+    setStatus('sending');
+    setErrorMessage('');
+
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          _subject: `Contact form: ${form.name}`,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.errors?.[0]?.message ?? `Request failed (${res.status})`);
+      }
+
+      setStatus('idle');
+      setSubmitted(true);
+    } catch (err) {
+      setStatus('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong.');
+    }
   };
 
   const faqs = [
@@ -70,7 +112,20 @@ export default function ContactPage() {
           {/* Contact Form */}
           <section>
             <h2 className="text-2xl font-semibold mb-4">Send Us a Message</h2>
-            {submitted ? (
+            {!FORM_ENDPOINT ? (
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+                <p className={`mb-4 text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  The message form is not configured on this deployment, so email is the
+                  reliable way to reach us. We read everything that arrives.
+                </p>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Global Economic Indicators enquiry')}`}
+                  className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Email {CONTACT_EMAIL}
+                </a>
+              </div>
+            ) : submitted ? (
               <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-green-900/30 border border-green-700' : 'bg-green-50 border border-green-200'}`}>
                 <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-green-400' : 'text-green-700'}`}>
                   Thank you for your message!
@@ -80,14 +135,27 @@ export default function ContactPage() {
                   requires a response, we will get back to you at the email address you provided.
                 </p>
                 <button
-                  onClick={() => { setSubmitted(false); setForm({ name: '', email: '', message: '' }); }}
+                  onClick={() => { setSubmitted(false); setStatus('idle'); setErrorMessage(''); setHoneypot(''); setForm({ name: '', email: '', message: '' }); }}
                   className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Send Another Message
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate={false}>
+                {/* Honeypot: visually hidden and skipped by keyboard and screen readers. */}
+                <div aria-hidden="true" className="absolute left-[-9999px] w-px h-px overflow-hidden">
+                  <label htmlFor="company">Company (leave blank)</label>
+                  <input
+                    type="text"
+                    id="company"
+                    name="company"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
+                </div>
                 <div>
                   <label htmlFor="name" className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Name
@@ -142,11 +210,27 @@ export default function ContactPage() {
                     placeholder="How can we help you?"
                   />
                 </div>
+                {status === 'error' && (
+                  <div
+                    role="alert"
+                    className={`p-4 rounded-lg text-sm ${isDarkMode ? 'bg-red-900/30 border border-red-700 text-red-300' : 'bg-red-50 border border-red-200 text-red-700'}`}
+                  >
+                    <p className="font-medium mb-1">We could not send that message.</p>
+                    <p>
+                      {errorMessage} You can email us directly at{' '}
+                      <a href={`mailto:${CONTACT_EMAIL}`} className="underline">
+                        {CONTACT_EMAIL}
+                      </a>
+                      .
+                    </p>
+                  </div>
+                )}
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  disabled={status === 'sending'}
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {status === 'sending' ? 'Sending…' : 'Send Message'}
                 </button>
               </form>
             )}

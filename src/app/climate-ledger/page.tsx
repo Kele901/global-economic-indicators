@@ -25,6 +25,7 @@ import LazyMount from '../components/LazyMount';
 
 const EmissionsTicker           = dynamic(() => import('../components/EmissionsTicker'),           { ssr: false });
 const PerCapitaEmissionsChart   = dynamic(() => import('../components/PerCapitaEmissionsChart'),   { ssr: false });
+const EmissionsTreemap          = dynamic(() => import('../components/EmissionsTreemap'),          { ssr: false });
 const EnergyMixChart            = dynamic(() => import('../components/EnergyMixChart'),            { ssr: false });
 const RenewablesTransitionChart = dynamic(() => import('../components/RenewablesTransitionChart'), { ssr: false });
 const CoalPipelineTable         = dynamic(() => import('../components/CoalPipelineTable'),         { ssr: false });
@@ -268,6 +269,9 @@ export default function ClimateLedgerPage() {
                 </div>
               );
             })}
+          </div>
+          <div className="mt-6">
+            <EmissionsTreemap isDarkMode={isDarkMode} co2EmissionsKt={co2Kt} />
           </div>
         </section>
 

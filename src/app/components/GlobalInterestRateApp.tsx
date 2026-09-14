@@ -1,10 +1,19 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart, Brush } from 'recharts';
 import { fetchGlobalData } from '../services/worldbank';
 import type { CountryData } from '../services/worldbank';
-import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
+import { COUNTRY_FLAGS as countryFlags } from './CountryFlag';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import {
+  COUNTRY_COLORS as countryColors,
+  COUNTRY_KEYS,
+  COUNTRY_REGIONS,
+  REGION_ORDER,
+  DEFAULT_DASHBOARD_SELECTION,
+  COUNTRY_DISPLAY_NAMES,
+} from '../utils/countryMappings';
 import AdSense from './AdSense';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
@@ -13,48 +22,6 @@ import AnomalyBanner from './AnomalyBanner';
 import MethodologyPopover, { type MethodologyPopoverProps } from './MethodologyPopover';
 import DataStatusIndicator from './DataStatusIndicator';
 import LoadingSpinner from './LoadingSpinner';
-
-const countryColors = {
-  USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
-  Japan: "#d0ed57", UK: "#83a6ed", Australia: "#ff7300", Mexico: "#e60049", SouthKorea: "#0bb4ff", 
-  Spain: "#50e991", Sweden: "#e6d800", Switzerland: "#9b19f5", Turkey: "#dc0ab4", Nigeria: "#00bfa0",
-  China: "#b3d4ff", Russia: "#fd7f6f", Brazil: "#7eb0d5", Chile: "#b2e061", Argentina: "#bd7ebe",
-  India: "#ff9ff3", Norway: "#45aaf2", Netherlands: "#ff6b35", Portugal: "#004e89", Belgium: "#f7b801",
-  Indonesia: "#06a77d", SouthAfrica: "#d62246", Poland: "#c1292e", SaudiArabia: "#006c35", Egypt: "#c09000"
-};
-
-const countryFlags: { [key: string]: React.ComponentType<any> } = {
-  UK: GB,
-  USA: US,
-  Canada: CA,
-  France: FR,
-  Germany: DE,
-  Italy: IT,
-  Japan: JP,
-  Australia: AU,
-  Mexico: MX,
-  SouthKorea: KR,
-  Spain: ES,
-  Sweden: SE,
-  Switzerland: CH,
-  Turkey: TR,
-  Nigeria: NG,
-  China: CN,
-  Russia: RU,
-  Brazil: BR,
-  Chile: CL,
-  Argentina: AR,
-  India: IN,
-  Norway: NO,
-  Netherlands: NL,
-  Portugal: PT,
-  Belgium: BE,
-  Indonesia: ID,
-  SouthAfrica: ZA,
-  Poland: PL,
-  SaudiArabia: SA,
-  Egypt: EG
-};
 
 // Custom Tooltip Component to prevent duplicates
 const CustomTooltip = ({ active, payload, label, isDarkMode }: any) => {
@@ -720,68 +687,9 @@ const CountryEconomicSummary = ({
   );
 };
 
-const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] => {
-  // Initialize state with a function to avoid unnecessary localStorage access on every render
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  // Sync with localStorage and update theme when value changes
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    try {
-      window.localStorage.setItem(key, JSON.stringify(storedValue));
-
-      // Handle theme-specific updates
-      if (key === 'isDarkMode') {
-        document.documentElement.setAttribute('data-theme', storedValue ? 'dark' : 'light');
-        document.body.classList.toggle('dark', storedValue as boolean);
-      }
-    } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
-
-  // Handle storage events from other tabs/windows
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === key && e.newValue !== null) {
-        try {
-          const newValue = JSON.parse(e.newValue) as T;
-          setStoredValue(newValue);
-        } catch (error) {
-          console.warn(`Error parsing storage change for key "${key}":`, error);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [key]);
-
-  return [storedValue, setStoredValue];
-};
-
 const GlobalInterestRateApp = () => {
   const [selectedPeriod, setSelectedPeriod] = useLocalStorage('selectedPeriod', 'all');
-  const [selectedCountries, setSelectedCountries] = useLocalStorage('selectedCountries', Object.keys(countryColors).slice(0, 9));
+  const [selectedCountries, setSelectedCountries] = useLocalStorage<string[]>('selectedCountries', [...DEFAULT_DASHBOARD_SELECTION]);
   const [maxYAxis, setMaxYAxis] = useLocalStorage('maxYAxis', 20);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
   const [isGridView, setIsGridView] = useLocalStorage('isGridView', false);
@@ -993,31 +901,12 @@ const GlobalInterestRateApp = () => {
   // Initial data load
   useEffect(() => {
     loadData();
-    
-    // Debug: Check selectedCountries on mount
-    console.log('=== DEBUG INFO ===');
-    console.log('Selected countries from localStorage:', selectedCountries);
-    console.log('Available country names:', Object.keys(countryColors));
-    console.log('USA is selected:', selectedCountries.includes('USA'));
-    console.log('==================');
   }, []);
 
-  // Initialize theme on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = window.localStorage.getItem('isDarkMode');
-      const initialDarkMode = savedTheme ? JSON.parse(savedTheme) : false;
-      document.documentElement.setAttribute('data-theme', initialDarkMode ? 'dark' : 'light');
-      document.body.classList.toggle('dark', initialDarkMode);
-    }
-  }, []);
-
-  // Dispatch theme change event when isDarkMode changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('themeChange'));
-    }
-  }, [isDarkMode]);
+  // Theme bootstrap and the themeChange broadcast both used to live here.
+  // The pre-paint script in layout.tsx now sets the document attributes
+  // before first paint, and useLocalStorage announces every write, so the
+  // duplicate copies of that logic are gone.
 
   const filterData = (period: string, data: CountryData[]) => {
     const referenceYear = 2024; // Set fixed reference year to 2024
@@ -1046,9 +935,25 @@ const GlobalInterestRateApp = () => {
     );
   };
 
-  const filteredCountries = Object.keys(countryColors).filter(country =>
-    country.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // The picker offers every country we actually fetch, grouped by region so 47
+  // checkboxes stay scannable. Search matches both the internal key and the
+  // display name, so "South Korea" and "SouthKorea" both work.
+  const matchesSearch = (country: string) => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      country.toLowerCase().includes(q) ||
+      (COUNTRY_DISPLAY_NAMES[country as keyof typeof COUNTRY_DISPLAY_NAMES] ?? '')
+        .toLowerCase()
+        .includes(q)
+    );
+  };
+
+  const countriesByRegion = REGION_ORDER
+    .map(region => ({ region, countries: COUNTRY_REGIONS[region].filter(matchesSearch) }))
+    .filter(group => group.countries.length > 0);
+
+  const filteredCountries = COUNTRY_KEYS.filter(matchesSearch);
 
   const formatYAxisTick = (value: number): string => {
     if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
@@ -1078,10 +983,25 @@ const GlobalInterestRateApp = () => {
   }) => {
     const chartRef = useRef<HTMLDivElement>(null);
     const renderChart = () => {
+      const filtered = filterData(selectedPeriod, data);
       const commonProps = {
-        data: filterData(selectedPeriod, data),
+        data: filtered,
         margin: { top: 5, right: 15, left: 5, bottom: 5 }
       };
+
+      // World Bank series run from 1960, so on "All" the 1970s and the
+      // post-2021 moves land in the same handful of pixels. The brush lets
+      // the reader isolate a window without losing the full context. Grid
+      // view panels are too short to fit the handles, so it is skipped there.
+      const brush = !isGridView && filtered.length > 15 ? (
+        <Brush
+          dataKey="year"
+          height={24}
+          travellerWidth={10}
+          stroke={isDarkMode ? '#60a5fa' : '#2563eb'}
+          fill={isDarkMode ? '#1f2937' : '#f9fafb'}
+        />
+      ) : null;
 
       if (chartType === 'area') {
         return (
@@ -1119,6 +1039,7 @@ const GlobalInterestRateApp = () => {
                 strokeWidth={2}
               />
             ))}
+            {brush}
           </AreaChart>
         );
       }
@@ -1205,6 +1126,7 @@ const GlobalInterestRateApp = () => {
                 activeDot={{ r: 3 }}
               />
             ))}
+            {brush}
           </ComposedChart>
         );
       }
@@ -1246,6 +1168,7 @@ const GlobalInterestRateApp = () => {
               strokeLinejoin="round"
             />
           ))}
+          {brush}
         </LineChart>
       );
     };
@@ -1397,7 +1320,7 @@ const GlobalInterestRateApp = () => {
           <div className={`p-3 sm:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
             <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Comprehensive Economic Analysis Platform</h2>
             <p className="text-xs sm:text-sm mb-2 sm:mb-3">
-              Welcome to our advanced economic data visualization platform. We provide in-depth analysis of key economic indicators across {Object.keys(countryColors).length} major economies, leveraging official World Bank data to deliver accurate, timely insights into global economic trends.
+              Welcome to our advanced economic data visualization platform. We provide in-depth analysis of key economic indicators across {COUNTRY_KEYS.length} major economies, leveraging official World Bank data to deliver accurate, timely insights into global economic trends.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
               <div className="bg-white/10 p-2 sm:p-3 rounded">
@@ -1600,8 +1523,10 @@ const GlobalInterestRateApp = () => {
             onChange={(e) => {
               setSearchTerm(e.target.value);
               const searchValue = e.target.value.toLowerCase();
-              const matchedCountry = Object.keys(countryColors).find(
-                country => country.toLowerCase() === searchValue
+              const matchedCountry = COUNTRY_KEYS.find(
+                country =>
+                  country.toLowerCase() === searchValue ||
+                  COUNTRY_DISPLAY_NAMES[country].toLowerCase() === searchValue
               );
               setSelectedCountryForSummary(matchedCountry || '');
             }}
@@ -1644,11 +1569,7 @@ const GlobalInterestRateApp = () => {
               Select Countries to Display:
             </h3>
             <button
-              onClick={() => {
-                const defaultCountries = Object.keys(countryColors).slice(0, 9);
-                setSelectedCountries(defaultCountries);
-                console.log('Reset to default countries:', defaultCountries);
-              }}
+              onClick={() => setSelectedCountries([...DEFAULT_DASHBOARD_SELECTION])}
               className={`text-xs px-2 py-1 rounded ${
                 isDarkMode
                   ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
@@ -1658,37 +1579,71 @@ const GlobalInterestRateApp = () => {
               Reset Defaults
             </button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
-            {filteredCountries.map(country => {
+          <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            {selectedCountries.length} of {COUNTRY_KEYS.length} selected
+          </p>
+          <div className="space-y-4">
+            {countriesByRegion.map(({ region, countries }) => {
+              const allSelected = countries.every(c => selectedCountries.includes(c));
               return (
-                <div 
-                  key={country} 
-                  className={`flex items-center space-x-2 p-2 rounded border transition-colors duration-200 ${
-                    isDarkMode 
-                      ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                      : 'bg-white border-gray-200 hover:bg-gray-100'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    id={country}
-                    checked={selectedCountries.includes(country)}
-                    onChange={() => handleCountryToggle(country)}
-                    className={`rounded w-4 h-4 transition-colors duration-200 ${
-                      isDarkMode 
-                        ? 'border-gray-500 text-blue-400 focus:ring-blue-400' 
-                        : 'border-gray-300 text-blue-600 focus:ring-blue-500'
-                    }`}
-                  />
-                  <label 
-                    htmlFor={country} 
-                    className={`${isDarkMode ? 'text-gray-100' : 'text-gray-700'} text-xs sm:text-sm truncate cursor-pointer transition-colors duration-200`}
-                  >
-                    {country}
-                  </label>
+                <div key={region}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className={`text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {region}
+                    </h4>
+                    <button
+                      onClick={() =>
+                        setSelectedCountries(prev =>
+                          allSelected
+                            ? prev.filter(c => !countries.includes(c as typeof countries[number]))
+                            : Array.from(new Set([...prev, ...countries]))
+                        )
+                      }
+                      className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
+                        isDarkMode ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {allSelected ? 'Clear' : 'Select all'}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+                    {countries.map(country => (
+                      <div
+                        key={country}
+                        className={`flex items-center space-x-2 p-2 rounded border transition-colors duration-200 ${
+                          isDarkMode
+                            ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                            : 'bg-white border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          id={country}
+                          checked={selectedCountries.includes(country)}
+                          onChange={() => handleCountryToggle(country)}
+                          className={`rounded w-4 h-4 transition-colors duration-200 ${
+                            isDarkMode
+                              ? 'border-gray-500 text-blue-400 focus:ring-blue-400'
+                              : 'border-gray-300 text-blue-600 focus:ring-blue-500'
+                          }`}
+                        />
+                        <label
+                          htmlFor={country}
+                          className={`${isDarkMode ? 'text-gray-100' : 'text-gray-700'} text-xs sm:text-sm truncate cursor-pointer transition-colors duration-200`}
+                        >
+                          {COUNTRY_DISPLAY_NAMES[country]}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })}
+            {countriesByRegion.length === 0 && (
+              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                No countries match &ldquo;{searchTerm}&rdquo;.
+              </p>
+            )}
           </div>
         </div>
 

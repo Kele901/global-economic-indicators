@@ -8,7 +8,7 @@
 // callback.
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Lesson, DemoKey } from '../../learn/lessons';
 import type { QuizScore } from '../../hooks/useLearnProgress';
 import QuizBlock from './QuizBlock';
@@ -19,6 +19,18 @@ const GdpDemo       = dynamic(() => import('./GdpDemo'),       { ssr: false });
 const TradeDemo     = dynamic(() => import('./TradeDemo'),     { ssr: false });
 const DebtDemo      = dynamic(() => import('./DebtDemo'),      { ssr: false });
 const CurrencyDemo  = dynamic(() => import('./CurrencyDemo'),  { ssr: false });
+const BankingDemo     = dynamic(() => import('./BankingDemo'),     { ssr: false });
+const CycleDemo       = dynamic(() => import('./CycleDemo'),       { ssr: false });
+const EnergyMixDemo   = dynamic(() => import('./EnergyMixDemo'),   { ssr: false });
+const ChartTricksDemo = dynamic(() => import('./ChartTricksDemo'), { ssr: false });
+const CorrelationDemo = dynamic(() => import('./CorrelationDemo'), { ssr: false });
+
+// Workshops. Heavier than the demos above, so they only load when the
+// lesson hosting them is expanded.
+const BuildIndexWorkshop    = dynamic(() => import('./BuildIndexWorkshop'),    { ssr: false });
+const BudgetWorkshop        = dynamic(() => import('./BudgetWorkshop'),        { ssr: false });
+const CentralBankerWorkshop = dynamic(() => import('./CentralBankerWorkshop'), { ssr: false });
+const ChartGameWorkshop     = dynamic(() => import('./ChartGameWorkshop'),     { ssr: false });
 
 const DEMO_MAP: Record<DemoKey, React.ComponentType<{ isDarkMode: boolean }>> = {
   inflation: InflationDemo,
@@ -27,6 +39,15 @@ const DEMO_MAP: Record<DemoKey, React.ComponentType<{ isDarkMode: boolean }>> = 
   trade:     TradeDemo,
   debt:      DebtDemo,
   currency:  CurrencyDemo,
+  banking:     BankingDemo,
+  cycle:       CycleDemo,
+  energyMix:   EnergyMixDemo,
+  chartTricks: ChartTricksDemo,
+  correlation: CorrelationDemo,
+  buildIndex:    BuildIndexWorkshop,
+  balanceBudget: BudgetWorkshop,
+  centralBanker: CentralBankerWorkshop,
+  chartGame:     ChartGameWorkshop,
 };
 
 interface Props {
@@ -40,14 +61,33 @@ interface Props {
 export default function LessonPanel({ lesson, isDarkMode, isComplete, quizScore, onComplete }: Props) {
   const [open, setOpen] = useState(false);
 
+  // Deep links: /learn#lesson-taxes expands that lesson and scrolls to it,
+  // which is what the workshop shortcuts on the learn page rely on. Read
+  // post-mount so the server and first client render agree.
+  useEffect(() => {
+    const target = `#lesson-${lesson.id}`;
+    const openFromHash = () => {
+      if (window.location.hash !== target) return;
+      setOpen(true);
+      document.getElementById(`lesson-${lesson.id}`)?.scrollIntoView({ block: 'start' });
+    };
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
+  }, [lesson.id]);
+
   const cardBg = isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
   const text   = isDarkMode ? 'text-white' : 'text-gray-900';
   const muted  = isDarkMode ? 'text-gray-400' : 'text-gray-500';
 
   const Demo = lesson.demoKey ? DEMO_MAP[lesson.demoKey] : null;
+  const Workshop = lesson.workshopKey ? DEMO_MAP[lesson.workshopKey] : null;
 
   return (
-    <article className={`rounded-lg border overflow-hidden ${cardBg} ${isComplete ? 'ring-1 ring-emerald-500/40' : ''}`}>
+    <article
+      id={`lesson-${lesson.id}`}
+      className={`rounded-lg border overflow-hidden scroll-mt-20 ${cardBg} ${isComplete ? 'ring-1 ring-emerald-500/40' : ''}`}
+    >
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
@@ -127,6 +167,16 @@ export default function LessonPanel({ lesson, isDarkMode, isComplete, quizScore,
                 Try it yourself
               </div>
               <Demo isDarkMode={isDarkMode} />
+            </div>
+          )}
+
+          {/* Workshop — a longer sandbox, when the lesson has one */}
+          {Workshop && (
+            <div>
+              <div className={`text-[11px] uppercase tracking-wider font-semibold mb-2 ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`}>
+                {lesson.workshopTitle ?? 'Workshop'}
+              </div>
+              <Workshop isDarkMode={isDarkMode} />
             </div>
           )}
 

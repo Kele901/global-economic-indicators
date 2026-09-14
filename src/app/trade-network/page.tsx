@@ -5,16 +5,10 @@ import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, COUNTRY_REGIONS, type CountryKey } from '../utils/countryMappings';
 import { BILATERAL_TRADE, getTradePartnersFor } from '../data/bilateralTradeData';
+import ChartMeta from '../components/ChartMeta';
+import DataQualityBadge from '../components/DataQualityBadge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, LineChart, Line, PieChart, Pie } from 'recharts';
-import { US, GB, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
-
-const FLAG_MAP: Record<string, React.ComponentType<any>> = {
-  USA: US, UK: GB, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
-  Australia: AU, Mexico: MX, SouthKorea: KR, Spain: ES, Sweden: SE, Switzerland: CH,
-  Turkey: TR, Nigeria: NG, China: CN, Russia: RU, Brazil: BR, Chile: CL,
-  Argentina: AR, India: IN, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
-  Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG,
-};
+import { COUNTRY_FLAGS as FLAG_MAP } from '../components/CountryFlag';
 
 function getLatest(series: CountryData[] | undefined, country: string): number | null {
   if (!series) return null;
@@ -236,6 +230,12 @@ export default function TradeNetworkPage() {
             </button>
             <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Dark</span>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <ChartMeta sourceId="bilateral-trade-curated" isDarkMode={isDarkMode} />
+          <ChartMeta sourceId="wb-trade-balance" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="estimate" isDarkMode={isDarkMode} />
         </div>
 
         <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'}`}>

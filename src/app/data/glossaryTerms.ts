@@ -1,9 +1,13 @@
-'use client';
+// Prose definitions of core macroeconomic vocabulary, migrated out of the old
+// /guides/glossary page when the two glossaries merged into /glossary.
+// Metric-level definitions (formula, units, source) live in data/economicMetrics.
 
-import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { useEffect, useState } from 'react';
+export interface GlossaryTerm {
+  term: string;
+  def: string;
+}
 
-const glossaryTerms = [
+export const GLOSSARY_TERMS: GlossaryTerm[] = [
   // A
   { term: 'Aggregate Demand', def: 'The total demand for goods and services in an economy at a given price level and time period. Composed of consumer spending, business investment, government spending, and net exports (exports minus imports).' },
   { term: 'Aggregate Supply', def: 'The total quantity of goods and services that producers are willing to supply at a given price level. In the short run, supply is influenced by wages and input costs; in the long run, it depends on productive capacity.' },
@@ -248,115 +252,4 @@ const glossaryTerms = [
   { term: 'Zero-Sum Game', def: 'A situation where one party\'s gain is exactly another\'s loss. International trade is generally not zero-sum — it creates mutual gains — but specific trade disputes can have zero-sum characteristics.' },
 ];
 
-export default function GlossaryPage() {
-  const [isDarkMode] = useLocalStorage('isDarkMode', false);
-  const [filter, setFilter] = useState('');
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.body.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-      document.body.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
-  const sortedTerms = glossaryTerms.sort((a, b) => a.term.localeCompare(b.term));
-  const filteredTerms = filter
-    ? sortedTerms.filter(t => t.term.toLowerCase().includes(filter.toLowerCase()) || t.def.toLowerCase().includes(filter.toLowerCase()))
-    : sortedTerms;
-
-  const letters = Array.from(new Set(sortedTerms.map(t => t.term[0].toUpperCase()))).sort();
-
-  const groupedTerms: { [key: string]: typeof sortedTerms } = {};
-  filteredTerms.forEach(t => {
-    const letter = t.term[0].toUpperCase();
-    if (!groupedTerms[letter]) groupedTerms[letter] = [];
-    groupedTerms[letter].push(t);
-  });
-
-  return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="max-w-4xl mx-auto p-6 sm:p-8">
-        <div className="mb-4">
-          <a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">&larr; All Guides</a>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4">Glossary of Economic Terms</h1>
-        <p className={`text-sm mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          Definitions of {glossaryTerms.length} key economic and financial terms used across our platform.
-        </p>
-
-        {/* Search */}
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Search terms..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className={`w-full px-4 py-2 rounded-lg border transition-colors ${
-              isDarkMode
-                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-500 focus:border-blue-500'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500'
-            } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-          />
-        </div>
-
-        {/* Letter Jump Links */}
-        {!filter && (
-          <div className="flex flex-wrap gap-2 mb-8">
-            {letters.map(letter => (
-              <a
-                key={letter}
-                href={`#letter-${letter}`}
-                className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
-                  isDarkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                {letter}
-              </a>
-            ))}
-          </div>
-        )}
-
-        {/* Terms */}
-        <div className="space-y-8">
-          {Object.entries(groupedTerms).map(([letter, terms]) => (
-            <section key={letter} id={`letter-${letter}`}>
-              <h2 className={`text-2xl font-bold mb-4 pb-2 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                {letter}
-              </h2>
-              <div className="space-y-3">
-                {terms.map(t => (
-                  <div key={t.term} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <h3 className="font-semibold mb-1">{t.term}</h3>
-                    <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t.def}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        {filteredTerms.length === 0 && (
-          <p className={`text-center py-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            No terms found matching &ldquo;{filter}&rdquo;
-          </p>
-        )}
-
-        <section className={`mt-12 p-6 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
-          <h2 className="text-xl font-semibold mb-3">Learn More</h2>
-          <p className="mb-3 leading-relaxed">
-            For deeper explanations of these concepts, explore our educational guides:
-          </p>
-          <ul className="space-y-2">
-            <li><a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline">How to Read Economic Data</a> &mdash; Beginner&apos;s guide to all guides</li>
-            <li><a href="/methodology" className="text-blue-600 dark:text-blue-400 hover:underline">Methodology</a> &mdash; How we source and process data</li>
-          </ul>
-        </section>
-      </div>
-    </div>
-  );
-}
+export const GLOSSARY_TERM_COUNT = GLOSSARY_TERMS.length;

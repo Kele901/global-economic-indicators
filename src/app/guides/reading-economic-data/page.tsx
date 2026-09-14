@@ -2,6 +2,7 @@
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useEffect } from 'react';
+import { GUIDES } from '../../data/guides';
 
 export default function ReadingEconomicDataGuide() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -122,45 +123,25 @@ export default function ReadingEconomicDataGuide() {
               For deeper dives into specific topics, explore our educational guides:
             </p>
             <div className="grid md:grid-cols-2 gap-4">
-              {[
-                { title: 'Understanding Interest Rates', href: '/guides/understanding-interest-rates', desc: 'How central banks set rates and why they matter' },
-                { title: 'Understanding Inflation', href: '/guides/inflation-guide', desc: 'What drives prices, CPI, and central bank response' },
-                { title: 'Global Trade Explained', href: '/guides/global-trade-explained', desc: 'Trade balances, comparative advantage, and trade flows' },
-                { title: 'Technology & Innovation Metrics', href: '/guides/technology-innovation-metrics', desc: 'R&D, patents, and how innovation is measured' },
-                { title: 'Economic Cycles Explained', href: '/guides/economic-cycles-explained', desc: 'Business cycles, debt crises, and Dalio frameworks' },
-                { title: 'Currencies and Exchange Rates', href: '/guides/currencies-and-exchange-rates', desc: 'Forex, reserve currencies, and currency tiers' },
-                { title: 'GDP and National Accounts', href: '/guides/gdp-and-national-accounts', desc: 'Nominal vs real GDP, per capita, and PPP' },
-                { title: 'Government Debt Explained', href: '/guides/government-debt-explained', desc: 'Sovereign debt, fiscal deficits, and sustainability' },
-                { title: 'Emerging vs Developed Economies', href: '/guides/emerging-vs-developed-economies', desc: 'Classification, risk profiles, and comparison tips' },
-                { title: 'How Central Banks Work', href: '/guides/how-central-banks-work', desc: 'QE, policy tools, and inflation targeting' },
-                { title: 'Understanding Employment Data', href: '/guides/understanding-employment-data', desc: 'Unemployment, participation, and labor metrics' },
-                { title: 'Digital Economy and AI', href: '/guides/digital-economy-and-ai', desc: 'AI patents, digital payments, and e-commerce' },
-                { title: 'Glossary of Economic Terms', href: '/guides/glossary', desc: 'A-Z definitions of 55+ economic and financial terms' },
-                { title: 'Monetary Policy Decisions', href: '/guides/monetary-policy-decisions', desc: 'How central banks set rates and what hikes, cuts, and holds mean' },
-                { title: 'Debt Sustainability', href: '/guides/debt-sustainability', desc: 'Interest-growth differentials, fiscal space, and sustainability scoring' },
-                { title: 'Economic Forecasting & Outlook', href: '/guides/economic-forecasting', desc: 'How IMF projections are produced and how to interpret forecasts' },
-                { title: 'Human Development & Inequality', href: '/guides/development-inequality', desc: 'HDI, Gini coefficient, social progress, and sustainability metrics' },
-                { title: 'Trade Networks & Supply Chains', href: '/guides/trade-networks', desc: 'Bilateral trade, trade openness, and supply chain concentration risk' },
-                { title: 'Scenario Analysis & Correlations', href: '/guides/scenario-analysis', desc: 'Correlation vs causation, lagged effects, and simulation confidence' },
-                { title: 'Business Cycle Indicators', href: '/guides/business-cycle-indicators', desc: 'Yield curve, recession probability, credit spreads, and leading indicators' },
-                { title: 'Market Cycle Indicators', href: '/guides/market-cycle-indicators', desc: 'Buffett Indicator, Shiller CAPE, sector rotation, and global market clock' },
-                { title: 'Kondratiev Long Waves', href: '/guides/kondratiev-long-waves', desc: '50-60 year technology-driven super-cycles and the Carlota Perez framework' },
-                { title: 'Minsky Financial Instability', href: '/guides/minsky-financial-instability', desc: 'Hedge, speculative, and Ponzi finance — how stability breeds instability' },
-                { title: 'Monetary Policy Regimes', href: '/guides/monetary-policy-regimes', desc: 'Gold standard to QE: how monetary frameworks shape economic cycles' },
-                { title: 'Geopolitical Cycles', href: '/guides/geopolitical-cycles', desc: 'Reserve currencies, Thucydides Trap, and how conflicts shape the economy' },
-              ].map(guide => (
+              {GUIDES.filter(g => g.slug !== 'reading-economic-data').map(guide => (
                 <a
-                  key={guide.href}
-                  href={guide.href}
+                  key={guide.slug}
+                  href={`/guides/${guide.slug}`}
                   className={`block p-4 rounded-lg transition-colors ${
                     isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'
                   }`}
                 >
                   <h3 className="font-semibold mb-1 text-blue-600 dark:text-blue-400">{guide.title}</h3>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{guide.desc}</p>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{guide.blurb}</p>
                 </a>
               ))}
             </div>
+            <p className={`text-sm mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <a href="/guides" className="text-blue-600 dark:text-blue-400 hover:underline">Browse the full index</a>
+              {' '}to filter by topic and level, or{' '}
+              <a href="/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">open the glossary</a>
+              {' '}for A-Z definitions.
+            </p>
           </section>
 
           <section className={`mt-8 p-6 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>

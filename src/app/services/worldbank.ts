@@ -211,7 +211,11 @@ export const COUNTRY_CODES = [
   // Latin America. Chosen to close obvious geographic gaps and enable the
   // Trade/Migration/AI ledgers to reason over remittance corridors, tariff
   // walls, and rising-manufacturer economies.
-  'KE', 'ET', 'GH', 'MA', 'IR', 'AE', 'QA', 'PK', 'BD', 'VN', 'TH', 'CO'
+  'KE', 'ET', 'GH', 'MA', 'IR', 'AE', 'QA', 'PK', 'BD', 'VN', 'TH', 'CO',
+  // Roster repair: Greece appears in DEBT_COUNTRY_META and the Philippines in
+  // MIGRATION_COUNTRY_META, but neither was ever fetched, so both rows were
+  // silently dropped at every latestEntry() join.
+  'GR', 'PH',
 ];
 
 // Country name mapping (exported so ledger roster metas can be validated
@@ -262,7 +266,9 @@ export const COUNTRY_NAMES: { [key: string]: string } = {
   'BD': 'Bangladesh',
   'VN': 'Vietnam',
   'TH': 'Thailand',
-  'CO': 'Colombia'
+  'CO': 'Colombia',
+  'GR': 'Greece',
+  'PH': 'Philippines'
 };
 
 // Function to fetch data with retry logic and exponential backoff

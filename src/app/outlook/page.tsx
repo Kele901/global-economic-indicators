@@ -5,8 +5,21 @@ import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { IMF_GDP_PROJECTIONS, IMF_INFLATION_PROJECTIONS, REGIONAL_GDP_PROJECTIONS, GLOBAL_OUTLOOK_SUMMARY, RISKS } from '../data/imfProjections';
 import { COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
-import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, ScatterChart, Scatter, Cell, ZAxis, ReferenceLine, LabelList } from 'recharts';
+import { ComposedChart, Line, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, ScatterChart, Scatter, Cell, ZAxis, ReferenceLine, ErrorBar, LabelList } from 'recharts';
 import { useIMFProjections } from '../hooks/useIMFProjections';
+
+// Illustrative forecast-error magnitudes used to draw the uncertainty band
+// around IMF point projections. The IMF does not publish an interval with the
+// WEO country tables, so these come from the published accuracy literature:
+// one-year-ahead WEO growth forecasts have a root-mean-square error of roughly
+// one percentage point, rising with the horizon and roughly half again as wide
+// for inflation (Timmermann, "An Evaluation of the World Economic Outlook
+// Forecasts", IMF Staff Papers 2007; IMF WEO forecast-accuracy reviews).
+// The band is a plausibility range, not a probability statement.
+const FORECAST_ERROR: Record<'gdp' | 'inflation', { base: number; perYear: number; cap: number }> = {
+  gdp:       { base: 1.0, perYear: 0.45, cap: 3.0 },
+  inflation: { base: 1.3, perYear: 0.60, cap: 4.0 },
+};
 
 export default function OutlookPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
@@ -75,7 +88,13 @@ export default function OutlookPage() {
     const metricKey = selectedMetric === 'gdp' ? 'gdpGrowth' : 'inflationRates';
     const series = (data as any)[metricKey] as CountryData[] | undefined;
 
-    const points: { year: number; actual?: number; forecast?: number }[] = [];
+    const points: {
+      year: number;
+      actual?: number;
+      forecast?: number;
+      band?: [number, number];
+      spread?: number;
+    }[] = [];
 
     if (series) {
       for (const row of series) {
@@ -98,7 +117,29 @@ export default function OutlookPage() {
       }
     }
 
-    return points.sort((a, b) => a.year - b.year);
+    points.sort((a, b) => a.year - b.year);
+
+    // The IMF publishes point forecasts without an interval, so drawing the
+    // dashed line alone implies precision the forecast does not have. The band
+    // below is an *illustrative* range sized from the published accuracy
+    // record of WEO projections, not an IMF-published confidence interval.
+    // See FORECAST_ERROR for the magnitudes and their source.
+    const errorProfile = FORECAST_ERROR[selectedMetric];
+    const firstForecastYear = points.find(p => p.forecast !== undefined)?.year;
+    if (firstForecastYear !== undefined) {
+      for (const point of points) {
+        if (point.forecast === undefined) continue;
+        const horizon = point.year - firstForecastYear;
+        const spread = Math.min(
+          errorProfile.base + errorProfile.perYear * horizon,
+          errorProfile.cap,
+        );
+        point.band = [point.forecast - spread, point.forecast + spread];
+        point.spread = spread;
+      }
+    }
+
+    return points;
   }, [data, selectedCountry, selectedMetric, gdpProjectionsData, inflationProjectionsData]);
 
   const availableCountries = useMemo(() => {
@@ -334,13 +375,39 @@ export default function OutlookPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
                 <XAxis dataKey="year" stroke={tc.axis} tick={{ fontSize: 11 }} />
                 <YAxis stroke={tc.axis} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip contentStyle={tc.tooltip} />
+                <Tooltip
+                  contentStyle={tc.tooltip}
+                  formatter={(value: any, name: any) => {
+                    if (name === 'Uncertainty range' && Array.isArray(value)) {
+                      return [`${Number(value[0]).toFixed(1)}% to ${Number(value[1]).toFixed(1)}%`, name];
+                    }
+                    return [`${Number(value).toFixed(1)}%`, name];
+                  }}
+                />
                 <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="band"
+                  name="Uncertainty range"
+                  stroke="none"
+                  fill="#f59e0b"
+                  fillOpacity={0.16}
+                  connectNulls
+                  isAnimationActive={false}
+                  legendType="plainline"
+                />
                 <Line type="monotone" dataKey="actual" name="Historical" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} connectNulls />
                 <Line type="monotone" dataKey="forecast" name="IMF Forecast" stroke="#f59e0b" strokeWidth={2} strokeDasharray="8 4" dot={{ r: 3 }} connectNulls />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
+          <p className={`text-xs mt-3 leading-relaxed ${tc.textSec}`}>
+            The shaded band is an illustrative uncertainty range, not an IMF-published interval:
+            the WEO country tables give point forecasts only. It widens with the horizon using the
+            published accuracy record of WEO projections — roughly ±1 percentage point one year out
+            for growth, wider for inflation and wider again further out. Read it as &ldquo;forecasts
+            this far ahead have historically missed by about this much&rdquo;, not as a probability.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">

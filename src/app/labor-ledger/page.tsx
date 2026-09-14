@@ -27,17 +27,36 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import GuidedTour, { type TourStep } from '../components/GuidedTour';
+import SkeletonCard from '../components/SkeletonCard';
 
-const WageTicker                = dynamic(() => import('../components/WageTicker'),                { ssr: false });
-const WagesChart                = dynamic(() => import('../components/WagesChart'),                { ssr: false });
-const UnionisationChart         = dynamic(() => import('../components/UnionisationChart'),         { ssr: false });
-const InformalEmploymentGrid    = dynamic(() => import('../components/InformalEmploymentGrid'),    { ssr: false });
-const WorkingAgeTrajectoryChart = dynamic(() => import('../components/WorkingAgeTrajectoryChart'), { ssr: false });
-const AiDisplacementRiskTable   = dynamic(() => import('../components/AiDisplacementRiskTable'),   { ssr: false });
-const GenderGapChart            = dynamic(() => import('../components/GenderGapChart'),            { ssr: false });
-const YouthUnemploymentTimeline = dynamic(() => import('../components/YouthUnemploymentTimeline'), { ssr: false });
+const skeleton = (label: string, height?: string) => {
+  const Loading = () => <SkeletonCard height={height} label={label} />;
+  return Loading;
+};
+
+const WageTicker                = dynamic(() => import('../components/WageTicker'),                { ssr: false, loading: skeleton('Loading wage ticker', 'h-[64px]') });
+const LaborSlackChart           = dynamic(() => import('../components/LaborSlackChart'),           { ssr: false, loading: skeleton('Loading labour market slack', 'h-[560px]') });
+const WagesChart                = dynamic(() => import('../components/WagesChart'),                { ssr: false, loading: skeleton('Loading wages chart', 'h-[560px]') });
+const UnionisationChart         = dynamic(() => import('../components/UnionisationChart'),         { ssr: false, loading: skeleton('Loading unionisation chart') });
+const InformalEmploymentGrid    = dynamic(() => import('../components/InformalEmploymentGrid'),    { ssr: false, loading: skeleton('Loading informal employment') });
+const WorkingAgeTrajectoryChart = dynamic(() => import('../components/WorkingAgeTrajectoryChart'), { ssr: false, loading: skeleton('Loading working-age trajectory') });
+const AiDisplacementRiskTable   = dynamic(() => import('../components/AiDisplacementRiskTable'),   { ssr: false, loading: skeleton('Loading AI displacement risk') });
+const GenderGapChart            = dynamic(() => import('../components/GenderGapChart'),            { ssr: false, loading: skeleton('Loading gender gap chart') });
+const YouthUnemploymentTimeline = dynamic(() => import('../components/YouthUnemploymentTimeline'), { ssr: false, loading: skeleton('Loading youth unemployment timeline') });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
+
+const TOUR_STEPS: TourStep[] = [
+  { chapter: 'Chapter 1', title: 'Who is out of work', body: 'Live overall and youth unemployment side by side for the whole roster, sorted by the youth multiple. The gap between the two bars is what a headline unemployment rate hides.' },
+  { chapter: 'Chapter 2', title: 'What people earn', body: 'Median hourly wages in PPP dollars, coloured by whether real wages actually grew between 2019 and 2023. For most of Europe they did not.' },
+  { chapter: 'Chapter 3', title: 'Unions', body: 'Membership density against bargaining coverage. In France the two diverge wildly because sectoral agreements extend to non-members.' },
+  { chapter: 'Chapter 4', title: 'Informality', body: 'No contract, no social insurance, often no minimum wage. Any wage comparison that ignores this overstates reality across most of South Asia and Sub-Saharan Africa.' },
+  { chapter: 'Chapter 5', title: 'The demographic cliff', body: 'Working-age population to 2050. China peaked in 2015; Nigeria overtakes both the US and the EU by mid-century.' },
+  { chapter: 'Chapter 6', title: 'AI exposure', body: 'Employment shares in occupations with high generative-AI exposure — and the complementarity column that says whether AI augments or replaces them.' },
+  { chapter: 'Chapter 7', title: 'The gender gap', body: 'Male against female participation. Nordic countries are near parity; India, Mexico and Turkey run gaps of 30-50 percentage points.' },
+  { chapter: 'Chapter 8', title: 'Youth unemployment over time', body: 'The same story as Chapter 1 on a time axis, by development band. The 2020-21 COVID spike was the sharpest short-term shock on record.' },
+];
 
 function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; }) {
   return (
@@ -51,7 +70,7 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: b
 
 export default function LaborLedgerPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
-  const [_data, setData] = useState<GlobalData | null>(null);
+  const [data, setData] = useState<GlobalData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -119,14 +138,23 @@ export default function LaborLedgerPage() {
           >{isDarkMode ? 'Light mode' : 'Dark mode'}</button>
         </div>
 
+        <GuidedTour
+          storageKey="tour-labor-ledger"
+          steps={TOUR_STEPS}
+          isDarkMode={isDarkMode}
+          ctaLabel="Take the 60-second tour of the 8 chapters"
+        />
+
         <StalenessBanner
           lastUpdated={CURATED_LAST_UPDATED}
           label="ILO Wage Report 2024, OECD/ICTWSS union density 2023, ILO informal employment 2023, UN DESA WPP 2024, OECD AI exposure 2024, ILO youth unemployment 2024"
           isDarkMode={isDarkMode}
         />
 
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2 mb-4 mt-4 flex-wrap">
+          <ChartMeta sourceId="wb-labor-market" isDarkMode={isDarkMode} />
           <ChartMeta sourceId="labor-ledger-curated" isDarkMode={isDarkMode} />
+          <DataQualityBadge flag="estimate" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
 
@@ -182,8 +210,13 @@ export default function LaborLedgerPage() {
 
         <section className="mb-14">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
-            title="What People Earn"
-            subtitle="Ticker of top median hourly wages (USD-PPP). Wage gaps between rich and emerging economies are 5-10x even after adjusting for purchasing-power differences." />
+            title="Who Is Out of Work"
+            subtitle="Live overall and youth unemployment for every country in the roster, sorted by the youth multiple. A high multiple on top of a low headline rate is the signature of a two-tier labour market, not a weak economy." />
+          <LaborSlackChart
+            isDarkMode={isDarkMode}
+            unemploymentRates={data?.unemploymentRates}
+            youthUnemployment={data?.youthUnemployment}
+          />
         </section>
 
         <section className="mb-14">

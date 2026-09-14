@@ -154,7 +154,7 @@ export default function InterestRatesGuide() {
               <li><a href="/guides/how-central-banks-work" className="text-blue-600 dark:text-blue-400 hover:underline">How Central Banks Work</a> &mdash; Deep dive into monetary policy tools</li>
               <li><a href="/guides/inflation-guide" className="text-blue-600 dark:text-blue-400 hover:underline">Understanding Inflation</a> &mdash; How inflation and interest rates interact</li>
               <li><a href="/guides/currencies-and-exchange-rates" className="text-blue-600 dark:text-blue-400 hover:underline">Currencies and Exchange Rates</a> &mdash; How rate differentials move currencies</li>
-              <li><a href="/guides/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
+              <li><a href="/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
             </ul>
           </section>
         </div>

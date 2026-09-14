@@ -1,12 +1,13 @@
 "use client";
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
 import { fetchGlobalData } from '../services/worldbank';
 import { latestEntry } from '../utils/countryData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
-import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
+import { COUNTRY_FLAGS as countryFlags } from '../components/CountryFlag';
+import { COUNTRY_COLORS as countryColors } from '../utils/countryMappings';
 import BulkChartDownload from '../components/BulkChartDownload';
 import ChartDownloadButton from '../components/ChartDownloadButton';
 import InfoPanel from '../components/InfoPanel';
@@ -26,22 +27,6 @@ const GlobalEconomicMap = dynamic(
   }
 );
 
-const countryColors = {
-  USA: "#8884d8", Canada: "#82ca9d", France: "#ffc658", Germany: "#ff8042", Italy: "#a4de6c", 
-  Japan: "#d0ed57", UK: "#83a6ed", Australia: "#ff7300", Mexico: "#e60049", SouthKorea: "#0bb4ff", 
-  Spain: "#50e991", Sweden: "#e6d800", Switzerland: "#9b19f5", Turkey: "#dc0ab4", Nigeria: "#00bfa0",
-  China: "#b3d4ff", Russia: "#fd7f6f", Brazil: "#7eb0d5", Chile: "#b2e061", Argentina: "#bd7ebe",
-  India: "#ff9ff3", Norway: "#45aaf2", Netherlands: "#ff6b35", Portugal: "#004e89", Belgium: "#f7b801",
-  Indonesia: "#06a77d", SouthAfrica: "#d62246", Poland: "#c1292e", SaudiArabia: "#006c35", Egypt: "#c09000"
-};
-
-const countryFlags: { [key: string]: React.ComponentType<any> } = {
-  UK: GB, USA: US, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
-  Australia: AU, Mexico: MX, SouthKorea: KR, Spain: ES, Sweden: SE, Switzerland: CH,
-  Turkey: TR, Nigeria: NG, China: CN, Russia: RU, Brazil: BR, Chile: CL,
-  Argentina: AR, India: IN, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
-  Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG
-};
 
 // Essential goods price data (2011-2024)
 const essentialGoodsData = [
@@ -1272,8 +1257,11 @@ export default function InflationPage() {
             size="medium"
           />
           
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">Data source: Numbeo.com</p>
-          <div className="h-[350px]">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">
+            Data source: World Bank consumer price inflation (FP.CPI.TOTL.ZG), fetched live.
+            Drag the handles under the chart to zoom into a period.
+          </p>
+          <div className="h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={inflationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
@@ -1296,6 +1284,18 @@ export default function InflationPage() {
                     activeDot={{ r: 5 }}
                   />
                 ))}
+                {/* Sixty-plus years of annual CPI compresses the 1970s spike and
+                    the post-2021 one into the same few pixels. The brush lets the
+                    reader isolate either without losing the full-series context. */}
+                {inflationData.length > 15 && (
+                  <Brush
+                    dataKey="year"
+                    height={28}
+                    travellerWidth={10}
+                    stroke={isDarkMode ? '#6366f1' : '#4f46e5'}
+                    fill={isDarkMode ? '#1f2937' : '#f9fafb'}
+                  />
+                )}
               </LineChart>
             </ResponsiveContainer>
           </div>

@@ -57,10 +57,22 @@ function readInitial(): LearnProgressState {
 }
 
 export function useLearnProgress() {
-  const [state, setState] = useState<LearnProgressState>(readInitial);
+  const [state, setState] = useState<LearnProgressState>(emptyState);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Stored progress is read after mount rather than during the first
+  // render. The server has no localStorage, so seeding state from it
+  // directly makes the client's first paint disagree with the
+  // server-rendered HTML and React throws the whole tree away.
+  useEffect(() => {
+    setState(readInitial());
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Persisting before the read above lands would flush the empty
+    // placeholder over real saved progress.
+    if (!hydrated || typeof window === 'undefined') return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, lastVisitedAt: new Date().toISOString() }));
     } catch (err) {
@@ -68,7 +80,7 @@ export function useLearnProgress() {
     }
     // Intentionally omit lastVisitedAt update from deps loop; we snapshot on write only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [state, hydrated]);
 
   const markComplete = useCallback((lessonId: string, score?: number, total?: number) => {
     setState(prev => {

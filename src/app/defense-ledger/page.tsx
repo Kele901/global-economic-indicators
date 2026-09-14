@@ -34,6 +34,7 @@ const DEFENSE_TOUR_STEPS: TourStep[] = [
 
 const DefenseSpendingTicker    = dynamic(() => import('../components/DefenseSpendingTicker'),    { ssr: false });
 const SuperpowerComparisonChart = dynamic(() => import('../components/SuperpowerComparisonChart'), { ssr: false });
+const DefenseSpendTreemap      = dynamic(() => import('../components/DefenseSpendTreemap'),      { ssr: false });
 const NatoTargetTable          = dynamic(() => import('../components/NatoTargetTable'),          { ssr: false });
 const ArmsTradeFlows           = dynamic(() => import('../components/ArmsTradeFlows'),           { ssr: false });
 const ArmsIndustryTable        = dynamic(() => import('../components/ArmsIndustryTable'),        { ssr: false });
@@ -425,6 +426,10 @@ export default function DefenseLedgerPage() {
                 </p>
               </div>
             </div>
+          </div>
+
+          <div className="mt-6">
+            <DefenseSpendTreemap isDarkMode={isDarkMode} militaryExpenditureUsd={spendUsd.merged} />
           </div>
         </section>
 

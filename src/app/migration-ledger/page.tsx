@@ -28,6 +28,7 @@ import LazyMount from '../components/LazyMount';
 const MigrationTicker            = dynamic(() => import('../components/MigrationTicker'),            { ssr: false });
 const RefugeeFlowsChart          = dynamic(() => import('../components/RefugeeFlowsChart'),          { ssr: false });
 const RemittanceCorridorTable    = dynamic(() => import('../components/RemittanceCorridorTable'),    { ssr: false });
+const MigrationCorridorFlow      = dynamic(() => import('../components/MigrationCorridorFlow'),      { ssr: false });
 const MigrantStocksGrid          = dynamic(() => import('../components/MigrantStocksGrid'),          { ssr: false });
 const AsylumFlowsChart           = dynamic(() => import('../components/AsylumFlowsChart'),           { ssr: false });
 const BrainMigrationTable        = dynamic(() => import('../components/BrainMigrationTable'),        { ssr: false });
@@ -262,6 +263,9 @@ export default function MigrationLedgerPage() {
             title="Remittance Corridors"
             subtitle="The USA-Mexico corridor alone moves $65B a year — more than any bilateral trade flow outside oil. The Gulf-India axis dwarfs everything else combined."
           />
+          <div className="mb-6">
+            <MigrationCorridorFlow isDarkMode={isDarkMode} />
+          </div>
           <RemittanceCorridorTable isDarkMode={isDarkMode} />
         </section>
 

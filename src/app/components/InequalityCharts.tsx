@@ -70,10 +70,15 @@ const NUMERIC_TO_ISO3: Record<string, string> = {
   '-99':'XKX',
 };
 
-type SubView = 'rvsg' | 'kuznets' | 'income' | 'wealth' | 'historical' | 'global' | 'tax';
+export type SubView = 'rvsg' | 'kuznets' | 'income' | 'wealth' | 'historical' | 'global' | 'tax';
 
 interface Props {
   isDarkMode: boolean;
+  // When set, renders that single view with no tab bar. The /inequality
+  // ledger uses this so each chapter owns one view and gets its own
+  // heading, provenance and lazy-mount boundary.
+  view?: SubView;
+  showSources?: boolean;
 }
 
 const SUB_VIEWS: { id: SubView; label: string; desc: string }[] = [
@@ -90,8 +95,10 @@ const INCOME_COUNTRIES = ['USA', 'France', 'UK', 'Germany', 'Japan', 'Sweden', '
 const WEALTH_COUNTRIES = ['USA', 'France', 'UK', 'Germany', 'Japan', 'Sweden', 'Canada', 'Brazil', 'India', 'South Africa', 'China', 'Australia'];
 const TAX_COUNTRIES = ['USA', 'UK', 'France', 'Germany'];
 
-const InequalityCharts: React.FC<Props> = ({ isDarkMode }) => {
-  const [subView, setSubView] = useState<SubView>('rvsg');
+const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) => {
+  const [tabView, setTabView] = useState<SubView>('rvsg');
+  const subView = view ?? tabView;
+  const setSubView = setTabView;
   const [selectedCountry, setSelectedCountry] = useState<string>('USA');
   const [expandedSource, setExpandedSource] = useState<number | null>(null);
   const [expandedLaw, setExpandedLaw] = useState<number | null>(null);
@@ -1076,15 +1083,17 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode }) => {
 
   return (
     <div className="space-y-6">
-      <div className={`rounded-xl p-1.5 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-        <div className="flex flex-wrap gap-1.5">
-          {SUB_VIEWS.map(v => (
-            <button key={v.id} onClick={() => setSubView(v.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subView === v.id ? tc.tabActive : tc.tab}`} title={v.desc}>
-              {v.label}
-            </button>
-          ))}
+      {!view && (
+        <div className={`rounded-xl p-1.5 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+          <div className="flex flex-wrap gap-1.5">
+            {SUB_VIEWS.map(v => (
+              <button key={v.id} onClick={() => setSubView(v.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subView === v.id ? tc.tabActive : tc.tab}`} title={v.desc}>
+                {v.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {subView === 'rvsg' && renderRvsG()}
       {subView === 'kuznets' && renderKuznets()}
@@ -1094,9 +1103,10 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode }) => {
       {subView === 'global' && renderGlobal()}
       {subView === 'tax' && renderTax()}
 
-      {renderSources()}
+      {(showSources ?? !view) && renderSources()}
     </div>
   );
 };
 
 export default InequalityCharts;
+  

@@ -13,7 +13,7 @@ import {
 import { HISTORICAL_PRESETS } from '../data/scenarioPresets';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-  LineChart, Line, Legend,
+  LineChart, Line, Legend, ErrorBar,
 } from 'recharts';
 
 const INPUT_METRICS = ['interestRates', 'inflationRates', 'gdpGrowth', 'governmentDebt', 'exchangeRate', 'fdi'];
@@ -134,11 +134,17 @@ export default function SimulatorPage() {
   const chartData = useMemo(() => {
     return results.slice(0, 8).map(r => {
       const label = getMetricByKey(r.metric)?.label || r.metric;
+      const change = parseFloat(r.estimatedChange.toFixed(2));
       return {
         metric: label.length > 20 ? label.slice(0, 18) + '…' : label,
-        change: parseFloat(r.estimatedChange.toFixed(2)),
+        change,
         confidence: r.confidence,
-        fill: r.estimatedChange >= 0 ? '#22c55e' : '#ef4444',
+        // The confidence score used to live only in a separate progress bar,
+        // so a weakly-supported estimate looked exactly as solid as a
+        // strongly-supported one. Scaling the bar length by the unexplained
+        // share of the relationship puts that doubt on the chart itself.
+        error: parseFloat((Math.abs(change) * (1 - r.confidence)).toFixed(2)),
+        fill: change >= 0 ? '#22c55e' : '#ef4444',
       };
     });
   }, [results]);
@@ -430,15 +436,41 @@ export default function SimulatorPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
                     <XAxis type="number" stroke={tc.axis} tick={{ fontSize: 11 }} />
                     <YAxis type="category" dataKey="metric" stroke={tc.axis} tick={{ fontSize: 10 }} width={100} />
-                    <Tooltip contentStyle={tc.tooltip} />
+                    <Tooltip
+                      contentStyle={tc.tooltip}
+                      formatter={(value: any, name: any, entry: any) => {
+                        if (name !== 'Estimated Change') return [value, name];
+                        const conf = entry?.payload?.confidence;
+                        const err = entry?.payload?.error;
+                        const range = typeof err === 'number' && err > 0
+                          ? ` (${(Number(value) - err).toFixed(2)} to ${(Number(value) + err).toFixed(2)})`
+                          : '';
+                        const suffix = typeof conf === 'number' ? ` · ${(conf * 100).toFixed(0)}% confidence` : '';
+                        return [`${Number(value).toFixed(2)}${range}${suffix}`, name];
+                      }}
+                    />
                     <Bar dataKey="change" name="Estimated Change" radius={[0, 4, 4, 0]}>
                       {chartData.map((entry, index) => (
                         <Cell key={index} fill={entry.fill} />
                       ))}
+                      <ErrorBar
+                        dataKey="error"
+                        direction="x"
+                        width={5}
+                        strokeWidth={1.5}
+                        stroke={isDarkMode ? '#e5e7eb' : '#374151'}
+                      />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+              <p className={`text-xs mt-3 leading-relaxed ${tc.textSec}`}>
+                The whisker on each bar scales with how weakly the historical relationship holds:
+                its half-width is the estimated change times one minus the confidence score, so a
+                60%-confidence estimate carries a whisker 40% as long as the bar. It is a visual
+                reminder that these are correlation-derived estimates, not structural model output —
+                a long whisker means the pattern behind the number is inconsistent across years.
+              </p>
             </div>
 
             {/* Detail Cards */}

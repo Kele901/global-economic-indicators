@@ -154,7 +154,7 @@ export default function InflationGuide() {
               <li><a href="/guides/understanding-interest-rates" className="text-blue-600 dark:text-blue-400 hover:underline">Understanding Interest Rates</a> &mdash; How central banks respond to inflation</li>
               <li><a href="/guides/how-central-banks-work" className="text-blue-600 dark:text-blue-400 hover:underline">How Central Banks Work</a> &mdash; Tools for fighting inflation</li>
               <li><a href="/guides/economic-cycles-explained" className="text-blue-600 dark:text-blue-400 hover:underline">Economic Cycles Explained</a> &mdash; Inflation crises in historical context</li>
-              <li><a href="/guides/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
+              <li><a href="/glossary" className="text-blue-600 dark:text-blue-400 hover:underline">Glossary</a> &mdash; Definitions of key economic terms</li>
             </ul>
           </section>
         </div>

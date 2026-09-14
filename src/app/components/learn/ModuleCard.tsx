@@ -25,6 +25,7 @@ const MODULE_COLOR: Record<string, { fg: string; bar: string }> = {
   economy:   { fg: 'text-emerald-500', bar: '#10b981' },
   countries: { fg: 'text-sky-500',     bar: '#0ea5e9' },
   themes:    { fg: 'text-violet-500',  bar: '#8b5cf6' },
+  analyst:   { fg: 'text-rose-500',    bar: '#f43f5e' },
 };
 
 export default function ModuleCard({ module, index, lessons, isDarkMode, completedLessons, quizScores, onComplete }: Props) {
