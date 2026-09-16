@@ -2,6 +2,7 @@
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useEffect } from 'react';
+import { CONTACT_EMAIL, SITE_URL } from '../lib/site';
 
 export default function PrivacyPolicy() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -27,7 +28,7 @@ export default function PrivacyPolicy() {
         <div className="space-y-8">
           <section>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              <strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              <strong>Last Updated:</strong> September 15, 2026
             </p>
             <p className="mb-4 text-base leading-relaxed">
               Global Economic Indicators ("we," "our," or "us") is committed to protecting your privacy. 
@@ -50,14 +51,11 @@ export default function PrivacyPolicy() {
 
             <h3 className="text-xl font-semibold mb-3">1.2 Personal Information</h3>
             <p className="mb-3 leading-relaxed">
-              We do <strong>NOT</strong> collect any personal identifiable information such as:
+              We do not require an account. We do <strong>not</strong> collect names, phone numbers, physical addresses, government IDs, or payment details as a condition of using the site.
             </p>
-            <ul className="list-disc ml-6 mb-4 space-y-2">
-              <li>Names, email addresses, or phone numbers</li>
-              <li>Physical addresses or billing information</li>
-              <li>Social security numbers or government IDs</li>
-              <li>Financial or payment information</li>
-            </ul>
+            <p className="mb-3 leading-relaxed">
+              If you write to us through the contact form or by email, we receive whatever you choose to send (typically a name, email address, and message) so we can reply. That correspondence is handled by our form provider and mail host, not stored as a user profile on this site.
+            </p>
           </section>
 
           <section>
@@ -75,9 +73,17 @@ export default function PrivacyPolicy() {
               <li>Improve site functionality and user experience</li>
             </ul>
 
-            <h3 className="text-xl font-semibold mb-3">2.2 Managing Cookies</h3>
+            <h3 className="text-xl font-semibold mb-3">2.2 Advertising Cookies</h3>
             <p className="mb-3 leading-relaxed">
-              These cookies are stored locally in your browser using localStorage and can be cleared at any time through your browser settings or by clicking "Clear All Data" in your browser's developer console.
+              If you click Accept All on the cookie banner, we load Google AdSense. Google and its advertising partners (including DoubleClick) may then set cookies to serve, measure, and personalise ads. Those cookies are not set when you choose Essential only.
+            </p>
+            <p className="mb-3 leading-relaxed">
+              You can change your choice by clearing this site&apos;s stored data in your browser (the <code>cookieConsent</code> key) and reloading the page. You can also opt out of personalised ads through the links in section 3.
+            </p>
+
+            <h3 className="text-xl font-semibold mb-3">2.3 Managing Cookies</h3>
+            <p className="mb-3 leading-relaxed">
+              Preference cookies are stored locally in your browser using localStorage and can be cleared at any time through your browser settings.
             </p>
           </section>
 
@@ -168,6 +174,14 @@ export default function PrivacyPolicy() {
               <li>Right to data portability</li>
               <li>Right to object to processing</li>
             </ul>
+
+            <h3 className="text-xl font-semibold mb-3 mt-4">6.2 California Residents (CCPA / CPRA)</h3>
+            <p className="mb-3 leading-relaxed">
+              If you are a California resident, you have the right to know what personal information is collected, to request deletion, to opt out of the sale or sharing of personal information, and not to be discriminated against for exercising those rights.
+            </p>
+            <p className="mb-3 leading-relaxed">
+              We do not sell personal information. Advertising cookies that support personalised ads are loaded only after you accept them. California residents can also use Global Privacy Control (GPC) signals in a supporting browser, opt out of personalised ads via the links in section 3, or email us at {CONTACT_EMAIL} with the subject &quot;California privacy request&quot;.
+            </p>
           </section>
 
           <section>
@@ -201,10 +215,12 @@ export default function PrivacyPolicy() {
             </p>
             <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
               <p className="mb-2">
-                <strong>Website:</strong> <a href="https://www.globaleconindicators.info" className="text-blue-600 dark:text-blue-400 hover:underline">www.globaleconindicators.info</a>
+                <strong>Website:</strong>{' '}
+                <a href={SITE_URL} className="text-blue-600 dark:text-blue-400 hover:underline">{SITE_URL.replace(/^https?:\/\//, '')}</a>
               </p>
               <p>
-                <strong>Email:</strong> Contact us through our website
+                <strong>Email:</strong>{' '}
+                <a href={`mailto:${CONTACT_EMAIL}`} className="text-blue-600 dark:text-blue-400 hover:underline">{CONTACT_EMAIL}</a>
               </p>
             </div>
           </section>
@@ -212,11 +228,11 @@ export default function PrivacyPolicy() {
           <section className={`mt-8 p-6 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
             <h2 className="text-xl font-semibold mb-3">Summary</h2>
             <ul className="space-y-2">
-              <li>✓ We don't collect personal information</li>
-              <li>✓ We use cookies only for site functionality and preferences</li>
-              <li>✓ Google AdSense may serve personalized ads (you can opt out)</li>
+              <li>✓ No account is required to use the site</li>
+              <li>✓ Essential cookies store theme and chart preferences on your device</li>
+              <li>✓ Google AdSense and DoubleClick cookies load only if you accept advertising cookies</li>
               <li>✓ All economic data is from public, reputable sources</li>
-              <li>✓ You have full control over your data and privacy choices</li>
+              <li>✓ You can change cookie choices, opt out of personalised ads, or email {CONTACT_EMAIL}</li>
             </ul>
           </section>
         </div>

@@ -15,7 +15,7 @@ export const RESOURCES_CURATED_LAST_UPDATED = '2025-08-01';
 //   - Oil (WTI, Brent): EIA via FRED
 //   - Natural gas: EIA (Henry Hub) via FRED, IMF (EU import) via FRED
 //   - Metals: IMF Primary Commodity Price System via FRED
-//   - Precious: LBMA (gold) via FRED
+//   - Gold is omitted: FRED discontinued GOLDAMGBD228NLBM in 2022 with no licensed replacement
 export interface CommoditySeriesMeta {
   id: string;
   label: string;
@@ -34,9 +34,8 @@ export const COMMODITY_SERIES: CommoditySeriesMeta[] = [
   { id: 'coal', label: 'Coal (Australia)', unit: '$/tonne', seriesId: 'PCOALAUUSDM', category: 'energy', color: '#1c1917' },
 
   // Metals
-  { id: 'gold', label: 'Gold (LBMA AM Fix)', unit: '$/troy oz', seriesId: 'GOLDAMGBD228NLBM', category: 'metals', color: '#d4af37' },
-  { id: 'copper', label: 'Copper', unit: '$/tonne', seriesId: 'PCOPPUSDM', category: 'metals', color: '#b45309' },
   { id: 'aluminium', label: 'Aluminium', unit: '$/tonne', seriesId: 'PALUMUSDM', category: 'metals', color: '#94a3b8' },
+  { id: 'copper', label: 'Copper', unit: '$/tonne', seriesId: 'PCOPPUSDM', category: 'metals', color: '#b45309' },
   { id: 'ironOre', label: 'Iron Ore', unit: '$/tonne', seriesId: 'PIORECRUSDM', category: 'metals', color: '#78350f' },
   { id: 'nickel', label: 'Nickel', unit: '$/tonne', seriesId: 'PNICKUSDM', category: 'metals', color: '#64748b' },
 

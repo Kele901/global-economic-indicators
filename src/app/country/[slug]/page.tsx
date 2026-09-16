@@ -234,17 +234,6 @@ export default function CountryProfilePage() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${tc.bg}`}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className={tc.textSec}>Loading {displayName} data...</p>
-        </div>
-      </div>
-    );
-  }
-
   const metricColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#e60049', '#0bb4ff'];
 
   return (
@@ -311,6 +300,15 @@ export default function CountryProfilePage() {
           </p>
         </div>
 
+        {loading && (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className={tc.textSec}>Loading {displayName} data...</p>
+          </div>
+        )}
+
+        {!loading && (
+        <>
         {/* Economic Summary */}
         {economicSummary && (
           <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${tc.card}`}>
@@ -589,6 +587,8 @@ export default function CountryProfilePage() {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

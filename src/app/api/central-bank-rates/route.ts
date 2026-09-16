@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { extractBisObservations, fetchBisDataset } from '../_lib/bisClient';
 
 const CENTRAL_BANKS = [
   { currency: 'USD', bank: 'Federal Reserve', bankAbbrev: 'Fed', fredSeries: 'FEDFUNDS', bisCode: 'US' },
@@ -23,12 +24,6 @@ const CENTRAL_BANKS = [
 ];
 
 const FRED_API_KEY = process.env.NEXT_PUBLIC_FRED_API_KEY || '30008945655d5ff4d1ade8c836f86dea';
-const BIS_BASE_URL = 'https://stats.bis.org/api/v1';
-
-const BIS_HEADERS = {
-  'Accept': 'application/vnd.sdmx.data+json; charset=utf-8; version=1.0',
-  'User-Agent': 'GlobalEconomicIndicators/1.0',
-};
 
 interface RateData {
   currency: string;
@@ -71,53 +66,13 @@ async function fetchFREDRate(seriesId: string): Promise<{ rate: number; previous
 
 async function fetchBISRate(countryCode: string): Promise<{ rate: number; previousRate: number; date: string } | null> {
   try {
-    const url = `${BIS_BASE_URL}/data/WS_CBPOL_M/M.${countryCode}?startPeriod=2023&detail=full`;
-
-    const response = await axios.get(url, {
-      timeout: 15000,
-      headers: BIS_HEADERS
-    });
-
-    if (response.data?.data?.dataSets?.[0]?.series) {
-      const series = response.data.data.dataSets[0].series;
-      const structure = response.data.data.structure;
-      const timeDimension = structure.dimensions?.observation?.find((d: any) =>
-        d.id === 'TIME_PERIOD' || d.id === 'time'
-      );
-
-      if (timeDimension?.values) {
-        const observations: { period: string; value: number }[] = [];
-
-        Object.values(series).forEach((seriesData: any) => {
-          if (seriesData.observations) {
-            Object.entries(seriesData.observations).forEach(([timeIndex, obs]: [string, any]) => {
-              const value = obs[0];
-              if (value !== null && !isNaN(value)) {
-                const period = timeDimension.values[parseInt(timeIndex)]?.id;
-                if (period) {
-                  observations.push({ period, value: Number(value) });
-                }
-              }
-            });
-          }
-        });
-
-        observations.sort((a, b) => b.period.localeCompare(a.period));
-
-        if (observations.length >= 2) {
-          return {
-            rate: observations[0].value,
-            previousRate: observations[1].value,
-            date: observations[0].period
-          };
-        } else if (observations.length === 1) {
-          return {
-            rate: observations[0].value,
-            previousRate: observations[0].value,
-            date: observations[0].period
-          };
-        }
-      }
+    const payload = await fetchBisDataset('WS_CBPOL', countryCode, '2023');
+    const observations = extractBisObservations(payload);
+    if (observations.length >= 2) {
+      return { rate: observations[0].value, previousRate: observations[1].value, date: observations[0].period };
+    }
+    if (observations.length === 1) {
+      return { rate: observations[0].value, previousRate: observations[0].value, date: observations[0].period };
     }
     return null;
   } catch (error: any) {

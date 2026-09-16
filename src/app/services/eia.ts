@@ -40,10 +40,13 @@ async function tryFetchEIA(params: Record<string, string | string[]>): Promise<a
 
   try {
     const response = await axios.get(`/api/eia?${search.toString()}`, { timeout: 15000 });
+    if (response.data?.fallback || response.data?.configured === false) {
+      console.info('ℹ️ EIA_API_KEY not configured, using static seed data');
+      return null;
+    }
     if (!response.data?.response?.data) return null;
     return response.data.response.data;
   } catch (error: any) {
-    // 501 = no key configured; anything else logged as a genuine failure.
     if (error.response?.status !== 501) {
       console.warn('⚠️ EIA fetch failed, using static fallback:', error.message);
     } else {

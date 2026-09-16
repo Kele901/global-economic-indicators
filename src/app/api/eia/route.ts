@@ -8,16 +8,19 @@ import { memoizeUpstream } from '../_lib/upstreamCache';
 // Callers pass:
 //   ?path=international/data&frequency=annual&facets[activityId][]=1&...
 // The proxy appends api_key from the environment. If EIA_API_KEY is not set
-// this route responds with 501 so the client can fall back to static data.
+// this route responds with fallback:true so the client can use static data.
 const EIA_API_BASE_URL = 'https://api.eia.gov/v2';
 
 export async function GET(request: NextRequest) {
   try {
     const apiKey = process.env.EIA_API_KEY || process.env.NEXT_PUBLIC_EIA_API_KEY;
     if (!apiKey) {
+      // 200 rather than 501: missing a key is expected locally and the
+      // client already falls back to the curated snapshot. A 5xx made the
+      // outage log look like a broken feed.
       return NextResponse.json(
-        { error: 'EIA_API_KEY not configured on the server', fallback: true },
-        { status: 501 }
+        { error: 'EIA_API_KEY not configured on the server', fallback: true, configured: false },
+        { status: 200 },
       );
     }
 

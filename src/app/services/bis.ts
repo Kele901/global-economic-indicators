@@ -1,14 +1,11 @@
 import axios from "axios";
 import { clientCache } from "./clientCache";
 
-// BIS API Configuration
-const BIS_BASE_URL = 'https://stats.bis.org/api/v1';
-
 // BIS Dataset for Central Bank Policy Rates
 const BIS_DATASETS = {
-  POLICY_RATES: 'WS_CBPOL_M', // Central Bank Policy Rates (Monthly)
-  EXCHANGE_RATES: 'WS_EER', // Effective Exchange Rates
-  CREDIT_TO_GDP: 'WS_LONG_CRE', // Credit to GDP gaps
+  POLICY_RATES: 'WS_CBPOL',
+  EXCHANGE_RATES: 'WS_EER',
+  CREDIT_TO_GDP: 'WS_LONG_CRE',
 };
 
 // Map your country codes to BIS codes

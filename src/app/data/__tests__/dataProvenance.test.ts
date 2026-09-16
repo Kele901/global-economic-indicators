@@ -17,7 +17,7 @@ const PROVIDER_FETCHERS: Partial<Record<DataProvider, string[]>> = {
   'World Bank': ['src/app/services/worldbank.ts', 'src/app/api/worldbank/route.ts'],
   FRED: ['src/app/api/fred/route.ts'],
   'BIS via FRED': ['src/app/api/fred/route.ts'],
-  BIS: ['src/app/api/bis/route.ts'],
+  BIS: ['src/app/api/bis/route.ts', 'src/app/api/_lib/bisClient.ts'],
   OECD: ['src/app/api/oecd/route.ts'],
   EIA: ['src/app/api/eia/route.ts'],
   Frankfurter: ['src/app/api/frankfurter/route.ts'],

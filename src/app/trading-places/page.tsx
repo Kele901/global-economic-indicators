@@ -198,7 +198,6 @@ const MAP_METRICS: { id: MapMetric; label: string }[] = [
 
 const TradingPlacesPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
-  const [enableRealData, setEnableRealData] = useLocalStorage('enableRealData', true);
   const [viewMode, setViewMode] = useLocalStorage<ViewMode>('tradingPlacesViewMode', 'rankings');
   const [selectedCountry, setSelectedCountry] = useState(mockTradeData.countries[0]);
   const [detailCountry, setDetailCountry] = useState<string | null>(null);
@@ -257,9 +256,9 @@ const TradingPlacesPage: React.FC = () => {
 
   const scrollToTop = useCallback(() => window.scrollTo({ top: 0, behavior: 'smooth' }), []);
 
-  const { data: realTradeData, loading } = useTradeData({
+  const { data: realTradeData, loading, error: tradeError } = useTradeData({
     countries: TRADE_COUNTRIES as unknown as string[],
-    enableRealData,
+    enableRealData: true,
     refreshInterval: 3600000
   });
 
@@ -272,11 +271,11 @@ const TradingPlacesPage: React.FC = () => {
     countries: TRADE_COUNTRIES as unknown as string[],
     startYear: customStartYear,
     endYear: customEndYear,
-    enableRealData: enableRealData && showHistoricalView
+    enableRealData: showHistoricalView
   });
 
   const combinedTradeData = useMemo(() => {
-    if (enableRealData && realTradeData.length > 0) {
+    if (realTradeData.length > 0) {
       const mergedCountries = mockTradeData.countries.map(mc => {
         const rd = realTradeData.find((r: any) =>
           r.code === mc.code || r.countryCode === mc.code ||
@@ -311,11 +310,9 @@ const TradingPlacesPage: React.FC = () => {
       return { countries: mergedCountries, globalStats: { ...mockTradeData.globalStats, totalWorldTrade: totalWorldTrade > 0 ? totalWorldTrade : mockTradeData.globalStats.totalWorldTrade, topTradingNations: topTradingNations.length > 0 ? topTradingNations : mockTradeData.globalStats.topTradingNations, tradeMetrics: { ...mockTradeData.globalStats.tradeMetrics, averageTradeIntensity: avgIntensity, globalTradeGrowth: globalGrowth } } };
     }
     return mockTradeData;
-  }, [enableRealData, realTradeData]);
+  }, [realTradeData]);
 
-  // True whenever the figures on screen are the illustrative fallback rather than
-  // merged live values, either because the toggle is off or the fetch returned nothing.
-  const showingSample = !enableRealData || realTradeData.length === 0;
+  const liveUnavailable = !loading && realTradeData.length === 0;
 
   useEffect(() => {
     const updated = combinedTradeData.countries.find(c => c.code === selectedCountry.code);
@@ -524,36 +521,32 @@ const TradingPlacesPage: React.FC = () => {
             <p className={tc.textSec}>Global trade flows, tariffs, and economic relationships</p>
                     </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setEnableRealData(!enableRealData)}
-              aria-pressed={enableRealData}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${enableRealData ? 'bg-green-600 text-white border-green-600' : 'bg-amber-500 text-white border-amber-500'}`}
-            >
-              {enableRealData ? 'Live Data' : 'Sample data'}
-                  </button>
-                  <div className="flex items-center gap-2">
               <span className={`text-xs ${tc.textSec}`}>Light</span>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`relative w-11 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}>
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${isDarkMode ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                     </button>
               <span className={`text-xs ${tc.textSec}`}>Dark</span>
-                  </div>
                 </div>
             </div>
 
-        {/* Provenance: says plainly whether the numbers on screen are measured or illustrative. */}
-        {showingSample && (
+        {(loading || liveUnavailable) && (
           <div
             role="status"
-            className={`rounded-xl border p-4 mb-6 ${isDarkMode ? 'bg-amber-900/25 border-amber-700' : 'bg-amber-50 border-amber-300'}`}
+            className={`rounded-xl border p-4 mb-6 ${
+              loading
+                ? isDarkMode ? 'bg-slate-800/60 border-slate-600' : 'bg-slate-50 border-slate-200'
+                : isDarkMode ? 'bg-amber-900/25 border-amber-700' : 'bg-amber-50 border-amber-300'
+            }`}
           >
-            <h3 className={`font-semibold mb-1 ${isDarkMode ? 'text-amber-200' : 'text-amber-900'}`}>
-              {loading ? 'Loading live trade data…' : 'You are viewing sample data'}
+            <h3 className={`font-semibold mb-1 ${loading ? tc.text : isDarkMode ? 'text-amber-200' : 'text-amber-900'}`}>
+              {loading ? 'Loading live trade data…' : 'Live trade data is unavailable'}
             </h3>
-            <p className={`text-sm ${isDarkMode ? 'text-amber-200/80' : 'text-amber-800'}`}>
+            <p className={`text-sm ${loading ? tc.textSec : isDarkMode ? 'text-amber-200/80' : 'text-amber-800'}`}>
               {loading
-                ? 'Illustrative figures are shown until the World Bank and UN Comtrade responses arrive.'
-                : 'These are illustrative figures for 18 economies, not measured statistics. Switch the toggle above to Live Data to pull real World Bank and UN Comtrade values.'}
+                ? 'Fetching World Bank and UN Comtrade figures. Tables below will update when the responses arrive.'
+                : tradeError
+                  ? `The World Bank / UN Comtrade request failed (${tradeError}). Showing the last curated snapshot until the live series recovers.`
+                  : 'The World Bank / UN Comtrade request returned no usable rows. Showing the last curated snapshot until the live series recovers.'}
             </p>
           </div>
         )}
@@ -562,7 +555,7 @@ const TradingPlacesPage: React.FC = () => {
           <ChartMeta sourceId="wb-trade-balance" isDarkMode={isDarkMode} />
           <ChartMeta sourceId="un-comtrade" isDarkMode={isDarkMode} />
           <ChartMeta sourceId="trade-ledger-curated" isDarkMode={isDarkMode} />
-          <DataQualityBadge flag={showingSample ? 'estimate' : 'revised'} isDarkMode={isDarkMode} />
+          <DataQualityBadge flag={liveUnavailable ? 'curated' : 'revised'} isDarkMode={isDarkMode} />
         </div>
 
         {/* Info Banner */}
@@ -575,7 +568,7 @@ const TradingPlacesPage: React.FC = () => {
           </p>
           <p className={`text-xs mt-2 ${tc.textSec}`}>
             The tariff disputes, trade-bloc membership and advanced complexity tables are curated
-            snapshots. They do not change with the live-data toggle.
+            snapshots and do not change with the live World Bank / UN Comtrade series.
           </p>
           </div>
           

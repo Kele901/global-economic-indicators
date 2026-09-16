@@ -146,8 +146,8 @@ export default function ResourcesPage() {
     const wtiLatest = commodities['wti']?.latest;
     const brentLatest = commodities['brent']?.latest;
     const gasLatest = commodities['henryHub']?.latest;
-    const goldLatest = commodities['gold']?.latest;
-    return { wtiLatest, brentLatest, gasLatest, goldLatest };
+    const copperLatest = commodities['copper']?.latest;
+    return { wtiLatest, brentLatest, gasLatest, copperLatest };
   }, [commodities]);
 
   const pageBg = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
@@ -243,7 +243,7 @@ export default function ResourcesPage() {
               { label: 'WTI Crude', obs: kpi.wtiLatest, unit: '$/bbl' },
               { label: 'Brent Crude', obs: kpi.brentLatest, unit: '$/bbl' },
               { label: 'Natural Gas', obs: kpi.gasLatest, unit: '$/MMBtu' },
-              { label: 'Gold', obs: kpi.goldLatest, unit: '$/oz' },
+              { label: 'Copper', obs: kpi.copperLatest, unit: '$/t' },
             ].map(k => (
               <div key={k.label} className={`p-3 rounded-lg border ${cardBg}`}>
                 <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>{k.label}</div>

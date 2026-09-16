@@ -289,11 +289,11 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     name: 'Commodity spot prices',
     category: 'resources',
     provider: 'FRED',
-    seriesIds: ['DCOILWTICO', 'DCOILBRENTEU', 'GOLDAMGBD228NLBM', 'PIORECRUSDM', 'PALUMUSDM', 'PCOPPUSDM', 'PWHEAMTUSDM'],
+    seriesIds: ['DCOILWTICO', 'DCOILBRENTEU', 'PIORECRUSDM', 'PALUMUSDM', 'PCOPPUSDM', 'PWHEAMTUSDM'],
     refreshCadence: 'daily',
     live: true,
     lastUpdated: LIVE,
-    notes: 'Oil (WTI, Brent), gold, iron ore, aluminium, copper, wheat. 30-day sparklines rendered client-side.',
+    notes: 'Oil (WTI, Brent), iron ore, aluminium, copper, wheat. 30-day sparklines rendered client-side. FRED discontinued the LBMA gold AM-fix series (GOLDAMGBD228NLBM) in 2022 with no licensed dollar replacement, so gold is omitted.',
   },
   {
     id: 'eia-oil-reserves',
@@ -303,7 +303,7 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     refreshCadence: 'annual',
     live: true,
     lastUpdated: LIVE,
-    notes: 'US Energy Information Administration international data via /api/eia. Falls back to a static snapshot when EIA is unavailable.',
+    notes: 'US Energy Information Administration international data via /api/eia when EIA_API_KEY is set. Without a key the route reports fallback:true and the client uses a curated 2024 snapshot.',
     sourceUrl: 'https://www.eia.gov/international/data/world',
   },
 

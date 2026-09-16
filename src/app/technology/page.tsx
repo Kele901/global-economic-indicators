@@ -332,32 +332,6 @@ const TechnologyPage = () => {
 
   const summaryStats = getSummaryStats();
 
-  if (loading) {
-    return (
-      <div className={`min-h-screen ${themeColors.background} ${themeColors.text} flex items-center justify-center`}>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={`min-h-screen ${themeColors.background} ${themeColors.text} flex items-center justify-center`}>
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border} max-w-md text-center`}>
-          <div className="text-red-500 text-4xl mb-4">!</div>
-          <h2 className="text-xl font-bold mb-2">Error Loading Data</h2>
-          <p className={themeColors.textSecondary}>{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`min-h-screen ${themeColors.background} ${themeColors.text}`}>
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -405,6 +379,28 @@ const TechnologyPage = () => {
           </p>
         </div>
 
+        {loading && (
+          <div className="flex items-center justify-center py-16">
+            <LoadingSpinner />
+          </div>
+        )}
+
+        {error && (
+          <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border} max-w-md mx-auto text-center`}>
+            <div className="text-red-500 text-4xl mb-4">!</div>
+            <h2 className="text-xl font-bold mb-2">Error Loading Data</h2>
+            <p className={themeColors.textSecondary}>{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && (
+        <>
         {/* Quick Stats */}
         {summaryStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -1060,6 +1056,9 @@ const TechnologyPage = () => {
               </div>
             </div>
           </div>
+        )}
+
+        </>
         )}
 
         {/* Footer / Sources */}

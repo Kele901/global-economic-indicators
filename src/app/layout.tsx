@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import Script from 'next/script';
 import Navbar from './components/Navbar';
 import ThemeProvider from './components/ThemeProvider';
 import CookieConsent from './components/CookieConsent';
+import AdSenseLoader from './components/AdSenseLoader';
 import StatusWidget from './components/StatusWidget';
 import CommandPalette from './components/CommandPalette';
 import RouteTracker from './components/RouteTracker';
@@ -66,13 +66,12 @@ export default function RootLayout({
             __html: `(function(){try{var s=localStorage.getItem('isDarkMode');var d=s==='true';var r=document.documentElement;r.setAttribute('data-theme',d?'dark':'light');if(d){r.classList.add('dark')}}catch(e){}})();`,
           }}
         />
-        <meta name="google-adsense-account" content="ca-pub-1726759813423594" />
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1726759813423594"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied'});`,
+          }}
         />
+        <meta name="google-adsense-account" content="ca-pub-1726759813423594" />
       </head>
       <body className={`${inter.className} min-h-screen`}>
         <ThemeProvider>
@@ -120,7 +119,7 @@ export default function RootLayout({
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">Legal</h3>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-200 mb-3">
                       © {new Date().getFullYear()} Global Economic Indicators.
-                      This site uses cookies for analytics and personalized content.
+                      Essential cookies remember preferences. Advertising cookies load only if you accept them.
                     </p>
                     <div className="flex flex-col gap-1.5 text-xs sm:text-sm">
                       <a href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Privacy Policy</a>
@@ -140,6 +139,7 @@ export default function RootLayout({
             </footer>
           </div>
           <CookieConsent />
+          <AdSenseLoader />
           <CommandPalette />
           <RouteTracker />
         </ThemeProvider>

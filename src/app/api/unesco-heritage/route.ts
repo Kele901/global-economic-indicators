@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
-const UNESCO_DATAHUB_URL = 'https://data.unesco.org/api/explore/v2.0/catalog/datasets/whc001/records';
+// v2.0 returned total_count but put rows under `records`; v2.1 puts them
+// under `results` with the field names this mapper already expected.
+const UNESCO_DATAHUB_URL = 'https://data.unesco.org/api/explore/v2.1/catalog/datasets/whc001/records';
 
 export interface HeritageSiteRecord {
   name_en: string;
@@ -41,10 +43,14 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const records = response.data?.results || [];
+    const records =
+      response.data?.results ??
+      response.data?.records?.map((row: any) => row.record?.fields ?? row) ??
+      [];
     const totalCount = response.data?.total_count || 0;
 
-    const sites = records.map((record: any) => ({
+    const sites = records
+      .map((record: any) => ({
       name: record.name_en || record.name_fr || '',
       description: record.short_description_en || '',
       category: record.category || 'Cultural',
@@ -58,7 +64,8 @@ export async function GET(request: NextRequest) {
       areaHectares: record.area_hectares || 0,
       criteria: record.criteria_txt || '',
       transboundary: record.transboundary === 1,
-    }));
+    }))
+      .filter((site: { name: string }) => Boolean(site.name));
 
     console.log(`[UNESCO Heritage API] Found ${sites.length} sites (total: ${totalCount})`);
 

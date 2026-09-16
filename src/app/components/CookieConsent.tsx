@@ -1,28 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { readCookieConsent, writeCookieConsent } from '../lib/cookieConsent';
 
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // Check if user has already accepted cookies
-    const consent = localStorage.getItem('cookieConsent');
-    if (!consent) {
-      // Show banner after a short delay to avoid layout shift
-      setTimeout(() => {
-        setShowBanner(true);
-      }, 1000);
+    if (!readCookieConsent()) {
+      setTimeout(() => setShowBanner(true), 1000);
     }
   }, []);
 
   const acceptCookies = () => {
-    localStorage.setItem('cookieConsent', 'accepted');
+    writeCookieConsent('accepted');
     setShowBanner(false);
   };
 
   const declineCookies = () => {
-    localStorage.setItem('cookieConsent', 'declined');
+    writeCookieConsent('declined');
     setShowBanner(false);
   };
 
@@ -34,11 +30,11 @@ export default function CookieConsent() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
             <p className="text-sm sm:text-base mb-2">
-              <strong>🍪 We use cookies to improve your experience</strong>
+              <strong>We use cookies to run the site and, if you allow it, to show ads</strong>
             </p>
             <p className="text-xs sm:text-sm text-gray-300">
-              We use essential cookies for site functionality and third-party cookies (Google AdSense) for advertising. 
-              By clicking "Accept", you consent to our use of cookies.{' '}
+              Essential cookies remember your theme and chart settings. Google AdSense cookies are used
+              only if you click Accept All.{' '}
               <a href="/privacy" className="underline hover:text-blue-400 transition-colors">
                 Learn more in our Privacy Policy
               </a>
@@ -49,7 +45,7 @@ export default function CookieConsent() {
               onClick={declineCookies}
               className="flex-1 sm:flex-none bg-gray-700 hover:bg-gray-600 px-4 sm:px-6 py-2 rounded text-sm whitespace-nowrap transition-colors"
             >
-              Decline
+              Essential only
             </button>
             <button
               onClick={acceptCookies}
@@ -63,4 +59,3 @@ export default function CookieConsent() {
     </div>
   );
 }
-

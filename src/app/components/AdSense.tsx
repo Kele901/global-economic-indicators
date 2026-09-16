@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { adsAllowed, COOKIE_CONSENT_EVENT } from '../lib/cookieConsent';
 
 declare global {
   interface Window {
@@ -17,10 +18,23 @@ interface AdSenseProps {
 const AdSense: React.FC<AdSenseProps> = ({ className = '', show = true }) => {
   const adRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
-  
+  const [consent, setConsent] = useState(false);
+
   useEffect(() => {
-    // Only initialize ads when show is true and component is mounted
-    if (!show) return;
+    const sync = () => setConsent(adsAllowed());
+    sync();
+    window.addEventListener(COOKIE_CONSENT_EVENT, sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener(COOKIE_CONSENT_EVENT, sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
+
+  const visible = show && consent;
+
+  useEffect(() => {
+    if (!visible) return;
     
     try {
       if (typeof window !== 'undefined' && adRef.current && !hasInitialized.current) {
@@ -37,10 +51,9 @@ const AdSense: React.FC<AdSenseProps> = ({ className = '', show = true }) => {
     } catch (err) {
       console.error('AdSense error:', err);
     }
-  }, [show]);
+  }, [visible]);
 
-  // Don't render anything if show is false - prevents ads on pages without content
-  if (!show) {
+  if (!visible) {
     return null;
   }
 

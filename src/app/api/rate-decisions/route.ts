@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
-
-const BIS_BASE_URL = 'https://stats.bis.org/api/v1';
+import { extractBisObservations, fetchBisDataset } from '../_lib/bisClient';
 
 const CENTRAL_BANK_INFO: Record<string, { bank: string; currency: string }> = {
   US: { bank: 'Federal Reserve', currency: 'USD' },
@@ -31,43 +29,8 @@ interface RateObservation {
 
 async function fetchBISRateHistory(bisCode: string): Promise<RateObservation[]> {
   try {
-    const url = `${BIS_BASE_URL}/data/WS_CBPOL_M/M.${bisCode}?startPeriod=2023&detail=full`;
-
-    const response = await axios.get(url, {
-      timeout: 15000,
-      headers: {
-        'Accept': 'application/vnd.sdmx.data+json; charset=utf-8; version=1.0',
-        'User-Agent': 'GlobalEconomicIndicators/1.0'
-      }
-    });
-
-    const observations: RateObservation[] = [];
-
-    if (response.data?.data?.dataSets?.[0]?.series) {
-      const series = response.data.data.dataSets[0].series;
-      const structure = response.data.data.structure;
-      const timeDimension = structure.dimensions?.observation?.find((d: any) =>
-        d.id === 'TIME_PERIOD' || d.id === 'time'
-      );
-
-      if (timeDimension?.values) {
-        Object.values(series).forEach((seriesData: any) => {
-          if (seriesData.observations) {
-            Object.entries(seriesData.observations).forEach(([timeIndex, obs]: [string, any]) => {
-              const value = obs[0];
-              if (value !== null && !isNaN(value)) {
-                const period = timeDimension.values[parseInt(timeIndex)]?.id;
-                if (period) {
-                  observations.push({ period, value: Number(value) });
-                }
-              }
-            });
-          }
-        });
-      }
-    }
-
-    return observations.sort((a, b) => b.period.localeCompare(a.period));
+    const payload = await fetchBisDataset('WS_CBPOL', bisCode, '2023');
+    return extractBisObservations(payload);
   } catch (error: any) {
     if (error.response?.status !== 404) {
       console.error(`BIS rate history fetch error for ${bisCode}:`, error.message);

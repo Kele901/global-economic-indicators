@@ -205,17 +205,6 @@ export default function MonetaryPolicyPage() {
     });
   }, [data, cyclePhases, ratesData, decisionsData]);
 
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${tc.bg}`}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className={tc.textSec}>Loading monetary policy data...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`min-h-screen transition-colors duration-200 ${tc.bg} ${tc.text}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -266,6 +255,15 @@ export default function MonetaryPolicyPage() {
           </p>
         </div>
 
+        {loading && (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className={tc.textSec}>Loading monetary policy data...</p>
+          </div>
+        )}
+
+        {!loading && (
+        <>
         {/* Current Rates Overview */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -539,6 +537,9 @@ export default function MonetaryPolicyPage() {
             </table>
           </div>
         </div>
+
+        </>
+        )}
 
         {/* Forward Guidance */}
         <div className={`rounded-xl border p-6 ${tc.card}`}>

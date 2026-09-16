@@ -253,17 +253,6 @@ export default function OutlookPage() {
     setSortConfig(prev => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }));
   };
 
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${tc.bg}`}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className={tc.textSec}>Loading outlook data...</p>
-        </div>
-      </div>
-    );
-  }
-
   const { worldGDP, globalInflation, tradeGrowth, oilPrice } = GLOBAL_OUTLOOK_SUMMARY;
 
   return (
@@ -330,6 +319,15 @@ export default function OutlookPage() {
           </p>
         </div>
 
+        {loading && (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className={tc.textSec}>Loading outlook data...</p>
+          </div>
+        )}
+
+        {!loading && (
+        <>
         {/* Global Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
@@ -643,6 +641,8 @@ export default function OutlookPage() {
             </table>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

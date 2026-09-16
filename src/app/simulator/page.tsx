@@ -193,17 +193,6 @@ export default function SimulatorPage() {
     return { lines, chartPoints };
   }, [data, results, inputMetric, country, changeMagnitude]);
 
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${tc.bg}`}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className={tc.textSec}>Loading data...</p>
-        </div>
-      </div>
-    );
-  }
-
   const inputLabel = getMetricByKey(inputMetric)?.label || inputMetric;
 
   return (
@@ -255,6 +244,15 @@ export default function SimulatorPage() {
           </p>
         </div>
 
+        {loading && (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className={tc.textSec}>Loading data...</p>
+          </div>
+        )}
+
+        {!loading && (
+        <>
         {/* Correlation Matrix Heatmap */}
         {correlationMatrix && (
           <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
@@ -584,6 +582,8 @@ export default function SimulatorPage() {
               </div>
             )}
           </>
+        )}
+        </>
         )}
       </div>
     </div>

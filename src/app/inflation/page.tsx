@@ -130,13 +130,6 @@ export default function InflationPage() {
     );
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-  if (error) {
-    return <ErrorMessage message={error} />;
-  }
-
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="w-full max-w-5xl mx-auto p-4 space-y-8">
@@ -176,6 +169,11 @@ export default function InflationPage() {
           </p>
         </div>
 
+        {loading && <LoadingSpinner />}
+        {error && <ErrorMessage message={error} />}
+
+        {!loading && !error && (
+        <>
         {/* Tab Navigation */}
         <div className={`flex gap-2 p-1 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
           <button
@@ -337,10 +335,10 @@ export default function InflationPage() {
                     fill={isDarkMode ? '#1f2937' : '#f9fafb'}
                   />
                 )}
-              </LineChart>
-            </ResponsiveContainer>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
 
         {CITY_ORDER.map(city => (
           <LazyCityPanel key={city}>
@@ -408,7 +406,7 @@ export default function InflationPage() {
             {selectedCityTab !== 'overview' && (
               <CityCostPanel city={selectedCityTab} isDarkMode={isDarkMode} compact />
             )}
-          </div>
+                  </div>
         )}
 
         {/* World Map Tab Content */}
@@ -461,6 +459,8 @@ export default function InflationPage() {
               </div>
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
     </div>

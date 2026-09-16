@@ -58,22 +58,6 @@ export default function InflationCalculatorPage() {
     loadData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <ErrorMessage message={error} />
-      </div>
-    );
-  }
-
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
@@ -128,6 +112,19 @@ export default function InflationCalculatorPage() {
           </p>
         </div>
 
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <LoadingSpinner />
+          </div>
+        )}
+        {error && (
+          <div className="py-8">
+            <ErrorMessage message={error} />
+          </div>
+        )}
+
+        {!loading && !error && (
+        <>
         {/* Calculator */}
         <InflationCalculator
           cpiData={cpiData}
@@ -177,8 +174,8 @@ export default function InflationCalculatorPage() {
                 <div className={`p-4 rounded-lg mb-4 ${
                   isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
                 }`}>
-                  <p className="mb-2">• The price index for 1975 = 17.78</p>
-                  <p className="mb-2">• The price index for 1985 = 44.6</p>
+                  <p className="mb-2">&bull; The price index for 1975 = 17.78</p>
+                  <p className="mb-2">&bull; The price index for 1985 = 44.6</p>
                   <p className="mb-4">
                     The calculator increases the cost in 1975 by the change in prices between 
                     1975 and 1985 with this formula:
@@ -186,9 +183,9 @@ export default function InflationCalculatorPage() {
                   <div className={`p-3 rounded font-mono text-sm ${
                     isDarkMode ? 'bg-gray-800' : 'bg-white'
                   }`}>
-                    Cost in 1985 = Cost in 1975 × (1985 CPI / 1975 CPI)
+                    Cost in 1985 = Cost in 1975 &times; (1985 CPI / 1975 CPI)
                     <br />
-                    $57.68 = $23 × (44.6 / 17.78)
+                    $57.68 = $23 &times; (44.6 / 17.78)
                   </div>
                 </div>
                 <p>
@@ -234,7 +231,7 @@ export default function InflationCalculatorPage() {
                 </p>
                 <p className="mb-4">
                   When prices go up, the same amount of money buys you less stuff. This is a 
-                  decrease in 'purchasing power'.
+                  decrease in &apos;purchasing power&apos;.
                 </p>
                 <div className={`p-4 rounded-lg ${
                   isDarkMode ? 'bg-gray-700' : 'bg-blue-50'
@@ -251,7 +248,7 @@ export default function InflationCalculatorPage() {
                   <div className={`p-3 rounded font-mono text-sm ${
                     isDarkMode ? 'bg-gray-800' : 'bg-white'
                   }`}>
-                    Average Inflation = (((CPI_end / CPI_start) ^ (1 / years)) - 1) × 100
+                    Average Inflation = (((CPI_end / CPI_start) ^ (1 / years)) - 1) &times; 100
                   </div>
                 </div>
                 <div className={`mt-4 p-4 rounded-lg ${
@@ -325,23 +322,23 @@ export default function InflationCalculatorPage() {
                   </h4>
                   <ul className="space-y-2">
                     <li>
-                      • Over long periods, the definitions of goods and services in the price 
+                      Over long periods, the definitions of goods and services in the price 
                       index have changed significantly.
                     </li>
                     <li>
-                      • A family's consumption today is very different from that of a typical 
+                      A family&apos;s consumption today is very different from that of a typical 
                       family decades ago.
                     </li>
                     <li>
-                      • Changes in household spending reflect higher incomes and a wider range 
+                      Changes in household spending reflect higher incomes and a wider range 
                       of available goods and services.
                     </li>
                     <li>
-                      • Comparisons over longer periods and further back in time are generally 
+                      Comparisons over longer periods and further back in time are generally 
                       less accurate than comparisons over shorter recent periods.
                     </li>
                     <li>
-                      • Data availability varies significantly by country - some countries have 
+                      Data availability varies significantly by country - some countries have 
                       complete data from 1960, while others have limited historical coverage.
                     </li>
                   </ul>
@@ -364,8 +361,9 @@ export default function InflationCalculatorPage() {
             country and time period.
           </p>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
 }
-
