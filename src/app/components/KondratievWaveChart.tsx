@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { kondratievWaves, type KondratievWave } from '../data/marketCyclesData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface KondratievWaveChartProps {
   isDarkMode: boolean;
@@ -86,17 +88,23 @@ const KondratievWaveChart: React.FC<KondratievWaveChartProps> = ({ isDarkMode })
   return (
     <div
       ref={containerRef}
+      id={slugify('Kondratiev Long Waves')}
       className={`relative w-full rounded-xl overflow-hidden ${
         isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50'
       }`}
     >
-      <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Kondratiev Long Waves
-        </h3>
-        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          250 years of technology-driven economic super-cycles (50–60 years each)
-        </p>
+      <div className={`px-4 py-3 border-b flex items-start justify-between gap-2 flex-wrap ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div>
+          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Kondratiev Long Waves
+          </h3>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            250 years of technology-driven economic super-cycles (50–60 years each)
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Kondratiev Long Waves" isDarkMode={isDarkMode} />
+        </div>
       </div>
 
       <svg

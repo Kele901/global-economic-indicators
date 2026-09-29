@@ -22,6 +22,8 @@ import AnomalyBanner from './AnomalyBanner';
 import MethodologyPopover, { type MethodologyPopoverProps } from './MethodologyPopover';
 import DataStatusIndicator from './DataStatusIndicator';
 import LoadingSpinner from './LoadingSpinner';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 // Custom Tooltip Component to prevent duplicates
 const CustomTooltip = ({ active, payload, label, isDarkMode }: any) => {
@@ -462,19 +464,24 @@ const CountryEconomicSummary = ({
     'Energy Consumption': '#5f27cd'
   };
 
+  const summaryTitle = `Economic Summary for ${country}`;
+
   return (
-    <div className={`p-3 sm:p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+    <div id={slugify(summaryTitle)} className={`p-3 sm:p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-        <h3 className="text-base sm:text-lg font-semibold">Economic Summary for {country}</h3>
-        {FlagComponent && (
-          <div className="w-12 h-8 sm:w-16 sm:h-10 overflow-hidden rounded-md shadow-lg border-2 border-gray-200 dark:border-gray-600 hover:scale-110 transition-transform duration-200">
-            <FlagComponent />
-          </div>
-        )}
+        <h3 className="text-base sm:text-lg font-semibold">{summaryTitle}</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          {FlagComponent && (
+            <div className="w-12 h-8 sm:w-16 sm:h-10 overflow-hidden rounded-md shadow-lg border-2 border-gray-200 dark:border-gray-600 hover:scale-110 transition-transform duration-200">
+              <FlagComponent />
+            </div>
+          )}
+          <SocialShareMenu title={summaryTitle} isDarkMode={isDarkMode} />
+        </div>
       </div>
       <hr className={`my-3 sm:my-4 border-t ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`} />
       
-      <div className="mb-4 sm:mb-6 h-[180px] sm:h-[200px] md:h-[250px]">
+      <div className="mb-4 sm:mb-6 h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={combinedData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#555' : '#ccc'} />
@@ -1176,6 +1183,7 @@ const GlobalInterestRateApp = () => {
     return (
       <div 
         ref={chartRef}
+        id={slugify(title)}
         data-chart-container
         data-chart-title={title}
         className={`mb-6 sm:mb-8 ${isGridView ? 'h-[350px] sm:h-[400px] md:h-[500px]' : ''}`}
@@ -1220,7 +1228,7 @@ const GlobalInterestRateApp = () => {
             />
           );
         })()}
-        <div className={`${isGridView ? 'h-[200px] sm:h-[250px] md:h-[350px]' : 'h-[250px] sm:h-[300px] md:h-[400px]'} w-full`}>
+        <div className={`${isGridView ? 'h-[250px] md:h-[350px]' : 'h-[250px] sm:h-[300px] md:h-[400px]'} w-full`}>
           <ResponsiveContainer>
             {renderChart()}
           </ResponsiveContainer>

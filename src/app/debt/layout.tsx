@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/debt', {
   title: 'Debt Ledger | Global Economic Indicators',
   description:
     'Sovereign, corporate and household debt across 30+ economies. Live World Bank + FRED balance-sheet data, curated ratings, CDS, defaults and IMF WEO projections.',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     description:
       'World Bank debt, FRED central-bank balance sheets, IMF WEO projections, curated ratings and default history.',
   },
-};
+});
 
 export default function DebtLayout({
   children,

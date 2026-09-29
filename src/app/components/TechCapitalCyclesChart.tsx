@@ -13,6 +13,8 @@ import {
   PEREZ_FIGURE_DATA,
   type GreatSurge,
 } from '../data/techCapitalCyclesData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 type SubView = 'historical' | 'surges' | 'capital' | 'adoption' | 'bubbles' | 'kondratiev' | 'societal' | 'contemporary';
 
@@ -212,6 +214,15 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
     </div>
   );
 
+  const renderShareHeading = (title: string, heading: React.ReactNode, className: string, subject?: 'chart' | 'dataset') => (
+    <div className={`flex items-start justify-between gap-2 flex-wrap ${className}`}>
+      {heading}
+      <div className="flex items-center gap-2 flex-wrap shrink-0">
+        <SocialShareMenu title={title} subject={subject} isDarkMode={isDarkMode} />
+      </div>
+    </div>
+  );
+
   const renderSurgeSelector = () => (
     <div className="flex flex-wrap gap-2 mb-4">
       <button
@@ -317,8 +328,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
 
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h3 className={`font-bold text-lg mb-1 ${tc.text}`}>The Historical Record</h3>
+        <div id={slugify('The Historical Record')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderShareHeading(
+            'The Historical Record',
+            <h3 className={`font-bold text-lg ${tc.text}`}>The Historical Record</h3>,
+            'mb-1',
+          )}
           <p className={`text-sm mb-1 ${tc.textTer}`}>
             Bubble prosperities, recessions and golden ages
           </p>
@@ -599,8 +614,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
           </div>
         </div>
 
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h3 className={`font-bold text-lg mb-1 ${tc.text}`}>The Five Great Surges (1771&ndash;Present)</h3>
+        <div id={slugify('The Five Great Surges (1771–Present)')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderShareHeading(
+            'The Five Great Surges (1771–Present)',
+            <h3 className={`font-bold text-lg ${tc.text}`}>The Five Great Surges (1771&ndash;Present)</h3>,
+            'mb-1',
+          )}
           <p className={`text-sm mb-5 ${tc.textSec}`}>
             Warm = Installation &middot; Cool = Deployment &middot; Red dashed = Turning Points
           </p>
@@ -650,8 +669,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
   // ── CAPITAL DYNAMICS VIEW ──
   const renderCapitalDynamics = () => (
     <div className="space-y-6">
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Financial Capital vs Production Capital</h3>
+      <div id={slugify('Financial Capital vs Production Capital')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderShareHeading(
+          'Financial Capital vs Production Capital',
+          <h3 className={`font-bold text-lg ${tc.text}`}>Financial Capital vs Production Capital</h3>,
+          'mb-2',
+        )}
         <p className={`text-sm mb-2 leading-relaxed ${tc.textTer}`}>
           During each surge&apos;s <strong>Installation</strong> period, <em>financial capital</em> dominates &mdash;
           venture funding, speculation, IPOs, and asset bubbles. After the <strong>Turning Point</strong> crash,
@@ -717,8 +740,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
   // ── ADOPTION S-CURVES VIEW ──
   const renderAdoptionCurves = () => (
     <div className="space-y-6">
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Technology Adoption S-Curves</h3>
+      <div id={slugify('Technology Adoption S-Curves')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderShareHeading(
+          'Technology Adoption S-Curves',
+          <h3 className={`font-bold text-lg ${tc.text}`}>Technology Adoption S-Curves</h3>,
+          'mb-2',
+        )}
         <p className={`text-sm mb-2 leading-relaxed ${tc.textTer}`}>
           Every major technology follows a logistic S-curve. Financial bubbles consistently occur
           during the steep middle section &mdash; when the technology&apos;s potential is visible but full
@@ -767,8 +794,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
   // ── BUBBLES & CRASHES VIEW ──
   const renderBubbles = () => (
     <div className="space-y-6">
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Financial Bubbles Across Surges</h3>
+      <div id={slugify('Financial Bubbles Across Surges')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderShareHeading(
+          'Financial Bubbles Across Surges',
+          <h3 className={`font-bold text-lg ${tc.text}`}>Financial Bubbles Across Surges</h3>,
+          'mb-2',
+        )}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           Every technological revolution produces a speculative bubble during its installation period.
           Janeway (2012) argues these bubbles serve an <em>essential function</em>: they mobilise risk
@@ -810,16 +841,16 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
             <span className={`text-xs ${tc.textSec}`}>{b.surgeName}</span>
             <p className={`text-sm mt-2 mb-4 leading-relaxed ${tc.textTer}`}>{b.description}</p>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className={`rounded-xl p-3 ${tc.infoBg}`}>
-                <div className="text-red-500 font-bold text-xl">-{b.decline}%</div>
+              <div className={`rounded-xl p-2 sm:p-3 ${tc.infoBg}`}>
+                <div className="text-red-500 font-bold text-lg sm:text-xl">-{b.decline}%</div>
                 <div className={`text-xs mt-0.5 ${tc.textSec}`}>Peak-to-Trough</div>
               </div>
-              <div className={`rounded-xl p-3 ${tc.infoBg}`}>
-                <div className={`font-bold text-xl ${tc.text}`}>{b.crashYear}</div>
+              <div className={`rounded-xl p-2 sm:p-3 ${tc.infoBg}`}>
+                <div className={`font-bold text-lg sm:text-xl ${tc.text}`}>{b.crashYear}</div>
                 <div className={`text-xs mt-0.5 ${tc.textSec}`}>Crash Year</div>
               </div>
-              <div className={`rounded-xl p-3 ${tc.infoBg}`}>
-                <div className="text-blue-500 font-bold text-xl">{b.recovery}yr</div>
+              <div className={`rounded-xl p-2 sm:p-3 ${tc.infoBg}`}>
+                <div className="text-blue-500 font-bold text-lg sm:text-xl">{b.recovery}yr</div>
                 <div className={`text-xs mt-0.5 ${tc.textSec}`}>To Recovery</div>
               </div>
             </div>
@@ -844,8 +875,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
   // ── KONDRATIEV WAVES VIEW ──
   const renderKondratiev = () => (
     <div className="space-y-6">
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Kondratiev Long Waves (1780&ndash;2020s)</h3>
+      <div id={slugify('Kondratiev Long Waves (1780–2020s)')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderShareHeading(
+          'Kondratiev Long Waves (1780–2020s)',
+          <h3 className={`font-bold text-lg ${tc.text}`}>Kondratiev Long Waves (1780&ndash;2020s)</h3>,
+          'mb-2',
+        )}
         <p className={`text-sm mb-2 leading-relaxed ${tc.textTer}`}>
           Nikolai Kondratiev identified long economic cycles of ~40&ndash;60 years. Each upswing is
           driven by a cluster of radical innovations; each downswing by the exhaustion of the prevailing
@@ -892,8 +927,13 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h4 className={`font-bold mb-3 ${tc.text}`}>Wave Summary</h4>
+      <div id={slugify('Kondratiev Wave Summary')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderShareHeading(
+          'Kondratiev Wave Summary',
+          <h4 className={`font-bold ${tc.text}`}>Wave Summary</h4>,
+          'mb-3',
+          'dataset',
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -949,8 +989,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
     const displaySurges = selectedSurge ? GREAT_SURGES.filter(s => s.id === selectedSurge) : GREAT_SURGES;
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Inequality Across Technological Revolutions</h3>
+        <div id={slugify('Inequality Across Technological Revolutions')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderShareHeading(
+            'Inequality Across Technological Revolutions',
+            <h3 className={`font-bold text-lg ${tc.text}`}>Inequality Across Technological Revolutions</h3>,
+            'mb-2',
+          )}
           <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
             Inequality rises sharply during <strong>Installation</strong> periods, peaks at the
             <strong> Turning Point</strong>, and falls during <strong>Deployment</strong>. The most dramatic
@@ -985,8 +1029,13 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
           </div>
         </div>
 
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h3 className={`font-bold text-lg mb-4 ${tc.text}`}>Techno-Economic Paradigm Shifts</h3>
+        <div id={slugify('Techno-Economic Paradigm Shifts')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderShareHeading(
+            'Techno-Economic Paradigm Shifts',
+            <h3 className={`font-bold text-lg ${tc.text}`}>Techno-Economic Paradigm Shifts</h3>,
+            'mb-4',
+            'dataset',
+          )}
           <p className={`text-sm mb-4 leading-relaxed ${tc.textTer}`}>
             Freeman &amp; Louçã argue that each revolution transforms the entire <em>techno-economic
             paradigm</em>: energy, transport, communication, organisation, and geographic scope all shift.
@@ -1112,8 +1161,12 @@ const TechCapitalCyclesChart: React.FC<Props> = ({ isDarkMode }) => {
           </p>
         </div>
 
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h4 className={`font-bold mb-3 ${tc.text}`}>5th Surge Phase Position</h4>
+        <div id={slugify('5th Surge Phase Position')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderShareHeading(
+            '5th Surge Phase Position',
+            <h4 className={`font-bold ${tc.text}`}>5th Surge Phase Position</h4>,
+            'mb-3',
+          )}
           <div className="flex items-center gap-1 flex-wrap text-xs mb-3">
             <span className={`px-3 py-1.5 rounded ${tc.infoBg} ${tc.textSec} line-through`}>Irruption (1971&ndash;1990s)</span>
             <span className={tc.textSec}>&rarr;</span>

@@ -22,6 +22,8 @@ import {
   m2GrowthHistory,
   type MonetaryRegime,
 } from '../data/marketCyclesData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface MonetaryPolicyRegimeTimelineProps {
   isDarkMode: boolean;
@@ -600,8 +602,10 @@ const MonetaryPolicyRegimeTimeline: React.FC<MonetaryPolicyRegimeTimelineProps> 
     </ResponsiveContainer>
   );
 
+  const shareTitle = `Monetary Policy Through the Ages: ${viewTabs.find((t) => t.key === activeView)?.label}`;
+
   return (
-    <div className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
+    <div id={slugify(shareTitle)} className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
       <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -613,24 +617,27 @@ const MonetaryPolicyRegimeTimeline: React.FC<MonetaryPolicyRegimeTimelineProps> 
             </p>
           </div>
 
-          <div className={`flex rounded-lg p-0.5 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
-            {viewTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveView(tab.key)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeView === tab.key
-                    ? isDarkMode
-                      ? 'bg-gray-600 text-white shadow-sm'
-                      : 'bg-white text-gray-900 shadow-sm'
-                    : isDarkMode
-                      ? 'text-gray-400 hover:text-gray-200'
-                      : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <div className={`flex rounded-lg p-0.5 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
+              {viewTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveView(tab.key)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    activeView === tab.key
+                      ? isDarkMode
+                        ? 'bg-gray-600 text-white shadow-sm'
+                        : 'bg-white text-gray-900 shadow-sm'
+                      : isDarkMode
+                        ? 'text-gray-400 hover:text-gray-200'
+                        : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <SocialShareMenu title={shareTitle} isDarkMode={isDarkMode} />
           </div>
         </div>
       </div>

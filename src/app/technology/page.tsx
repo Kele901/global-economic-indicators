@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../components/LoadingSpinner';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { fetchTechnologyData, TechnologyData, CountryData, COUNTRY_NAMES } from '../services/worldbank';
 import { 
   technologyIndicators, 
@@ -19,7 +21,7 @@ const PatentTrendsChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -31,7 +33,7 @@ const RDSpendingChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -43,7 +45,7 @@ const TechExportsChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -55,7 +57,7 @@ const InnovationRankingTable = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading table...</span>
       </div>
     )
@@ -67,7 +69,7 @@ const TechWorldMap = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[320px] sm:h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
       </div>
     )
@@ -80,7 +82,7 @@ const DigitalInfraChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -92,7 +94,7 @@ const VCFundingChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -104,7 +106,7 @@ const AIEmergingTechChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -116,7 +118,7 @@ const DigitalEconomyChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -128,7 +130,7 @@ const TechWorkforceChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -141,7 +143,7 @@ const RDEfficiencyChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -153,7 +155,7 @@ const IPTradeBalanceChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -165,7 +167,7 @@ const TechHeatmapChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -177,7 +179,7 @@ const TrademarkTrendsChart = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -189,7 +191,7 @@ const TechFlowSankey = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -201,7 +203,7 @@ const TechCapitalCyclesChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -403,7 +405,11 @@ const TechnologyPage = () => {
         <>
         {/* Quick Stats */}
         {summaryStats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div id={slugify('Technology key figures')} className="mb-8">
+          <div className="flex justify-end mb-2">
+            <SocialShareMenu title="Technology key figures" isDarkMode={isDarkMode} />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
               <div className={`text-3xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                 {formatNumber(summaryStats.totalPatents)}
@@ -428,6 +434,7 @@ const TechnologyPage = () => {
               </div>
               <div className={`text-sm ${themeColors.textSecondary}`}>Countries Tracked</div>
             </div>
+          </div>
           </div>
         )}
 
@@ -521,12 +528,17 @@ const TechnologyPage = () => {
             </div>
 
             {/* Innovation Map */}
-            <div className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-                <h2 className="text-xl font-bold">Global Innovation Map</h2>
-                <p className={`text-sm ${themeColors.textSecondary}`}>
-                  R&amp;D spending as percentage of GDP by country
-                </p>
+            <div id={slugify('Global Innovation Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className={`px-4 py-3 border-b ${themeColors.border} flex items-start justify-between gap-2 flex-wrap`}>
+                <div>
+                  <h2 className="text-xl font-bold">Global Innovation Map</h2>
+                  <p className={`text-sm ${themeColors.textSecondary}`}>
+                    R&amp;D spending as percentage of GDP by country
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Global Innovation Map" isDarkMode={isDarkMode} />
+                </div>
               </div>
               <TechWorldMap
                 isDarkMode={isDarkMode}
@@ -578,8 +590,13 @@ const TechnologyPage = () => {
             />
 
             {/* Trademark Applications Summary */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Trademark Applications Summary</h3>
+            <div id={slugify('Trademark Applications Summary')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                <h3 className="text-lg font-semibold">Trademark Applications Summary</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Trademark Applications Summary" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <p className={`text-sm ${themeColors.textSecondary} mb-4`}>
                 Trademark filings indicate commercial activity and brand development across economies.
               </p>
@@ -638,8 +655,13 @@ const TechnologyPage = () => {
             />
 
             {/* Researchers per Million */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Research Workforce</h3>
+            <div id={slugify('Research Workforce')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                <h3 className="text-lg font-semibold">Research Workforce</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Research Workforce" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <h4 className={`text-sm font-medium mb-3 ${themeColors.textSecondary}`}>
@@ -715,8 +737,13 @@ const TechnologyPage = () => {
             />
 
             {/* IP Royalties */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Intellectual Property Flows</h3>
+            <div id={slugify('Intellectual Property Flows')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                <h3 className="text-lg font-semibold">Intellectual Property Flows</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Intellectual Property Flows" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <p className={`text-sm ${themeColors.textSecondary} mb-4`}>
                 IP receipts and payments show the flow of technology licensing and royalties between countries.
               </p>
@@ -802,8 +829,13 @@ const TechnologyPage = () => {
 
             {/* Comparison Charts */}
             <div className="grid md:grid-cols-2 gap-6">
-              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <h3 className="text-lg font-semibold mb-4">R&amp;D Spending Comparison</h3>
+              <div id={slugify('R&D Spending Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">R&amp;D Spending Comparison</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="R&D Spending Comparison" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
                 <div className="space-y-3">
                   {selectedCountries.map(country => {
                     const value = getLatestValue(techData.rdSpending, country);
@@ -830,8 +862,13 @@ const TechnologyPage = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <h3 className="text-lg font-semibold mb-4">High-Tech Exports Comparison</h3>
+              <div id={slugify('High-Tech Exports Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">High-Tech Exports Comparison</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="High-Tech Exports Comparison" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
                 <div className="space-y-3">
                   {selectedCountries.map(country => {
                     const value = getLatestValue(techData.hightechExports, country);
@@ -860,8 +897,13 @@ const TechnologyPage = () => {
             </div>
 
             {/* Scientific Output */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Scientific Publications</h3>
+            <div id={slugify('Scientific Publications')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                <h3 className="text-lg font-semibold">Scientific Publications</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Scientific Publications" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {selectedCountries.map(country => {
                   const value = getLatestValue(techData.scientificPublications, country);

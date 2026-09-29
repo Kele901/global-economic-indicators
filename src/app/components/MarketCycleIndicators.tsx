@@ -22,6 +22,8 @@ import {
   type SectorRotation,
   type MarketClockPosition,
 } from '../data/marketCyclesData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface MarketCycleIndicatorsProps {
   isDarkMode: boolean;
@@ -126,13 +128,15 @@ export default function MarketCycleIndicators({ isDarkMode }: MarketCycleIndicat
     return acc;
   }, {});
 
+  const shareTitle = `Market Valuation & Cycle Positioning: ${viewLabels[activeView]}`;
+
   return (
-    <div className={`rounded-2xl border p-5 ${isDarkMode ? 'bg-gray-900/60 border-gray-700/50' : 'bg-white border-gray-200'}`}>
+    <div id={slugify(shareTitle)} className={`rounded-2xl border p-5 ${isDarkMode ? 'bg-gray-900/60 border-gray-700/50' : 'bg-white border-gray-200'}`}>
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Market Valuation &amp; Cycle Positioning
         </h2>
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {(['buffett', 'cape', 'clock', 'sectors'] as ViewKey[]).map((view) => (
             <button
               key={view}
@@ -150,6 +154,7 @@ export default function MarketCycleIndicators({ isDarkMode }: MarketCycleIndicat
               {viewLabels[view]}
             </button>
           ))}
+          <SocialShareMenu title={shareTitle} isDarkMode={isDarkMode} />
         </div>
       </div>
 

@@ -6,6 +6,8 @@ import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
 import { METRIC_CATEGORIES, ALL_METRICS, formatMetricValue, getMetricByKey } from '../utils/metricCategories';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { US, GB, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN as INFlag, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
 
 const FLAG_MAP: Record<string, React.ComponentType<any>> = {
@@ -257,8 +259,13 @@ export default function ReportsPage() {
                   return point;
                 });
                 return (
-                  <div key={mk}>
-                    <h3 className="text-lg font-semibold mb-3">{metricDef?.label || mk}</h3>
+                  <div key={mk} id={slugify(metricDef?.label || mk)}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className="text-lg font-semibold">{metricDef?.label || mk}</h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0" data-html2canvas-ignore="true">
+                        <SocialShareMenu title={metricDef?.label || mk} isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <div className="h-[250px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>

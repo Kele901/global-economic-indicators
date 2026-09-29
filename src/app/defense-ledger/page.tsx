@@ -19,6 +19,8 @@ import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { CURATED_LAST_UPDATED } from '../services/defenseCurated';
 
 const DEFENSE_TOUR_STEPS: TourStep[] = [
@@ -49,15 +51,23 @@ interface ChapterHeaderProps {
   chapter: string;
   title: string;
   subtitle: string;
+  share?: boolean;
 }
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: ChapterHeaderProps) {
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: ChapterHeaderProps) {
   return (
-    <div className="mb-6">
+    <div className="mb-6" id={share ? slugify(title) : undefined}>
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-rose-400' : 'text-rose-600'}`}>
         {chapter}
       </div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -270,7 +280,13 @@ export default function DefenseLedgerPage() {
         </div>
 
         {/* Hero: ticker + KPI cards */}
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Defense Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+          <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+            <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>Defense Ledger key figures</div>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Defense Ledger key figures" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <DefenseSpendingTicker
             isDarkMode={isDarkMode}
             militaryExpenditureUsd={spendUsd.merged}
@@ -401,7 +417,7 @@ export default function DefenseLedgerPage() {
                 <span className={`text-[10px] uppercase tracking-wider ${textMuted}`}>UCDP</span>
               </div>
               <div className="text-center py-4">
-                <div className={`text-5xl font-bold tabular-nums ${isDarkMode ? 'text-rose-400' : 'text-rose-600'}`}>
+                <div className={`text-4xl sm:text-5xl font-bold tabular-nums ${isDarkMode ? 'text-rose-400' : 'text-rose-600'}`}>
                   {latestConflicts?.count ?? '—'}
                 </div>
                 <div className={`text-xs mt-1 ${textMuted}`}>as of {latestConflicts?.year}</div>
@@ -417,7 +433,7 @@ export default function DefenseLedgerPage() {
                 <span className={`text-[10px] uppercase tracking-wider ${textMuted}`}>UN Fifth Committee</span>
               </div>
               <div className="text-center py-4">
-                <div className={`text-5xl font-bold tabular-nums ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                <div className={`text-4xl sm:text-5xl font-bold tabular-nums ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
                   ${latestPeacekeeping?.budgetUsdBn.toFixed(1)}B
                 </div>
                 <div className={`text-xs mt-1 ${textMuted}`}>FY {latestPeacekeeping?.fiscalYear} · {latestPeacekeeping?.activeMissions} active missions</div>
@@ -442,7 +458,7 @@ export default function DefenseLedgerPage() {
             subtitle="Six-plus decades of defense spending in one view. Ten countries account for over three-quarters of the global total — watch the US, China and Russia diverge from 1960 onwards, in dollars and in share of GDP."
           />
           {loading ? (
-            <SkeletonCard isDarkMode={isDarkMode} className="h-[520px]" />
+            <SkeletonCard isDarkMode={isDarkMode} className="h-[400px] sm:h-[520px]" />
           ) : (
             <SuperpowerComparisonChart
               isDarkMode={isDarkMode}
@@ -525,7 +541,7 @@ export default function DefenseLedgerPage() {
               subtitle="Every dollar a government spends on defense is a dollar it isn&apos;t spending on schools, hospitals, or transfers. Here&apos;s where each economy sits on that trade-off."
             />
             {loading ? (
-              <SkeletonCard isDarkMode={isDarkMode} className="h-[520px]" />
+              <SkeletonCard isDarkMode={isDarkMode} className="h-[400px] sm:h-[520px]" />
             ) : data ? (
               <GunsVsButterQuadrant
                 isDarkMode={isDarkMode}

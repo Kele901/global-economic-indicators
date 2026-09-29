@@ -22,6 +22,8 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const EmissionsTicker           = dynamic(() => import('../components/EmissionsTicker'),           { ssr: false });
 const PerCapitaEmissionsChart   = dynamic(() => import('../components/PerCapitaEmissionsChart'),   { ssr: false });
@@ -36,15 +38,22 @@ const NdcTargetTable            = dynamic(() => import('../components/NdcTargetT
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: {
-  isDarkMode: boolean; chapter: string; title: string; subtitle: string;
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: {
+  isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean;
 }) {
   return (
-    <div className="mb-6">
+    <div className="mb-6" id={share ? slugify(title) : undefined}>
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
         {chapter}
       </div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -176,7 +185,8 @@ export default function ClimateLedgerPage() {
         </div>
 
         {/* Hero: ticker + KPI cards */}
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Climate Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+          <div className={`text-[11px] uppercase tracking-wider mb-3 ${textMuted}`}>Climate Ledger key figures</div>
           <EmissionsTicker
             isDarkMode={isDarkMode}
             co2EmissionsKt={co2Kt}
@@ -232,6 +242,7 @@ export default function ClimateLedgerPage() {
               isDarkMode={isDarkMode}
               filename="climate-ledger-data"
               label="Data"
+              shareTitle="Climate Ledger key figures"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
                 (co2Kt ?? []).forEach(row => rows.push({ series: 'CO2 kt', ...row }));
@@ -348,6 +359,7 @@ export default function ClimateLedgerPage() {
               isDarkMode={isDarkMode}
               chapter="Chapter 7"
               title="Physical Risk"
+              share={false}
               subtitle="The other side of the ledger: what a warmer planet does to the people on it. Air quality now, disasters over the last three decades."
             />
             <div className="grid grid-cols-1 gap-4">

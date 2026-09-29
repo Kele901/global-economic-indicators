@@ -36,6 +36,8 @@ import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const GiniTicker = dynamic(() => import('../components/GiniTicker'), {
   ssr: false,
@@ -43,11 +45,11 @@ const GiniTicker = dynamic(() => import('../components/GiniTicker'), {
 });
 const GiniRankChart = dynamic(() => import('../components/GiniRankChart'), {
   ssr: false,
-  loading: () => <SkeletonCard height="h-[520px]" label="Loading Gini ranking" />,
+  loading: () => <SkeletonCard height="h-[400px] sm:h-[520px]" label="Loading Gini ranking" />,
 });
 const InequalityCharts = dynamic(() => import('../components/InequalityCharts'), {
   ssr: false,
-  loading: () => <SkeletonCard height="h-[520px]" label="Loading chapter" />,
+  loading: () => <SkeletonCard height="h-[400px] sm:h-[520px]" label="Loading chapter" />,
 });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
@@ -203,7 +205,7 @@ export default function InequalityPage() {
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
 
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Inequality Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <GiniTicker isDarkMode={isDarkMode} gini={gini} />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
@@ -255,6 +257,7 @@ export default function InequalityPage() {
             <DataDownloadButton
               isDarkMode={isDarkMode}
               filename="inequality-ledger-data"
+              shareTitle="Inequality Ledger key figures"
               label="Data"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
@@ -284,7 +287,7 @@ export default function InequalityPage() {
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
             title="Where Inequality Stands Now"
             subtitle="Live World Bank Gini for every country in the roster, ranked. Survey years differ by country and faded bars flag the stale ones — a single &quot;latest Gini&quot; table is one of the easiest places to accidentally compare 2023 against 2011." />
-          <GiniRankChart isDarkMode={isDarkMode} gini={gini} />
+          <GiniRankChart isDarkMode={isDarkMode} gini={gini} shareTitle="Where Inequality Stands Now" />
         </section>
 
         <section className="mb-14">

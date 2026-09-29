@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/data-sources', {
   title: 'Data Sources | Global Economic Indicators',
   description:
     'Transparency page listing every dataset the site consumes: provider, refresh cadence, live-vs-snapshot status, series IDs, and source URLs.',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     description:
       'Search, filter and inspect every live or curated dataset powering the dashboards and epic ledgers.',
   },
-};
+});
 
 export default function DataSourcesLayout({
   children,

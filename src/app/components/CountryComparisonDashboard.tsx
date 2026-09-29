@@ -7,6 +7,8 @@ import { COUNTRY_COLORS as countryColors } from '../utils/countryMappings';
 import ChartDownloadButton from './ChartDownloadButton';
 import BulkChartDownload from './BulkChartDownload';
 import InfoPanel from './InfoPanel';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 import { economicMetrics } from '../data/economicMetrics';
 
 const getThemeColors = (isDarkMode: boolean) => isDarkMode ? {
@@ -239,10 +241,10 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   if (chartType === 'area') {
     const els = sharedChartElements('area');
     return (
-      <div ref={chartRef} data-chart-container data-chart-title={title} className={cardClass}>
+      <div ref={chartRef} id={slugify(title)} data-chart-container data-chart-title={title} className={cardClass}>
         {els.header}
         {els.info}
-        <div className="h-[220px]">
+        <div className="h-[250px] lg:h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data[metricKey]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
               {els.grid}{els.xAxis}{els.yAxis}{els.tooltip}{els.legend}
@@ -262,10 +264,10 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
   if (chartType === 'bar') {
     const els = sharedChartElements('bar');
     return (
-      <div ref={chartRef} data-chart-container data-chart-title={title} className={cardClass}>
+      <div ref={chartRef} id={slugify(title)} data-chart-container data-chart-title={title} className={cardClass}>
         {els.header}
         {els.info}
-        <div className="h-[220px]">
+        <div className="h-[250px] lg:h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data[metricKey]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
               {els.grid}{els.xAxis}{els.yAxis}{els.tooltip}{els.legend}
@@ -283,10 +285,10 @@ const ComparisonMetric: React.FC<ComparisonMetricProps> = ({
 
   const els = sharedChartElements('line');
   return (
-    <div ref={chartRef} data-chart-container data-chart-title={title} className={cardClass}>
+    <div ref={chartRef} id={slugify(title)} data-chart-container data-chart-title={title} className={cardClass}>
       {els.header}
       {els.info}
-      <div className="h-[220px]">
+      <div className="h-[250px] lg:h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data[metricKey]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
             {els.grid}{els.xAxis}{els.yAxis}{els.tooltip}{els.legend}
@@ -337,8 +339,13 @@ const StatComparison = ({
   const maxVal = Math.max(...sorted.map(c => Math.abs(Number(latest[c]) || 0)), 1);
 
   return (
-    <div className={`p-4 rounded-xl border border-l-4 border-l-blue-500 shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
-      <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>{title}</h3>
+    <div id={slugify(title)} className={`p-4 rounded-xl border border-l-4 border-l-blue-500 shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+        <h3 className={`text-sm font-semibold ${tc.text}`}>{title}</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={title} isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <div className="space-y-3">
         {sorted.map((country, idx) => {
           const value = Number(latest[country]) || 0;
@@ -466,8 +473,13 @@ const CorrelationMatrix = ({
   };
 
   return (
-    <div className={`p-4 sm:p-5 rounded-xl border shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
-      <h3 className={`text-base font-semibold mb-4 ${tc.text}`}>Economic Correlations</h3>
+    <div id={slugify('Economic Correlations')} className={`p-4 sm:p-5 rounded-xl border shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+        <h3 className={`text-base font-semibold ${tc.text}`}>Economic Correlations</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Economic Correlations" subject="dataset" isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <div className="space-y-3">
         {correlations.map(({ country1, country2, gdp, inflation, employment, lifeExpectancy }) => {
           const Flag1 = countryFlags[country1];
@@ -563,9 +575,12 @@ const EconomicSimilarityChart = ({
   const tc = getThemeColors(isDarkMode);
 
   return (
-    <div className={`p-4 sm:p-5 rounded-xl border shadow-sm relative transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
-      <div className="flex justify-between items-start mb-4">
+    <div id={slugify('Enhanced Economic Similarity Analysis')} className={`p-4 sm:p-5 rounded-xl border shadow-sm relative transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
+      <div className="flex justify-between items-start gap-2 flex-wrap mb-4">
         <h3 className={`text-base font-semibold ${tc.text}`}>Enhanced Economic Similarity Analysis</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Enhanced Economic Similarity Analysis" isDarkMode={isDarkMode} />
+        </div>
         <InfoPanel
           metric={economicMetrics.economicSimilarityAnalysis}
           isDarkMode={isDarkMode}
@@ -664,9 +679,14 @@ const EconomicRadarChart = ({
   const tc = getThemeColors(isDarkMode);
 
   return (
-    <div className={`p-4 sm:p-5 rounded-xl border shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
-      <h3 className={`text-base font-semibold mb-4 ${tc.text}`}>Economic Profile Radar Chart</h3>
-      <div className="h-[400px]">
+    <div id={slugify('Economic Profile Radar Chart')} className={`p-4 sm:p-5 rounded-xl border shadow-sm transition-all duration-200 ${tc.card} ${tc.cardHover}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+        <h3 className={`text-base font-semibold ${tc.text}`}>Economic Profile Radar Chart</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Economic Profile Radar Chart" isDarkMode={isDarkMode} />
+        </div>
+      </div>
+      <div className="h-[300px] sm:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={combinedData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <PolarGrid stroke={tc.gridStroke} />
@@ -1748,8 +1768,13 @@ const CountryComparisonDashboard: React.FC<ComparisonDashboardProps> = ({ data, 
           </div>
 
           <SectionHeader title="Comparative Analysis" isDarkMode={isDarkMode} />
-          <div className={`p-4 sm:p-5 rounded-xl border shadow-sm ${tc.card}`}>
-            <h3 className={`text-base font-semibold mb-4 ${tc.text}`}>Enhanced Comparative Analysis</h3>
+          <div id={slugify('Enhanced Comparative Analysis')} className={`p-4 sm:p-5 rounded-xl border shadow-sm ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h3 className={`text-base font-semibold ${tc.text}`}>Enhanced Comparative Analysis</h3>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Enhanced Comparative Analysis" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <div className="space-y-3">
               {selectedCountries.map(country => {
                 const latestData = {

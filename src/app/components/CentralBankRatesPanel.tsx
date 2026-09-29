@@ -5,6 +5,8 @@ import {
   CENTRAL_BANK_RATES
 } from '../data/currencyHierarchyData';
 import { useCentralBankRates } from '../hooks/useCentralBankRates';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CentralBankRatesPanelProps {
   isDarkMode: boolean;
@@ -155,9 +157,9 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify('Central Bank Interest Rates')} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start gap-2 flex-wrap">
           <div>
             <h3 className={`text-lg font-semibold ${themeColors.text}`}>
               Central Bank Interest Rates
@@ -166,7 +168,7 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
               Current policy rates and upcoming meeting schedules
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
             <div className="flex items-center gap-1">
               <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
               <span className={`text-xs ${themeColors.textTertiary}`}>
@@ -184,6 +186,7 @@ const CentralBankRatesPanel: React.FC<CentralBankRatesPanelProps> = ({ isDarkMod
             >
               {loading ? 'Loading...' : 'Refresh'}
             </button>
+            <SocialShareMenu title="Central Bank Interest Rates" subject="dataset" isDarkMode={isDarkMode} />
           </div>
         </div>
         {lastFetched && (

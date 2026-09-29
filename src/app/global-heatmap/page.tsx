@@ -7,6 +7,8 @@ import { METRIC_CATEGORIES, ALL_METRICS, formatMetricValue, getRelatedMetrics, g
 import { COUNTRY_ISO_NUMERIC, ISO_NUMERIC_TO_COUNTRY, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Marker } from 'react-simple-maps';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
@@ -372,6 +374,13 @@ export default function GlobalHeatmapPage() {
     );
   }
 
+  const metricLabel = metricDef?.label || selectedMetric;
+  const choroplethTitle = `${metricLabel} — Choropleth Map (${selectedYear})`;
+  const bubbleTitle = `${metricLabel} — Bubble Map (${selectedYear})`;
+  const rankingsTitle = `${metricDef?.label} — Country Rankings (${selectedYear})`;
+  const compareTitle = `${metricLabel} — Comparison Map (${selectedYear})`;
+  const compareWithTitle = `${compareMetricDef?.label || compareMetric} — Comparison Map (${selectedYear})`;
+
   // Shared map renderer used by choropleth, bubble, and comparison views
   const renderMap = (
     values: Record<string, number>,
@@ -625,14 +634,19 @@ export default function GlobalHeatmapPage() {
         {viewMode === 'choropleth' && (
           <>
             <div className="flex gap-6">
-              <div className={`rounded-xl border overflow-hidden relative flex-1 ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
-                {hoveredCountry && (
-                  <div className={`absolute z-10 px-3 py-2 rounded-lg border shadow-lg text-sm pointer-events-none ${tc.card}`} style={{ left: hoveredCountry.x + 10, top: hoveredCountry.y - 40 }}>
-                    <p className="font-semibold">{hoveredCountry.name}</p>
-                    <p className={tc.textSec}>{metricDef?.label}: {formatMetricValue(selectedMetric, hoveredCountry.value)}</p>
-                  </div>
-                )}
-                {renderMap(countryValues, min, max, heatmapStyle)}
+              <div id={slugify(choroplethTitle)} className="relative flex-1 min-w-0">
+                <div className="absolute top-3 right-3 z-20">
+                  <SocialShareMenu title={choroplethTitle} isDarkMode={isDarkMode} />
+                </div>
+                <div className={`rounded-xl border overflow-hidden relative ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
+                  {hoveredCountry && (
+                    <div className={`absolute z-10 px-3 py-2 rounded-lg border shadow-lg text-sm pointer-events-none ${tc.card}`} style={{ left: hoveredCountry.x + 10, top: hoveredCountry.y - 40 }}>
+                      <p className="font-semibold">{hoveredCountry.name}</p>
+                      <p className={tc.textSec}>{metricDef?.label}: {formatMetricValue(selectedMetric, hoveredCountry.value)}</p>
+                    </div>
+                  )}
+                  {renderMap(countryValues, min, max, heatmapStyle)}
+                </div>
               </div>
               {detailCountry && countryDetail && (
                 <div ref={panelRef} className={`w-96 flex-shrink-0 rounded-xl border overflow-hidden ${tc.card} hidden lg:block`} style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
@@ -654,19 +668,24 @@ export default function GlobalHeatmapPage() {
         {viewMode === 'bubble' && (
           <>
             <div className="flex gap-6">
-              <div className={`rounded-xl border overflow-hidden relative flex-1 ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
-                {hoveredCountry && (
-                  <div className={`absolute z-10 px-3 py-2 rounded-lg border shadow-lg text-sm pointer-events-none ${tc.card}`} style={{ left: hoveredCountry.x + 10, top: hoveredCountry.y - 40 }}>
-                    <p className="font-semibold">{hoveredCountry.name}</p>
-                    <p className={tc.textSec}>{metricDef?.label}: {formatMetricValue(selectedMetric, hoveredCountry.value)}</p>
-                  </div>
-                )}
-                {renderMap(countryValues, min, max, heatmapStyle, {
-                  showBubbles: true,
-                  bubbleKeyValues: countryKeyValues,
-                  bubbleMin: min,
-                  bubbleMax: max,
-                })}
+              <div id={slugify(bubbleTitle)} className="relative flex-1 min-w-0">
+                <div className="absolute top-3 right-3 z-20">
+                  <SocialShareMenu title={bubbleTitle} isDarkMode={isDarkMode} />
+                </div>
+                <div className={`rounded-xl border overflow-hidden relative ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
+                  {hoveredCountry && (
+                    <div className={`absolute z-10 px-3 py-2 rounded-lg border shadow-lg text-sm pointer-events-none ${tc.card}`} style={{ left: hoveredCountry.x + 10, top: hoveredCountry.y - 40 }}>
+                      <p className="font-semibold">{hoveredCountry.name}</p>
+                      <p className={tc.textSec}>{metricDef?.label}: {formatMetricValue(selectedMetric, hoveredCountry.value)}</p>
+                    </div>
+                  )}
+                  {renderMap(countryValues, min, max, heatmapStyle, {
+                    showBubbles: true,
+                    bubbleKeyValues: countryKeyValues,
+                    bubbleMin: min,
+                    bubbleMax: max,
+                  })}
+                </div>
               </div>
               {detailCountry && countryDetail && (
                 <div ref={panelRef} className={`w-96 flex-shrink-0 rounded-xl border overflow-hidden ${tc.card} hidden lg:block`} style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
@@ -701,10 +720,13 @@ export default function GlobalHeatmapPage() {
         {/* ============================================================ */}
         {viewMode === 'ranked' && (
           <div className="flex gap-6">
-            <div className={`rounded-xl border overflow-hidden flex-1 p-4 ${tc.card}`}>
-              <div className="mb-3 flex items-center justify-between">
+            <div id={slugify(rankingsTitle)} className={`rounded-xl border overflow-hidden flex-1 p-4 ${tc.card}`}>
+              <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
                 <h3 className="font-semibold">{metricDef?.label} — Country Rankings ({selectedYear})</h3>
-                <span className={`text-xs ${tc.textSec}`}>{rankedData.length} countries</span>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <span className={`text-xs ${tc.textSec}`}>{rankedData.length} countries</span>
+                  <SocialShareMenu title={rankingsTitle} isDarkMode={isDarkMode} />
+                </div>
               </div>
               <div style={{ height: Math.max(400, rankedData.length * 32) }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -740,36 +762,46 @@ export default function GlobalHeatmapPage() {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Left: primary metric */}
-              <div className={`rounded-xl border overflow-hidden relative ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
-                <div className={`absolute top-3 left-3 z-10 px-3 py-1.5 rounded-lg text-xs font-semibold ${isDarkMode ? 'bg-gray-800/90 text-white' : 'bg-white/90 text-gray-900'} shadow`}>
-                  {metricDef?.label}
+              <div id={slugify(compareTitle)} className="relative min-w-0">
+                <div className="absolute top-3 right-3 z-20">
+                  <SocialShareMenu title={compareTitle} isDarkMode={isDarkMode} />
                 </div>
-                {hoveredCountry && (
-                  <div className={`absolute z-10 px-3 py-2 rounded-lg border shadow-lg text-sm pointer-events-none ${tc.card}`} style={{ left: hoveredCountry.x + 10, top: hoveredCountry.y - 40 }}>
-                    <p className="font-semibold">{hoveredCountry.name}</p>
-                    <p className={tc.textSec}>{metricDef?.label}: {formatMetricValue(selectedMetric, hoveredCountry.value)}</p>
+                <div className={`rounded-xl border overflow-hidden relative ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
+                  <div className={`absolute top-3 left-3 z-10 px-3 py-1.5 rounded-lg text-xs font-semibold ${isDarkMode ? 'bg-gray-800/90 text-white' : 'bg-white/90 text-gray-900'} shadow`}>
+                    {metricDef?.label}
                   </div>
-                )}
-                {renderMap(countryValues, min, max, heatmapStyle, { compact: true })}
-                <div className="px-3 pb-2">
-                  <div className="h-2.5 rounded-full overflow-hidden" style={{ background: getGradientCSS(heatmapStyle, isDarkMode) }} />
-                  <div className="flex justify-between mt-1">
-                    <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(selectedMetric, min)}</span>
-                    <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(selectedMetric, max)}</span>
+                  {hoveredCountry && (
+                    <div className={`absolute z-10 px-3 py-2 rounded-lg border shadow-lg text-sm pointer-events-none ${tc.card}`} style={{ left: hoveredCountry.x + 10, top: hoveredCountry.y - 40 }}>
+                      <p className="font-semibold">{hoveredCountry.name}</p>
+                      <p className={tc.textSec}>{metricDef?.label}: {formatMetricValue(selectedMetric, hoveredCountry.value)}</p>
+                    </div>
+                  )}
+                  {renderMap(countryValues, min, max, heatmapStyle, { compact: true })}
+                  <div className="px-3 pb-2">
+                    <div className="h-2.5 rounded-full overflow-hidden" style={{ background: getGradientCSS(heatmapStyle, isDarkMode) }} />
+                    <div className="flex justify-between mt-1">
+                      <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(selectedMetric, min)}</span>
+                      <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(selectedMetric, max)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
               {/* Right: comparison metric */}
-              <div className={`rounded-xl border overflow-hidden relative ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
-                <div className={`absolute top-3 left-3 z-10 px-3 py-1.5 rounded-lg text-xs font-semibold ${isDarkMode ? 'bg-gray-800/90 text-white' : 'bg-white/90 text-gray-900'} shadow`}>
-                  {compareMetricDef?.label}
+              <div id={slugify(compareWithTitle)} className="relative min-w-0">
+                <div className="absolute top-3 right-3 z-20">
+                  <SocialShareMenu title={compareWithTitle} isDarkMode={isDarkMode} />
                 </div>
-                {renderMap(compareValues.vals, compareValues.min, compareValues.max, compareStyle, { compact: true })}
-                <div className="px-3 pb-2">
-                  <div className="h-2.5 rounded-full overflow-hidden" style={{ background: getGradientCSS(compareStyle, isDarkMode) }} />
-                  <div className="flex justify-between mt-1">
-                    <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(compareMetric, compareValues.min)}</span>
-                    <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(compareMetric, compareValues.max)}</span>
+                <div className={`rounded-xl border overflow-hidden relative ${tc.card}`} style={{ backgroundColor: tc.ocean }}>
+                  <div className={`absolute top-3 left-3 z-10 px-3 py-1.5 rounded-lg text-xs font-semibold ${isDarkMode ? 'bg-gray-800/90 text-white' : 'bg-white/90 text-gray-900'} shadow`}>
+                    {compareMetricDef?.label}
+                  </div>
+                  {renderMap(compareValues.vals, compareValues.min, compareValues.max, compareStyle, { compact: true })}
+                  <div className="px-3 pb-2">
+                    <div className="h-2.5 rounded-full overflow-hidden" style={{ background: getGradientCSS(compareStyle, isDarkMode) }} />
+                    <div className="flex justify-between mt-1">
+                      <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(compareMetric, compareValues.min)}</span>
+                      <span className={`text-[10px] ${tc.textSec}`}>{formatMetricValue(compareMetric, compareValues.max)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -787,14 +819,17 @@ export default function GlobalHeatmapPage() {
         {/* TABLE RANKING VIEW */}
         {/* ============================================================ */}
         {viewMode === 'table' && (
-          <div className={`rounded-xl border overflow-hidden ${tc.card}`}>
-            <div className={`px-5 py-4 border-b flex items-center justify-between ${isDarkMode ? 'border-gray-700' : 'border-gray-100'}`}>
+          <div id={slugify(rankingsTitle)} className={`rounded-xl border overflow-hidden ${tc.card}`}>
+            <div className={`px-5 py-4 border-b flex items-center justify-between gap-2 flex-wrap ${isDarkMode ? 'border-gray-700' : 'border-gray-100'}`}>
               <div>
                 <h3 className="font-semibold">{metricDef?.label} — Country Rankings ({selectedYear})</h3>
                 <p className={`text-xs mt-0.5 ${tc.textSec}`}>{tableData.length} countries &middot; Click headers to sort &middot; Click a row for details</p>
               </div>
-              <div className={`text-xs px-2.5 py-1 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                {tableColumns.length + 1} columns
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <div className={`text-xs px-2.5 py-1 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                  {tableColumns.length + 1} columns
+                </div>
+                <SocialShareMenu title={rankingsTitle} subject="dataset" isDarkMode={isDarkMode} />
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -960,9 +995,12 @@ function CountryDetailPanel({ detail, metricDef, selectedMetric, selectedYear, i
             <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{category?.label}</span>
           </div>
         </div>
-        <button onClick={onClose} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}>
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <SocialShareMenu title={`${detail.countryName}: ${metricDef.label} (${selectedYear})`} isDarkMode={isDarkMode} />
+          <button onClick={onClose} className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
       </div>
       <div className="px-5 pt-4 pb-3">
         <div className="flex items-end justify-between mb-1">
@@ -985,7 +1023,10 @@ function CountryDetailPanel({ detail, metricDef, selectedMetric, selectedYear, i
       <div className={`mx-5 mb-4 p-3 rounded-lg text-sm leading-relaxed ${isDarkMode ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-50 text-gray-600'}`}>{summary}</div>
       {detail.history.length > 2 && (
         <div className="px-5 mb-4">
-          <p className={`text-xs uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Historical Trend ({detail.history[0].year}&ndash;{detail.history[detail.history.length - 1].year})</p>
+          <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+            <p className={`text-xs uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Historical Trend ({detail.history[0].year}&ndash;{detail.history[detail.history.length - 1].year})</p>
+            <SocialShareMenu title={`${detail.countryName} ${metricDef.label}: Historical Trend (${detail.history[0].year}–${detail.history[detail.history.length - 1].year})`} isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <div className="h-36">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={detail.history} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>

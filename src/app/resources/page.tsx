@@ -9,6 +9,8 @@ import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { fetchOilReserves, fetchOilProduction, type ReservesSnapshot, type ProductionSnapshot } from '../services/eia';
 
 const CommodityTicker = dynamic(() => import('../components/CommodityTicker'), { ssr: false });
@@ -19,20 +21,31 @@ const PetrostateVulnerabilityTable = dynamic(() => import('../components/Petrost
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
+const KPI_TITLE = 'Resource Atlas key commodity prices';
+
 interface ChapterHeaderProps {
   isDarkMode: boolean;
   chapter: string;
   title: string;
   subtitle: string;
+  share?: boolean;
+  shareSubject?: 'chart' | 'dataset';
 }
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: ChapterHeaderProps) {
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, shareSubject = 'chart' }: ChapterHeaderProps) {
   return (
-    <div className="mb-6">
-      <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
-        {chapter}
+    <div id={share ? slugify(title) : undefined} className="mb-6">
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <div>
+          <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+            {chapter}
+          </div>
+          <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        </div>
+        {share && (
+          <SocialShareMenu title={title} subject={shareSubject} isDarkMode={isDarkMode} className="shrink-0" />
+        )}
       </div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -238,7 +251,7 @@ export default function ResourcesPage() {
             onRetry={retryCommodities}
           />
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+          <div id={slugify(KPI_TITLE)} className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
             {[
               { label: 'WTI Crude', obs: kpi.wtiLatest, unit: '$/bbl' },
               { label: 'Brent Crude', obs: kpi.brentLatest, unit: '$/bbl' },
@@ -259,9 +272,12 @@ export default function ResourcesPage() {
             ))}
           </div>
 
-          <div className={`mt-4 text-xs ${textMuted}`}>
-            Prices: FRED (EIA, IMF, LBMA). Reserves &amp; production: {reserves?.source === 'EIA' ? 'EIA International Energy Statistics' : 'BP/EIA seed data'}. 
-            Country data: World Bank.
+          <div className="mt-4 flex items-start justify-between gap-2 flex-wrap">
+            <div className={`text-xs ${textMuted}`}>
+              Prices: FRED (EIA, IMF, LBMA). Reserves &amp; production: {reserves?.source === 'EIA' ? 'EIA International Energy Statistics' : 'BP/EIA seed data'}. 
+              Country data: World Bank.
+            </div>
+            <SocialShareMenu title={KPI_TITLE} isDarkMode={isDarkMode} className="shrink-0" />
           </div>
         </div>
 
@@ -272,17 +288,21 @@ export default function ResourcesPage() {
             chapter="Chapter 1"
             title="Who Has What?"
             subtitle="Proven reserves and production concentrate in a handful of countries — often the same ones. Together they set global supply."
+            share={false}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className={`rounded-lg border p-5 ${cardBg}`}>
-              <div className="flex items-center justify-between mb-3">
+            <div id={slugify('Top Oil Reserves')} className={`rounded-lg border p-5 ${cardBg}`}>
+              <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
                 <h4 className={`text-base font-semibold ${textPrimary}`}>Top Oil Reserves</h4>
-                <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                  reserves?.source === 'EIA' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-600'
-                }`}>
-                  {reserves?.source === 'EIA' ? 'EIA live' : 'Seed 2024'}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
+                    reserves?.source === 'EIA' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-600'
+                  }`}>
+                    {reserves?.source === 'EIA' ? 'EIA live' : 'Seed 2024'}
+                  </span>
+                  <SocialShareMenu title="Top Oil Reserves" subject="dataset" isDarkMode={isDarkMode} />
+                </div>
               </div>
               {loading && !topReserves.length ? (
                 <SkeletonCard isDarkMode={isDarkMode} className="h-48" />
@@ -300,14 +320,17 @@ export default function ResourcesPage() {
               )}
             </div>
 
-            <div className={`rounded-lg border p-5 ${cardBg}`}>
-              <div className="flex items-center justify-between mb-3">
+            <div id={slugify('Top Oil Producers')} className={`rounded-lg border p-5 ${cardBg}`}>
+              <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
                 <h4 className={`text-base font-semibold ${textPrimary}`}>Top Oil Producers</h4>
-                <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                  production?.source === 'EIA' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-600'
-                }`}>
-                  {production?.source === 'EIA' ? 'EIA live' : 'Seed 2024'}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
+                    production?.source === 'EIA' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-600'
+                  }`}>
+                    {production?.source === 'EIA' ? 'EIA live' : 'Seed 2024'}
+                  </span>
+                  <SocialShareMenu title="Top Oil Producers" subject="dataset" isDarkMode={isDarkMode} />
+                </div>
               </div>
               {loading && !topProducers.length ? (
                 <SkeletonCard isDarkMode={isDarkMode} className="h-48" />
@@ -325,10 +348,13 @@ export default function ResourcesPage() {
               )}
             </div>
 
-            <div className={`rounded-lg border p-5 ${cardBg}`}>
-              <div className="flex items-center justify-between mb-3">
+            <div id={slugify('Most Oil-Rent Dependent')} className={`rounded-lg border p-5 ${cardBg}`}>
+              <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
                 <h4 className={`text-base font-semibold ${textPrimary}`}>Most Oil-Rent Dependent</h4>
-                <span className={`text-[10px] uppercase tracking-wider ${textMuted}`}>World Bank</span>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <span className={`text-[10px] uppercase tracking-wider ${textMuted}`}>World Bank</span>
+                  <SocialShareMenu title="Most Oil-Rent Dependent" subject="dataset" isDarkMode={isDarkMode} />
+                </div>
               </div>
               {loading ? (
                 <SkeletonCard isDarkMode={isDarkMode} className="h-48" />
@@ -359,7 +385,7 @@ export default function ResourcesPage() {
             subtitle="Every economy sits somewhere on the resource-rents / growth plane. Four archetypes emerge — from diversified rich to caught in the resource curse."
           />
           {loading ? (
-            <SkeletonCard isDarkMode={isDarkMode} className="h-[520px]" />
+            <SkeletonCard isDarkMode={isDarkMode} className="h-[400px] sm:h-[520px]" />
           ) : data ? (
             <ResourceDependenceQuadrant
               isDarkMode={isDarkMode}
@@ -379,7 +405,7 @@ export default function ResourcesPage() {
             subtitle="Fifty years of oil prices, broken into the shocks that made and unmade petrostates. Click any era to see who won and who lost."
           />
           {commoditiesLoading ? (
-            <SkeletonCard isDarkMode={isDarkMode} className="h-[400px]" />
+            <SkeletonCard isDarkMode={isDarkMode} className="h-[300px] sm:h-[400px]" />
           ) : (
             <CommoditySupercycleTimeline
               isDarkMode={isDarkMode}
@@ -396,6 +422,7 @@ export default function ResourcesPage() {
             chapter="Chapter 4"
             title="The Reserves Clock"
             subtitle="Reserves ÷ production = years of supply at today's extraction rate. Not a doomsday countdown — proven reserves grow as prices rise — but a snapshot of geological pressure."
+            share={false}
           />
           <ReservesClockGauge isDarkMode={isDarkMode} />
         </section>
@@ -407,6 +434,7 @@ export default function ResourcesPage() {
             chapter="Chapter 5"
             title="Curse or Blessing?"
             subtitle="A composite vulnerability score for every tracked economy — the higher, the more exposed to commodity swings. Sort by any column."
+            shareSubject="dataset"
           />
           {loading ? (
             <SkeletonCard isDarkMode={isDarkMode} className="h-96" />

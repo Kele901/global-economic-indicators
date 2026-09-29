@@ -38,10 +38,10 @@ export default function ChartMeta({ sourceId, isDarkMode, updatedAt, className =
   const provLink = isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900';
 
   return (
-    <div className={`flex items-center gap-2 text-[11px] ${muted} ${className}`}>
-      <span>Updated {age}</span>
+    <div className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] leading-snug ${muted} ${className}`}>
+      <span className="whitespace-nowrap">Updated {age}</span>
       <span aria-hidden>·</span>
-      <a href="/data-sources" className={`underline underline-offset-2 ${provLink}`} title={`Source: ${entry.provider}`}>
+      <a href="/data-sources" className={`whitespace-nowrap underline underline-offset-2 py-2 -my-2 sm:py-0 sm:my-0 ${provLink}`} title={`Source: ${entry.provider}`}>
         source: {entry.provider}
       </a>
     </div>

@@ -46,7 +46,7 @@ export default function DataQualityBadge({ flag, className = '' }: Props) {
   const meta = FLAG_META[flag];
   return (
     <span
-      className={`inline-flex items-center text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded ${className}`}
+      className={`inline-flex items-center shrink-0 whitespace-nowrap text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded ${className}`}
       style={{ color: meta.fg, backgroundColor: meta.bg }}
       title={meta.help}
       role="note"

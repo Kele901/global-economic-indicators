@@ -7,6 +7,8 @@ import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, COUNTRY_REGIONS, t
 import { BILATERAL_TRADE, getTradePartnersFor } from '../data/bilateralTradeData';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, LineChart, Line, PieChart, Pie } from 'recharts';
 import { COUNTRY_FLAGS as FLAG_MAP } from '../components/CountryFlag';
 
@@ -212,6 +214,8 @@ export default function TradeNetworkPage() {
     );
   }
 
+  const countryName = COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry;
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${tc.bg} ${tc.text}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -284,14 +288,24 @@ export default function TradeNetworkPage() {
         </div>
 
         {/* Country Focus: Trade Partners */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">
-            {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Partners
-          </h2>
+        <div id={slugify(`${countryName}: Trade Partners`)} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">
+              {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Partners
+            </h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title={`${countryName}: Trade Partners`} subject="dataset" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Exports/Imports */}
-            <div>
-              <h3 className={`text-sm font-medium mb-3 ${tc.textSec}`}>Exports & Imports (Billion USD)</h3>
+            <div id={slugify('Exports & Imports (Billion USD)')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                <h3 className={`text-sm font-medium ${tc.textSec}`}>Exports & Imports (Billion USD)</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Exports & Imports (Billion USD)" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={partnerChartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -308,8 +322,13 @@ export default function TradeNetworkPage() {
             </div>
 
             {/* Trade Balance */}
-            <div>
-              <h3 className={`text-sm font-medium mb-3 ${tc.textSec}`}>Trade Balance (Billion USD)</h3>
+            <div id={slugify('Trade Balance (Billion USD)')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                <h3 className={`text-sm font-medium ${tc.textSec}`}>Trade Balance (Billion USD)</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Trade Balance (Billion USD)" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={balanceChartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -357,8 +376,13 @@ export default function TradeNetworkPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Trade Openness */}
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-4">Trade Openness (% of GDP)</h2>
+          <div id={slugify('Trade Openness (% of GDP)')} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h2 className="text-xl font-semibold">Trade Openness (% of GDP)</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Trade Openness (% of GDP)" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={tradeOpenness} layout="vertical" margin={{ top: 5, right: 20, left: 80, bottom: 5 }}>
@@ -377,8 +401,13 @@ export default function TradeNetworkPage() {
           </div>
 
           {/* Supply Chain Concentration */}
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-2">Supply Chain Concentration</h2>
+          <div id={slugify('Supply Chain Concentration')} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+              <h2 className="text-xl font-semibold">Supply Chain Concentration</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Supply Chain Concentration" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <p className={`text-xs mb-4 ${tc.textSec}`}>Share of trade with top partner — higher = more dependent</p>
             <div className="space-y-2">
               {concentrationData.map(d => (
@@ -396,10 +425,15 @@ export default function TradeNetworkPage() {
         </div>
 
         {/* Section 1: Trade Trend Over Time */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-1">
-            {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Trend Over Time
-          </h2>
+        <div id={slugify(`${countryName}: Trade Trend Over Time`)} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h2 className="text-xl font-semibold">
+              {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Trend Over Time
+            </h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title={`${countryName}: Trade Trend Over Time`} isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Trade balance (% of GDP) and trade openness since 2000</p>
           {tradeTrendData.length > 0 ? (
             <div className="h-[350px]">
@@ -422,8 +456,13 @@ export default function TradeNetworkPage() {
         </div>
 
         {/* Section 2: Trade Diversification Index (HHI) */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-1">Trade Diversification Index</h2>
+        <div id={slugify('Trade Diversification Index')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h2 className="text-xl font-semibold">Trade Diversification Index</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Trade Diversification Index" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Herfindahl-Hirschman Index — lower = more diversified.
             <span className="ml-2 inline-flex gap-3">
@@ -432,7 +471,7 @@ export default function TradeNetworkPage() {
               <span className="text-red-500">● ≥2500 Concentrated</span>
             </span>
           </p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={hhiData} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -450,10 +489,15 @@ export default function TradeNetworkPage() {
         </div>
 
         {/* Section 3: Top Trade Flows Table */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-1">
-            {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Top Trade Flows
-          </h2>
+        <div id={slugify(`${countryName}: Top Trade Flows`)} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h2 className="text-xl font-semibold">
+              {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Top Trade Flows
+            </h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title={`${countryName}: Top Trade Flows`} subject="dataset" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Click column headers to sort</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -507,10 +551,15 @@ export default function TradeNetworkPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Section 4: Regional Trade Breakdown */}
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-1">
-              {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Regional Breakdown
-            </h2>
+          <div id={slugify(`${countryName}: Regional Breakdown`)} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+              <h2 className="text-xl font-semibold">
+                {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Regional Breakdown
+              </h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title={`${countryName}: Regional Breakdown`} isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <p className={`text-xs mb-4 ${tc.textSec}`}>Share of total trade by region</p>
             {regionalTradeData.length > 0 ? (
               <div className="h-[350px]">
@@ -543,10 +592,15 @@ export default function TradeNetworkPage() {
           </div>
 
           {/* Section 5: Trade Balance Summary Cards */}
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-1">
-              {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Summary
-            </h2>
+          <div id={slugify(`${countryName}: Trade Summary`)} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+              <h2 className="text-xl font-semibold">
+                {COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry}: Trade Summary
+              </h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title={`${countryName}: Trade Summary`} isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <p className={`text-xs mb-4 ${tc.textSec}`}>Key trade statistics at a glance</p>
             <div className="grid grid-cols-2 gap-4">
               <div className={`rounded-lg p-4 ${isDarkMode ? 'bg-gray-700/50' : 'bg-green-50'}`}>

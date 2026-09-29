@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/migration-ledger', {
   title: 'Migration Ledger | Global Economic Indicators',
   description:
     'Eight-chapter epic on global migration — remittances, refugee flows, corridors, migrant stocks, EU asylum, brain drain/gain, diaspora contributions, and border safety. Live World Bank + curated UNHCR / KNOMAD / UN DESA / IOM data.',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     description:
       'The world&apos;s people flows in eight chapters: remittances, refugees, corridors, migrant stocks, asylum, brain migration, diaspora, and border safety.',
   },
-};
+});
 
 export default function MigrationLedgerLayout({
   children,

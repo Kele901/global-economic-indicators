@@ -29,6 +29,8 @@ import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const skeleton = (label: string, height?: string) => {
   const Loading = () => <SkeletonCard height={height} label={label} />;
@@ -36,7 +38,7 @@ const skeleton = (label: string, height?: string) => {
 };
 
 const EnergyTicker            = dynamic(() => import('../components/EnergyTicker'),            { ssr: false, loading: skeleton('Loading energy ticker', 'h-[64px]') });
-const EnergyDependenceChart   = dynamic(() => import('../components/EnergyDependenceChart'),   { ssr: false, loading: skeleton('Loading import dependence', 'h-[520px]') });
+const EnergyDependenceChart   = dynamic(() => import('../components/EnergyDependenceChart'),   { ssr: false, loading: skeleton('Loading import dependence', 'h-[400px] sm:h-[520px]') });
 const ElectricityMixChart     = dynamic(() => import('../components/ElectricityMixChart'),     { ssr: false, loading: skeleton('Loading electricity mix') });
 const ElectricityMixTreemap   = dynamic(() => import('../components/ElectricityMixTreemap'),   { ssr: false, loading: skeleton('Loading generation composition', 'h-[380px]') });
 const StorageBuildoutChart    = dynamic(() => import('../components/StorageBuildoutChart'),    { ssr: false, loading: skeleton('Loading storage build-out') });
@@ -59,11 +61,18 @@ const TOUR_STEPS: TourStep[] = [
   { chapter: 'Chapter 8', title: 'Energy intensity', body: 'Primary energy per unit of GDP. Lower is more efficient, and the year-on-year change shows who is actually improving.' },
 ];
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; }) {
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean; }) {
   return (
-    <div className="mb-6">
+    <div className="mb-6" id={share ? slugify(title) : undefined}>
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>{chapter}</div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -155,7 +164,8 @@ export default function EnergyLedgerPage() {
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
 
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Energy Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+          <div className={`text-[11px] uppercase tracking-wider mb-3 ${textMuted}`}>Energy Ledger key figures</div>
           <EnergyTicker isDarkMode={isDarkMode} />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
@@ -190,6 +200,7 @@ export default function EnergyLedgerPage() {
               isDarkMode={isDarkMode}
               filename="energy-ledger-data"
               label="Data"
+              shareTitle="Energy Ledger key figures"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
                 ELECTRICITY_MIX_2023.forEach(r => rows.push({ series: 'Electricity mix 2023', ...r }));
@@ -208,9 +219,11 @@ export default function EnergyLedgerPage() {
         <section className="mb-14">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
             title="Who Depends on Whom"
+            share={false}
             subtitle="Live net energy imports as a share of energy use. Above zero the country is buying energy in; below zero it is selling a surplus. Bar colour carries the renewable share of final consumption, which is the only thing that structurally shrinks the exposure." />
           <EnergyDependenceChart
             isDarkMode={isDarkMode}
+            shareTitle="Who Depends on Whom"
             netEnergyImports={data?.netEnergyImports}
             renewableEnergy={data?.renewableEnergy}
           />

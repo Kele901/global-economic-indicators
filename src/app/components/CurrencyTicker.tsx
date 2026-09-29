@@ -4,6 +4,10 @@ import { useMemo } from 'react';
 import type { CurrencyRateHistory, FxCategory } from '../services/currencyRates';
 import Sparkline from './Sparkline';
 import ChartA11yCaption from './ChartA11yCaption';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TICKER_TITLE = 'Live foreign exchange rates';
 
 interface Props {
   isDarkMode: boolean;
@@ -79,15 +83,16 @@ export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
   const doubled = [...items, ...items];
 
   return (
+    <div id={slugify(TICKER_TITLE)} className="flex items-center gap-2">
     <div
-      className={`relative overflow-hidden rounded-lg border ${
+      className={`relative flex-1 min-w-0 overflow-hidden rounded-lg border ${
         isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
       }`}
       role="region"
       aria-label="Live foreign exchange rates — scrolling ticker"
     >
       <ChartA11yCaption
-        title="Live foreign exchange rates"
+        title={TICKER_TITLE}
         precision={4}
         rows={items.map(h => ({ label: h.meta.pair, value: h.latest?.value ?? null }))}
       />
@@ -185,6 +190,8 @@ export default function CurrencyTicker({ isDarkMode, rates, loading }: Props) {
           to { transform: translateX(-50%); }
         }
       `}</style>
+    </div>
+      <SocialShareMenu title={TICKER_TITLE} isDarkMode={isDarkMode} className="shrink-0" />
     </div>
   );
 }

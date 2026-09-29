@@ -15,6 +15,8 @@ import MinskyMomentTracker from '../components/MinskyMomentTracker';
 import MonetaryPolicyRegimeTimeline from '../components/MonetaryPolicyRegimeTimeline';
 import GeopoliticalCycleOverlay from '../components/GeopoliticalCycleOverlay';
 import CycleReportGenerator from '../components/CycleReportGenerator';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { 
   crisisEvents, 
   empireCycles, 
@@ -33,7 +35,7 @@ const CrisisWorldMap = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[320px] sm:h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
       </div>
     )
@@ -131,7 +133,10 @@ const EconomicCyclesPage = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="flex justify-end mb-2">
+          <SocialShareMenu title="Economic Cycles key figures" isDarkMode={isDarkMode} />
+        </div>
+        <div id={slugify('Economic Cycles key figures')} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
             <div className={`text-3xl font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
               {empireCycles.length}
@@ -511,12 +516,17 @@ const EconomicCyclesPage = () => {
             </div>
 
             {/* Crisis Map */}
-            <div className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-                <h2 className="text-xl font-bold">Global Crisis Map</h2>
-                <p className={`text-sm ${themeColors.textSecondary}`}>
-                  200+ years of financial crises mapped across the globe
-                </p>
+            <div id={slugify('Global Crisis Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className={`px-4 py-3 border-b flex items-start justify-between gap-2 flex-wrap ${themeColors.border}`}>
+                <div>
+                  <h2 className="text-xl font-bold">Global Crisis Map</h2>
+                  <p className={`text-sm ${themeColors.textSecondary}`}>
+                    200+ years of financial crises mapped across the globe
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Global Crisis Map" isDarkMode={isDarkMode} />
+                </div>
               </div>
               <CrisisWorldMap
                 isDarkMode={isDarkMode}
@@ -529,33 +539,38 @@ const EconomicCyclesPage = () => {
             </div>
 
             {/* Crisis Type Breakdown */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {([
-                { type: 'banking', count: bankingCrises },
-                { type: 'sovereign_debt', count: debtCrises },
-                { type: 'currency', count: currencyCrises },
-                { type: 'inflation', count: crisisEvents.filter(c => c.type === 'inflation').length },
-                { type: 'stock_market', count: crisisEvents.filter(c => c.type === 'stock_market').length },
-              ] as { type: CrisisType; count: number }[]).map(item => (
-                <button
-                  key={item.type}
-                  onClick={() => setCrisisFilter(crisisFilter === item.type ? 'all' : item.type)}
-                  className={`p-4 rounded-xl text-center transition-all ${
-                    crisisFilter === item.type
-                      ? 'ring-2 ring-blue-500'
-                      : ''
-                  } ${themeColors.cardBg} border ${themeColors.border} hover:shadow-lg`}
-                >
-                  <div 
-                    className="w-4 h-4 rounded-full mx-auto mb-2"
-                    style={{ backgroundColor: getCrisisTypeColor(item.type) }}
-                  />
-                  <div className="text-2xl font-bold">{item.count}</div>
-                  <div className={`text-xs ${themeColors.textSecondary}`}>
-                    {getCrisisTypeLabel(item.type)}
-                  </div>
-                </button>
-              ))}
+            <div id={slugify('Financial crises by type')}>
+              <div className="flex justify-end mb-2">
+                <SocialShareMenu title="Financial crises by type" isDarkMode={isDarkMode} />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {([
+                  { type: 'banking', count: bankingCrises },
+                  { type: 'sovereign_debt', count: debtCrises },
+                  { type: 'currency', count: currencyCrises },
+                  { type: 'inflation', count: crisisEvents.filter(c => c.type === 'inflation').length },
+                  { type: 'stock_market', count: crisisEvents.filter(c => c.type === 'stock_market').length },
+                ] as { type: CrisisType; count: number }[]).map(item => (
+                  <button
+                    key={item.type}
+                    onClick={() => setCrisisFilter(crisisFilter === item.type ? 'all' : item.type)}
+                    className={`p-4 rounded-xl text-center transition-all ${
+                      crisisFilter === item.type
+                        ? 'ring-2 ring-blue-500'
+                        : ''
+                    } ${themeColors.cardBg} border ${themeColors.border} hover:shadow-lg`}
+                  >
+                    <div 
+                      className="w-4 h-4 rounded-full mx-auto mb-2"
+                      style={{ backgroundColor: getCrisisTypeColor(item.type) }}
+                    />
+                    <div className="text-2xl font-bold">{item.count}</div>
+                    <div className={`text-xs ${themeColors.textSecondary}`}>
+                      {getCrisisTypeLabel(item.type)}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -586,8 +601,13 @@ const EconomicCyclesPage = () => {
             />
 
             {/* Short-term Cycles */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Recent Business Cycles</h3>
+            <div id={slugify('Recent Business Cycles')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                <h3 className="text-lg font-semibold">Recent Business Cycles</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Recent Business Cycles" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="grid md:grid-cols-3 gap-4">
                 {debtCyclePhases
                   .filter(p => p.cycleType === 'short_term')

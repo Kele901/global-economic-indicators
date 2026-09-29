@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { downloadChart, ChartDownloadOptions, ChartData } from '../utils/chartDownload';
-
+import SocialShareMenu, { ShareScopeContext } from './SocialShareMenu';
 interface ChartDownloadButtonProps {
   chartElement: HTMLElement | null;
   chartData: ChartData;
@@ -24,7 +24,7 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadFormat, setDownloadFormat] = useState<'png' | 'jpg' | 'pdf' | 'csv'>('png');
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const inChartCard = useContext(ShareScopeContext);
   const variantClasses = {
     primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg dark:shadow-blue-500/25',
     secondary: 'bg-gray-600 hover:bg-gray-700 text-white shadow-lg dark:shadow-gray-400/25',
@@ -148,6 +148,10 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
   }, [chartElement, chartData.title]);
 
   return (
+    <div className="inline-flex items-center gap-2">
+    {!inChartCard && (
+      <SocialShareMenu title={chartData.title} size={size === 'sm' ? 'sm' : 'md'} />
+    )}
     <div className="relative inline-block" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -211,6 +215,7 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

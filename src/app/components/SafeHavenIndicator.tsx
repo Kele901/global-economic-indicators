@@ -7,6 +7,8 @@ import {
   type SafeHavenCategory,
   type SafeHavenCurrency
 } from '../data/currencyHierarchyData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface SafeHavenIndicatorProps {
   isDarkMode: boolean;
@@ -105,14 +107,19 @@ const SafeHavenIndicator: React.FC<SafeHavenIndicatorProps> = ({ isDarkMode }) =
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify('Safe Haven Currency Classification')} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Safe Haven Currency Classification
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          Currency behavior during periods of market stress and risk aversion
-        </p>
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Safe Haven Currency Classification
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              Currency behavior during periods of market stress and risk aversion
+            </p>
+          </div>
+          <SocialShareMenu title="Safe Haven Currency Classification" isDarkMode={isDarkMode} className="shrink-0" />
+        </div>
       </div>
 
       <div className="p-6">

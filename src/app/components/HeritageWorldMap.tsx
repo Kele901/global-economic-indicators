@@ -65,7 +65,7 @@ const HeritageWorldMap: React.FC<HeritageWorldMapProps> = memo(({ isDarkMode, he
 
   return (
     <div className="relative w-full">
-      <div className="w-full h-[450px]">
+      <div className="w-full h-[320px] sm:h-[450px]">
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{ scale: 130, center: [0, 30] }}

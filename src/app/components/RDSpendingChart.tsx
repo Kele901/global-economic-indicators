@@ -17,6 +17,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber, formatPercent, defaultTechCountries } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface RDSpendingChartProps {
   isDarkMode: boolean;
@@ -107,7 +109,7 @@ const RDSpendingChart: React.FC<RDSpendingChartProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('R&D Investment Analysis')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -170,6 +172,8 @@ const RDSpendingChart: React.FC<RDSpendingChartProps> = ({
               ))}
             </select>
           )}
+
+          <SocialShareMenu title="R&D Investment Analysis" isDarkMode={isDarkMode} />
         </div>
       </div>
 
@@ -207,7 +211,7 @@ const RDSpendingChart: React.FC<RDSpendingChartProps> = ({
       </div>
 
       {/* Chart */}
-      <div className="h-[400px]">
+      <div className="h-[300px] sm:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           {viewMode === 'comparison' ? (
             // Time series view

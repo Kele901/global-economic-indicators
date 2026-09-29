@@ -9,6 +9,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import dynamic from 'next/dynamic';
 import { useCentralBankRates } from '../hooks/useCentralBankRates';
 import { fetchRecentDecisions, RateDecision as LiveRateDecision } from '../services/rateDecisions';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const PhillipsCurveChart = dynamic(() => import('../components/PhillipsCurveChart'), { ssr: false });
 
@@ -265,8 +267,8 @@ export default function MonetaryPolicyPage() {
         {!loading && (
         <>
         {/* Current Rates Overview */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div id={slugify('Current Policy Rates')} className="mb-8">
+          <div className="flex items-center justify-between gap-2 flex-wrap mb-4">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold">Current Policy Rates</h2>
               <div className="flex items-center gap-1">
@@ -281,9 +283,10 @@ export default function MonetaryPolicyPage() {
                 {ratesLoading ? 'Loading...' : 'Refresh'}
               </button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
               <button onClick={() => setSortBy('rate')} className={`px-3 py-1 rounded text-xs border ${sortBy === 'rate' ? 'bg-blue-500/20 border-blue-500 text-blue-500' : isDarkMode ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'}`}>By Rate</button>
               <button onClick={() => setSortBy('name')} className={`px-3 py-1 rounded text-xs border ${sortBy === 'name' ? 'bg-blue-500/20 border-blue-500 text-blue-500' : isDarkMode ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'}`}>By Name</button>
+              <SocialShareMenu title="Current Policy Rates" isDarkMode={isDarkMode} />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -317,8 +320,8 @@ export default function MonetaryPolicyPage() {
         </div>
 
         {/* Rate Decision Timeline */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <div className="flex items-center gap-3 mb-4">
+        <div id={slugify('Recent Rate Decisions')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-center gap-3 flex-wrap mb-4">
             <h2 className="text-xl font-semibold">Recent Rate Decisions</h2>
             <div className="flex items-center gap-1">
               <div className={`w-2 h-2 rounded-full ${liveDecisions.length > 0 ? 'bg-green-500' : 'bg-yellow-500'}`} />
@@ -331,6 +334,9 @@ export default function MonetaryPolicyPage() {
             >
               {decisionsLoading ? 'Loading...' : 'Refresh'}
             </button>
+            <div className="ml-auto flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Recent Rate Decisions" isDarkMode={isDarkMode} />
+            </div>
           </div>
           <div className="space-y-3">
             {decisionsData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 20).map((decision, idx) => {
@@ -358,8 +364,13 @@ export default function MonetaryPolicyPage() {
         </div>
 
         {/* Rate Paths Chart */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Historical Rate Paths</h2>
+        <div id={slugify('Historical Rate Paths')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Historical Rate Paths</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Historical Rate Paths" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-2 mb-4">
             {uniqueBanks.map(bank => (
               <button
@@ -376,7 +387,7 @@ export default function MonetaryPolicyPage() {
               </button>
             ))}
           </div>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={ratePathData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -394,10 +405,15 @@ export default function MonetaryPolicyPage() {
         </div>
 
         {/* Real Interest Rate Comparison */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Real Interest Rate Comparison</h2>
+        <div id={slugify('Real Interest Rate Comparison')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Real Interest Rate Comparison</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Real Interest Rate Comparison" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${tc.textSec}`}>Policy rate minus latest inflation. Positive real rates indicate restrictive policy; negative means monetary conditions remain loose.</p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={realRateData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -416,10 +432,15 @@ export default function MonetaryPolicyPage() {
         </div>
 
         {/* Rate vs Inflation Scatter */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Policy Rate vs Inflation</h2>
+        <div id={slugify('Policy Rate vs Inflation')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Policy Rate vs Inflation</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Policy Rate vs Inflation" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${tc.textSec}`}>Each dot represents a central bank. Points above the diagonal line have positive real rates (ahead of the curve).</p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -468,10 +489,15 @@ export default function MonetaryPolicyPage() {
         </div>
 
         {/* Rate Change Frequency */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Rate Change Frequency</h2>
+        <div id={slugify('Rate Change Frequency')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Rate Change Frequency</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Rate Change Frequency" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${tc.textSec}`}>Count of hikes, cuts, and holds per central bank from recent decision history.</p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rateChangeFreqData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -488,8 +514,13 @@ export default function MonetaryPolicyPage() {
         </div>
 
         {/* Central Bank Comparison Table */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Central Bank Comparison Table</h2>
+        <div id={slugify('Central Bank Comparison Table')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Central Bank Comparison Table</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Central Bank Comparison Table" subject="dataset" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${tc.textSec}`}>Comprehensive side-by-side view of all tracked central banks.</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

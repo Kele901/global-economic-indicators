@@ -12,6 +12,10 @@ import type { CountryData } from '../services/worldbank';
 import { DEBT_COUNTRY_META, HOUSEHOLD_DEBT_2024 } from '../services/debtCurated';
 import { latestEntry } from '../utils/countryData';
 import { useViewportSize } from '../hooks/useViewportSize';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Public vs Private Debt Stack';
 
 interface Props {
   isDarkMode: boolean;
@@ -47,12 +51,17 @@ export default function PublicPrivateDebtChart({ isDarkMode, governmentDebt }: P
     : { backgroundColor: '#fff',    border: '1px solid #e5e7eb', color: '#111827', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' };
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-      <h3 className={`text-base sm:text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Public vs Private Debt Stack</h3>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h3 className={`text-base sm:text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{TITLE}</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <p className={`text-xs mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
         Stacked bars: government debt (WB latest) + household debt (BIS 2024). Total headline stress is the full column height.
       </p>
-      <div className="h-[420px]">
+      <div className="h-[300px] sm:h-[420px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

@@ -11,7 +11,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = 'Loading Economic Data',
   subtitle = 'Fetching the latest indicators from World Bank, IMF, OECD, and other trusted sources...'
 }) => (
-  <div className="flex flex-col justify-center items-center h-[400px] px-4">
+  <div className="flex flex-col justify-center items-center h-[300px] sm:h-[400px] px-4">
     <div className="animate-spin rounded-full h-24 w-24 sm:h-32 sm:w-32 border-b-2 border-blue-500 mb-6"></div>
     <h2 className="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2 text-center">
       {message}

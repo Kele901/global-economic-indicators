@@ -7,6 +7,8 @@ import {
   type RegimeType,
   type CurrencyRegime
 } from '../data/currencyHierarchyData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CurrencyRegimeInfoProps {
   isDarkMode: boolean;
@@ -115,14 +117,19 @@ const CurrencyRegimeInfo: React.FC<CurrencyRegimeInfoProps> = ({
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify('Currency Exchange Rate Regimes')} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Currency Exchange Rate Regimes
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          Classification of how currencies are managed relative to other currencies
-        </p>
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Currency Exchange Rate Regimes
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              Classification of how currencies are managed relative to other currencies
+            </p>
+          </div>
+          <SocialShareMenu title="Currency Exchange Rate Regimes" subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+        </div>
       </div>
 
       <div className="p-6">

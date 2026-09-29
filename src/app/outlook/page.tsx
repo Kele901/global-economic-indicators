@@ -7,6 +7,8 @@ import { IMF_GDP_PROJECTIONS, IMF_INFLATION_PROJECTIONS, REGIONAL_GDP_PROJECTION
 import { COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../utils/countryMappings';
 import { ComposedChart, Line, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, ScatterChart, Scatter, Cell, ZAxis, ReferenceLine, ErrorBar, LabelList } from 'recharts';
 import { useIMFProjections } from '../hooks/useIMFProjections';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 // Illustrative forecast-error magnitudes used to draw the uncertainty band
 // around IMF point projections. The IMF does not publish an interval with the
@@ -254,6 +256,7 @@ export default function OutlookPage() {
   };
 
   const { worldGDP, globalInflation, tradeGrowth, oilPrice } = GLOBAL_OUTLOOK_SUMMARY;
+  const forecastShareTitle = `Country Forecasts: ${COUNTRY_DISPLAY_NAMES[selectedCountry as CountryKey] || selectedCountry} ${selectedMetric === 'gdp' ? 'GDP Growth' : 'Inflation'}`;
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${tc.bg} ${tc.text}`}>
@@ -329,7 +332,11 @@ export default function OutlookPage() {
         {!loading && (
         <>
         {/* Global Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div id={slugify('Global outlook key figures')} className="mb-8">
+        <div className="flex justify-end mb-2">
+          <SocialShareMenu title="Global outlook key figures" isDarkMode={isDarkMode} />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'World GDP Growth', ...worldGDP },
             { label: 'Global Inflation', ...globalInflation },
@@ -345,12 +352,13 @@ export default function OutlookPage() {
             </div>
           ))}
         </div>
+        </div>
 
         {/* Country Forecast Chart */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+        <div id={slugify(forecastShareTitle)} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <div className="flex flex-wrap gap-4 items-center mb-4">
             <h2 className="text-xl font-semibold">Country Forecasts</h2>
-            <div className="flex gap-2 ml-auto">
+            <div className="flex flex-wrap items-center gap-2 ml-auto">
               <button onClick={() => setSelectedMetric('gdp')}
                 className={`px-3 py-1 rounded text-xs border ${selectedMetric === 'gdp' ? 'bg-blue-500/20 border-blue-500 text-blue-500' : isDarkMode ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'}`}>
                 GDP Growth
@@ -365,9 +373,10 @@ export default function OutlookPage() {
                   <option key={c} value={c}>{COUNTRY_DISPLAY_NAMES[c as CountryKey] || c}</option>
                 ))}
               </select>
+              <SocialShareMenu title={forecastShareTitle} isDarkMode={isDarkMode} />
             </div>
           </div>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={forecastChartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -410,8 +419,13 @@ export default function OutlookPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Regional Comparison */}
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-4">Regional GDP Projections</h2>
+          <div id={slugify('Regional GDP Projections')} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h2 className="text-xl font-semibold">Regional GDP Projections</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Regional GDP Projections" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={REGIONAL_GDP_PROJECTIONS} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -453,8 +467,13 @@ export default function OutlookPage() {
         </div>
 
         {/* Multi-Country Projection Comparison */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Multi-Country Projection Comparison</h2>
+        <div id={slugify('Multi-Country Projection Comparison')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Multi-Country Projection Comparison</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Multi-Country Projection Comparison" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-2 mb-4">
             {allProjectionCountries.map(c => (
               <button
@@ -472,7 +491,7 @@ export default function OutlookPage() {
               </button>
             ))}
           </div>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={multiCountryChartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -499,9 +518,14 @@ export default function OutlookPage() {
         </div>
 
         {/* Growth vs Inflation Scatter */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Growth vs Inflation (2025 Projections)</h2>
-          <div className="h-[400px]">
+        <div id={slugify('Growth vs Inflation (2025 Projections)')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Growth vs Inflation (2025 Projections)</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Growth vs Inflation (2025 Projections)" isDarkMode={isDarkMode} />
+            </div>
+          </div>
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 20, right: 30, bottom: 30, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -553,8 +577,13 @@ export default function OutlookPage() {
         </div>
 
         {/* Forecast Revision Indicators */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Forecast Revision Indicators</h2>
+        <div id={slugify('Forecast Revision Indicators')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Forecast Revision Indicators</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Forecast Revision Indicators" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${tc.textSec}`}>Projected GDP growth change from 2024 to 2025</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {revisionData.map(r => (
@@ -576,8 +605,13 @@ export default function OutlookPage() {
         </div>
 
         {/* Advanced vs Emerging Split */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Advanced vs Emerging Economies</h2>
+        <div id={slugify('Advanced vs Emerging Economies')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Advanced vs Emerging Economies</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Advanced vs Emerging Economies" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={advancedVsEmergingData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -594,8 +628,13 @@ export default function OutlookPage() {
         </div>
 
         {/* Global Outlook Summary Table */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Global Outlook Summary</h2>
+        <div id={slugify('Global Outlook Summary')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Global Outlook Summary</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Global Outlook Summary" subject="dataset" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

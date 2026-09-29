@@ -29,6 +29,8 @@ import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const skeleton = (label: string, height?: string) => {
   const Loading = () => <SkeletonCard height={height} label={label} />;
@@ -36,8 +38,8 @@ const skeleton = (label: string, height?: string) => {
 };
 
 const WageTicker                = dynamic(() => import('../components/WageTicker'),                { ssr: false, loading: skeleton('Loading wage ticker', 'h-[64px]') });
-const LaborSlackChart           = dynamic(() => import('../components/LaborSlackChart'),           { ssr: false, loading: skeleton('Loading labour market slack', 'h-[560px]') });
-const WagesChart                = dynamic(() => import('../components/WagesChart'),                { ssr: false, loading: skeleton('Loading wages chart', 'h-[560px]') });
+const LaborSlackChart           = dynamic(() => import('../components/LaborSlackChart'),           { ssr: false, loading: skeleton('Loading labour market slack', 'h-[440px] sm:h-[560px]') });
+const WagesChart                = dynamic(() => import('../components/WagesChart'),                { ssr: false, loading: skeleton('Loading wages chart', 'h-[440px] sm:h-[560px]') });
 const UnionisationChart         = dynamic(() => import('../components/UnionisationChart'),         { ssr: false, loading: skeleton('Loading unionisation chart') });
 const InformalEmploymentGrid    = dynamic(() => import('../components/InformalEmploymentGrid'),    { ssr: false, loading: skeleton('Loading informal employment') });
 const WorkingAgeTrajectoryChart = dynamic(() => import('../components/WorkingAgeTrajectoryChart'), { ssr: false, loading: skeleton('Loading working-age trajectory') });
@@ -58,11 +60,18 @@ const TOUR_STEPS: TourStep[] = [
   { chapter: 'Chapter 8', title: 'Youth unemployment over time', body: 'The same story as Chapter 1 on a time axis, by development band. The 2020-21 COVID spike was the sharpest short-term shock on record.' },
 ];
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; }) {
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, shareSubject = 'chart' }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean; shareSubject?: 'chart' | 'dataset'; }) {
   return (
-    <div className="mb-6">
+    <div id={share ? slugify(title) : undefined} className="mb-6">
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>{chapter}</div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} subject={shareSubject} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -158,7 +167,7 @@ export default function LaborLedgerPage() {
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
 
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Labor Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <WageTicker isDarkMode={isDarkMode} />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
@@ -192,6 +201,7 @@ export default function LaborLedgerPage() {
             <DataDownloadButton
               isDarkMode={isDarkMode}
               filename="labor-ledger-data"
+              shareTitle="Labor Ledger key figures"
               label="Data"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
@@ -209,11 +219,12 @@ export default function LaborLedgerPage() {
         </div>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1" share={false}
             title="Who Is Out of Work"
             subtitle="Live overall and youth unemployment for every country in the roster, sorted by the youth multiple. A high multiple on top of a low headline rate is the signature of a two-tier labour market, not a weak economy." />
           <LaborSlackChart
             isDarkMode={isDarkMode}
+            shareTitle="Who Is Out of Work"
             unemploymentRates={data?.unemploymentRates}
             youthUnemployment={data?.youthUnemployment}
           />
@@ -234,7 +245,7 @@ export default function LaborLedgerPage() {
         </section>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4" shareSubject="dataset"
             title="Informal Employment"
             subtitle="No contract, no social insurance, often no minimum wage. Dominant in Sub-Saharan Africa and South Asia. Any wage or productivity comparison that ignores it will overstate reality by a huge margin." />
           <InformalEmploymentGrid isDarkMode={isDarkMode} />
@@ -248,7 +259,7 @@ export default function LaborLedgerPage() {
         </section>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6" shareSubject="dataset"
             title="AI Displacement Risk"
             subtitle="OECD 2024 employment shares in occupations with high generative-AI exposure. High-exposure ≠ certain displacement — the complementarity column shows how likely AI is to augment rather than replace those workers." />
           <AiDisplacementRiskTable isDarkMode={isDarkMode} />

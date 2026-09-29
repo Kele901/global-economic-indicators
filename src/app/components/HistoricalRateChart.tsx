@@ -16,6 +16,8 @@ import {
   getHistoricalRates,
   type HistoricalRate
 } from '../data/currencyHierarchyData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface HistoricalRateChartProps {
   isDarkMode: boolean;
@@ -145,14 +147,19 @@ const HistoricalRateChart: React.FC<HistoricalRateChartProps> = ({ isDarkMode })
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify('Historical Exchange Rates')} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Historical Exchange Rates
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          Exchange rate trends over time
-        </p>
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Historical Exchange Rates
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              Exchange rate trends over time
+            </p>
+          </div>
+          <SocialShareMenu title="Historical Exchange Rates" isDarkMode={isDarkMode} className="shrink-0" />
+        </div>
       </div>
 
       <div className="p-6">

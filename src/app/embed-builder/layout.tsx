@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/embed-builder', {
   title: 'Embed Builder | Global Economic Indicators',
   description:
     'Configure a lightweight embed of any chart or metric, then copy an iframe snippet you can drop into blogs, wikis or Notion.',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     description:
       'Pick a chart, pick your countries, copy the snippet.',
   },
-};
+});
 
 export default function EmbedBuilderLayout({
   children,

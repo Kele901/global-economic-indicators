@@ -26,6 +26,8 @@ import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const skeleton = (label: string, height?: string) => {
   const Loading = () => <SkeletonCard height={height} label={label} />;
@@ -33,7 +35,7 @@ const skeleton = (label: string, height?: string) => {
 };
 
 const HealthSpendTicker         = dynamic(() => import('../components/HealthSpendTicker'),         { ssr: false, loading: skeleton('Loading health spend ticker', 'h-[64px]') });
-const HealthCommitmentChart     = dynamic(() => import('../components/HealthCommitmentChart'),     { ssr: false, loading: skeleton('Loading health commitment chart', 'h-[560px]') });
+const HealthCommitmentChart     = dynamic(() => import('../components/HealthCommitmentChart'),     { ssr: false, loading: skeleton('Loading health commitment chart', 'h-[440px] sm:h-[560px]') });
 const SpendVsOutcomeChart       = dynamic(() => import('../components/SpendVsOutcomeChart'),       { ssr: false, loading: skeleton('Loading spend vs outcome') });
 const LifeExpectancyDivergenceChart = dynamic(() => import('../components/LifeExpectancyDivergenceChart'), { ssr: false, loading: skeleton('Loading life-expectancy divergence') });
 const PandemicReadinessGrid     = dynamic(() => import('../components/PandemicReadinessGrid'),     { ssr: false, loading: skeleton('Loading pandemic readiness') });
@@ -55,11 +57,18 @@ const TOUR_STEPS: TourStep[] = [
   { chapter: 'Chapter 8', title: 'The burden shift', body: 'Communicable-disease DALYs collapsed since 1990 while non-communicable disease held steady. That shift is what health systems now have to be built for.' },
 ];
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; }) {
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, shareSubject = 'chart' }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean; shareSubject?: 'chart' | 'dataset'; }) {
   return (
-    <div className="mb-6">
+    <div id={share ? slugify(title) : undefined} className="mb-6">
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>{chapter}</div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} subject={shareSubject} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -160,7 +169,7 @@ export default function HealthLedgerPage() {
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
 
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Health Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <HealthSpendTicker isDarkMode={isDarkMode} />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
@@ -194,6 +203,7 @@ export default function HealthLedgerPage() {
             <DataDownloadButton
               isDarkMode={isDarkMode}
               filename="health-ledger-data"
+              shareTitle="Health Ledger key figures"
               label="Data"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
@@ -208,11 +218,12 @@ export default function HealthLedgerPage() {
         </div>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1" share={false}
             title="What Each Country Commits"
             subtitle="Live health expenditure as a share of GDP across the full roster, with life expectancy overlaid on the right axis. The bars are sorted by spending and the line refuses to follow them — the first and most important fact about health systems is that money alone does not buy years." />
           <HealthCommitmentChart
             isDarkMode={isDarkMode}
+            shareTitle="What Each Country Commits"
             healthcareExpenditure={data?.healthcareExpenditure}
             lifeExpectancy={data?.lifeExpectancy}
           />
@@ -233,14 +244,14 @@ export default function HealthLedgerPage() {
         </section>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4" shareSubject="dataset"
             title="Pandemic Preparedness"
             subtitle="Johns Hopkins Global Health Security Index + WHO JEE core-capacity scores. Even the highest-ranked countries fell short during COVID; the ranking system itself is being re-evaluated." />
           <PandemicReadinessGrid isDarkMode={isDarkMode} />
         </section>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5" shareSubject="dataset"
             title="The Pharma Industry"
             subtitle="Top-15 pharmaceutical firms by 2024 R&D spend. Concentrated in the US (7), Europe (7) and Japan (1). Chinese firms are growing fast but not yet in the top-15 by absolute R&D." />
           <PharmaConcentrationTable isDarkMode={isDarkMode} />
@@ -255,7 +266,7 @@ export default function HealthLedgerPage() {
 
         <LazyMount isDarkMode={isDarkMode}>
           <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7" shareSubject="dataset"
               title="The Mental-Health Gap"
               subtitle="What share of people with a diagnosable mental disorder receive no treatment? Roughly half in the OECD, 90%+ in low-income countries. Psychiatrist density is the strongest system-level predictor." />
             <MentalHealthGapTable isDarkMode={isDarkMode} />

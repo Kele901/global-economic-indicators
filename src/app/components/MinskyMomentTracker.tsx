@@ -19,6 +19,8 @@ import {
   type MinskyPhase,
   type MinskyMomentEvent,
 } from '../data/marketCyclesData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface MinskyMomentTrackerProps {
   isDarkMode: boolean;
@@ -227,10 +229,15 @@ export default function MinskyMomentTracker({ isDarkMode }: MinskyMomentTrackerP
       </div>
 
       {/* A) Minsky Progression Flow */}
-      <div className={`rounded-xl border p-5 ${cardBg}`}>
-        <h3 className={`text-lg font-semibold mb-4 ${headingText}`}>
-          Minsky Progression Flow
-        </h3>
+      <div id={slugify('Minsky Progression Flow')} className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+          <h3 className={`text-lg font-semibold ${headingText}`}>
+            Minsky Progression Flow
+          </h3>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title="Minsky Progression Flow" isDarkMode={isDarkMode} />
+          </div>
+        </div>
         <div className="flex flex-col lg:flex-row items-stretch gap-2">
           {minskyPhases.map((phase, i) => (
             <React.Fragment key={phase.id}>
@@ -246,10 +253,15 @@ export default function MinskyMomentTracker({ isDarkMode }: MinskyMomentTrackerP
       </div>
 
       {/* B) Minsky Moments Scatter Plot */}
-      <div className={`rounded-xl border p-5 ${cardBg}`}>
-        <h3 className={`text-lg font-semibold mb-1 ${headingText}`}>
-          Minsky Moments — Credit &amp; Asset Price Scatter
-        </h3>
+      <div id={slugify('Minsky Moments — Credit & Asset Price Scatter')} className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+          <h3 className={`text-lg font-semibold ${headingText}`}>
+            Minsky Moments — Credit &amp; Asset Price Scatter
+          </h3>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title="Minsky Moments — Credit & Asset Price Scatter" isDarkMode={isDarkMode} />
+          </div>
+        </div>
         <p className={`text-xs mb-4 ${secondaryText}`}>
           Each bubble represents a historical Minsky Moment. Size reflects combined impact severity.
           The shaded area marks the danger zone of high credit growth combined with elevated asset prices.
@@ -342,10 +354,15 @@ export default function MinskyMomentTracker({ isDarkMode }: MinskyMomentTrackerP
       </div>
 
       {/* C) Historical Minsky Moments Timeline */}
-      <div className={`rounded-xl border p-5 ${cardBg}`}>
-        <h3 className={`text-lg font-semibold mb-4 ${headingText}`}>
-          Historical Minsky Moments
-        </h3>
+      <div id={slugify('Historical Minsky Moments')} className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+          <h3 className={`text-lg font-semibold ${headingText}`}>
+            Historical Minsky Moments
+          </h3>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title="Historical Minsky Moments" isDarkMode={isDarkMode} />
+          </div>
+        </div>
         <div className="space-y-0">
           {sortedMoments.map((event, idx) => {
             const phase = minskyPhases.find((p) => p.id === event.minskyPhase);

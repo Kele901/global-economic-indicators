@@ -20,11 +20,12 @@ import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
+  shareTitle?: string;
   healthcareExpenditure: CountryData[] | undefined;
   lifeExpectancy: CountryData[] | undefined;
 }
 
-export default function HealthCommitmentChart({ isDarkMode, healthcareExpenditure, lifeExpectancy }: Props) {
+export default function HealthCommitmentChart({ isDarkMode, healthcareExpenditure, lifeExpectancy, shareTitle }: Props) {
   const theme = useChartTheme(isDarkMode);
 
   const rows = useMemo(() => (
@@ -48,7 +49,7 @@ export default function HealthCommitmentChart({ isDarkMode, healthcareExpenditur
 
   if (rows.length === 0) {
     return (
-      <ChartCard isDarkMode={isDarkMode} height="h-auto">
+      <ChartCard isDarkMode={isDarkMode} shareTitle={shareTitle} height="h-auto">
         <p className={`text-sm ${theme.subtitleCls}`}>
           Live World Bank health-expenditure data has not arrived yet. The curated chapters below
           are unaffected.
@@ -65,7 +66,8 @@ export default function HealthCommitmentChart({ isDarkMode, healthcareExpenditur
   return (
     <ChartCard
       isDarkMode={isDarkMode}
-      height="h-[520px]"
+      shareTitle={shareTitle}
+      height="h-[400px] sm:h-[520px]"
       caption={
         <ChartA11yCaption
           title="Current health expenditure as a share of GDP, latest year"

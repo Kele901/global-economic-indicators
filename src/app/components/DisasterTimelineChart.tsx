@@ -16,10 +16,14 @@ import {
 } from 'recharts';
 import { EMDAT_DISASTERS_1990_2024 } from '../services/climateCurated';
 import { useViewportSize } from '../hooks/useViewportSize';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface Props {
   isDarkMode: boolean;
 }
+
+const TITLE = 'Climate-related disasters · EM-DAT 1990-2024';
 
 const REGIONS = [
   { key: 'asia',     label: 'Asia',     color: '#dc2626' },
@@ -44,19 +48,22 @@ export default function DisasterTimelineChart({ isDarkMode }: Props) {
   const growthPct = first.total > 0 ? ((last.total - first.total) / first.total) * 100 : 0;
 
   return (
-    <div className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
+    <div id={slugify(TITLE)} className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>
-            Climate-related disasters · EM-DAT 1990-2024
+            {TITLE}
           </div>
           <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Floods, storms, droughts, wildfires and extreme temperature events. Grouped by continent.
           </p>
         </div>
-        <div className={`text-xs ${textMuted}`}>
-          {first.year} · {first.total} events → {last.year} · <span className="font-semibold text-rose-500">{last.total} events</span>
-          <span className="ml-2">(+{growthPct.toFixed(0)}%)</span>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <div className={`text-xs ${textMuted}`}>
+            {first.year} · {first.total} events → {last.year} · <span className="font-semibold text-rose-500">{last.total} events</span>
+            <span className="ml-2">(+{growthPct.toFixed(0)}%)</span>
+          </div>
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
         </div>
       </div>
       <div className={isMobile ? 'h-[280px]' : 'h-[380px]'}>

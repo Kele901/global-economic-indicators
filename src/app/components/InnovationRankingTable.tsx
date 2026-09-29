@@ -3,6 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { TechnologyData, CountryData, COUNTRY_NAMES } from '../services/worldbank';
 import { techChartColors, formatNumber, formatPercent } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface InnovationRankingTableProps {
   isDarkMode: boolean;
@@ -163,32 +165,37 @@ const InnovationRankingTable: React.FC<InnovationRankingTableProps> = ({
     rowHover: isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
   };
 
+  const rankingTitle = `Innovation Rankings (${selectedYear})`;
+
   return (
-    <div className={`rounded-xl ${themeColors.cardBg} border ${themeColors.border} overflow-hidden`}>
+    <div id={slugify(rankingTitle)} className={`rounded-xl ${themeColors.cardBg} border ${themeColors.border} overflow-hidden`}>
       {/* Header */}
       <div className={`px-6 py-4 border-b ${themeColors.border}`}>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-              Innovation Rankings ({selectedYear})
+              {rankingTitle}
             </h3>
             <p className={`text-sm ${themeColors.textSecondary}`}>
               Composite ranking based on patents, R&amp;D, exports, and research capacity
             </p>
           </div>
           
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="Search countries..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`px-3 py-2 rounded-lg text-sm w-full md:w-48 ${
-              isDarkMode 
-                ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400' 
-                : 'bg-white text-gray-900 border-gray-300 placeholder-gray-500'
-            } border`}
-          />
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            {/* Search */}
+            <input
+              type="text"
+              placeholder="Search countries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`px-3 py-2 rounded-lg text-sm w-full md:w-48 ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400' 
+                  : 'bg-white text-gray-900 border-gray-300 placeholder-gray-500'
+              } border`}
+            />
+            <SocialShareMenu title={rankingTitle} subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
         </div>
       </div>
 

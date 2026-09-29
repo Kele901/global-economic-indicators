@@ -20,6 +20,7 @@ import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
+  shareTitle?: string;
   gini: CountryData[] | undefined;
 }
 
@@ -39,7 +40,7 @@ function bandColor(gini: number): string {
   return BANDS.find(b => gini < b.max)?.color ?? '#ef4444';
 }
 
-export default function GiniRankChart({ isDarkMode, gini }: Props) {
+export default function GiniRankChart({ isDarkMode, gini, shareTitle }: Props) {
   const theme = useChartTheme(isDarkMode);
 
   const rows = useMemo(() => {
@@ -69,7 +70,7 @@ export default function GiniRankChart({ isDarkMode, gini }: Props) {
 
   if (rows.length === 0) {
     return (
-      <ChartCard isDarkMode={isDarkMode} height="h-auto">
+      <ChartCard isDarkMode={isDarkMode} shareTitle={shareTitle} height="h-auto">
         <p className={`text-sm ${theme.subtitleCls}`}>
           No live Gini values returned for the current roster. The World Bank only publishes
           SI.POV.GINI for countries with a recent household survey, so this chart stays empty
@@ -85,6 +86,7 @@ export default function GiniRankChart({ isDarkMode, gini }: Props) {
   return (
     <ChartCard
       isDarkMode={isDarkMode}
+      shareTitle={shareTitle}
       height={Math.max(420, rows.length * 22)}
       caption={
         <ChartA11yCaption

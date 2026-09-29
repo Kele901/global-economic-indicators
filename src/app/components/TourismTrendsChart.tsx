@@ -10,6 +10,8 @@ import {
   culturalChartColors, formatNumber, formatCurrency,
   tourismReceiptsFallbackData, tourismExpenditureFallbackData,
 } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface TourismTrendsChartProps {
   isDarkMode: boolean;
@@ -170,10 +172,15 @@ const TourismTrendsChart: React.FC<TourismTrendsChartProps> = ({
       </div>
 
       {viewMode === 'arrivals' && arrivalsData.length > 0 && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>International Tourism Arrivals</h3>
+        <div id={slugify('International Tourism Arrivals')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>International Tourism Arrivals</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="International Tourism Arrivals" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Number of inbound tourists over time</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={arrivalsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -199,10 +206,15 @@ const TourismTrendsChart: React.FC<TourismTrendsChartProps> = ({
       )}
 
       {viewMode === 'receipts' && receiptsData.length > 0 && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Tourism Receipts vs Expenditure</h3>
+        <div id={slugify('Tourism Receipts vs Expenditure')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Tourism Receipts vs Expenditure</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Tourism Receipts vs Expenditure" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Billions USD - top selected countries</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={receiptsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -249,12 +261,17 @@ const TourismTrendsChart: React.FC<TourismTrendsChartProps> = ({
       )}
 
       {viewMode === 'migration' && migrationData.length > 0 && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Net Migration</h3>
+        <div id={slugify('Net Migration')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Net Migration</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Net Migration" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Positive values indicate cultural pull (more immigrants than emigrants)
           </p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={migrationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -276,8 +293,13 @@ const TourismTrendsChart: React.FC<TourismTrendsChartProps> = ({
       )}
 
       {viewMode === 'softpower' && softPowerData.length > 0 && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Global Soft Power Rankings</h3>
+        <div id={slugify('Global Soft Power Rankings')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Global Soft Power Rankings</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Global Soft Power Rankings" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Brand Finance Global Soft Power Index 2024</p>
           <div className="space-y-3">
             {softPowerData.map((item) => (

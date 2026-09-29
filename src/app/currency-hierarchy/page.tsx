@@ -7,6 +7,8 @@ import { calculateCurrencyPairs } from '../services/forex';
 import { fetchAllCurrencyRates, type CurrencyRateHistory } from '../services/currencyRates';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import InfoPanel from '../components/InfoPanel';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { economicMetrics } from '../data/economicMetrics';
 import { CENTRAL_BANK_RATES, CURRENCY_REGIMES, SAFE_HAVEN_CURRENCIES, REER_DATA } from '../data/currencyHierarchyData';
 
@@ -43,6 +45,8 @@ interface CurrencyInfo {
     [key: string]: number;
   };
 }
+
+const HIERARCHY_TITLE = 'Global Currency Hierarchy';
 
 const TIER_COLORS: Record<number, { border: string; bg: string; text: string }> = {
   1: { border: '#3B82F6', bg: 'rgba(59,130,246,0.15)', text: '#60A5FA' },
@@ -483,7 +487,7 @@ const CurrencyHierarchyPage = () => {
         <>
           {/* Existing hierarchy content */}
       
-      <div className={`w-full overflow-x-auto relative rounded-lg shadow-lg p-4 transition-colors duration-200 ${
+      <div id={slugify(HIERARCHY_TITLE)} className={`w-full overflow-x-auto relative rounded-lg shadow-lg p-4 transition-colors duration-200 ${
         isDarkMode 
           ? 'bg-gray-900 border border-gray-700' 
           : 'bg-white border border-gray-200'
@@ -496,6 +500,9 @@ const CurrencyHierarchyPage = () => {
           position="top-right"
           size="medium"
         />
+        <div className="absolute top-2 left-2 z-10">
+          <SocialShareMenu title={HIERARCHY_TITLE} isDarkMode={isDarkMode} align="left" />
+        </div>
         {/* Refined Tooltip */}
         {hoveredCurrency && currencyData[hoveredCurrency] && (() => {
           const cd = currencyData[hoveredCurrency];
@@ -972,14 +979,16 @@ const CurrencyHierarchyPage = () => {
         const reer = REER_DATA.find(r => r.currency === selectedCurrency || (selectedCurrency === 'CNH' && r.currency === 'CNY'));
         const tierLabel = tier === 1 ? 'Global Reserve' : tier === 2 ? 'Major' : tier === 3 ? 'Regional' : 'Local';
         const rates = exchangeRates[selectedCurrency] || {};
+        const profileTitle = `${cd.code} ${cd.name} currency profile`;
 
         return (
           <div
+            id={slugify(profileTitle)}
             className={`mt-6 rounded-xl overflow-hidden shadow-lg transition-all duration-300 ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}
             style={{ borderTop: `3px solid ${tc.border}` }}
           >
             {/* Panel Header */}
-            <div className={`px-5 py-4 flex items-center justify-between ${isDarkMode ? 'bg-gray-800/80' : 'bg-gray-50'}`}>
+            <div className={`px-5 py-4 flex items-center justify-between gap-2 flex-wrap ${isDarkMode ? 'bg-gray-800/80' : 'bg-gray-50'}`}>
               <div className="flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
@@ -1000,12 +1009,15 @@ const CurrencyHierarchyPage = () => {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedCurrency(null)}
-                className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-              </button>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title={profileTitle} isDarkMode={isDarkMode} />
+                <button
+                  onClick={() => setSelectedCurrency(null)}
+                  className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
             </div>
 
             {/* Panel Body - Grid */}
@@ -1225,10 +1237,13 @@ const CurrencyHierarchyPage = () => {
         
         {/* Conversion Results Grid */}
         {Object.keys(converterResults).length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600">
-            <h3 className={`text-sm font-medium mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-              {converterAmount} {converterFromCurrency} equals:
-            </h3>
+          <div id={slugify(`${converterAmount} ${converterFromCurrency} converted to other currencies`)} className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600">
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+              <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                {converterAmount} {converterFromCurrency} equals:
+              </h3>
+              <SocialShareMenu title={`${converterAmount} ${converterFromCurrency} converted to other currencies`} subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {Object.entries(converterResults)
                 .sort(([, amountA], [, amountB]) => amountB - amountA)
@@ -1315,8 +1330,9 @@ const CurrencyHierarchyPage = () => {
           
           {/* Exchange Rates Section */}
           {exchangeRates[selectedCurrency] && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center space-x-2">
+            <div id={slugify(`${selectedCurrency} exchange rates`)}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h3 className="text-lg font-semibold dark:text-white flex items-center space-x-2">
                 <span>Exchange Rates</span>
                 <button
                   onClick={handleManualRefresh}
@@ -1332,6 +1348,8 @@ const CurrencyHierarchyPage = () => {
                   {loading ? '↻' : '↻'}
                 </button>
               </h3>
+              <SocialShareMenu title={`${selectedCurrency} exchange rates`} subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {Object.entries(exchangeRates[selectedCurrency] || {})
                   .sort(([, rateA], [, rateB]) => (rateB || 0) - (rateA || 0))

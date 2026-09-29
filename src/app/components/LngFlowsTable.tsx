@@ -36,6 +36,7 @@ export default function LngFlowsTable({ isDarkMode }: Props) {
           }`}>{exp}</button>
         ))}
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className={`border-b ${cellCls}`}>
@@ -54,6 +55,7 @@ export default function LngFlowsTable({ isDarkMode }: Props) {
           ))}
         </tbody>
       </table>
+      </div>
       <p className={`text-xs mt-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
         {filter === 'ALL' ? 'All 20 major flows' : filter} · Total: <span className="font-semibold">{total} Mtpa</span> · Post-Ukraine, US LNG dethroned Qatar as the world&apos;s biggest exporter and Europe replaced Asia as the biggest premium buyer.
       </p>

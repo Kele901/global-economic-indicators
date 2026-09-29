@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/simulator', {
   title: 'Economic Simulator | Global Economic Indicators',
   description:
     'Model shocks to interest rates, inflation, exchange rates and GDP. Explore counter-factual scenarios grounded in historical data.',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     description:
       'Rate hikes, currency crises, GDP shocks — all as scenarios you can steer.',
   },
-};
+});
 
 export default function SimulatorLayout({
   children,

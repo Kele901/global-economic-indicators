@@ -6,6 +6,10 @@
 
 import { useMemo, useState } from 'react';
 import { costOfLivingData } from '../../data/costOfLiving';
+import SocialShareMenu from '../SocialShareMenu';
+import { slugify } from '../../lib/share';
+
+const TABLE_TITLE = 'Cost of living index by city, 2026 (New York = 100)';
 
 type Row = (typeof costOfLivingData)[number];
 
@@ -50,7 +54,11 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
 
   return (
     <>
-      <div className={`rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow overflow-hidden`}>
+      <div id={slugify(TABLE_TITLE)} className={`rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow overflow-hidden`}>
+        <div className={`flex items-center justify-between gap-2 flex-wrap px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <h3 className="text-base font-semibold">{TABLE_TITLE}</h3>
+          <SocialShareMenu title={TABLE_TITLE} subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <caption className="sr-only">
@@ -128,8 +136,11 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-          <h3 className="text-lg font-bold mb-3">Most Expensive Cities</h3>
+        <div id={slugify('Most Expensive Cities')} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h3 className="text-lg font-bold">Most Expensive Cities</h3>
+            <SocialShareMenu title="Most Expensive Cities" subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <ul className={`space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             <li><span className="font-semibold">Zurich, Switzerland</span> - Highest cost of living index (118.5)</li>
             <li><span className="font-semibold">Geneva, Switzerland</span> - Second highest (116.5)</li>
@@ -137,8 +148,11 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
             <li><span className="font-semibold">San Francisco, USA</span> - Tech hub with high costs (97.6)</li>
           </ul>
         </div>
-        <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-          <h3 className="text-lg font-bold mb-3">Best Purchasing Power</h3>
+        <div id={slugify('Best Purchasing Power')} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h3 className="text-lg font-bold">Best Purchasing Power</h3>
+            <SocialShareMenu title="Best Purchasing Power" subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <ul className={`space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             <li><span className="font-semibold">Basel, Switzerland</span> - Highest purchasing power (183.7)</li>
             <li><span className="font-semibold">Zurich, Switzerland</span> - High salaries offset costs (164.4)</li>

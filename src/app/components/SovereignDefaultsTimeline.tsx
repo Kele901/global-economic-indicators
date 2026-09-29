@@ -6,6 +6,10 @@
 
 import { useMemo, useState } from 'react';
 import { SOVEREIGN_DEFAULTS_2000_2024 } from '../services/debtCurated';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Sovereign Default Timeline';
 
 interface Props {
   isDarkMode: boolean;
@@ -36,23 +40,26 @@ export default function SovereignDefaultsTimeline({ isDarkMode }: Props) {
   const btnIdle = isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white' : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900';
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
-          <h3 className={`text-base sm:text-lg font-semibold ${text}`}>Sovereign Default Timeline</h3>
+          <h3 className={`text-base sm:text-lg font-semibold ${text}`}>{TITLE}</h3>
           <p className={`text-xs ${muted}`}>Full or selective defaults / distress exchanges since 2000. Colour codes external, domestic, or combined restructurings.</p>
         </div>
-        <div className="flex gap-2 flex-wrap" role="group" aria-label="Filter defaults by type">
-          {(['all', 'external', 'domestic', 'both'] as Filter[]).map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`${btnBase} ${filter === f ? btnActive : btnIdle}`}
-              aria-pressed={filter === f}
-            >
-              {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap" role="group" aria-label="Filter defaults by type">
+            {(['all', 'external', 'domestic', 'both'] as Filter[]).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`${btnBase} ${filter === f ? btnActive : btnIdle}`}
+                aria-pressed={filter === f}
+              >
+                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+          </div>
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
         </div>
       </div>
 

@@ -3,6 +3,8 @@
 import React, { useMemo, useState } from 'react';
 import { CountryData } from '../services/worldbank';
 import { culturalChartColors, formatNumber, culturalCapitalWeights } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CulturalRankingTableProps {
   isDarkMode: boolean;
@@ -126,14 +128,19 @@ const CulturalRankingTable: React.FC<CulturalRankingTableProps> = ({
   const cellClass = `px-3 py-3 text-sm`;
 
   return (
-    <div className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
-      <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-          Cultural Capital Rankings
-        </h3>
-        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          Composite score based on heritage, tourism, creative economy, and cultural infrastructure
-        </p>
+    <div id={slugify('Cultural Capital Rankings')} className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
+      <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} flex items-start justify-between gap-2 flex-wrap`}>
+        <div>
+          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
+            Cultural Capital Rankings
+          </h3>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            Composite score based on heritage, tourism, creative economy, and cultural infrastructure
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Cultural Capital Rankings" subject="dataset" isDarkMode={isDarkMode} />
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">

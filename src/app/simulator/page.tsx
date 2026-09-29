@@ -11,6 +11,8 @@ import {
   extractTimeSeries, alignTimeSeries,
 } from '../utils/correlationEngine';
 import { HISTORICAL_PRESETS } from '../data/scenarioPresets';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line, Legend, ErrorBar,
@@ -255,8 +257,13 @@ export default function SimulatorPage() {
         <>
         {/* Correlation Matrix Heatmap */}
         {correlationMatrix && (
-          <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-2">Correlation Matrix</h2>
+          <div id={slugify('Correlation Matrix')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+              <h2 className="text-xl font-semibold">Correlation Matrix</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Correlation Matrix" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <p className={`text-sm mb-4 ${tc.textSec}`}>
               Pearson correlations between major metrics for {COUNTRY_DISPLAY_NAMES[country as CountryKey]}
             </p>
@@ -426,8 +433,13 @@ export default function SimulatorPage() {
         {results.length > 0 && (
           <>
             {/* Impact Visualization */}
-            <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-              <h2 className="text-xl font-semibold mb-4">Estimated Impacts</h2>
+            <div id={slugify('Estimated Impacts')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                <h2 className="text-xl font-semibold">Estimated Impacts</h2>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Estimated Impacts" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 20, left: 100, bottom: 5 }}>
@@ -472,7 +484,11 @@ export default function SimulatorPage() {
             </div>
 
             {/* Detail Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <div id={slugify('Estimated impact details')} className="mb-8">
+            <div className="flex justify-end mb-2">
+              <SocialShareMenu title="Estimated impact details" isDarkMode={isDarkMode} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.slice(0, 9).map((impact, i) => {
                 const metricDef = getMetricByKey(impact.metric);
                 return (
@@ -504,6 +520,7 @@ export default function SimulatorPage() {
                 );
               })}
             </div>
+            </div>
 
             {/* Disclaimer */}
             <div className={`rounded-xl border p-4 mb-8 ${isDarkMode ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
@@ -516,8 +533,13 @@ export default function SimulatorPage() {
 
             {/* Impact Timeline */}
             {timelineData && timelineData.lines.length > 0 && (
-              <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-                <h2 className="text-xl font-semibold mb-2">Impact Timeline</h2>
+              <div id={slugify('Impact Timeline')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                  <h2 className="text-xl font-semibold">Impact Timeline</h2>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Impact Timeline" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
                 <p className={`text-sm mb-4 ${tc.textSec}`}>
                   Estimated impact propagation over 0–3 year lags for the top correlated metrics
                 </p>

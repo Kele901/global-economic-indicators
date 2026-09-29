@@ -20,6 +20,7 @@ import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
+  shareTitle?: string;
   netEnergyImports: CountryData[] | undefined;
   renewableEnergy: CountryData[] | undefined;
 }
@@ -56,7 +57,7 @@ function latestNetImports(
   return null;
 }
 
-export default function EnergyDependenceChart({ isDarkMode, netEnergyImports, renewableEnergy }: Props) {
+export default function EnergyDependenceChart({ isDarkMode, netEnergyImports, renewableEnergy, shareTitle }: Props) {
   const theme = useChartTheme(isDarkMode);
 
   const rows = useMemo(() => (
@@ -79,7 +80,7 @@ export default function EnergyDependenceChart({ isDarkMode, netEnergyImports, re
 
   if (rows.length === 0) {
     return (
-      <ChartCard isDarkMode={isDarkMode} height="h-auto">
+      <ChartCard isDarkMode={isDarkMode} shareTitle={shareTitle} height="h-auto">
         <p className={`text-sm ${theme.subtitleCls}`}>
           Live net-energy-import data has not arrived yet. The chapters below run on curated
           snapshots and are unaffected.
@@ -93,6 +94,7 @@ export default function EnergyDependenceChart({ isDarkMode, netEnergyImports, re
   return (
     <ChartCard
       isDarkMode={isDarkMode}
+      shareTitle={shareTitle}
       height={Math.max(420, rows.length * 22)}
       caption={
         <ChartA11yCaption

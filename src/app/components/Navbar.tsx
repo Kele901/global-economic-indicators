@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import ExploreProgressBadge from './ExploreProgressBadge';
 import ColorSchemeToggle from './ColorSchemeToggle';
+import SocialShareMenu from './SocialShareMenu';
 
 interface NavItem {
   href?: string;
@@ -160,7 +161,7 @@ const Navbar = () => {
     },
   ];
 
-  const linkClass = `text-sm px-3 py-2 transition-colors duration-200 whitespace-nowrap ${
+  const linkClass = `text-sm px-2 2xl:px-3 py-2 transition-colors duration-200 whitespace-nowrap ${
     isDarkMode ? 'text-gray-300 hover:text-blue-400' : 'text-gray-700 hover:text-blue-600'
   }`;
 
@@ -175,7 +176,7 @@ const Navbar = () => {
       <div className="w-full py-3 sm:py-4 px-3 sm:px-6 lg:px-8">
         <nav className="flex items-center justify-center">
           <div className="flex items-center">
-            <div className={`flex items-center space-x-3 text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-6 ${
+            <div className={`flex items-center space-x-3 text-base sm:text-lg font-semibold transition-colors duration-200 flex-shrink-0 mr-4 2xl:mr-6 ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>
               <Image
@@ -189,12 +190,12 @@ const Navbar = () => {
               <span>Global Economic Indicators</span>
             </div>
 
-            <div className="hidden md:flex items-center">
+            <div className="hidden xl:flex items-center">
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('cursor:cmd-palette:open'))}
                 aria-label="Search (Ctrl+K)"
-                className={`mr-3 hidden lg:flex items-center gap-2 text-xs px-2 py-1 rounded border ${
+                className={`mr-3 flex items-center gap-2 text-xs px-2 py-1 rounded border ${
                   isDarkMode ? 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500' : 'border-gray-200 text-gray-500 hover:text-gray-900 hover:border-gray-400'
                 } transition-colors`}
               >
@@ -202,7 +203,7 @@ const Navbar = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
                 </svg>
                 <span>Search</span>
-                <kbd className={`text-[9px] px-1 py-0.5 rounded border ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`}>Ctrl K</kbd>
+                <kbd className={`hidden 2xl:inline text-[9px] px-1 py-0.5 rounded border ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`}>Ctrl K</kbd>
               </button>
               <div className="flex items-center space-x-0">
                 {navItems.map((item, index) => (
@@ -247,17 +248,20 @@ const Navbar = () => {
                       </div>
                     )}
                     {index < navItems.length - 1 && (
-                      <div className={`w-px h-4 mx-2 transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`} />
+                      <div className={`hidden 2xl:block w-px h-4 mx-2 transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`} />
                     )}
                   </div>
                 ))}
               </div>
+              <SocialShareMenu subject="page" isDarkMode={isDarkMode} className="ml-3" />
             </div>
           </div>
 
+          <div className="xl:hidden ml-auto flex items-center gap-1">
+          <SocialShareMenu subject="page" isDarkMode={isDarkMode} iconOnly size="md" />
           <button
             onClick={toggleMobileMenu}
-            className={`md:hidden ml-auto p-2 rounded-md transition-colors duration-200 ${
+            className={`p-2 rounded-md transition-colors duration-200 ${
               isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
             }`}
             aria-label="Toggle mobile menu"
@@ -270,10 +274,11 @@ const Navbar = () => {
               )}
             </svg>
           </button>
+          </div>
         </nav>
 
         {isMobileMenuOpen && (
-          <div className={`md:hidden mt-3 pb-3 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className={`xl:hidden mt-3 pb-3 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
             <div className="flex flex-col space-y-0 pt-3">
               {navItems.map((item) => (
                 <div key={item.label}>

@@ -106,10 +106,10 @@ export default function DebtBuildupWaterfall({ isDarkMode, governmentDebt }: Pro
       valueFormat={v => `${v.toFixed(0)}%`}
       yLabel="Debt, % of GDP"
       risingIsGood={false}
-      height="h-[460px]"
+      height="h-[320px] sm:h-[460px]"
       actions={
         <div className="flex flex-col gap-1.5 items-end">
-          <div className="flex flex-wrap gap-1.5 justify-end">
+          <div className="flex flex-wrap gap-1.5 justify-start sm:justify-end">
             {[1995, 2007, 2015].map(y => (
               <button key={y} onClick={() => setStartYear(y)} aria-pressed={startYear === y} className={pill(startYear === y)}>
                 From {y}

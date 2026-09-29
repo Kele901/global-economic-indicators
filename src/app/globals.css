@@ -24,10 +24,24 @@ body {
   button, 
   input[type="checkbox"], 
   input[type="radio"],
-  select,
-  a {
+  select {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Toggle switches draw their own track; the 44px floor turns them into circles. */
+  button.rounded-full:is(.h-5, .h-6, .h-7):is(.w-9, .w-10, .w-11, .w-12, .w-14) {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  /* Only standalone links: a min-height on inline text links (or text links
+     laid out as flex items) top-aligns them against their neighbours. */
+  a.block,
+  a.flex,
+  a.inline-flex,
+  a.inline-block {
+    min-height: 44px;
   }
   
   /* Better scrolling on mobile */
@@ -60,7 +74,7 @@ body {
   }
 
   /* Better mobile form controls */
-  select, input, button {
+  select, input, textarea {
     font-size: 16px; /* Prevents zoom on iOS */
   }
 
@@ -110,11 +124,6 @@ body {
   .text-xs {
     font-size: 0.75rem;
   }
-
-  /* Compact grid for very small screens */
-  .grid-cols-2 {
-    gap: 0.25rem;
-  }
 }
 
 /* Dark mode improvements for mobile */
@@ -144,6 +153,11 @@ a:focus {
 @media (max-width: 768px) {
   .recharts-tooltip-wrapper {
     font-size: 12px !important;
+  }
+
+  /* An inactive tooltip keeps its last translate and can widen the page. */
+  .recharts-tooltip-wrapper[style*="visibility: hidden"] {
+    display: none;
   }
   
   .recharts-legend-wrapper {

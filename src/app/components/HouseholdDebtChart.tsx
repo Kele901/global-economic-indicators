@@ -8,6 +8,10 @@
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, ReferenceLine } from 'recharts';
 import { HOUSEHOLD_DEBT_2024 } from '../services/debtCurated';
 import { useViewportSize } from '../hooks/useViewportSize';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Household Debt Load';
 
 interface Props {
   isDarkMode: boolean;
@@ -29,12 +33,17 @@ export default function HouseholdDebtChart({ isDarkMode }: Props) {
   const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-      <h3 className={`text-base sm:text-lg font-semibold mb-1 ${text}`}>Household Debt Load</h3>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+        <h3 className={`text-base sm:text-lg font-semibold ${text}`}>{TITLE}</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <p className={`text-xs mb-4 ${muted}`}>
         Household + non-profit debt as % of GDP (BIS 2024). The line overlay tracks the change since 2010 — red bars mean the level has ballooned, green means households have deleveraged.
       </p>
-      <div className="h-[420px]">
+      <div className="h-[300px] sm:h-[420px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 10, right: isMobile ? 8 : 20, left: isMobile ? 0 : 10, bottom: 70 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />

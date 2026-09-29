@@ -16,6 +16,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber, formatPercent } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface RDEfficiencyChartProps {
   isDarkMode: boolean;
@@ -162,7 +164,7 @@ const RDEfficiencyChart: React.FC<RDEfficiencyChartProps> = ({
   }, [efficiencyData]);
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('R&D Efficiency Analysis')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -211,6 +213,8 @@ const RDEfficiencyChart: React.FC<RDEfficiencyChartProps> = ({
             />
             Show Averages
           </label>
+
+          <SocialShareMenu title="R&D Efficiency Analysis" isDarkMode={isDarkMode} />
         </div>
       </div>
 

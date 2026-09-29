@@ -7,6 +7,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { culturalChartColors, formatCurrency, ipReceiptsFallbackData, ipPaymentsFallbackData } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CulturalTradeChartProps {
   isDarkMode: boolean;
@@ -169,15 +171,20 @@ const CulturalTradeChart: React.FC<CulturalTradeChartProps> = ({
       </div>
 
       {viewMode === 'ipFlows' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>
-            IP Receipts vs Payments
-          </h3>
+        <div id={slugify('IP Receipts vs Payments')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              IP Receipts vs Payments
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="IP Receipts vs Payments" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             World Bank BPM6 — current USD
           </p>
           {ipFlowsData.length > 0 ? (
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={ipFlowsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -245,16 +252,21 @@ const CulturalTradeChart: React.FC<CulturalTradeChartProps> = ({
       )}
 
       {viewMode === 'tradeBalance' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>
-            Creative Trade Balance
-          </h3>
+        <div id={slugify('Creative Trade Balance')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Creative Trade Balance
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Creative Trade Balance" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Net IP balance (receipts − payments), latest common year
             {tradeBalanceData[0] ? ` (${tradeBalanceData[0].year})` : ''}
           </p>
           {tradeBalanceData.length > 0 ? (
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={tradeBalanceData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -305,15 +317,20 @@ const CulturalTradeChart: React.FC<CulturalTradeChartProps> = ({
       )}
 
       {viewMode === 'goodsImports' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>
-            Cultural Goods Imports
-          </h3>
+        <div id={slugify('Cultural Goods Imports')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Cultural Goods Imports
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Cultural Goods Imports" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Estimated cultural goods imports (billions USD)
           </p>
           {goodsImportsData.length > 0 ? (
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={goodsImportsData}

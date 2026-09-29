@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { GLOBAL_RESERVES_AGGREGATES, type GlobalReservesAggregate } from '../data/resourceStaticData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface Props {
   isDarkMode: boolean;
@@ -52,7 +54,7 @@ export default function ReservesClockGauge({ isDarkMode }: Props) {
   const trackColor = isDarkMode ? '#374151' : '#f3f4f6';
 
   return (
-    <div className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
+    <div id={slugify('Years Until Depletion')} className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
           <h4 className={`text-base font-semibold ${textPrimary}`}>Years Until Depletion</h4>
@@ -60,6 +62,7 @@ export default function ReservesClockGauge({ isDarkMode }: Props) {
             Global proven reserves divided by current annual production. Not a prediction — resources are found and lost every year.
           </p>
         </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
         <div className="flex gap-1">
           {(['all', 'energy', 'metals'] as const).map(k => (
             <button
@@ -76,6 +79,8 @@ export default function ReservesClockGauge({ isDarkMode }: Props) {
               {k}
             </button>
           ))}
+        </div>
+          <SocialShareMenu title="Years Until Depletion" isDarkMode={isDarkMode} />
         </div>
       </div>
 

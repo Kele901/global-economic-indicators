@@ -8,6 +8,10 @@
 import { useMemo, useState } from 'react';
 import { RE_EXPORT_HUBS_2024 } from '../services/tradeCurated';
 import FlowDiagram, { type FlowColumn, type FlowNode, type FlowLink } from './charts/FlowDiagram';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Re-Exports: Goods That Only Pass Through';
 
 interface Props {
   isDarkMode: boolean;
@@ -83,16 +87,16 @@ export default function TradeReExportFlow({ isDarkMode }: Props) {
   const textSec = isDarkMode ? 'text-gray-400' : 'text-gray-600';
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${cardCls}`}>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${cardCls}`}>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div>
-          <h3 className={`text-lg font-semibold ${textPrimary}`}>Re-Exports: Goods That Only Pass Through</h3>
+          <h3 className={`text-lg font-semibold ${textPrimary}`}>{TITLE}</h3>
           <p className={`text-sm mt-0.5 max-w-2xl ${textSec}`}>
             {hub.shareOfGoodsExportsPct}% of {hub.hub}&apos;s goods exports are re-exports — things it
             never made. Pick a hub to see what arrives and where it goes next.
           </p>
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {RE_EXPORT_HUBS_2024.map(h => (
             <button
               key={h.iso3}
@@ -109,6 +113,7 @@ export default function TradeReExportFlow({ isDarkMode }: Props) {
               {h.hub}
             </button>
           ))}
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
         </div>
       </div>
 

@@ -3,6 +3,8 @@
 import React, { useMemo } from 'react';
 import { CountryData } from '../services/worldbank';
 import { culturalChartColors } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CulturalHeatmapChartProps {
   isDarkMode: boolean;
@@ -116,8 +118,13 @@ const CulturalHeatmapChart: React.FC<CulturalHeatmapChartProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-      <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Cultural Capital Heatmap</h3>
+    <div id={slugify('Cultural Capital Heatmap')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+        <h3 className={`text-lg font-semibold ${themeColors.text}`}>Cultural Capital Heatmap</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Cultural Capital Heatmap" isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
         Normalized scores across cultural metrics (darker = stronger)
       </p>

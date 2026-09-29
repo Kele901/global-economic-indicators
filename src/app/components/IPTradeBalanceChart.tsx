@@ -15,6 +15,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface IPTradeBalanceChartProps {
   isDarkMode: boolean;
@@ -164,7 +166,7 @@ const IPTradeBalanceChart: React.FC<IPTradeBalanceChartProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('IP Trade Balance')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -217,6 +219,8 @@ const IPTradeBalanceChart: React.FC<IPTradeBalanceChartProps> = ({
             <option value="receipts">Sort by Receipts</option>
             <option value="payments">Sort by Payments</option>
           </select>
+
+          <SocialShareMenu title="IP Trade Balance" isDarkMode={isDarkMode} />
         </div>
       </div>
 

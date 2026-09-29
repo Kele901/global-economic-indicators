@@ -15,6 +15,8 @@ import {
   ReferenceArea,
 } from 'recharts';
 import { debtCyclePhases, getPhaseColor, type DebtCyclePhase } from '../data/economicCycles';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 // Debt intolerance thresholds (from Handbook of International Economics)
 const DEBT_THRESHOLDS = {
@@ -162,7 +164,7 @@ const DebtCycleChart: React.FC<DebtCycleChartProps> = ({
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
+    <div id={slugify('Long-Term Debt Cycle')} className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
       {/* Header */}
       <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -176,7 +178,7 @@ const DebtCycleChart: React.FC<DebtCycleChartProps> = ({
           </div>
           
           {/* View Toggle */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
             <div className={`flex rounded-lg overflow-hidden border ${
               isDarkMode ? 'border-gray-700' : 'border-gray-200'
             }`}>
@@ -215,13 +217,14 @@ const DebtCycleChart: React.FC<DebtCycleChartProps> = ({
             >
               📊 Thresholds
             </button>
+            <SocialShareMenu title="Long-Term Debt Cycle" isDarkMode={isDarkMode} />
           </div>
         </div>
       </div>
 
       {/* Chart */}
       <div className="p-4">
-        <div className="h-[400px]">
+        <div className="h-[300px] sm:h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={combinedData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
               <defs>
@@ -579,7 +582,7 @@ const DebtCycleChart: React.FC<DebtCycleChartProps> = ({
           </div>
 
           {/* Phase Indicators */}
-          <div className="grid grid-cols-3 gap-4 mb-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3">
             <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>Interest Rates</div>
               <div className={`text-sm font-semibold ${

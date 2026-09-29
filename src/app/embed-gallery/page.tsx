@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Breadcrumbs from '../components/Breadcrumbs';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface EmbedRecipe {
   id: string;
@@ -131,7 +133,7 @@ export default function EmbedGalleryPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {cards.map(c => (
-            <article key={c.id} className={`rounded-xl border overflow-hidden ${card}`}>
+            <article key={c.id} id={slugify(c.title)} className={`rounded-xl border overflow-hidden ${card}`}>
               <div className={`aspect-[16/10] w-full ${c.theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
                 {origin && (
                   <iframe
@@ -144,7 +146,12 @@ export default function EmbedGalleryPage() {
                 )}
               </div>
               <div className="p-4">
-                <h2 className="text-lg font-semibold mb-1">{c.title}</h2>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+                  <h2 className="text-lg font-semibold">{c.title}</h2>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title={c.title} isDarkMode={isDarkMode} />
+                  </div>
+                </div>
                 <p className={`text-sm mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{c.description}</p>
                 <pre className={`text-[11px] p-2 rounded border overflow-auto whitespace-pre-wrap break-words max-h-24 ${code}`}>
 {c.iframe}

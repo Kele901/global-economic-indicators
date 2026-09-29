@@ -8,6 +8,8 @@ import { useMemo } from 'react';
 import type { CountryData } from '../services/worldbank';
 import { CLIMATE_COUNTRY_META } from '../services/climateCurated';
 import { latestEntry } from '../utils/countryData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface Props {
   isDarkMode: boolean;
@@ -20,6 +22,8 @@ interface Cell {
   year: number;
   tier: 'below' | 'target' | 'moderate' | 'high' | 'severe';
 }
+
+const TITLE = 'Mean PM2.5 exposure · µg/m³';
 
 const WHO_GUIDELINE = 5;
 const WHO_IT4 = 10;
@@ -71,14 +75,19 @@ export default function AirPollutionGrid({ isDarkMode, pm25 }: Props) {
   }
 
   return (
-    <div className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
-      <div className="mb-4">
-        <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>
-          Mean PM2.5 exposure · µg/m³
+    <div id={slugify(TITLE)} className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
+      <div className="mb-4 flex items-start justify-between gap-2 flex-wrap">
+        <div>
+          <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>
+            {TITLE}
+          </div>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Latest annual mean by country. WHO annual guideline is 5 µg/m³ — interim targets step up in 5-15 µg/m³ bands.
+          </p>
         </div>
-        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          Latest annual mean by country. WHO annual guideline is 5 µg/m³ — interim targets step up in 5-15 µg/m³ bands.
-        </p>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">

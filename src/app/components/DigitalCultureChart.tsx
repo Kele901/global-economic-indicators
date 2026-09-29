@@ -6,6 +6,8 @@ import {
   ResponsiveContainer, ComposedChart, Line, Cell,
 } from 'recharts';
 import { culturalChartColors } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface DigitalCultureChartProps {
   isDarkMode: boolean;
@@ -116,16 +118,22 @@ const DigitalCultureChart: React.FC<DigitalCultureChartProps> = ({
 
       {viewMode === 'gaming' && (
         <div
+          id={slugify('Video Game Revenue Over Time')}
           className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}
         >
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>
-            Video Game Revenue Over Time
-          </h3>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Video Game Revenue Over Time
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Video Game Revenue Over Time" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Market revenue in billions USD by country
           </p>
           {gamingChartData.length > 0 ? (
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                   data={gamingChartData}
@@ -193,17 +201,23 @@ const DigitalCultureChart: React.FC<DigitalCultureChartProps> = ({
 
       {viewMode === 'webLanguage' && (
         <div
+          id={slugify('Web Content by Primary Language')}
           className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}
         >
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>
-            Web Content by Primary Language
-          </h3>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Web Content by Primary Language
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Web Content by Primary Language" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Estimated percentage of web pages in each country&apos;s primary
             language
           </p>
           {webLanguageBarData.length > 0 ? (
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={webLanguageBarData}

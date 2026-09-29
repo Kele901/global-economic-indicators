@@ -6,6 +6,8 @@ import {
   ResponsiveContainer, ComposedChart, Line, Cell,
 } from 'recharts';
 import { culturalChartColors, formatNumber } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface MediaPublishingChartProps {
   isDarkMode: boolean;
@@ -117,13 +119,18 @@ const MediaPublishingChart: React.FC<MediaPublishingChartProps> = ({
       </div>
 
       {viewMode === 'music' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>
-            Recorded Music Revenue
-          </h3>
+        <div id={slugify('Recorded Music Revenue')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Recorded Music Revenue
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Recorded Music Revenue" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Billions USD over time</p>
           {musicChartData.length > 0 ? (
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={musicChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -175,12 +182,17 @@ const MediaPublishingChart: React.FC<MediaPublishingChartProps> = ({
       )}
 
       {viewMode === 'books' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Book Titles Published</h3>
+        <div id={slugify('Book Titles Published')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Book Titles Published</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Book Titles Published" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Number of book titles published per country
           </p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={bookTitlesData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -204,12 +216,17 @@ const MediaPublishingChart: React.FC<MediaPublishingChartProps> = ({
       )}
 
       {viewMode === 'streaming' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Streaming Original Productions</h3>
+        <div id={slugify('Streaming Original Productions')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Streaming Original Productions</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Streaming Original Productions" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Count of original productions by country
           </p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={streamingData}

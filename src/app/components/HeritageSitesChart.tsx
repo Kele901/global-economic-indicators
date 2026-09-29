@@ -6,6 +6,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { culturalChartColors } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface HeritageSitesChartProps {
   isDarkMode: boolean;
@@ -46,7 +48,7 @@ const HeritageSitesChart: React.FC<HeritageSitesChartProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('UNESCO World Heritage Sites')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <div>
           <h3 className={`text-lg font-semibold ${themeColors.text}`}>UNESCO World Heritage Sites</h3>
@@ -54,7 +56,7 @@ const HeritageSitesChart: React.FC<HeritageSitesChartProps> = ({
             Sites by category across selected countries
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {(['total', 'cultural', 'natural'] as const).map(option => (
             <button
               key={option}
@@ -68,10 +70,11 @@ const HeritageSitesChart: React.FC<HeritageSitesChartProps> = ({
               Sort: {option.charAt(0).toUpperCase() + option.slice(1)}
             </button>
           ))}
+          <SocialShareMenu title="UNESCO World Heritage Sites" isDarkMode={isDarkMode} />
         </div>
       </div>
 
-      <div className="w-full h-[400px]">
+      <div className="w-full h-[300px] sm:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />

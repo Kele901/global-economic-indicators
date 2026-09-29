@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/monetary-policy', {
   title: 'Monetary Policy Tracker | Global Economic Indicators',
   description:
     'Central-bank policy rates, long-term yields and term-spread signals for the Fed, ECB, BoE, BoJ, PBoC and more. Live FRED + BIS data.',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     description:
       'Policy rates, long-term yields, real policy rates and term-spread signals from live FRED + BIS data.',
   },
-};
+});
 
 export default function MonetaryPolicyLayout({
   children,

@@ -67,3 +67,8 @@ export function useViewportSize(): ViewportSize {
 
   return size;
 }
+
+/** Shorthand for charts that only need the phone breakpoint (< 640px). */
+export function useIsMobile(): boolean {
+  return useViewportSize().isMobile;
+}

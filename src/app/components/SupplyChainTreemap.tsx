@@ -71,7 +71,7 @@ export default function SupplyChainTreemap({ isDarkMode }: Props) {
       actions={
         <div className="flex flex-col gap-1.5 items-end max-w-2xl">
           {grouped.map(([category, rows]) => (
-            <div key={category} className="flex flex-wrap gap-1.5 justify-end items-center">
+            <div key={category} className="flex flex-wrap gap-1.5 justify-start sm:justify-end items-center">
               <span className={`text-[10px] uppercase tracking-wider ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                 {CATEGORY_LABELS[category] ?? category}
               </span>

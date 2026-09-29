@@ -22,6 +22,8 @@ import {
   type ThucydidesTrapEvent,
   type ConflictCycleEvent,
 } from '../data/marketCyclesData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface GeopoliticalCycleOverlayProps {
   isDarkMode: boolean;
@@ -110,13 +112,18 @@ function ReserveCurrencyTooltip({
 
 function ReserveCurrencyView({ isDarkMode }: { isDarkMode: boolean }) {
   return (
-    <div className="space-y-4">
-      <h3
-        className={`text-base font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
-      >
-        Global Reserve Currency Composition
-      </h3>
-      <div className="h-[400px] w-full">
+    <div id={slugify('Global Reserve Currency Composition')} className="space-y-4">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
+        <h3
+          className={`text-base font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
+        >
+          Global Reserve Currency Composition
+        </h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Global Reserve Currency Composition" isDarkMode={isDarkMode} />
+        </div>
+      </div>
+      <div className="h-[300px] sm:h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={reserveCurrencyShares} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid
@@ -283,12 +290,17 @@ function ThucydidesTrapView({ isDarkMode }: { isDarkMode: boolean }) {
   );
 
   return (
-    <div className="space-y-4">
-      <h3
-        className={`text-base font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
-      >
-        Thucydides Trap — Power Transitions
-      </h3>
+    <div id={slugify('Thucydides Trap — Power Transitions')} className="space-y-4">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
+        <h3
+          className={`text-base font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
+        >
+          Thucydides Trap — Power Transitions
+        </h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Thucydides Trap — Power Transitions" isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <ThucydidesTimeline events={thucydidesTrapEvents} isDarkMode={isDarkMode} />
 
       {(['war', 'peaceful', 'ongoing'] as const).map((outcome) =>
@@ -355,14 +367,19 @@ function ConflictsView({ isDarkMode }: { isDarkMode: boolean }) {
   }, []);
 
   return (
-    <div className="space-y-4">
-      <h3
-        className={`text-base font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
-      >
-        Major Conflicts &amp; Their Economic Impact
-      </h3>
+    <div id={slugify('Major Conflicts & Their Economic Impact')} className="space-y-4">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
+        <h3
+          className={`text-base font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
+        >
+          Major Conflicts &amp; Their Economic Impact
+        </h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Major Conflicts & Their Economic Impact" isDarkMode={isDarkMode} />
+        </div>
+      </div>
 
-      <div className="h-[400px] w-full">
+      <div className="h-[300px] sm:h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={majorConflicts}

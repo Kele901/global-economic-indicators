@@ -9,8 +9,8 @@
 // Consumers just pass a lazy `getData` closure returning an object[].
 // Kept schema-free so every ledger can wire it without adaptation.
 
-import { useEffect, useRef, useState } from 'react';
-
+import { useContext, useEffect, useRef, useState } from 'react';
+import SocialShareMenu, { ShareScopeContext } from './SocialShareMenu';
 interface DataDownloadButtonProps {
   /** Called only when the user clicks a format; keeps large datasets lazy. */
   getData: () => Record<string, unknown>[];
@@ -22,6 +22,8 @@ interface DataDownloadButtonProps {
   /** Visual size — matches ChartDownloadButton's `sm/md/lg`. */
   size?: 'sm' | 'md';
   className?: string;
+  /** Title used when sharing; defaults to the page title. */
+  shareTitle?: string;
 }
 
 type Format = 'csv' | 'json';
@@ -71,8 +73,10 @@ export default function DataDownloadButton({
   isDarkMode = false,
   size = 'sm',
   className = '',
+  shareTitle,
 }: DataDownloadButtonProps) {
   const [open, setOpen] = useState(false);
+  const inChartCard = useContext(ShareScopeContext);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -110,7 +114,11 @@ export default function DataDownloadButton({
     size === 'md' ? 'px-3 py-1.5 text-sm' : 'px-2 py-1 text-xs';
 
   return (
-    <div className={`relative inline-block ${className}`} ref={menuRef}>
+    <div className={`inline-flex items-center gap-2 ${className}`}>
+    {!inChartCard && (
+      <SocialShareMenu title={shareTitle} isDarkMode={isDarkMode} subject="dataset" size={size} />
+    )}
+    <div className="relative inline-block" ref={menuRef}>
       <button
         type="button"
         aria-haspopup="true"
@@ -175,6 +183,7 @@ export default function DataDownloadButton({
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 }

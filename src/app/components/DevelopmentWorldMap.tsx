@@ -9,6 +9,8 @@ import {
 } from 'react-simple-maps';
 import { scaleLinear } from 'd3-scale';
 import { COUNTRY_KEYS, COUNTRY_ISO_NUMERIC, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
@@ -77,7 +79,7 @@ const DevelopmentWorldMap: React.FC<DevelopmentWorldMapProps> = ({
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
+    <div id={slugify('Global Development Map')} className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
       <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -88,27 +90,30 @@ const DevelopmentWorldMap: React.FC<DevelopmentWorldMapProps> = ({
               {config.label} across tracked countries
             </p>
           </div>
-          {onMetricChange && (
-            <div className={`flex flex-wrap gap-1 p-1 rounded-lg ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
-              {(['hdi', 'gini', 'gdpPc', 'lifeExp'] as const).map(m => (
-                <button
-                  key={m}
-                  onClick={() => onMetricChange(m)}
-                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
-                    metric === m
-                      ? isDarkMode
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-900 shadow'
-                      : isDarkMode
-                        ? 'text-gray-400 hover:text-white'
-                        : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {metricLabels[m].label}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {onMetricChange && (
+              <div className={`flex flex-wrap gap-1 p-1 rounded-lg ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+                {(['hdi', 'gini', 'gdpPc', 'lifeExp'] as const).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => onMetricChange(m)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                      metric === m
+                        ? isDarkMode
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-gray-900 shadow'
+                        : isDarkMode
+                          ? 'text-gray-400 hover:text-white'
+                          : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {metricLabels[m].label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <SocialShareMenu title="Global Development Map" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
         </div>
       </div>
 

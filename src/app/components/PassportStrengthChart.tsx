@@ -24,6 +24,8 @@ import {
   getAdvisoryTier,
   getMobilityTier,
 } from '../services/passport';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface PassportStrengthChartProps {
   isDarkMode: boolean;
@@ -506,9 +508,13 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
   const passportCount = Object.keys(passportData).length;
   const destinationCount = Object.values(passportData)[0]?.destinations.length || 0;
 
+  const viewShareTitle = `Passport Strength Analysis — ${TABS.find(tab => tab.id === activeView)?.label ?? ''}`;
+  const viewHasOwnShares = activeView === 'lengthOfStay' || activeView === 'visaTypes'
+    || activeView === 'histogram' || activeView === 'insights';
+
   return (
     <div className="space-y-6">
-      <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+      <div id={viewHasOwnShares ? undefined : slugify(viewShareTitle)} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
         {/* Header + tabs */}
         <div className="flex flex-col gap-3 mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -529,6 +535,15 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                 </p>
               )}
             </div>
+            {!viewHasOwnShares && (
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu
+                  title={viewShareTitle}
+                  subject={activeView === 'table' || activeView === 'destinations' ? 'dataset' : 'chart'}
+                  isDarkMode={isDarkMode}
+                />
+              </div>
+            )}
           </div>
           <div className={`flex flex-wrap gap-1 p-1 rounded-lg ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
             {TABS.map(tab => (
@@ -711,8 +726,13 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
         {/* ===== LENGTH OF STAY ===== */}
         {activeView === 'lengthOfStay' && (
           <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold mb-2">Average Length of Stay (visa-free / VOA / ETA destinations)</h3>
+            <div id={slugify('Average Length of Stay (visa-free / VOA / ETA destinations)')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                <h3 className="font-semibold">Average Length of Stay (visa-free / VOA / ETA destinations)</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Average Length of Stay (visa-free / VOA / ETA destinations)" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="w-full" style={{ height: `${Math.max(400, lengthOfStayData.length * 22)}px` }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={lengthOfStayData} layout="vertical" margin={{ top: 5, right: 20, left: 110, bottom: 5 }}>
@@ -730,8 +750,13 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
               </div>
             </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">Stay Length Distribution (per passport)</h3>
+            <div id={slugify('Stay Length Distribution (per passport)')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                <h3 className="font-semibold">Stay Length Distribution (per passport)</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Stay Length Distribution (per passport)" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="w-full" style={{ height: `${Math.max(400, lengthOfStayData.length * 22)}px` }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={lengthOfStayData} layout="vertical" stackOffset="expand" margin={{ top: 5, right: 20, left: 110, bottom: 5 }}>
@@ -767,7 +792,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
         {/* ===== VISA TYPES ===== */}
         {activeView === 'visaTypes' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div id={slugify('Global Visa Policy Mix')} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               <div className="md:col-span-1 h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -781,7 +806,12 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                 </ResponsiveContainer>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <h3 className="font-semibold">Global Visa Policy Mix</h3>
+                <div className="flex items-start justify-between gap-2 flex-wrap">
+                  <h3 className="font-semibold">Global Visa Policy Mix</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Global Visa Policy Mix" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
                 <p className={`text-sm ${themeColors.textSecondary}`}>
                   Across every tracked passport-destination pair in the live dataset.
                 </p>
@@ -799,8 +829,13 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
               </div>
             </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">Visa Policy Breakdown per Passport</h3>
+            <div id={slugify('Visa Policy Breakdown per Passport')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                <h3 className="font-semibold">Visa Policy Breakdown per Passport</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Visa Policy Breakdown per Passport" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="w-full" style={{ height: `${Math.max(420, visaTypesData.length * 22)}px` }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={visaTypesData} layout="vertical" margin={{ top: 5, right: 20, left: 110, bottom: 5 }}>
@@ -1091,24 +1126,34 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
         {/* ===== HISTOGRAM ===== */}
         {activeView === 'histogram' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {[
-                { label: 'Strongest', value: mobilityGap.max.toString(), sub: 'destinations', accent: isDarkMode ? 'text-green-400' : 'text-green-600' },
-                { label: 'Weakest', value: mobilityGap.min.toString(), sub: 'destinations', accent: isDarkMode ? 'text-red-400' : 'text-red-600' },
-                { label: 'Mobility Gap', value: mobilityGap.gap.toString(), sub: 'destinations', accent: isDarkMode ? 'text-amber-400' : 'text-amber-600' },
-                { label: 'Average', value: mobilityGap.avg.toString(), sub: 'destinations', accent: isDarkMode ? 'text-blue-400' : 'text-blue-600' },
-                { label: 'Median', value: mobilityGap.median.toString(), sub: 'destinations', accent: isDarkMode ? 'text-cyan-400' : 'text-cyan-600' },
-                { label: 'Passports', value: mobilityGap.total.toString(), sub: 'tracked', accent: isDarkMode ? 'text-purple-400' : 'text-purple-600' },
-              ].map(stat => (
-                <div key={stat.label} className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                  <div className={`text-2xl font-bold ${stat.accent}`}>{stat.value}</div>
-                  <div className={`text-xs ${themeColors.textSecondary}`}>{stat.label}</div>
-                  <div className={`text-[10px] ${themeColors.textTertiary}`}>{stat.sub}</div>
-                </div>
-              ))}
+            <div id={slugify('Passport mobility key figures')}>
+              <div className="flex justify-end mb-2">
+                <SocialShareMenu title="Passport mobility key figures" isDarkMode={isDarkMode} />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                {[
+                  { label: 'Strongest', value: mobilityGap.max.toString(), sub: 'destinations', accent: isDarkMode ? 'text-green-400' : 'text-green-600' },
+                  { label: 'Weakest', value: mobilityGap.min.toString(), sub: 'destinations', accent: isDarkMode ? 'text-red-400' : 'text-red-600' },
+                  { label: 'Mobility Gap', value: mobilityGap.gap.toString(), sub: 'destinations', accent: isDarkMode ? 'text-amber-400' : 'text-amber-600' },
+                  { label: 'Average', value: mobilityGap.avg.toString(), sub: 'destinations', accent: isDarkMode ? 'text-blue-400' : 'text-blue-600' },
+                  { label: 'Median', value: mobilityGap.median.toString(), sub: 'destinations', accent: isDarkMode ? 'text-cyan-400' : 'text-cyan-600' },
+                  { label: 'Passports', value: mobilityGap.total.toString(), sub: 'tracked', accent: isDarkMode ? 'text-purple-400' : 'text-purple-600' },
+                ].map(stat => (
+                  <div key={stat.label} className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                    <div className={`text-2xl font-bold ${stat.accent}`}>{stat.value}</div>
+                    <div className={`text-xs ${themeColors.textSecondary}`}>{stat.label}</div>
+                    <div className={`text-[10px] ${themeColors.textTertiary}`}>{stat.sub}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-3">Mobility Score Distribution (10-destination buckets)</h3>
+            <div id={slugify('Mobility Score Distribution (10-destination buckets)')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                <h3 className="font-semibold">Mobility Score Distribution (10-destination buckets)</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Mobility Score Distribution (10-destination buckets)" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="w-full h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={histogramData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -1135,7 +1180,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
             <p className={`text-sm ${themeColors.textSecondary}`}>
               Each dot represents a country. X-axis: GDP per capita (PPP, thousands $). Y-axis: live mobility score.
             </p>
-            <div className="w-full h-[450px]">
+            <div className="w-full h-[320px] sm:h-[450px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -1175,7 +1220,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
             <p className={`text-sm ${themeColors.textSecondary}`}>
               Comparing live passport rank vs Brand Finance Global Soft Power Index rank. Large gaps reveal where global influence diverges from travel freedom.
             </p>
-            <div className="w-full h-[450px]">
+            <div className="w-full h-[320px] sm:h-[450px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -1226,7 +1271,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
             <p className={`text-sm ${themeColors.textSecondary}`}>
               Multi-dimensional comparison: average mobility, best passport, internal consistency (low spread), year-over-year trajectory, and country coverage per region.
             </p>
-            <div className="w-full h-[450px]">
+            <div className="w-full h-[320px] sm:h-[450px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
                   <PolarGrid stroke={themeColors.gridColor} />
@@ -1271,7 +1316,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                 <p className={themeColors.textSecondary}>No historical data available for the currently selected countries. Try selecting countries like USA, Japan, Germany, China, or Brazil.</p>
               </div>
             ) : (
-              <div className="w-full h-[450px]">
+              <div className="w-full h-[320px] sm:h-[450px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData} margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />

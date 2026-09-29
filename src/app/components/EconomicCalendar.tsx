@@ -9,6 +9,8 @@ import {
   type EconomicEvent
 } from '../data/currencyHierarchyData';
 import { useEconomicCalendar, EconomicEvent as LiveEconomicEvent } from '../hooks/useEconomicCalendar';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface EconomicCalendarProps {
   isDarkMode: boolean;
@@ -170,9 +172,9 @@ const EconomicCalendar: React.FC<EconomicCalendarProps> = ({ isDarkMode }) => {
   }, [filteredEvents]);
 
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify('Economic Calendar')} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start gap-2 flex-wrap">
           <div>
             <h3 className={`text-lg font-semibold ${themeColors.text}`}>
               Economic Calendar
@@ -181,7 +183,7 @@ const EconomicCalendar: React.FC<EconomicCalendarProps> = ({ isDarkMode }) => {
               Upcoming central bank meetings and key economic data releases
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
             <div className="flex items-center gap-1">
               <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
               <span className={`text-xs ${themeColors.textTertiary}`}>
@@ -199,6 +201,7 @@ const EconomicCalendar: React.FC<EconomicCalendarProps> = ({ isDarkMode }) => {
             >
               {loading ? 'Loading...' : 'Refresh'}
             </button>
+            <SocialShareMenu title="Economic Calendar" subject="dataset" isDarkMode={isDarkMode} />
           </div>
         </div>
       </div>

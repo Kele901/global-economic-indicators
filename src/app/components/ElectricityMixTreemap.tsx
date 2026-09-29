@@ -57,7 +57,7 @@ export default function ElectricityMixTreemap({ isDarkMode }: Props) {
       provenance={<ChartMeta sourceId="energy-ledger-curated" isDarkMode={isDarkMode} />}
       height="h-[380px]"
       actions={
-        <div className="flex flex-wrap gap-1.5 max-w-xl justify-end">
+        <div className="flex flex-wrap gap-1.5 max-w-xl justify-start sm:justify-end">
           {available.map(m => (
             <button
               key={m.code}

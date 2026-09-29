@@ -12,6 +12,10 @@ import {
 import type { CountryData } from '../services/worldbank';
 import { TRADE_COUNTRY_META } from '../services/tradeCurated';
 import { useViewportSize } from '../hooks/useViewportSize';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Current account balance';
 
 interface Props {
   isDarkMode: boolean;
@@ -53,9 +57,14 @@ export default function TradeBalanceChart({ isDarkMode, currentAccount }: Props)
   };
 
   return (
-    <div className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
-      <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>
-        Current account balance
+    <div id={slugify(TITLE)} className={`rounded-lg border p-4 sm:p-6 ${cardBg}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+        <div className={`text-xs uppercase tracking-wider ${textMuted}`}>
+          {TITLE}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
+        </div>
       </div>
       <p className={`text-sm mb-4 ${textSec}`}>
         Net exports of goods, services, and primary/secondary income, as % of GDP. Above 0 = net exporter (Germany, China surplus); below 0 = net importer (US, UK deficit).

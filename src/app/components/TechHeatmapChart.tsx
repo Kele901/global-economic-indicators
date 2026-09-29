@@ -3,6 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber, formatPercent } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface TechHeatmapChartProps {
   isDarkMode: boolean;
@@ -212,7 +214,7 @@ const TechHeatmapChart: React.FC<TechHeatmapChartProps> = ({
     : heatmapData;
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Technology Metrics Heatmap')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -239,6 +241,8 @@ const TechHeatmapChart: React.FC<TechHeatmapChartProps> = ({
               <option key={m.key} value={m.key}>Sort by {m.shortLabel}</option>
             ))}
           </select>
+
+          <SocialShareMenu title="Technology Metrics Heatmap" isDarkMode={isDarkMode} />
         </div>
       </div>
 

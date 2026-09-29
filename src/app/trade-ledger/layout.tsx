@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/trade-ledger', {
   title: 'Trade Ledger | Global Economic Indicators',
   description:
     'Eight-chapter epic on global trade — exports, imports, current-account balances, openness, tariff walls, freight shipping indices, regional trade agreements, supply-chain concentration, and 2018-2025 trade-war frictions. Live World Bank + curated WTO / PIIE / USGS / SEMI data.',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     description:
       'The global bazaar in eight chapters: exports and balances, openness, tariff walls, freight, FTAs, supply-chain concentration, trade wars. Live and curated data.',
   },
-};
+});
 
 export default function TradeLedgerLayout({
   children,

@@ -84,3 +84,10 @@ export function seriesColorMap(keys: readonly string[], series: string[]): Recor
   keys.forEach((key, i) => { map[key] = series[i % series.length]!; });
   return map;
 }
+
+// Shortens axis and end-of-line labels on narrow screens, where Recharts
+// has no wrapping and long country names collide or push the plot inward.
+export function truncateLabel(label: unknown, max: number): string {
+  const s = String(label ?? '');
+  return s.length > max ? `${s.slice(0, Math.max(1, max - 1)).trimEnd()}…` : s;
+}

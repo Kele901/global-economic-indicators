@@ -19,6 +19,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatBillions, formatNumber } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface VCFundingChartProps {
   isDarkMode: boolean;
@@ -227,7 +229,7 @@ const VCFundingChart: React.FC<VCFundingChartProps> = ({
   }, [unicornData]);
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Startup & Venture Capital Analysis')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -286,6 +288,8 @@ const VCFundingChart: React.FC<VCFundingChartProps> = ({
               ))}
             </select>
           )}
+
+          <SocialShareMenu title="Startup & Venture Capital Analysis" isDarkMode={isDarkMode} />
         </div>
       </div>
 

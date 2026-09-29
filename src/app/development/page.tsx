@@ -10,6 +10,8 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
 } from 'recharts';
 import dynamic from 'next/dynamic';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const DevelopmentWorldMap = dynamic(() => import('../components/DevelopmentWorldMap'), { ssr: false });
 
@@ -827,8 +829,11 @@ export default function DevelopmentPage() {
         {activeSection === 'overview' && (
         <>
         {/* Development Scorecard */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Development Scorecard (Simplified HDI)</h2>
+        <div id={slugify('Development Scorecard (Simplified HDI)')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Development Scorecard (Simplified HDI)</h2>
+            <SocialShareMenu title="Development Scorecard (Simplified HDI)" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
             {scoreCards.map((sc, rank) => {
               const hdiColor = (sc.hdi ?? 0) >= 0.8 ? 'text-green-500' : (sc.hdi ?? 0) >= 0.6 ? 'text-yellow-500' : 'text-red-500';
@@ -874,13 +879,16 @@ export default function DevelopmentPage() {
 
         {/* Convergence Chart — GROWTH */}
         {activeSection === 'growth' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Development Convergence (2000 → Today)</h2>
+        <div id={slugify('Development Convergence (2000 → Today)')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Development Convergence (2000 → Today)</h2>
+            <SocialShareMenu title="Development Convergence (2000 → Today)" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Do poor countries catch up? X-axis shows initial GDP/capita (PPP) in 2000; Y-axis shows 23-year annualized growth. A downward slope = convergence
             (poorer countries grow faster). Flat/upward = divergence.
           </p>
-          <div className="h-[420px]">
+          <div className="h-[300px] sm:h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -932,13 +940,16 @@ export default function DevelopmentPage() {
 
         {/* Education Pipeline — EDUCATION */}
         {activeSection === 'education' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Education Pipeline</h2>
+        <div id={slugify('Education Pipeline')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Education Pipeline</h2>
+            <SocialShareMenu title="Education Pipeline" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             How students progress through education stages (all % gross enrollment / completion).
             Steep drop-offs from secondary to tertiary often signal opportunity bottlenecks.
           </p>
-          <div className="h-[420px]">
+          <div className="h-[300px] sm:h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={educationPipeline} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -957,13 +968,16 @@ export default function DevelopmentPage() {
 
         {/* HCI vs HDI — EDUCATION */}
         {activeSection === 'education' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Human Capital vs Human Development</h2>
+        <div id={slugify('Human Capital vs Human Development')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Human Capital vs Human Development</h2>
+            <SocialShareMenu title="Human Capital vs Human Development" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             World Bank Human Capital Index (HCI 2020, potential productivity of a child born today) vs our computed HDI.
             Countries above the diagonal over-perform on human capital relative to overall development; below the line under-perform.
           </p>
-          <div className="h-[420px]">
+          <div className="h-[300px] sm:h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1015,13 +1029,16 @@ export default function DevelopmentPage() {
 
         {/* Social Mobility: Income Share — INEQUALITY */}
         {activeSection === 'inequality' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Income Share: Bottom 20% vs Top 20%</h2>
+        <div id={slugify('Income Share: Bottom 20% vs Top 20%')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Income Share: Bottom 20% vs Top 20%</h2>
+            <SocialShareMenu title="Income Share: Bottom 20% vs Top 20%" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Perfect equality would give each quintile 20% of national income. In practice, the top 20% typically captures 35-50%+ while the bottom 20% gets 3-7%.
             Countries are sorted by the top-to-bottom ratio (lower = more equal).
           </p>
-          <div className="h-[420px]">
+          <div className="h-[300px] sm:h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mobilityData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1055,8 +1072,11 @@ export default function DevelopmentPage() {
 
         {/* Healthcare Access & Outcomes — HEALTH */}
         {activeSection === 'health' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Healthcare Access & Outcomes</h2>
+        <div id={slugify('Healthcare Access & Outcomes')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Healthcare Access & Outcomes</h2>
+            <SocialShareMenu title="Healthcare Access & Outcomes" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Six core health system indicators: child and maternal mortality (outcomes), physicians and hospital beds
             (access), DPT and measles immunization (prevention coverage).
@@ -1103,7 +1123,10 @@ export default function DevelopmentPage() {
             })}
           </div>
 
-          <h3 className="text-lg font-semibold mt-6 mb-2">Under-5 Mortality vs Physicians per 1000</h3>
+          <div id={slugify('Under-5 Mortality vs Physicians per 1000')} className="flex items-start justify-between gap-2 flex-wrap mt-6 mb-2">
+            <h3 className="text-lg font-semibold">Under-5 Mortality vs Physicians per 1000</h3>
+            <SocialShareMenu title="Under-5 Mortality vs Physicians per 1000" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Each country plotted by doctor density vs child mortality. Top-right = worst (many doctors unable to prevent mortality — rare, often data issues). Bottom-right = best.</p>
           <div className="h-[380px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -1144,8 +1167,11 @@ export default function DevelopmentPage() {
 
         {/* Basic Services Access — HEALTH */}
         {activeSection === 'health' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Basic Services Access</h2>
+        <div id={slugify('Basic Services Access')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Basic Services Access</h2>
+            <SocialShareMenu title="Basic Services Access" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             The foundational infrastructure of development: electricity, drinking water, sanitation, and internet.
             Composite score is the simple average of available indicators per country (0-100%).
@@ -1180,8 +1206,11 @@ export default function DevelopmentPage() {
             (good outcomes per dollar spent); <strong>below</strong> the trend are under-performing.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Healthcare $ → Life Expectancy</h3>
+            <div id={slugify('Healthcare $ → Life Expectancy')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                <h3 className="text-sm font-semibold">Healthcare $ → Life Expectancy</h3>
+                <SocialShareMenu title="Healthcare $ → Life Expectancy" isDarkMode={isDarkMode} className="shrink-0" />
+              </div>
               <div className="h-[360px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <ScatterChart margin={{ top: 10, right: 20, bottom: 30, left: 20 }}>
@@ -1212,8 +1241,11 @@ export default function DevelopmentPage() {
                 </ResponsiveContainer>
               </div>
             </div>
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Education $ → Tertiary Enrollment</h3>
+            <div id={slugify('Education $ → Tertiary Enrollment')}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                <h3 className="text-sm font-semibold">Education $ → Tertiary Enrollment</h3>
+                <SocialShareMenu title="Education $ → Tertiary Enrollment" isDarkMode={isDarkMode} className="shrink-0" />
+              </div>
               <div className="h-[360px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <ScatterChart margin={{ top: 10, right: 20, bottom: 30, left: 20 }}>
@@ -1250,7 +1282,7 @@ export default function DevelopmentPage() {
 
         {/* Demographic Transition — ENVIRONMENT */}
         {activeSection === 'environment' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+        <div id={slugify('Demographic Transition')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <h2 className="text-xl font-semibold mb-1">Demographic Transition</h2>
@@ -1258,17 +1290,20 @@ export default function DevelopmentPage() {
                 The classic pattern: both birth and death rates fall as development progresses. Life expectancy rises and fertility converges toward replacement (~2.1).
               </p>
             </div>
-            <select
-              value={demoCountry}
-              onChange={e => setDemoCountry(e.target.value as CountryKey)}
-              className={`rounded-lg px-3 py-2 text-sm border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-            >
-              {COUNTRY_KEYS.map(ck => (
-                <option key={ck} value={ck}>{COUNTRY_DISPLAY_NAMES[ck]}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <select
+                value={demoCountry}
+                onChange={e => setDemoCountry(e.target.value as CountryKey)}
+                className={`rounded-lg px-3 py-2 text-sm border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+              >
+                {COUNTRY_KEYS.map(ck => (
+                  <option key={ck} value={ck}>{COUNTRY_DISPLAY_NAMES[ck]}</option>
+                ))}
+              </select>
+              <SocialShareMenu title="Demographic Transition" isDarkMode={isDarkMode} />
+            </div>
           </div>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={demoTransition} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1291,8 +1326,11 @@ export default function DevelopmentPage() {
 
         {/* SDG Progress Tracker — SDG */}
         {activeSection === 'sdg' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">SDG Progress Tracker (Tracked-Country Average)</h2>
+        <div id={slugify('SDG Progress Tracker (Tracked-Country Average)')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">SDG Progress Tracker (Tracked-Country Average)</h2>
+            <SocialShareMenu title="SDG Progress Tracker (Tracked-Country Average)" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Progress toward 8 of the 17 UN Sustainable Development Goals, using proxy indicators averaged across tracked countries
             (0-100 scale, 100 = goal achieved). Bars shows distance to target.
@@ -1341,8 +1379,11 @@ export default function DevelopmentPage() {
               { title: 'Mobile Subscriptions (per 100)', data: digitalDivideData.mobile, suffix: '', color: '#8b5cf6' },
               { title: 'Fixed Broadband (per 100)', data: digitalDivideData.broadband, suffix: '', color: '#ec4899' },
             ].map(col => (
-              <div key={col.title}>
-                <h3 className="text-sm font-semibold mb-2">{col.title}</h3>
+              <div key={col.title} id={slugify(col.title)}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                  <h3 className="text-sm font-semibold">{col.title}</h3>
+                  <SocialShareMenu title={col.title} isDarkMode={isDarkMode} className="shrink-0" />
+                </div>
                 <div style={{ height: `${Math.max(280, col.data.length * 24)}px` }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={col.data} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
@@ -1364,13 +1405,16 @@ export default function DevelopmentPage() {
 
         {/* Radar Comparison — COMPARE */}
         {activeSection === 'compare' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+        <div id={slugify('Multi-Dimensional Country Comparison')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <div className="flex flex-col gap-3 mb-4">
-            <div>
-              <h2 className="text-xl font-semibold mb-1">Multi-Dimensional Country Comparison</h2>
-              <p className={`text-xs ${tc.textSec}`}>
-                Six development dimensions normalized to 0-100. Select up to 6 countries to compare their full development profile.
-              </p>
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <div>
+                <h2 className="text-xl font-semibold mb-1">Multi-Dimensional Country Comparison</h2>
+                <p className={`text-xs ${tc.textSec}`}>
+                  Six development dimensions normalized to 0-100. Select up to 6 countries to compare their full development profile.
+                </p>
+              </div>
+              <SocialShareMenu title="Multi-Dimensional Country Comparison" isDarkMode={isDarkMode} className="shrink-0" />
             </div>
             <div className="flex flex-wrap gap-2">
               {COUNTRY_KEYS.map(ck => {
@@ -1393,7 +1437,7 @@ export default function DevelopmentPage() {
               })}
             </div>
           </div>
-          <div className="h-[500px]">
+          <div className="h-[400px] sm:h-[500px]">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData} outerRadius="75%">
                 <PolarGrid stroke={tc.grid} />
@@ -1421,8 +1465,11 @@ export default function DevelopmentPage() {
         {/* Social Progress Charts — INEQUALITY (both charts) */}
         {activeSection === 'inequality' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-4">Social Progress Comparison</h2>
+          <div id={slugify('Social Progress Comparison')} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h2 className="text-xl font-semibold">Social Progress Comparison</h2>
+              <SocialShareMenu title="Social Progress Comparison" isDarkMode={isDarkMode} className="shrink-0" />
+            </div>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={socialMetrics} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -1439,8 +1486,11 @@ export default function DevelopmentPage() {
             </div>
           </div>
 
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-4">Gender & Youth</h2>
+          <div id={slugify('Gender & Youth')} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h2 className="text-xl font-semibold">Gender & Youth</h2>
+              <SocialShareMenu title="Gender & Youth" isDarkMode={isDarkMode} className="shrink-0" />
+            </div>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={genderData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -1460,10 +1510,13 @@ export default function DevelopmentPage() {
 
         {/* Sustainability: CO2 vs Renewable — ENVIRONMENT */}
         {activeSection === 'environment' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Sustainability: CO2 Emissions vs Renewable Energy</h2>
+        <div id={slugify('Sustainability: CO2 Emissions vs Renewable Energy')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Sustainability: CO2 Emissions vs Renewable Energy</h2>
+            <SocialShareMenu title="Sustainability: CO2 Emissions vs Renewable Energy" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Ideal position is bottom-right (low CO2, high renewable energy)</p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1486,7 +1539,7 @@ export default function DevelopmentPage() {
 
         {/* Population Pyramid — ENVIRONMENT */}
         {activeSection === 'environment' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+        <div id={slugify('Population Age Structure')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <h2 className="text-xl font-semibold mb-1">Population Age Structure</h2>
@@ -1495,15 +1548,18 @@ export default function DevelopmentPage() {
                 demographic dividend; a top-heavy one indicates an aging society with rising old-age dependency.
               </p>
             </div>
-            <select
-              value={demoCountry}
-              onChange={e => setDemoCountry(e.target.value as CountryKey)}
-              className={`rounded-lg px-3 py-2 text-sm border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-            >
-              {COUNTRY_KEYS.map(ck => (
-                <option key={ck} value={ck}>{COUNTRY_DISPLAY_NAMES[ck]}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <select
+                value={demoCountry}
+                onChange={e => setDemoCountry(e.target.value as CountryKey)}
+                className={`rounded-lg px-3 py-2 text-sm border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+              >
+                {COUNTRY_KEYS.map(ck => (
+                  <option key={ck} value={ck}>{COUNTRY_DISPLAY_NAMES[ck]}</option>
+                ))}
+              </select>
+              <SocialShareMenu title="Population Age Structure" isDarkMode={isDarkMode} />
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
@@ -1547,14 +1603,17 @@ export default function DevelopmentPage() {
 
         {/* Resource Curse Scatter — ENVIRONMENT */}
         {activeSection === 'environment' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Resource Curse? Rents vs Development</h2>
+        <div id={slugify('Resource Curse? Rents vs Development')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Resource Curse? Rents vs Development</h2>
+            <SocialShareMenu title="Resource Curse? Rents vs Development" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Natural resource rents as % of GDP (oil, gas, minerals, forest) plotted against HDI. The
             &quot;resource curse&quot; hypothesis predicts countries high in resource rents often underperform on development
             (Venezuela, Nigeria, Saudi Arabia). Norway is the classic counter-example.
           </p>
-          <div className="h-[420px]">
+          <div className="h-[300px] sm:h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 30, bottom: 30, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1592,10 +1651,13 @@ export default function DevelopmentPage() {
 
         {/* HDI Component Breakdown — OVERVIEW */}
         {activeSection === 'overview' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">HDI Component Breakdown</h2>
+        <div id={slugify('HDI Component Breakdown')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">HDI Component Breakdown</h2>
+            <SocialShareMenu title="HDI Component Breakdown" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Three dimensions of the Human Development Index scored 0-100 for top 15 countries</p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={hdiBreakdown} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1614,26 +1676,29 @@ export default function DevelopmentPage() {
 
         {/* Development Over Time (with metric selector) — GROWTH */}
         {activeSection === 'growth' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+        <div id={slugify('Development Over Time')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
             <div>
               <h2 className="text-xl font-semibold mb-1">Development Over Time</h2>
               <p className={`text-xs ${tc.textSec}`}>Historical trends since 2000 for selected countries and metric.</p>
             </div>
-            <div className={`flex flex-wrap gap-1 p-1 rounded-lg ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
-              {DEV_METRIC_OPTIONS.map(opt => (
-                <button
-                  key={opt.key}
-                  onClick={() => setDevMetric(opt.key)}
-                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
-                    devMetric === opt.key
-                      ? isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-gray-900 shadow'
-                      : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className={`flex flex-wrap gap-1 p-1 rounded-lg ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+                {DEV_METRIC_OPTIONS.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setDevMetric(opt.key)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                      devMetric === opt.key
+                        ? isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-gray-900 shadow'
+                        : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <SocialShareMenu title="Development Over Time" isDarkMode={isDarkMode} className="shrink-0" />
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-4">
@@ -1658,7 +1723,7 @@ export default function DevelopmentPage() {
               );
             })}
           </div>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={devOverTimeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1690,13 +1755,16 @@ export default function DevelopmentPage() {
 
         {/* Inequality Over Time — GROWTH */}
         {activeSection === 'growth' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Inequality Over Time (Gini)</h2>
+        <div id={slugify('Inequality Over Time (Gini)')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Inequality Over Time (Gini)</h2>
+            <SocialShareMenu title="Inequality Over Time (Gini)" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Gini coefficient historical series for selected countries since 1990. Lower = more equal. Uses the same
             country selection as &quot;Development Over Time&quot; above.
           </p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={giniOverTimeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1725,10 +1793,13 @@ export default function DevelopmentPage() {
 
         {/* Regional Development Comparison — GROWTH */}
         {activeSection === 'growth' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Regional Development Comparison</h2>
+        <div id={slugify('Regional Development Comparison')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Regional Development Comparison</h2>
+            <SocialShareMenu title="Regional Development Comparison" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Average HDI (x100), Gini coefficient, and healthcare spending by region</p>
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={regionalComparison} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1747,13 +1818,16 @@ export default function DevelopmentPage() {
 
         {/* Gender Development Index — INEQUALITY */}
         {activeSection === 'inequality' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Gender Development Index</h2>
+        <div id={slugify('Gender Development Index')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Gender Development Index</h2>
+            <SocialShareMenu title="Gender Development Index" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Male vs female life expectancy side by side. Women typically live 3-7 years longer; a narrow gap may signal
             maternal or health-system deficits. Hover for school gender parity and female labor force participation.
           </p>
-          <div className="h-[420px]">
+          <div className="h-[300px] sm:h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={gdiData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1788,8 +1862,11 @@ export default function DevelopmentPage() {
 
         {/* Remittances Reliance — INEQUALITY */}
         {activeSection === 'inequality' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Remittances as % of GDP</h2>
+        <div id={slugify('Remittances as % of GDP')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Remittances as % of GDP</h2>
+            <SocialShareMenu title="Remittances as % of GDP" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Personal remittances received (from citizens working abroad). For countries like the Philippines, Tajikistan,
             Egypt, or Lebanon, remittances can exceed 5-20% of GDP — a critical but volatile income source that also
@@ -1813,8 +1890,11 @@ export default function DevelopmentPage() {
 
         {/* Poverty & Income Cards — INEQUALITY */}
         {activeSection === 'inequality' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Poverty & Income Overview</h2>
+        <div id={slugify('Poverty & Income Overview')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Poverty & Income Overview</h2>
+            <SocialShareMenu title="Poverty & Income Overview" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Countries sorted by GDP per capita (PPP). Color indicators: Gini green &lt; 30, yellow &lt; 40, red &ge; 40</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {povertyCards.map(sc => {
@@ -1847,8 +1927,11 @@ export default function DevelopmentPage() {
 
         {/* Development Complexity Score — OVERVIEW */}
         {activeSection === 'overview' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Development Complexity Score</h2>
+        <div id={slugify('Development Complexity Score')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Development Complexity Score</h2>
+            <SocialShareMenu title="Development Complexity Score" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             A custom 7-dimension composite going beyond HDI. Weights: HDI 25%, Equality 15%, Basic Services 15%, Health Outcomes 15%,
             Digital 10%, Sustainability 10%, Gender 10%. Countries ranked 0-100.
@@ -1887,8 +1970,11 @@ export default function DevelopmentPage() {
 
         {/* Rises & Falls Leaderboard — OVERVIEW */}
         {activeSection === 'overview' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Development Rises & Falls (2000 → Today)</h2>
+        <div id={slugify('Development Rises & Falls (2000 → Today)')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Development Rises & Falls (2000 → Today)</h2>
+            <SocialShareMenu title="Development Rises & Falls (2000 → Today)" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>
             Change in computed HDI from 2000 to latest. Green = gains; red = losses. Reveals which countries have
             climbed the development ladder fastest and which have regressed.
@@ -1928,8 +2014,11 @@ export default function DevelopmentPage() {
 
         {/* Development Rankings Table — OVERVIEW */}
         {activeSection === 'overview' && (
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-2">Development Rankings</h2>
+        <div id={slugify('Development Rankings')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+            <h2 className="text-xl font-semibold">Development Rankings</h2>
+            <SocialShareMenu title="Development Rankings" subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <p className={`text-xs mb-4 ${tc.textSec}`}>Click column headers to sort. All countries ranked by key development indicators.</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

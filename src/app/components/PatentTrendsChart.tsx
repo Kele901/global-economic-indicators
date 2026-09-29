@@ -15,6 +15,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber, defaultTechCountries } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface PatentTrendsChartProps {
   isDarkMode: boolean;
@@ -90,7 +92,7 @@ const PatentTrendsChart: React.FC<PatentTrendsChartProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Patent Applications Trends')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -131,6 +133,8 @@ const PatentTrendsChart: React.FC<PatentTrendsChartProps> = ({
             <option value="line">Line Chart</option>
             <option value="area">Area Chart</option>
           </select>
+
+          <SocialShareMenu title="Patent Applications Trends" isDarkMode={isDarkMode} />
         </div>
       </div>
 
@@ -192,7 +196,7 @@ const PatentTrendsChart: React.FC<PatentTrendsChartProps> = ({
       </div>
 
       {/* Chart */}
-      <div className="h-[400px]">
+      <div className="h-[300px] sm:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'line' ? (
             <LineChart data={filteredData}>

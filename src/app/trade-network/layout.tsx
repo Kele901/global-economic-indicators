@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/trade-network', {
   title: 'Global Trade Network | Global Economic Indicators',
   description:
     'Interactive network graph of bilateral trade flows across major economies. Explore export/import ties, dependency, and centrality.',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     description:
       'Force-directed graph of trade ties across major economies.',
   },
-};
+});
 
 export default function TradeNetworkLayout({
   children,

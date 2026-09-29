@@ -7,6 +7,10 @@
 
 import { useMemo, useState } from 'react';
 import { SOVEREIGN_RATINGS_2025, SOVEREIGN_CDS_SEP_2025 } from '../services/debtCurated';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Ratings & CDS Grid';
 
 interface Props {
   isDarkMode: boolean;
@@ -57,16 +61,17 @@ export default function RatingsAndCdsGrid({ isDarkMode }: Props) {
   const btnIdle = isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white' : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900';
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
-          <h3 className={`text-base sm:text-lg font-semibold ${text}`}>Ratings & CDS Grid</h3>
+          <h3 className={`text-base sm:text-lg font-semibold ${text}`}>{TITLE}</h3>
           <p className={`text-xs ${muted}`}>S&amp;P / Moody&apos;s / Fitch letter grades (mid-2025) alongside 5Y CDS spreads (Sep-2025).</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <button className={`${btnBase} ${sort === 'score' ? btnActive : btnIdle}`} onClick={() => setSort('score')} aria-pressed={sort === 'score'}>Sort: Score</button>
           <button className={`${btnBase} ${sort === 'cds'   ? btnActive : btnIdle}`} onClick={() => setSort('cds')}   aria-pressed={sort === 'cds'}>Sort: CDS</button>
           <button className={`${btnBase} ${sort === 'name'  ? btnActive : btnIdle}`} onClick={() => setSort('name')}  aria-pressed={sort === 'name'}>Sort: A→Z</button>
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} subject="dataset" />
         </div>
       </div>
 

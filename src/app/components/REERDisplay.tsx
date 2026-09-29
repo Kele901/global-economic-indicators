@@ -18,6 +18,8 @@ import {
   type CurrencyCode
 } from '../data/currencyHierarchyData';
 import { useREERData } from '../hooks/useREERData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface REERDisplayProps {
   isDarkMode: boolean;
@@ -177,9 +179,9 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify('Real Effective Exchange Rate (REER)')} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start gap-2 flex-wrap">
           <div>
             <h3 className={`text-lg font-semibold ${themeColors.text}`}>
               Real Effective Exchange Rate (REER)
@@ -188,7 +190,7 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
               Currency valuation relative to historical averages (BIS data)
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
             <div className="flex items-center gap-1">
               <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500' : 'bg-yellow-500'}`} />
               <span className={`text-xs ${themeColors.textTertiary}`}>
@@ -206,6 +208,7 @@ const REERDisplay: React.FC<REERDisplayProps> = ({ isDarkMode }) => {
             >
               {loading ? 'Loading...' : 'Refresh'}
             </button>
+            <SocialShareMenu title="Real Effective Exchange Rate (REER)" isDarkMode={isDarkMode} />
           </div>
         </div>
       </div>

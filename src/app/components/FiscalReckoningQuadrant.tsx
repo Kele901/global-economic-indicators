@@ -16,6 +16,10 @@ import type { CountryData } from '../services/worldbank';
 import { DEBT_COUNTRY_META } from '../services/debtCurated';
 import { latestEntry } from '../utils/countryData';
 import { useViewportSize } from '../hooks/useViewportSize';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Fiscal Reckoning Quadrant';
 
 interface Props {
   isDarkMode: boolean;
@@ -55,12 +59,17 @@ export default function FiscalReckoningQuadrant({ isDarkMode, governmentDebt, gd
   const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-      <h3 className={`text-base sm:text-lg font-semibold mb-1 ${text}`}>Fiscal Reckoning Quadrant</h3>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+        <h3 className={`text-base sm:text-lg font-semibold ${text}`}>{TITLE}</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <p className={`text-xs mb-4 ${muted}`}>
         X: government debt as % of GDP. Y: interest-rate minus GDP-growth (r − g). Top-right = debt spiral; bottom-right = growth-out; bottom-left = safe; top-left = slow squeeze.
       </p>
-      <div className="h-[420px]">
+      <div className="h-[300px] sm:h-[420px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: isMobile ? 12 : 30, left: isMobile ? 0 : 10, bottom: 30 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />

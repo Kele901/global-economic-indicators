@@ -16,6 +16,8 @@ import {
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { useTradeData, useHistoricalTradeData } from '../hooks/useTradeData';
 import { COUNTRY_MAPPINGS } from '../services/tradeData';
 import { 
@@ -573,7 +575,11 @@ const TradingPlacesPage: React.FC = () => {
           </div>
           
         {/* Global Stat Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div id={slugify('Trading Places key figures')} className="mb-6">
+        <div className="flex justify-end mb-2">
+          <SocialShareMenu title="Trading Places key figures" isDarkMode={isDarkMode} />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: 'World Trade', value: `$${(combinedTradeData.globalStats.totalWorldTrade / 1000).toFixed(1)}T`, icon: Globe, color: 'text-blue-500' },
             { label: 'Top Exporter', value: combinedTradeData.globalStats.topTradingNations[0], icon: Package, color: 'text-green-500' },
@@ -589,6 +595,7 @@ const TradingPlacesPage: React.FC = () => {
             </div>
           ))}
           </div>
+        </div>
           
         {/* View Mode Selector */}
         <div className={`rounded-xl border p-3 mb-4 ${tc.card}`}>
@@ -683,6 +690,9 @@ const TradingPlacesPage: React.FC = () => {
                           </button>
                           </div>
                           )}
+            <div className="flex items-end gap-2 flex-wrap shrink-0 ml-auto">
+              <SocialShareMenu title={`Trade Map: ${MAP_METRICS.find(m => m.id === mapMetric)?.label ?? ''}`} isDarkMode={isDarkMode} />
+            </div>
                         </div>
         )}
 
@@ -692,7 +702,13 @@ const TradingPlacesPage: React.FC = () => {
 
             {/* ==================== RANKINGS VIEW ==================== */}
             {viewMode === 'rankings' && (
-              <div className={`rounded-xl border overflow-hidden ${tc.card}`}>
+              <div id={slugify('Country Trade Rankings')} className={`rounded-xl border overflow-hidden ${tc.card}`}>
+                  <div className="p-4 border-b flex items-center justify-between gap-2 flex-wrap" style={{ borderColor: isDarkMode ? '#374151' : '#e5e7eb' }}>
+                    <h3 className={`font-semibold ${tc.text}`}>Country Trade Rankings</h3>
+                    <div className="flex items-center gap-2 flex-wrap shrink-0">
+                      <SocialShareMenu title="Country Trade Rankings" subject="dataset" isDarkMode={isDarkMode} />
+                    </div>
+                  </div>
                   <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                       <thead>
@@ -769,8 +785,13 @@ const TradingPlacesPage: React.FC = () => {
                 {/* Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Exports Pie */}
-                  <div className={`rounded-xl border p-4 ${tc.card}`}>
-                    <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>Top Exports</h3>
+                  <div id={slugify('Top Exports')} className={`rounded-xl border p-4 ${tc.card}`}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className={`text-sm font-semibold ${tc.text}`}>Top Exports</h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title="Top Exports" isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <ResponsiveContainer width="100%" height={250}>
                       <RechartsPieChart><Pie data={chartData.exportData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                         {chartData.exportData.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
@@ -778,8 +799,13 @@ const TradingPlacesPage: React.FC = () => {
                     </ResponsiveContainer>
                   </div>
                   {/* Imports Pie */}
-                  <div className={`rounded-xl border p-4 ${tc.card}`}>
-                    <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>Top Imports</h3>
+                  <div id={slugify('Top Imports')} className={`rounded-xl border p-4 ${tc.card}`}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className={`text-sm font-semibold ${tc.text}`}>Top Imports</h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title="Top Imports" isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <ResponsiveContainer width="100%" height={250}>
                       <RechartsPieChart><Pie data={chartData.importData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                         {chartData.importData.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
@@ -787,8 +813,13 @@ const TradingPlacesPage: React.FC = () => {
                     </ResponsiveContainer>
                 </div>
                   {/* Partners Pie */}
-                  <div className={`rounded-xl border p-4 ${tc.card}`}>
-                    <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>Trading Partners</h3>
+                  <div id={slugify('Trading Partners')} className={`rounded-xl border p-4 ${tc.card}`}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className={`text-sm font-semibold ${tc.text}`}>Trading Partners</h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title="Trading Partners" isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <ResponsiveContainer width="100%" height={250}>
                       <RechartsPieChart><Pie data={chartData.partnerData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                         {chartData.partnerData.map((e: any, i: number) => <Cell key={i} fill={e.fill} />)}
@@ -796,8 +827,13 @@ const TradingPlacesPage: React.FC = () => {
                     </ResponsiveContainer>
                   </div>
                   {/* Partner Bar Chart */}
-                  <div className={`rounded-xl border p-4 ${tc.card}`}>
-                    <h3 className={`text-sm font-semibold mb-3 ${tc.text}`}>Partner Trade Flows ($B)</h3>
+                  <div id={slugify('Partner Trade Flows ($B)')} className={`rounded-xl border p-4 ${tc.card}`}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className={`text-sm font-semibold ${tc.text}`}>Partner Trade Flows ($B)</h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title="Partner Trade Flows ($B)" isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={chartData.partnerBarData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -813,10 +849,14 @@ const TradingPlacesPage: React.FC = () => {
             </div>
 
                 {/* Trade Flows Table */}
-                <div className={`rounded-xl border overflow-hidden ${tc.card}`}>
-                  <div className="p-4 border-b" style={{ borderColor: isDarkMode ? '#374151' : '#e5e7eb' }}>
+                <div id={slugify(`${selectedCountry.name} - Trade Partners`)} className={`rounded-xl border overflow-hidden ${tc.card}`}>
+                  <div className="p-4 border-b flex items-center justify-between gap-2 flex-wrap" style={{ borderColor: isDarkMode ? '#374151' : '#e5e7eb' }}>
                     <h3 className={`font-semibold ${tc.text}`}>{selectedCountry.name} - Trade Partners</h3>
+                    <div className="flex items-center gap-2 flex-wrap shrink-0">
+                      <SocialShareMenu title={`${selectedCountry.name} - Trade Partners`} subject="dataset" isDarkMode={isDarkMode} />
+                    </div>
                   </div>
+                  <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead><tr className={isDarkMode ? 'bg-gray-800/60' : 'bg-gray-50'}>
                       <th className={`px-4 py-2 text-left text-xs font-medium uppercase ${tc.textSec}`}>Partner</th>
@@ -835,9 +875,14 @@ const TradingPlacesPage: React.FC = () => {
                         ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
 
                 {/* Summary Cards */}
+                <div id={slugify(`${selectedCountry.name} trade summary`)}>
+                <div className="flex justify-end mb-2">
+                  <SocialShareMenu title={`${selectedCountry.name} trade summary`} isDarkMode={isDarkMode} />
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {[
                     { label: 'Total Exports', value: formatNumber(selectedCountry.totalExports), color: 'text-blue-500' },
@@ -851,6 +896,7 @@ const TradingPlacesPage: React.FC = () => {
                   </div>
                   ))}
                 </div>
+                </div>
               </div>
             )}
 
@@ -858,8 +904,13 @@ const TradingPlacesPage: React.FC = () => {
             {viewMode === 'historical' && (
               <div className="space-y-6">
                 {globalTradeVolumeData.length > 0 && (
-                  <div className={`rounded-xl border p-4 ${tc.card}`}>
-                    <h3 className={`font-semibold mb-3 ${tc.text}`}>Global Trade Volume Over Time</h3>
+                  <div id={slugify('Global Trade Volume Over Time')} className={`rounded-xl border p-4 ${tc.card}`}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className={`font-semibold ${tc.text}`}>Global Trade Volume Over Time</h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title="Global Trade Volume Over Time" isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <ResponsiveContainer width="100%" height={300}>
                       <AreaChart data={globalTradeVolumeData}>
                         <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -874,8 +925,13 @@ const TradingPlacesPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {globalAggregateData.length > 0 && (
-                    <div className={`rounded-xl border p-4 ${tc.card}`}>
-                      <h3 className={`font-semibold mb-3 ${tc.text}`}>Exports vs Imports</h3>
+                    <div id={slugify('Exports vs Imports')} className={`rounded-xl border p-4 ${tc.card}`}>
+                      <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                        <h3 className={`font-semibold ${tc.text}`}>Exports vs Imports</h3>
+                        <div className="flex items-center gap-2 flex-wrap shrink-0">
+                          <SocialShareMenu title="Exports vs Imports" isDarkMode={isDarkMode} />
+                        </div>
+                      </div>
                       <ResponsiveContainer width="100%" height={280}>
                         <AreaChart data={globalAggregateData}>
                           <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -891,8 +947,13 @@ const TradingPlacesPage: React.FC = () => {
                   )}
 
                   {top5ExporterData.data.length > 0 && (
-                    <div className={`rounded-xl border p-4 ${tc.card}`}>
-                      <h3 className={`font-semibold mb-3 ${tc.text}`}>Top 5 Exporters Over Time</h3>
+                    <div id={slugify('Top 5 Exporters Over Time')} className={`rounded-xl border p-4 ${tc.card}`}>
+                      <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                        <h3 className={`font-semibold ${tc.text}`}>Top 5 Exporters Over Time</h3>
+                        <div className="flex items-center gap-2 flex-wrap shrink-0">
+                          <SocialShareMenu title="Top 5 Exporters Over Time" isDarkMode={isDarkMode} />
+                        </div>
+                      </div>
                       <ResponsiveContainer width="100%" height={280}>
                         <LineChart data={top5ExporterData.data}>
                           <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -910,8 +971,13 @@ const TradingPlacesPage: React.FC = () => {
             </div>
 
                 {latestYearSnapshot.length > 0 && (
-                  <div className={`rounded-xl border p-4 ${tc.card}`}>
-                    <h3 className={`font-semibold mb-3 ${tc.text}`}>Latest Year Trade Snapshot ({latestYearSnapshot[0]?.year})</h3>
+                  <div id={slugify(`Latest Year Trade Snapshot (${latestYearSnapshot[0]?.year})`)} className={`rounded-xl border p-4 ${tc.card}`}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className={`font-semibold ${tc.text}`}>Latest Year Trade Snapshot ({latestYearSnapshot[0]?.year})</h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title={`Latest Year Trade Snapshot (${latestYearSnapshot[0]?.year})`} isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <ResponsiveContainer width="100%" height={350}>
                       <BarChart data={latestYearSnapshot.slice(0, 15)} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -956,17 +1022,20 @@ const TradingPlacesPage: React.FC = () => {
                 {tariffTab === 'disputes' && (
                   <div className="space-y-4">
                     {tariffData.currentDisputes.map(d => (
-                      <div key={d.id} className={`rounded-xl border p-5 ${tc.card}`}>
-                        <div className="flex items-start justify-between mb-3">
+                      <div key={d.id} id={slugify(d.title)} className={`rounded-xl border p-5 ${tc.card}`}>
+                        <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
                         <div>
                             <h3 className={`font-semibold text-lg ${tc.text}`}>{d.title}</h3>
                             <p className={`text-sm ${tc.textSec}`}>{d.description}</p>
                           </div>
+                          <div className="flex items-center gap-2 flex-wrap shrink-0">
                           <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${d.status === 'Ongoing' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'}`}>
                             {d.status}
                           </span>
+                            <SocialShareMenu title={d.title} isDarkMode={isDarkMode} />
+                          </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-3 mb-4">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
                           <div className={`rounded-lg p-3 ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                             <div className={`text-xs ${tc.textSec}`}>Global Trade Impact</div>
                             <div className={`text-lg font-bold ${tc.negative}`}>{d.impact.globalTrade}%</div>
@@ -999,8 +1068,13 @@ const TradingPlacesPage: React.FC = () => {
                 {/* Trends */}
                 {tariffTab === 'trends' && (
                   <div className="space-y-6">
-                    <div className={`rounded-xl border p-4 ${tc.card}`}>
-                      <h3 className={`font-semibold mb-3 ${tc.text}`}>Global Average Tariff Rate</h3>
+                    <div id={slugify('Global Average Tariff Rate')} className={`rounded-xl border p-4 ${tc.card}`}>
+                      <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                        <h3 className={`font-semibold ${tc.text}`}>Global Average Tariff Rate</h3>
+                        <div className="flex items-center gap-2 flex-wrap shrink-0">
+                          <SocialShareMenu title="Global Average Tariff Rate" isDarkMode={isDarkMode} />
+                        </div>
+                      </div>
                       <ResponsiveContainer width="100%" height={280}>
                         <AreaChart data={tariffData.globalTariffTrends}>
                           <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1011,8 +1085,13 @@ const TradingPlacesPage: React.FC = () => {
                         </AreaChart>
                       </ResponsiveContainer>
                         </div>
-                    <div className={`rounded-xl border p-4 ${tc.card}`}>
-                      <h3 className={`font-semibold mb-3 ${tc.text}`}>Sectoral Impact</h3>
+                    <div id={slugify('Sectoral Impact')} className={`rounded-xl border p-4 ${tc.card}`}>
+                      <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                        <h3 className={`font-semibold ${tc.text}`}>Sectoral Impact</h3>
+                        <div className="flex items-center gap-2 flex-wrap shrink-0">
+                          <SocialShareMenu title="Sectoral Impact" isDarkMode={isDarkMode} />
+                        </div>
+                      </div>
                       <ResponsiveContainer width="100%" height={280}>
                         <BarChart data={tariffData.sectoralImpacts} layout="vertical">
                           <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1025,8 +1104,13 @@ const TradingPlacesPage: React.FC = () => {
                         </BarChart>
                       </ResponsiveContainer>
                       </div>
-                  <div>
-                      <h3 className={`font-semibold mb-3 ${tc.text}`}>Historical Trade Wars</h3>
+                  <div id={slugify('Historical Trade Wars')}>
+                      <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                        <h3 className={`font-semibold ${tc.text}`}>Historical Trade Wars</h3>
+                        <div className="flex items-center gap-2 flex-wrap shrink-0">
+                          <SocialShareMenu title="Historical Trade Wars" isDarkMode={isDarkMode} />
+                        </div>
+                      </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {tariffData.historicalWars.map((w, i) => (
                           <div key={i} className={`rounded-xl border p-4 ${tc.card}`}>
@@ -1048,13 +1132,16 @@ const TradingPlacesPage: React.FC = () => {
                 {tariffTab === 'blocs' && (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {Object.values(tradeBlocs).map(bloc => (
-                      <div key={bloc.acronym} className={`rounded-xl border p-5 ${tc.card}`}>
+                      <div key={bloc.acronym} id={slugify(bloc.name)} className={`rounded-xl border p-5 ${tc.card}`}>
                         <div className="flex items-center gap-3 mb-3">
                           <span className="text-2xl font-bold text-blue-500">{bloc.acronym}</span>
-                          <div>
+                          <div className="min-w-0 flex-1">
                             <h3 className={`font-semibold ${tc.text}`}>{bloc.name}</h3>
                             <p className={`text-xs ${tc.textSec}`}>{bloc.type} &middot; Est. {bloc.established}</p>
                   </div>
+                          <div className="flex items-center gap-2 flex-wrap shrink-0">
+                            <SocialShareMenu title={bloc.name} isDarkMode={isDarkMode} />
+                          </div>
                           </div>
                         <div className="flex flex-wrap gap-1.5 mb-3">
                           {bloc.members.map(m => (
@@ -1108,9 +1195,15 @@ const TradingPlacesPage: React.FC = () => {
                         const barData = Object.entries(metricsData)
                           .map(([code, vals]) => ({ name: mockTradeData.countries.find(c => c.code === code)?.name || code, code, value: vals[metricKey] ?? 0 }))
                           .sort((a, b) => b.value - a.value);
+                        const metricTitle = metricKey.replace(/([A-Z])/g, ' $1').trim().replace(/\b\w/g, ch => ch.toUpperCase());
                       return (
-                          <div key={metricKey} className={`rounded-xl border p-4 ${tc.card}`}>
-                            <h3 className={`font-semibold mb-3 capitalize ${tc.text}`}>{metricKey.replace(/([A-Z])/g, ' $1').trim()}</h3>
+                          <div key={metricKey} id={slugify(metricTitle)} className={`rounded-xl border p-4 ${tc.card}`}>
+                            <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                              <h3 className={`font-semibold capitalize ${tc.text}`}>{metricKey.replace(/([A-Z])/g, ' $1').trim()}</h3>
+                              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                                <SocialShareMenu title={metricTitle} isDarkMode={isDarkMode} />
+                              </div>
+                            </div>
                             <ResponsiveContainer width="100%" height={300}>
                               <BarChart data={barData} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" stroke={tc.grid} />
@@ -1147,7 +1240,7 @@ const TradingPlacesPage: React.FC = () => {
                   .trade-flow-bubble.active { stroke-dasharray: 10 3; animation-duration: 0.5s; }
                   .trade-flow-bubble.dimmed { animation-play-state: paused; }
                 `}</style>
-                <div className={`rounded-xl border overflow-hidden ${tc.card}`}>
+                <div id={slugify(`Trade Map: ${MAP_METRICS.find(m => m.id === mapMetric)?.label ?? ''}`)} className={`rounded-xl border overflow-hidden ${tc.card}`}>
                   <div className="relative" style={{ background: tc.ocean }}>
                     <ComposableMap
                       projectionConfig={{ rotate: [-10, 0, 0], scale: 147 }}
@@ -1444,10 +1537,11 @@ const TradingPlacesPage: React.FC = () => {
 
                   const srcTariff = countryTariffs[sourceData.code];
                   const partTariff = partnerData ? countryTariffs[partnerData.code] : undefined;
+                  const flowTitle = `${sourceData.name} - ${partnerData?.name || flow.partner} trade flow`;
 
                   return (
-                    <div className={`rounded-xl border p-5 ${tc.card}`}>
-                            <div className="flex items-center justify-between mb-4">
+                    <div id={slugify(flowTitle)} className={`rounded-xl border p-5 ${tc.card}`}>
+                            <div className="flex items-center justify-between gap-2 flex-wrap mb-4">
                         <div className="flex items-center gap-3 flex-wrap">
                           <div className="flex items-center gap-2">
                             <FlagIcon code={sourceData.code} size="w-7 h-5" />
@@ -1462,9 +1556,12 @@ const TradingPlacesPage: React.FC = () => {
                             <span className={`font-bold ${tc.text}`}>{partnerData?.name || flow.partner}</span>
                               </div>
                             </div>
-                        <button onClick={() => setSelectedFlow(null)} className={`p-1.5 rounded-lg ${tc.inactiveBg}`}>
-                          <X className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-2 flex-wrap shrink-0">
+                          <SocialShareMenu title={flowTitle} isDarkMode={isDarkMode} />
+                          <button onClick={() => setSelectedFlow(null)} className={`p-1.5 rounded-lg ${tc.inactiveBg}`}>
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
                             </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -1559,10 +1656,15 @@ const TradingPlacesPage: React.FC = () => {
 
                 {/* Trade Flow Info Section */}
                 {detailCountry && detailCountryData && tradeFlows.length > 0 && (
-                  <div className={`rounded-xl border p-4 ${tc.card}`}>
-                    <h3 className={`font-semibold mb-3 ${tc.text}`}>
-                      Trade Flows: {detailCountryData.name}
-                  </h3>
+                  <div id={slugify(`Trade Flows: ${detailCountryData.name}`)} className={`rounded-xl border p-4 ${tc.card}`}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+                      <h3 className={`font-semibold ${tc.text}`}>
+                        Trade Flows: {detailCountryData.name}
+                      </h3>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title={`Trade Flows: ${detailCountryData.name}`} isDarkMode={isDarkMode} />
+                      </div>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-4">
                       {tradeFlows.slice(0, 5).map((flow) => {
                         const partnerCountry = combinedTradeData.countries.find(c => c.code === flow.partnerCode);
@@ -1628,8 +1730,8 @@ const TradingPlacesPage: React.FC = () => {
 
           {/* ==================== DETAIL PANEL ==================== */}
           {detailCountryData && (
-            <div ref={panelRef} className={`w-full lg:w-96 flex-shrink-0 rounded-xl border p-5 ${tc.card} self-start lg:sticky lg:top-4`}>
-              <div className="flex items-center justify-between mb-4">
+            <div ref={panelRef} id={slugify(`${detailCountryData.name} trade profile`)} className={`w-full lg:w-96 flex-shrink-0 rounded-xl border p-5 ${tc.card} self-start lg:sticky lg:top-4`}>
+              <div className="flex items-center justify-between gap-2 mb-4">
                 <div className="flex items-center gap-3">
                   <FlagIcon code={detailCountryData.code} size="w-8 h-6" />
                     <div>
@@ -1637,7 +1739,10 @@ const TradingPlacesPage: React.FC = () => {
                     <span className={`text-xs px-2 py-0.5 rounded ${tc.tagBg} ${tc.textSec}`}>{detailCountryData.region}</span>
                     </div>
                 </div>
-                <button onClick={() => setDetailCountry(null)} className={`p-1 rounded-lg ${tc.inactiveBg}`}><X className="w-4 h-4" /></button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <SocialShareMenu title={`${detailCountryData.name} trade profile`} isDarkMode={isDarkMode} />
+                  <button onClick={() => setDetailCountry(null)} className={`p-1 rounded-lg ${tc.inactiveBg}`}><X className="w-4 h-4" /></button>
+                </div>
                   </div>
 
               {/* Key Stats */}

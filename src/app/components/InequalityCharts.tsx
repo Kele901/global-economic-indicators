@@ -18,6 +18,8 @@ import {
   REGION_COLORS, COUNTRY_COLORS,
   type TopSharePoint, type TopWealthPoint,
 } from '../data/inequalityData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
@@ -269,6 +271,15 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
 
   // ── Shared Helpers ──
 
+  const renderCardTitle = (title: string, mb = 'mb-2', subject?: 'chart' | 'dataset') => (
+    <div className={`flex items-start justify-between gap-2 flex-wrap ${mb}`}>
+      <h3 className={`font-bold text-lg ${tc.text}`}>{title}</h3>
+      <div className="flex items-center gap-2 flex-wrap shrink-0">
+        <SocialShareMenu title={title} subject={subject} isDarkMode={isDarkMode} />
+      </div>
+    </div>
+  );
+
   const renderQuoteBlock = (quote: string, author: string, source: string, year: number) => (
     <div className={`rounded-xl border p-4 ${tc.quoteBg}`}>
       <blockquote className={`text-sm italic leading-relaxed ${tc.textTer}`}>
@@ -299,8 +310,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
 
   const renderRvsG = () => (
     <div className="space-y-6">
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>r &gt; g: The Fundamental Force for Divergence</h3>
+      <div id={slugify('r > g: The Fundamental Force for Divergence')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('r > g: The Fundamental Force for Divergence')}
         <p className={`text-sm mb-2 leading-relaxed ${tc.textTer}`}>
           Piketty&apos;s central claim is that for most of human history, the rate of return on capital
           (<strong className={isDarkMode ? 'text-red-400' : 'text-red-600'}>r</strong>) has exceeded the
@@ -371,8 +382,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Capital/Income Ratio (β) Across Countries</h3>
+      <div id={slugify('Capital/Income Ratio (β) Across Countries')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('Capital/Income Ratio (β) Across Countries')}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           The capital/income ratio measures the total stock of capital (real estate, business capital,
           financial assets, etc.) relative to annual national income. In Europe before 1914, β was around
@@ -412,8 +423,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
     }));
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>The Kuznets Curve: An Inverted-U?</h3>
+        <div id={slugify('The Kuznets Curve: An Inverted-U?')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderCardTitle('The Kuznets Curve: An Inverted-U?')}
           <p className={`text-sm mb-2 leading-relaxed ${tc.textTer}`}>
             In 1955, Simon Kuznets hypothesised that inequality follows an inverted-U pattern: it rises
             during industrialisation (as workers move from low-productivity agriculture to high-productivity
@@ -514,8 +525,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
     <div className="space-y-6">
       {renderCountrySelector(INCOME_COUNTRIES)}
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Top Income Shares: {selectedCountry}</h3>
+      <div id={slugify(`Top Income Shares: ${selectedCountry}`)} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle(`Top Income Shares: ${selectedCountry}`)}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           The share of national income going to the top 1% and top 10% reveals the U-shaped trajectory
           that defines 20th-century inequality: extreme concentration before 1914, a dramatic &quot;Great
@@ -559,8 +570,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>The Elephant Curve: Globalisation&apos;s Winners and Losers</h3>
+      <div id={slugify("The Elephant Curve: Globalisation's Winners and Losers")} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle("The Elephant Curve: Globalisation's Winners and Losers")}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           Branko Milanovic&apos;s famous chart shows cumulative income growth by global percentile (1988&ndash;2008).
           The shape reveals who benefited from globalisation: the global middle class (especially in China and
@@ -606,8 +617,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
     <div className="space-y-6">
       {renderCountrySelector(WEALTH_COUNTRIES)}
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Wealth Concentration: {selectedCountry}</h3>
+      <div id={slugify(`Wealth Concentration: ${selectedCountry}`)} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle(`Wealth Concentration: ${selectedCountry}`)}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           Wealth inequality is always more extreme than income inequality. Before 1914, the top 1% in Europe
           owned 60&ndash;70% of all wealth. The 20th century saw dramatic de-concentration &mdash; through
@@ -639,8 +650,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Wealth Composition by Country</h3>
+      <div id={slugify('Wealth Composition by Country')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('Wealth Composition by Country')}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           How wealth is held varies dramatically. In China and France, housing dominates (reflecting property
           booms). In the USA and Japan, financial assets are the largest category. The composition matters
@@ -664,8 +675,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>The Return of Inheritance: France 1820&ndash;2020</h3>
+      <div id={slugify('The Return of Inheritance: France 1820–2020')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('The Return of Inheritance: France 1820–2020')}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           Piketty shows that annual inheritance flows in France are returning to 19th-century levels.
           Before 1914, inherited wealth represented ~25% of national income annually. Wars and progressive
@@ -711,8 +722,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
 
   const renderHistorical = () => (
     <div className="space-y-6">
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>The U-Shaped Curve of Inequality: 1910&ndash;2022</h3>
+      <div id={slugify('The U-Shaped Curve of Inequality: 1910–2022')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('The U-Shaped Curve of Inequality: 1910–2022')}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           The top 10% income share in the United States traces a dramatic U: extreme inequality in the Roaring
           Twenties, a sustained period of relative equality from the 1940s to the 1970s (&quot;The Great
@@ -770,8 +781,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-4 ${tc.text}`}>Key Milestones in the History of Inequality</h3>
+      <div id={slugify('Key Milestones in the History of Inequality')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('Key Milestones in the History of Inequality', 'mb-4')}
         <div className="space-y-2">
           {INEQUALITY_MILESTONES.map((m, i) => (
             <div key={i} className={`rounded-lg border p-3 cursor-pointer transition-all ${tc.card} ${tc.cardHover}`} onClick={() => setExpandedMilestone(expandedMilestone === i ? null : i)}>
@@ -842,8 +853,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
     };
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Global Gini Coefficients</h3>
+        <div id={slugify('Global Gini Coefficients')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderCardTitle('Global Gini Coefficients')}
           <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
             The Gini coefficient measures income inequality on a 0&ndash;100 scale. A value of 0 means
             perfect equality; 100 means all income goes to one person. Most countries fall between 25
@@ -899,8 +910,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
           </div>
         </div>
 
-        <div className={`rounded-xl border p-5 ${tc.card}`}>
-          <h3 className={`font-bold text-lg mb-3 ${tc.text}`}>Country Rankings by Gini Coefficient</h3>
+        <div id={slugify('Country Rankings by Gini Coefficient')} className={`rounded-xl border p-5 ${tc.card}`}>
+          {renderCardTitle('Country Rankings by Gini Coefficient', 'mb-3', 'dataset')}
           <p className={`text-sm mb-4 ${tc.textSec}`}>
             {giniEntries.length > 0 ? `Showing ${giniEntries.length} countries with available data.` : 'Loading data from World Bank...'}
           </p>
@@ -939,8 +950,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
 
   const renderTax = () => (
     <div className="space-y-6">
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Top Marginal Income Tax Rates (1900&ndash;2020)</h3>
+      <div id={slugify('Top Marginal Income Tax Rates (1900–2020)')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('Top Marginal Income Tax Rates (1900–2020)')}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           The story of inequality in the 20th century is inseparable from the story of taxation. Top marginal
           rates rose dramatically during and after the World Wars (exceeding 90% in the US and UK), then
@@ -966,8 +977,8 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${tc.card}`}>
-        <h3 className={`font-bold text-lg mb-2 ${tc.text}`}>Capital Gains vs Labour Income Taxation: USA</h3>
+      <div id={slugify('Capital Gains vs Labour Income Taxation: USA')} className={`rounded-xl border p-5 ${tc.card}`}>
+        {renderCardTitle('Capital Gains vs Labour Income Taxation: USA')}
         <p className={`text-sm mb-5 leading-relaxed ${tc.textTer}`}>
           A critical source of inequality is the divergence between how labour income and capital income are
           taxed. In the US, capital gains have almost always been taxed at lower rates than wages. This means

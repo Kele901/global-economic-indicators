@@ -24,6 +24,8 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const ExportTicker                  = dynamic(() => import('../components/ExportTicker'),                  { ssr: false });
 const TradeBalanceChart             = dynamic(() => import('../components/TradeBalanceChart'),             { ssr: false });
@@ -38,15 +40,22 @@ const TradeFrictionsTimeline        = dynamic(() => import('../components/TradeF
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: {
-  isDarkMode: boolean; chapter: string; title: string; subtitle: string;
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, shareSubject = 'chart' }: {
+  isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean; shareSubject?: 'chart' | 'dataset';
 }) {
   return (
-    <div className="mb-6">
+    <div id={share ? slugify(title) : undefined} className="mb-6">
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
         {chapter}
       </div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} subject={shareSubject} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -173,7 +182,7 @@ export default function TradeLedgerPage() {
         </div>
 
         {/* Hero: ticker + KPI cards */}
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Trade Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <ExportTicker
             isDarkMode={isDarkMode}
             exports={exports}
@@ -222,6 +231,7 @@ export default function TradeLedgerPage() {
             <DataDownloadButton
               isDarkMode={isDarkMode}
               filename="trade-ledger-data"
+              shareTitle="Trade Ledger key figures"
               label="Data"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
@@ -266,6 +276,7 @@ export default function TradeLedgerPage() {
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
+            share={false}
             title="The Balance"
             subtitle="Current-account balance as % of GDP — who is a net creditor to the world, who is a net debtor. Persistent surpluses (Germany, China) and deficits (US, UK) reveal structural asymmetries in savings vs consumption."
           />
@@ -291,6 +302,7 @@ export default function TradeLedgerPage() {
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
+            share={false}
             title="The Tariff Wall"
             subtitle="How high the border walls really are, and who is raising them fastest. WTO applied rates for 15 economies at the top, US-China bilateral escalation 2018-2025 below."
           />
@@ -313,6 +325,7 @@ export default function TradeLedgerPage() {
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
+            shareSubject="dataset"
             title="Trade Agreements"
             subtitle="Membership matrix for the five biggest FTAs. RCEP is Asia-Pacific + China; CPTPP is Asia-Pacific minus China + UK; USMCA is North America; the EU is the deepest bloc; AfCFTA is the newcomer."
           />
@@ -325,6 +338,7 @@ export default function TradeLedgerPage() {
             <ChapterHeader
               isDarkMode={isDarkMode}
               chapter="Chapter 7"
+              share={false}
               title="Supply-Chain Concentration"
               subtitle="Where the world's critical inputs come from. Rare earths, lithium, cobalt, semiconductors, solar PV — any product where the top-3 producers combine for &gt;90% is a real single-point-of-failure risk."
             />

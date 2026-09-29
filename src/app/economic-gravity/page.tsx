@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { ResponsiveContainer, LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import InfoPanel from '../components/InfoPanel';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { economicMetrics } from '../data/economicMetrics';
 import dynamic from 'next/dynamic';
 import type { HistoricalPoint } from '../components/EconomicGravityMap';
@@ -337,6 +339,14 @@ const gdpShareData = [
 
 type ChartType = 'line' | 'stacked_area' | 'stacked_bar' | 'area_line' | 'bump';
 
+const CHART_TABS: { key: ChartType; label: string }[] = [
+  { key: 'line', label: 'Line' },
+  { key: 'stacked_area', label: 'Stacked Area' },
+  { key: 'stacked_bar', label: 'Stacked Bar' },
+  { key: 'area_line', label: 'Area + Line' },
+  { key: 'bump', label: 'Ranking' },
+];
+
 const REGIONS = ['Asia', 'Europe', 'Americas', 'Africa', 'Oceania'] as const;
 const REGION_COLORS: Record<string, string> = {
   Asia: '#f97316', Europe: '#3b82f6', Americas: '#22c55e', Africa: '#eab308', Oceania: '#8b5cf6'
@@ -380,6 +390,8 @@ const EconomicGravityPage = () => {
     shadow: isDarkMode ? 'shadow-blue-900/20' : 'shadow-blue-100',
   };
 
+  const timelineShareTitle = `Historical Timeline: ${CHART_TABS.find(t => t.key === activeChart)?.label ?? 'Line'}`;
+
   return (
     <div className={`w-full max-w-6xl mx-auto p-4 ${themeColors.text} ${themeColors.background} min-h-screen`}>
       {/* Header Section */}
@@ -421,7 +433,7 @@ const EconomicGravityPage = () => {
       </div>
 
       {/* World Map Visualization - NEW RESPONSIVE MAP */}
-      <div className={`mb-12 p-4 sm:p-6 rounded-2xl relative ${
+      <div id={slugify('Global Economic Center of Gravity')} className={`mb-12 p-4 sm:p-6 rounded-2xl relative ${
         isDarkMode 
           ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 border border-gray-700' 
           : 'bg-gradient-to-br from-white via-gray-50 to-white border border-gray-100'
@@ -431,13 +443,16 @@ const EconomicGravityPage = () => {
             <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
             Global Economic Center of Gravity
           </h2>
-          {/* Info Panel for Economic Center of Gravity */}
-          <InfoPanel
-            metric={economicMetrics.economicCenterOfGravity}
-            isDarkMode={isDarkMode}
-            position="top-right"
-            size="small"
-          />
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {/* Info Panel for Economic Center of Gravity */}
+            <InfoPanel
+              metric={economicMetrics.economicCenterOfGravity}
+              isDarkMode={isDarkMode}
+              position="top-right"
+              size="small"
+            />
+            <SocialShareMenu title="Global Economic Center of Gravity" isDarkMode={isDarkMode} />
+          </div>
         </div>
         
         {/* Responsive Interactive Map */}
@@ -454,11 +469,16 @@ const EconomicGravityPage = () => {
       </div>
 
       {/* Timeline Visualization */}
-      <div className={`p-4 sm:p-8 rounded-2xl mb-12 relative ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow} backdrop-blur-sm`}>
-        <h2 className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
-          Historical Timeline
-        </h2>
+      <div id={slugify(timelineShareTitle)} className={`p-4 sm:p-8 rounded-2xl mb-12 relative ${themeColors.cardBg} border ${themeColors.border} shadow-lg ${themeColors.shadow} backdrop-blur-sm`}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-4 sm:mb-6">
+          <h2 className={`text-xl sm:text-2xl font-bold flex items-center ${themeColors.text}`}>
+            <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
+            Historical Timeline
+          </h2>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={timelineShareTitle} isDarkMode={isDarkMode} />
+          </div>
+        </div>
         
         <p className={`text-sm mb-4 ${themeColors.textSecondary} max-w-2xl`}>
           Track the shifting balance of global economic power across continents and time periods. 
@@ -468,13 +488,7 @@ const EconomicGravityPage = () => {
 
         {/* Chart type tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {([
-            { key: 'line' as ChartType, label: 'Line' },
-            { key: 'stacked_area' as ChartType, label: 'Stacked Area' },
-            { key: 'stacked_bar' as ChartType, label: 'Stacked Bar' },
-            { key: 'area_line' as ChartType, label: 'Area + Line' },
-            { key: 'bump' as ChartType, label: 'Ranking' },
-          ]).map(tab => (
+          {CHART_TABS.map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveChart(tab.key)}
@@ -743,13 +757,18 @@ const EconomicGravityPage = () => {
         </div>
         
         {/* Enhanced chart statistics */}
-        <div className={`mt-6 p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'} border`}>
-          <h4 className={`font-semibold text-sm mb-3 ${themeColors.text} flex items-center`}>
-            <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Key Economic Shifts
-          </h4>
+        <div id={slugify('Key Economic Shifts')} className={`mt-6 p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'} border`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h4 className={`font-semibold text-sm ${themeColors.text} flex items-center`}>
+              <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Key Economic Shifts
+            </h4>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Key Economic Shifts" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3 text-xs">
             <div className="text-center">
               <div className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>2000 BCE</div>
@@ -796,11 +815,16 @@ const EconomicGravityPage = () => {
       </div>
 
       {/* Historical Points - Compact Grid */}
-      <div className={`mb-12 p-4 sm:p-6 rounded-2xl ${themeColors.cardBg} border ${themeColors.border}`}>
-        <h2 className={`text-xl sm:text-2xl font-bold mb-6 flex items-center ${themeColors.text}`}>
-          <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
-          Historical Economic Centers
-        </h2>
+      <div id={slugify('Historical Economic Centers')} className={`mb-12 p-4 sm:p-6 rounded-2xl ${themeColors.cardBg} border ${themeColors.border}`}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-6">
+          <h2 className={`text-xl sm:text-2xl font-bold flex items-center ${themeColors.text}`}>
+            <span className={`inline-block w-2 h-2 rounded-full mr-3 bg-blue-500`} />
+            Historical Economic Centers
+          </h2>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title="Historical Economic Centers" subject="dataset" isDarkMode={isDarkMode} />
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {historicalData.map((point, index) => (
             <button

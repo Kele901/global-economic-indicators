@@ -33,19 +33,21 @@ export default function LearnBanner() {
     <div
       role="region"
       aria-label="Beginner\u2019s guide callout"
-      className="max-w-7xl mx-auto mb-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/20 px-4 py-3 flex items-center gap-3"
+      className="max-w-7xl mx-auto mb-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/20 px-4 py-3 flex items-start sm:items-center gap-3"
     >
       <span className="text-2xl shrink-0" aria-hidden>🎓</span>
-      <div className="flex-1 text-sm text-gray-800 dark:text-gray-200">
-        <span className="font-semibold">New to economics?</span>{' '}
-        Start with our beginner&apos;s guide for ages 13+ — plain-English lessons, quick demos, and a printable certificate.
+      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <div className="flex-1 text-sm text-gray-800 dark:text-gray-200">
+          <span className="font-semibold">New to economics?</span>{' '}
+          Start with our beginner&apos;s guide for ages 13+ — plain-English lessons, quick demos, and a printable certificate.
+        </div>
+        <a
+          href="/learn"
+          className="self-start sm:self-auto text-xs font-semibold px-3 py-2.5 sm:py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors shrink-0"
+        >
+          Start learning →
+        </a>
       </div>
-      <a
-        href="/learn"
-        className="text-xs font-semibold px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors shrink-0"
-      >
-        Start learning →
-      </a>
       <button
         onClick={dismiss}
         aria-label="Dismiss beginner\u2019s guide banner"

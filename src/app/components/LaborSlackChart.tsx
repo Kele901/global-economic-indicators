@@ -19,11 +19,12 @@ import ChartA11yCaption from './ChartA11yCaption';
 
 interface Props {
   isDarkMode: boolean;
+  shareTitle?: string;
   unemploymentRates: CountryData[] | undefined;
   youthUnemployment: CountryData[] | undefined;
 }
 
-export default function LaborSlackChart({ isDarkMode, unemploymentRates, youthUnemployment }: Props) {
+export default function LaborSlackChart({ isDarkMode, unemploymentRates, youthUnemployment, shareTitle }: Props) {
   const theme = useChartTheme(isDarkMode);
 
   const rows = useMemo(() => (
@@ -47,7 +48,7 @@ export default function LaborSlackChart({ isDarkMode, unemploymentRates, youthUn
 
   if (rows.length === 0) {
     return (
-      <ChartCard isDarkMode={isDarkMode} height="h-auto">
+      <ChartCard isDarkMode={isDarkMode} shareTitle={shareTitle} height="h-auto">
         <p className={`text-sm ${theme.subtitleCls}`}>
           Live World Bank unemployment data has not arrived yet. The curated chapters below are
           unaffected.
@@ -62,6 +63,7 @@ export default function LaborSlackChart({ isDarkMode, unemploymentRates, youthUn
   return (
     <ChartCard
       isDarkMode={isDarkMode}
+      shareTitle={shareTitle}
       height={Math.max(460, rows.length * 24)}
       caption={
         <ChartA11yCaption

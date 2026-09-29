@@ -6,6 +6,8 @@ import {
   ResponsiveContainer, Cell,
 } from 'recharts';
 import { culturalChartColors } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface LinguisticDiversityChartProps {
   isDarkMode: boolean;
@@ -93,10 +95,15 @@ const LinguisticDiversityChart: React.FC<LinguisticDiversityChartProps> = ({
       </div>
 
       {viewMode === 'diversity' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Language Diversity Index</h3>
+        <div id={slugify('Language Diversity Index')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Language Diversity Index</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Language Diversity Index" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Higher values indicate greater linguistic plurality (0–1 scale)</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={diversityData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -123,8 +130,13 @@ const LinguisticDiversityChart: React.FC<LinguisticDiversityChartProps> = ({
       )}
 
       {viewMode === 'endangered' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Endangered Languages</h3>
+        <div id={slugify('Endangered Languages')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Endangered Languages</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Endangered Languages" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Number of endangered languages by country</p>
           <div className="w-full" style={{ height: endangeredChartHeight }}>
             <ResponsiveContainer width="100%" height="100%">

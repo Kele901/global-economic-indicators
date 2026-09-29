@@ -16,7 +16,8 @@ import { useMemo } from 'react';
 import {
   BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { useChartTheme } from '../../utils/chartTheme';
+import { useChartTheme, truncateLabel } from '../../utils/chartTheme';
+import { useIsMobile } from '../../hooks/useViewportSize';
 import ChartCard from './ChartCard';
 import ChartA11yCaption from '../ChartA11yCaption';
 
@@ -64,12 +65,13 @@ export default function WaterfallChart({
   provenance,
   actions,
   footnote,
-  height = 'h-[420px]',
+  height = 'h-[300px] sm:h-[420px]',
   valueFormat,
   yLabel,
   risingIsGood = true,
 }: Props) {
   const theme = useChartTheme(isDarkMode);
+  const isMobile = useIsMobile();
 
   const rows = useMemo<Row[]>(() => {
     let running = 0;
@@ -126,7 +128,10 @@ export default function WaterfallChart({
       footnote={footnote}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={rows} margin={{ top: 20, right: 20, left: 10, bottom: 60 }}>
+        <BarChart
+          data={rows}
+          margin={isMobile ? { top: 16, right: 8, left: 0, bottom: 40 } : { top: 20, right: 20, left: 10, bottom: 60 }}
+        >
           <CartesianGrid stroke={theme.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="label"
@@ -134,11 +139,13 @@ export default function WaterfallChart({
             tick={{ fontSize: 10 }}
             angle={-45}
             textAnchor="end"
-            height={70}
+            height={isMobile ? 56 : 70}
             interval={0}
+            tickFormatter={isMobile ? (v: unknown) => truncateLabel(v, 12) : undefined}
           />
           <YAxis
             stroke={theme.axis}
+            width={isMobile ? 44 : 60}
             tick={{ fontSize: 11 }}
             tickFormatter={v => fmt(Number(v))}
             label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fill: theme.axis, fontSize: 11 } : undefined}

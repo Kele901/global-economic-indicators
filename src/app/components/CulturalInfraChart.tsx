@@ -7,6 +7,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { culturalChartColors, formatPercent } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CulturalInfraChartProps {
   isDarkMode: boolean;
@@ -102,10 +104,15 @@ const CulturalInfraChart: React.FC<CulturalInfraChartProps> = ({
       </div>
 
       {viewMode === 'museums' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Museum Density</h3>
+        <div id={slugify('Museum Density')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Museum Density</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Museum Density" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Museums per million inhabitants</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={museumData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -124,8 +131,13 @@ const CulturalInfraChart: React.FC<CulturalInfraChartProps> = ({
       )}
 
       {viewMode === 'cities' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>UNESCO Creative Cities Network</h3>
+        <div id={slugify('UNESCO Creative Cities Network')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>UNESCO Creative Cities Network</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="UNESCO Creative Cities Network" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Designated cities across creative fields</p>
           <div className="w-full h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -163,10 +175,15 @@ const CulturalInfraChart: React.FC<CulturalInfraChartProps> = ({
       )}
 
       {viewMode === 'education' && educationData.length > 0 && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Education Expenditure</h3>
+        <div id={slugify('Education Expenditure')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Education Expenditure</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Education Expenditure" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Government spending on education (% of GDP)</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={educationData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />

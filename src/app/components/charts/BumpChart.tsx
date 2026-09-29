@@ -16,7 +16,8 @@ import { useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { useChartTheme } from '../../utils/chartTheme';
+import { useChartTheme, truncateLabel } from '../../utils/chartTheme';
+import { useIsMobile } from '../../hooks/useViewportSize';
 import ChartCard from './ChartCard';
 import ChartTooltip from './ChartTooltip';
 import ChartA11yCaption from '../ChartA11yCaption';
@@ -71,9 +72,10 @@ export default function BumpChart({
   provenance,
   actions,
   footnote,
-  height = 'h-[460px]',
+  height = 'h-[320px] sm:h-[460px]',
 }: Props) {
   const theme = useChartTheme(isDarkMode);
+  const isMobile = useIsMobile();
 
   const { rows, shown, worstRank } = useMemo(() => {
     const bestRankByKey = new Map<string, number>();
@@ -150,7 +152,7 @@ export default function BumpChart({
       footnote={footnote}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={rows} margin={{ top: 10, right: 110, left: 10, bottom: 10 }}>
+        <LineChart data={rows} margin={{ top: 10, right: isMobile ? 72 : 110, left: isMobile ? 0 : 10, bottom: 10 }}>
           <CartesianGrid stroke={theme.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="x" stroke={theme.axis} tick={{ fontSize: 11 }} />
           <YAxis
@@ -162,7 +164,7 @@ export default function BumpChart({
             stroke={theme.axis}
             tick={{ fontSize: 11 }}
             tickFormatter={v => `#${v}`}
-            width={44}
+            width={isMobile ? 32 : 44}
           />
           <Tooltip
             content={
@@ -203,10 +205,10 @@ export default function BumpChart({
                     x={x + 8}
                     y={y + 4}
                     fill={s.color}
-                    fontSize={11}
+                    fontSize={isMobile ? 10 : 11}
                     fontWeight={600}
                   >
-                    {s.label}
+                    {isMobile ? truncateLabel(s.label, 10) : s.label}
                   </text>
                 );
               }}

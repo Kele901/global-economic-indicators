@@ -4,6 +4,10 @@ import { useMemo } from 'react';
 import type { CommodityHistory } from '../services/commodities';
 import Sparkline from './Sparkline';
 import ChartA11yCaption from './ChartA11yCaption';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TICKER_TITLE = 'Live commodity prices';
 
 interface Props {
   isDarkMode: boolean;
@@ -57,15 +61,16 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
   const doubled = [...items, ...items];
 
   return (
+    <div id={slugify(TICKER_TITLE)} className="flex items-center gap-2">
     <div
-      className={`relative overflow-hidden rounded-lg border ${
+      className={`relative flex-1 min-w-0 overflow-hidden rounded-lg border ${
         isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
       }`}
       role="region"
       aria-label="Live commodity prices — scrolling ticker"
     >
       <ChartA11yCaption
-        title="Live commodity prices"
+        title={TICKER_TITLE}
         unit=" USD"
         precision={2}
         rows={items.map(i => ({ label: i.meta.label, value: i.latest?.value ?? null }))}
@@ -161,6 +166,8 @@ export default function CommodityTicker({ isDarkMode, commodities, loading, onRe
           to { transform: translateX(-50%); }
         }
       `}</style>
+    </div>
+      <SocialShareMenu title={TICKER_TITLE} isDarkMode={isDarkMode} className="shrink-0" />
     </div>
   );
 }

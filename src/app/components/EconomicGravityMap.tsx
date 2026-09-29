@@ -9,6 +9,8 @@ import {
   Line,
   ZoomableGroup,
 } from 'react-simple-maps';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 // World map TopoJSON URL (free, reliable source)
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -466,6 +468,7 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
       {/* Selected Point Info Card */}
       {selectedPoint && (
         <div 
+          id={slugify(`${selectedPoint.center} (${selectedPoint.label})`)}
           className={`mt-4 p-4 sm:p-6 rounded-xl border transition-all duration-300 ${
             isDarkMode 
               ? 'bg-gray-800 border-gray-700' 
@@ -493,6 +496,8 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
                 {selectedPoint.description}
               </p>
             </div>
+            <div className="flex items-center gap-2 flex-wrap shrink-0 self-start">
+            <SocialShareMenu title={`${selectedPoint.center} (${selectedPoint.label})`} isDarkMode={isDarkMode} />
             <button
               onClick={() => onSelectPoint(null)}
               className={`self-start p-2 rounded-lg transition-colors ${
@@ -506,6 +511,7 @@ const EconomicGravityMap: React.FC<EconomicGravityMapProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+            </div>
           </div>
           
           {(selectedPoint.population || selectedPoint.estimatedGDP || selectedPoint.keyFigures) && (

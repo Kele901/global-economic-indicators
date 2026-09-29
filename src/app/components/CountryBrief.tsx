@@ -12,6 +12,8 @@ import { SOVEREIGN_RATINGS_2025 } from '../services/debtCurated';
 import { ELECTRICITY_MIX_2023 } from '../services/energyCurated';
 import { SPEND_OUTCOME_2023 } from '../services/healthCurated';
 import { WAGES_2023 } from '../services/laborCurated';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const KEY_TO_ISO3: Record<string, string> = {
   USA: 'USA', Canada: 'CAN', UK: 'GBR', France: 'FRA', Germany: 'DEU', Italy: 'ITA',
@@ -70,20 +72,25 @@ export default function CountryBrief({ countryKey, displayName, isDarkMode }: Pr
 
   if (stats.length === 0) return null;
 
+  const title = `${displayName} across the ledgers`;
+
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${cardBg}`}>
-      <div className="flex items-start justify-between mb-4">
+    <div id={slugify(title)} className={`rounded-xl border p-4 sm:p-6 mb-8 ${cardBg}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
         <div>
           <div className={`text-[11px] uppercase tracking-[0.2em] mb-1 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>At a glance</div>
-          <h2 className={`text-xl font-bold ${text}`}>{displayName} across the ledgers</h2>
+          <h2 className={`text-xl font-bold ${text}`}>{title}</h2>
           <p className={`text-xs mt-1 ${muted}`}>Curated cross-ledger snapshots. Click a card to open its full ledger.</p>
         </div>
-        <button
-          onClick={() => window.print()}
-          className="text-xs font-semibold px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors print:hidden"
-        >
-          Print country brief
-        </button>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <button
+            onClick={() => window.print()}
+            className="text-xs font-semibold px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors print:hidden"
+          >
+            Print country brief
+          </button>
+          <SocialShareMenu title={title} isDarkMode={isDarkMode} className="print:hidden" />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

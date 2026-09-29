@@ -6,6 +6,10 @@
 
 import { useMemo, useState } from 'react';
 import { REMITTANCE_CORRIDORS_2024 } from '../services/migrationCurated';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Top-25 remittance corridors (2024)';
 
 interface Props {
   isDarkMode: boolean;
@@ -56,14 +60,17 @@ export default function RemittanceCorridorTable({ isDarkMode }: Props) {
   }
 
   return (
-    <div className={`rounded-lg border ${cardBg}`}>
+    <div id={slugify(TITLE)} className={`rounded-lg border ${cardBg}`}>
       <div className="p-4 sm:p-6 border-b border-inherit flex items-center justify-between flex-wrap gap-3">
         <div>
-          <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>Top-25 remittance corridors (2024)</div>
+          <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>{TITLE}</div>
           <p className={`text-sm ${textSec}`}>World Bank Bilateral Remittance Matrix estimates. USD billions.</p>
         </div>
-        <div className={`text-sm font-medium ${isDarkMode ? 'text-emerald-300' : 'text-emerald-700'}`}>
-          ${total.toFixed(1)}B <span className={textMuted}>total across top 25</span>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <div className={`text-sm font-medium ${isDarkMode ? 'text-emerald-300' : 'text-emerald-700'}`}>
+            ${total.toFixed(1)}B <span className={textMuted}>total across top 25</span>
+          </div>
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} subject="dataset" />
         </div>
       </div>
 

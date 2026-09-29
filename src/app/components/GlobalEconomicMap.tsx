@@ -8,6 +8,8 @@ import {
   Marker,
   ZoomableGroup,
 } from 'react-simple-maps';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 // World map TopoJSON URL
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -468,9 +470,12 @@ const GlobalEconomicMap: React.FC<GlobalEconomicMapProps> = ({
 
   const showInflation = activeView === 'inflation' || activeView === 'both';
   const showCostOfLiving = activeView === 'cost-of-living' || activeView === 'both';
+  const shareTitle = `Global Economic Map: ${
+    activeView === 'inflation' ? 'Inflation Rates' : activeView === 'cost-of-living' ? 'Cost of Living' : 'Inflation and Cost of Living'
+  }`;
 
   return (
-    <div className="space-y-4">
+    <div id={slugify(shareTitle)} className="space-y-4">
       {/* View Toggle Buttons */}
       <div className={`flex flex-wrap gap-2 p-3 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
         <button
@@ -503,6 +508,7 @@ const GlobalEconomicMap: React.FC<GlobalEconomicMapProps> = ({
         >
           Both
         </button>
+        <SocialShareMenu title={shareTitle} isDarkMode={isDarkMode} className="ml-auto self-center shrink-0" />
       </div>
 
       {/* Map Container */}

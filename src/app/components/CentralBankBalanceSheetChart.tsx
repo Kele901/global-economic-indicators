@@ -8,6 +8,10 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceArea } from 'recharts';
 import { CB_BALANCE_SHEETS_2007_2025 } from '../services/debtCurated';
 import { useViewportSize } from '../hooks/useViewportSize';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Central Bank Balance Sheets';
 
 interface Props {
   isDarkMode: boolean;
@@ -42,8 +46,13 @@ export default function CentralBankBalanceSheetChart({ isDarkMode }: Props) {
   const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-      <h3 className={`text-base sm:text-lg font-semibold mb-1 ${text}`}>Central Bank Balance Sheets</h3>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+        <h3 className={`text-base sm:text-lg font-semibold ${text}`}>{TITLE}</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <p className={`text-xs mb-4 ${muted}`}>USD trillions, quarter-end. Shaded zone marks the 2020-2021 pandemic QE surge.</p>
       <div className="h-[380px]">
         <ResponsiveContainer width="100%" height="100%">

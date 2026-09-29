@@ -11,6 +11,8 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import type { Lesson, DemoKey } from '../../learn/lessons';
 import type { QuizScore } from '../../hooks/useLearnProgress';
+import { absoluteUrl } from '../../lib/site';
+import SocialShareMenu from '../SocialShareMenu';
 import QuizBlock from './QuizBlock';
 
 const InflationDemo = dynamic(() => import('./InflationDemo'), { ssr: false });
@@ -82,6 +84,8 @@ export default function LessonPanel({ lesson, isDarkMode, isComplete, quizScore,
 
   const Demo = lesson.demoKey ? DEMO_MAP[lesson.demoKey] : null;
   const Workshop = lesson.workshopKey ? DEMO_MAP[lesson.workshopKey] : null;
+  const workshopTitle = lesson.workshopTitle ?? 'Workshop';
+  const lessonUrl = absoluteUrl(`/learn#lesson-${lesson.id}`);
 
   return (
     <article
@@ -163,8 +167,13 @@ export default function LessonPanel({ lesson, isDarkMode, isComplete, quizScore,
           {/* Interactive demo */}
           {Demo && (
             <div>
-              <div className={`text-[11px] uppercase tracking-wider font-semibold mb-2 ${isDarkMode ? 'text-emerald-300' : 'text-emerald-600'}`}>
-                Try it yourself
+              <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                <div className={`text-[11px] uppercase tracking-wider font-semibold ${isDarkMode ? 'text-emerald-300' : 'text-emerald-600'}`}>
+                  Try it yourself
+                </div>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title={`${lesson.title}: try it yourself`} url={lessonUrl} isDarkMode={isDarkMode} />
+                </div>
               </div>
               <Demo isDarkMode={isDarkMode} />
             </div>
@@ -173,8 +182,13 @@ export default function LessonPanel({ lesson, isDarkMode, isComplete, quizScore,
           {/* Workshop — a longer sandbox, when the lesson has one */}
           {Workshop && (
             <div>
-              <div className={`text-[11px] uppercase tracking-wider font-semibold mb-2 ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`}>
-                {lesson.workshopTitle ?? 'Workshop'}
+              <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                <div className={`text-[11px] uppercase tracking-wider font-semibold ${isDarkMode ? 'text-purple-300' : 'text-purple-600'}`}>
+                  {workshopTitle}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title={workshopTitle} url={lessonUrl} isDarkMode={isDarkMode} />
+                </div>
               </div>
               <Workshop isDarkMode={isDarkMode} />
             </div>

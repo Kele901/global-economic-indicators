@@ -8,6 +8,8 @@ import {
   debtCyclePhases,
   type CycleIndicator 
 } from '../data/economicCycles';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CyclePhaseIndicatorProps {
   isDarkMode: boolean;
@@ -95,15 +97,20 @@ const CyclePhaseIndicator: React.FC<CyclePhaseIndicatorProps> = ({ isDarkMode })
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
+    <div id={slugify('Where Are We in the Cycle?')} className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
       {/* Header */}
-      <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Where Are We in the Cycle?
-        </h3>
-        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          Current economic indicators compared to historical patterns
-        </p>
+      <div className={`px-4 py-3 border-b flex items-start justify-between gap-2 flex-wrap ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div>
+          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Where Are We in the Cycle?
+          </h3>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Current economic indicators compared to historical patterns
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Where Are We in the Cycle?" isDarkMode={isDarkMode} />
+        </div>
       </div>
 
       <div className="p-6">
@@ -236,10 +243,15 @@ const CyclePhaseIndicator: React.FC<CyclePhaseIndicatorProps> = ({ isDarkMode })
         </div>
 
         {/* Indicator Grid */}
-        <div className="mt-6">
-          <h4 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            Key Economic Indicators
-          </h4>
+        <div id={slugify('Key Economic Indicators')} className="mt-6">
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h4 className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Key Economic Indicators
+            </h4>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Key Economic Indicators" subject="dataset" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {cycleIndicators.map((indicator, idx) => {
               const status = getIndicatorStatus(indicator);

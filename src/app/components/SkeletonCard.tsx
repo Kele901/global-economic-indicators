@@ -13,7 +13,7 @@ interface Props {
 
 export default function SkeletonCard({
   isDarkMode = false,
-  height = 'h-[420px]',
+  height = 'h-[300px] sm:h-[420px]',
   label = 'Loading chart',
 }: Props) {
   const shell = isDarkMode ? 'border-gray-700 bg-gray-800/60' : 'border-gray-200 bg-white';

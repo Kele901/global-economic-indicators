@@ -9,6 +9,10 @@ import type { CountryData } from '../services/worldbank';
 import { latestEntry } from '../utils/countryData';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES } from '../utils/countryMappings';
 import ChartA11yCaption from './ChartA11yCaption';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const SHARE_TITLE = 'Most and least equal economies by Gini index';
 
 interface Props {
   isDarkMode: boolean;
@@ -44,23 +48,28 @@ export default function GiniTicker({ isDarkMode, gini }: Props) {
   }
 
   return (
-    <div className={`rounded-lg border bg-gradient-to-r overflow-hidden ${bg}`} aria-label="Gini index by country, most and least equal">
-      <ChartA11yCaption
-        title="Gini index, latest available survey"
-        precision={1}
-        rows={rows.map(r => ({ label: `${r.name} (${r.year})`, value: r.gini }))}
-      />
-      <div className="flex gap-6 py-3 px-4 overflow-x-auto whitespace-nowrap text-sm">
-        {rows.concat(rows).map((r, i) => {
-          const tone = r.gini >= 45 ? 'text-rose-500' : r.gini < 30 ? 'text-emerald-500' : 'text-amber-500';
-          return (
-            <span key={i} className="inline-flex items-center gap-2">
-              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>{r.name}</span>
-              <span className={`tabular-nums font-semibold ${tone}`}>{r.gini.toFixed(1)}</span>
-              <span className={`text-xs tabular-nums ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{r.year}</span>
-            </span>
-          );
-        })}
+    <div id={slugify(SHARE_TITLE)} className="flex items-center gap-2">
+      <div className={`flex-1 min-w-0 rounded-lg border bg-gradient-to-r overflow-hidden ${bg}`} aria-label="Gini index by country, most and least equal">
+        <ChartA11yCaption
+          title="Gini index, latest available survey"
+          precision={1}
+          rows={rows.map(r => ({ label: `${r.name} (${r.year})`, value: r.gini }))}
+        />
+        <div className="flex gap-6 py-3 px-4 overflow-x-auto whitespace-nowrap text-sm">
+          {rows.concat(rows).map((r, i) => {
+            const tone = r.gini >= 45 ? 'text-rose-500' : r.gini < 30 ? 'text-emerald-500' : 'text-amber-500';
+            return (
+              <span key={i} className="inline-flex items-center gap-2">
+                <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>{r.name}</span>
+                <span className={`tabular-nums font-semibold ${tone}`}>{r.gini.toFixed(1)}</span>
+                <span className={`text-xs tabular-nums ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{r.year}</span>
+              </span>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap shrink-0">
+        <SocialShareMenu title={SHARE_TITLE} isDarkMode={isDarkMode} />
       </div>
     </div>
   );

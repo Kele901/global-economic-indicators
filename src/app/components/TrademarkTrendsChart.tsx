@@ -17,6 +17,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface TrademarkTrendsChartProps {
   isDarkMode: boolean;
@@ -192,7 +194,7 @@ const TrademarkTrendsChart: React.FC<TrademarkTrendsChartProps> = ({
   const displayData = viewMode === 'growth' ? growthData : viewMode === 'comparison' ? comparisonData : filteredData;
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Trademark Application Trends')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -263,6 +265,8 @@ const TrademarkTrendsChart: React.FC<TrademarkTrendsChartProps> = ({
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
+
+          <SocialShareMenu title="Trademark Application Trends" isDarkMode={isDarkMode} />
         </div>
       </div>
 

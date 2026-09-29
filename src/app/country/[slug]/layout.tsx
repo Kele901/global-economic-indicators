@@ -4,6 +4,7 @@ import {
   COUNTRY_DISPLAY_NAMES,
   COUNTRY_KEY_TO_SLUG,
 } from '../../utils/countryMappings';
+import { withOgImage } from '../../lib/og';
 
 export function generateStaticParams() {
   return Object.values(COUNTRY_KEY_TO_SLUG).map((slug) => ({ slug }));
@@ -24,7 +25,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   const title = `${name} Economy: GDP, Inflation, Interest Rates & Debt`;
   const description = `Economic profile of ${name}. GDP growth, inflation, policy interest rates, unemployment, government debt, trade balance and 20 further indicators, charted from World Bank, IMF and FRED data.`;
 
-  return {
+  return withOgImage(canonical, {
     title: `${title} | Global Economic Indicators`,
     description,
     keywords: `${name} economy, ${name} GDP, ${name} inflation rate, ${name} interest rates, ${name} unemployment, ${name} government debt, ${name} economic indicators`,
@@ -40,7 +41,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       title,
       description,
     },
-  };
+  }, { section: `${name} \u00b7 Country profile` });
 }
 
 export default function CountryLayout({ children }: { children: React.ReactNode }) {

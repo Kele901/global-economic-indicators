@@ -6,6 +6,8 @@ import {
   ResponsiveContainer, Cell,
 } from 'recharts';
 import { culturalChartColors } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface IntangibleHeritageChartProps {
   isDarkMode: boolean;
@@ -116,12 +118,17 @@ const IntangibleHeritageChart: React.FC<IntangibleHeritageChartProps> = ({
       </div>
 
       {viewMode === 'intangible' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Intangible Cultural Heritage</h3>
+        <div id={slugify('Intangible Cultural Heritage')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Intangible Cultural Heritage</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Intangible Cultural Heritage" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Number of UNESCO Intangible Cultural Heritage inscriptions by country
           </p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={intangibleData}
@@ -149,12 +156,17 @@ const IntangibleHeritageChart: React.FC<IntangibleHeritageChartProps> = ({
       )}
 
       {viewMode === 'endangered' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>World Heritage in danger</h3>
+        <div id={slugify('World Heritage in danger')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>World Heritage in danger</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="World Heritage in danger" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             Countries with the most World Heritage sites listed as &quot;in danger&quot;
           </p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={endangeredData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -178,12 +190,17 @@ const IntangibleHeritageChart: React.FC<IntangibleHeritageChartProps> = ({
       )}
 
       {viewMode === 'memory' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Memory of the World</h3>
+        <div id={slugify('Memory of the World')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Memory of the World</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Memory of the World" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
             UNESCO Memory of the World register entries by country
           </p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={memoryData}

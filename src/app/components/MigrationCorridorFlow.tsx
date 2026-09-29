@@ -9,6 +9,10 @@
 import { useMemo, useState } from 'react';
 import { REMITTANCE_CORRIDORS_2024 } from '../services/migrationCurated';
 import FlowDiagram, { type FlowColumn, type FlowNode, type FlowLink } from './charts/FlowDiagram';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Remittance Corridors, 2024';
 
 interface Props {
   isDarkMode: boolean;
@@ -84,15 +88,15 @@ export default function MigrationCorridorFlow({ isDarkMode }: Props) {
   const biggest = corridors[0];
 
   return (
-    <div className={`rounded-xl border p-4 sm:p-6 ${cardCls}`}>
+    <div id={slugify(TITLE)} className={`rounded-xl border p-4 sm:p-6 ${cardCls}`}>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div>
-          <h3 className={`text-lg font-semibold ${textPrimary}`}>Remittance Corridors, 2024</h3>
+          <h3 className={`text-lg font-semibold ${textPrimary}`}>{TITLE}</h3>
           <p className={`text-sm mt-0.5 ${textSec}`}>
             Where migrant earnings actually go. Ribbon thickness is the annual flow in US dollars.
           </p>
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap shrink-0">
           {TOP_CORRIDOR_COUNTS.map(n => (
             <button
               key={n}
@@ -109,6 +113,7 @@ export default function MigrationCorridorFlow({ isDarkMode }: Props) {
               {n === REMITTANCE_CORRIDORS_2024.length ? 'All' : `Top ${n}`}
             </button>
           ))}
+          <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} />
         </div>
       </div>
 

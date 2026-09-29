@@ -11,6 +11,8 @@ import React, { useMemo, useState } from 'react';
 import { CountryData } from '../services/worldbank';
 import { formatNumber } from '../data/technologyIndicators';
 import FlowDiagram, { type FlowColumn, type FlowNode, type FlowLink } from './charts/FlowDiagram';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface TechFlowSankeyProps {
   isDarkMode: boolean;
@@ -141,7 +143,7 @@ const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
   ];
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Tech Ecosystem Flow')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h3 className={`text-lg font-semibold ${themeColors.text}`}>Tech Ecosystem Flow</h3>
@@ -164,6 +166,8 @@ const TechFlowSankey: React.FC<TechFlowSankeyProps> = ({
               <option key={country} value={country}>{country}</option>
             ))}
           </select>
+
+          <SocialShareMenu title="Tech Ecosystem Flow" isDarkMode={isDarkMode} />
         </div>
       </div>
 

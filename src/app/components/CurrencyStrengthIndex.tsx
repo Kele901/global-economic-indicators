@@ -16,6 +16,8 @@ import {
   HISTORICAL_RATES,
   type CurrencyCode
 } from '../data/currencyHierarchyData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CurrencyStrengthIndexProps {
   isDarkMode: boolean;
@@ -160,14 +162,19 @@ const CurrencyStrengthIndex: React.FC<CurrencyStrengthIndexProps> = ({ isDarkMod
   };
 
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify('Currency Strength Index')} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Currency Strength Index
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          Relative currency performance based on exchange rate changes vs USD
-        </p>
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Currency Strength Index
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              Relative currency performance based on exchange rate changes vs USD
+            </p>
+          </div>
+          <SocialShareMenu title="Currency Strength Index" isDarkMode={isDarkMode} className="shrink-0" />
+        </div>
       </div>
 
       <div className="p-6">

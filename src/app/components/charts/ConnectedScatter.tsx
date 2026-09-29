@@ -15,6 +15,7 @@ import {
   ResponsiveContainer, ReferenceLine, Legend,
 } from 'recharts';
 import { useChartTheme } from '../../utils/chartTheme';
+import { useIsMobile } from '../../hooks/useViewportSize';
 import ChartCard from './ChartCard';
 import ChartA11yCaption from '../ChartA11yCaption';
 
@@ -68,7 +69,7 @@ export default function ConnectedScatter({
   provenance,
   actions,
   footnote,
-  height = 'h-[480px]',
+  height = 'h-[400px] sm:h-[480px]',
   xFormat,
   yFormat,
   labelEvery = 5,
@@ -76,6 +77,7 @@ export default function ConnectedScatter({
   yReference,
 }: Props) {
   const theme = useChartTheme(isDarkMode);
+  const isMobile = useIsMobile();
 
   const ordered = useMemo(
     () => paths
@@ -156,7 +158,7 @@ export default function ConnectedScatter({
       footnote={footnote}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart margin={{ top: 16, right: 30, left: 16, bottom: 32 }}>
+        <ComposedChart margin={isMobile ? { top: 12, right: 12, left: 4, bottom: 32 } : { top: 16, right: 30, left: 16, bottom: 32 }}>
           <CartesianGrid stroke={theme.grid} strokeDasharray="3 3" />
           <XAxis
             type="number"
@@ -173,6 +175,7 @@ export default function ConnectedScatter({
             stroke={theme.axis}
             tick={{ fontSize: 11 }}
             tickFormatter={fmtY}
+            width={isMobile ? 48 : 60}
             domain={['auto', 'auto']}
             label={{ value: yLabel, angle: -90, position: 'insideLeft', fill: theme.axis, fontSize: 11 }}
           />

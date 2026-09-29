@@ -8,7 +8,9 @@ import AdSenseLoader from './components/AdSenseLoader';
 import StatusWidget from './components/StatusWidget';
 import CommandPalette from './components/CommandPalette';
 import RouteTracker from './components/RouteTracker';
+import HashAnchorScroll from './components/HashAnchorScroll';
 import CitationDropdown from './components/CitationDropdown';
+import SocialShareMenu from './components/SocialShareMenu';
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from './lib/site';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -129,7 +131,10 @@ export default function RootLayout({
                   </div>
                 </div>
                 <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 flex-wrap">
-                  <CitationDropdown />
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CitationDropdown />
+                    <SocialShareMenu subject="page" align="left" placement="up" />
+                  </div>
                   <StatusWidget />
                 </div>
                 <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400 transition-colors duration-200">
@@ -142,6 +147,7 @@ export default function RootLayout({
           <AdSenseLoader />
           <CommandPalette />
           <RouteTracker />
+          <HashAnchorScroll />
         </ThemeProvider>
       </body>
     </html>

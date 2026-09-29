@@ -82,7 +82,7 @@ export default function ModelReleasesTimeline({ isDarkMode }: Props) {
           ))}
         </div>
       </div>
-      <div className="h-[420px]">
+      <div className="h-[300px] sm:h-[420px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: isMobile ? 12 : 30, left: isMobile ? 0 : 10, bottom: 30 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />

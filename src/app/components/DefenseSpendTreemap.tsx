@@ -52,7 +52,7 @@ export default function DefenseSpendTreemap({ isDarkMode, militaryExpenditureUsd
       topN={14}
       format={v => `$${v.toFixed(0)}B`}
       provenance={<ChartMeta sourceId="wb-military-spend" isDarkMode={isDarkMode} />}
-      height="h-[460px]"
+      height="h-[320px] sm:h-[460px]"
       footnote={
         <>
           World Bank MS.MIL.XPND.CD with SIPRI used as a fallback where the World Bank series is

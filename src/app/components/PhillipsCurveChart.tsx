@@ -104,14 +104,14 @@ export default function PhillipsCurveChart({ isDarkMode, unemploymentRates, infl
       labelEvery={4}
       actions={
         <div className="flex flex-col gap-1.5 items-end">
-          <div className="flex flex-wrap gap-1.5 justify-end">
+          <div className="flex flex-wrap gap-1.5 justify-start sm:justify-end">
             {ERAS.map(e => (
               <button key={e.id} onClick={() => setEraId(e.id)} aria-pressed={eraId === e.id} className={pill(eraId === e.id)}>
                 {e.label}
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-1.5 justify-end max-w-xl">
+          <div className="flex flex-wrap gap-1.5 justify-start sm:justify-end max-w-xl">
             {CANDIDATES.map(c => (
               <button
                 key={c.key}

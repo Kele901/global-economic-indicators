@@ -17,6 +17,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatPercent, defaultTechCountries } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface TechExportsChartProps {
   isDarkMode: boolean;
@@ -204,7 +206,7 @@ const TechExportsChart: React.FC<TechExportsChartProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Technology Exports')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -265,6 +267,8 @@ const TechExportsChart: React.FC<TechExportsChartProps> = ({
               ))}
             </select>
           )}
+
+          <SocialShareMenu title="Technology Exports" isDarkMode={isDarkMode} />
         </div>
       </div>
 
@@ -302,7 +306,7 @@ const TechExportsChart: React.FC<TechExportsChartProps> = ({
       </div>
 
       {/* Chart */}
-      <div className="h-[400px]">
+      <div className="h-[300px] sm:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           {renderChart()}
         </ResponsiveContainer>

@@ -31,6 +31,8 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 
 const DebtLoadTicker              = dynamic(() => import('../components/DebtLoadTicker'),              { ssr: false });
@@ -238,7 +240,7 @@ export default function DebtLedgerPage() {
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
 
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Debt Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <DebtLoadTicker
             isDarkMode={isDarkMode}
             governmentDebt={governmentDebt}
@@ -281,6 +283,7 @@ export default function DebtLedgerPage() {
             <DataDownloadButton
               isDarkMode={isDarkMode}
               filename="debt-ledger-data"
+              shareTitle="Debt Ledger key figures"
               label="Data"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
@@ -304,8 +307,8 @@ export default function DebtLedgerPage() {
             subtitle="Sustainability scorecard for the 33 tracked economies. Each card scores debt level, debt service, budget balance, and the interest-growth differential into a composite 0-100 grade. Click cards to add or remove countries from the chapters below."
           />
 
-          <div className={`rounded-xl border p-4 sm:p-6 mb-4 ${cardBg}`}>
-            <div className="flex items-center gap-2 mb-4">
+          <div id={slugify('Sustainability Scorecard')} className={`rounded-xl border p-4 sm:p-6 mb-4 ${cardBg}`}>
+            <div className="flex items-center gap-2 flex-wrap mb-4">
               <h3 className={`text-base sm:text-lg font-semibold ${textPrimary}`}>Sustainability Scorecard</h3>
               <MethodologyPopover
                 isDarkMode={isDarkMode}
@@ -325,6 +328,9 @@ export default function DebtLedgerPage() {
                   'Interest — proxied by lending rate FR.INR.LEND',
                 ]}
               />
+              <div className="ml-auto flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Sustainability Scorecard" isDarkMode={isDarkMode} subject="dataset" />
+              </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
               {scoreCards.map(sc => (
@@ -350,8 +356,13 @@ export default function DebtLedgerPage() {
           </div>
 
           {/* IMF WEO projection line chart */}
-          <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
-            <h3 className={`text-base sm:text-lg font-semibold mb-1 ${textPrimary}`}>IMF WEO Debt Projections, 2019-2029</h3>
+          <div id={slugify('IMF WEO Debt Projections, 2019-2029')} className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+              <h3 className={`text-base sm:text-lg font-semibold ${textPrimary}`}>IMF WEO Debt Projections, 2019-2029</h3>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="IMF WEO Debt Projections, 2019-2029" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <p className={`text-xs mb-4 ${textMuted}`}>Where the biggest sovereigns are headed. Dashed line marks 2024 — everything after is projected.</p>
             <div className="h-[380px]">
               <ResponsiveContainer width="100%" height="100%">

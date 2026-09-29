@@ -169,7 +169,7 @@ export default function GunsVsButterQuadrant({
         ))}
       </div>
 
-      <div className="h-[440px]">
+      <div className="h-[320px] sm:h-[440px]">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 30, bottom: 40, left: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />

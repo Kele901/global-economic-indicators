@@ -11,6 +11,8 @@ import {
 } from '../services/inflationCalculator';
 import { CountryData } from '../services/worldbank';
 import ValueTimelineChart from './ValueTimelineChart';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface InflationCalculatorProps {
   cpiData: CountryData[];
@@ -134,6 +136,13 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
     }
     return 'pl-8'; // 2rem (default)
   };
+
+  const resultsShareTitle = result
+    ? `${selectedCountry} inflation calculator: ${formatCurrency(result.originalAmount, selectedCountry, result.originalYear)} in ${result.originalYear} = ${formatCurrency(result.adjustedValue, selectedCountry, result.targetYear)} in ${result.targetYear}`
+    : '';
+  const timelineShareTitle = result
+    ? `Value Over Time: ${selectedCountry}, ${result.originalYear}-${result.targetYear}`
+    : '';
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -347,14 +356,22 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
           )}
 
           {/* Results Summary */}
-          <div className={`p-6 rounded-lg shadow-lg ${
+          <div id={slugify(resultsShareTitle)} className={`p-6 rounded-lg shadow-lg ${
             isDarkMode ? 'bg-gray-800' : 'bg-white'
           }`}>
-            <h3 className={`text-xl font-bold mb-4 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
-              Your Results
-            </h3>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h3 className={`text-xl font-bold ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                Your Results
+              </h3>
+              <SocialShareMenu
+                title={resultsShareTitle}
+                metric={`${formatCurrency(result.originalAmount, selectedCountry, result.originalYear)} → ${formatCurrency(result.adjustedValue, selectedCountry, result.targetYear)}`}
+                isDarkMode={isDarkMode}
+                className="shrink-0"
+              />
+            </div>
 
             <div className="space-y-4">
               {/* Main Result */}
@@ -434,14 +451,22 @@ const InflationCalculator: React.FC<InflationCalculatorProps> = ({
           </div>
 
           {/* Value Over Time Chart */}
-          <div className={`p-6 rounded-lg shadow-lg ${
+          <div id={slugify(timelineShareTitle)} className={`p-6 rounded-lg shadow-lg ${
             isDarkMode ? 'bg-gray-800' : 'bg-white'
           }`}>
-            <h3 className={`text-xl font-bold mb-4 ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
-              Value Over Time
-            </h3>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h3 className={`text-xl font-bold ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                Value Over Time
+              </h3>
+              <SocialShareMenu
+                title={timelineShareTitle}
+                series={result.yearlyValues.map(v => v.value)}
+                isDarkMode={isDarkMode}
+                className="shrink-0"
+              />
+            </div>
             <ValueTimelineChart
               data={result.yearlyValues}
               country={selectedCountry}

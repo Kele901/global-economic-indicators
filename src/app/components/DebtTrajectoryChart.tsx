@@ -93,9 +93,9 @@ export default function DebtTrajectoryChart({ isDarkMode, governmentDebt }: Prop
       isDarkMode={isDarkMode}
       title="Debt Trajectories Since 1990"
       subtitle="Central government debt as a share of GDP. Drag the handles under the chart to zoom into a period; click a country to add or remove its line."
-      height="h-[420px]"
+      height="h-[300px] sm:h-[420px]"
       actions={
-        <div className="flex flex-wrap gap-1.5 max-w-lg justify-end">
+        <div className="flex flex-wrap gap-1.5 max-w-lg justify-start sm:justify-end">
           {DEBT_COUNTRY_META.slice(0, 12).map(m => {
             const on = selected.includes(m.iso3);
             return (

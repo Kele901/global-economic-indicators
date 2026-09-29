@@ -46,7 +46,7 @@ export default function EmissionsTreemap({ isDarkMode, co2EmissionsKt }: Props) 
       topN={14}
       format={v => `${v.toFixed(0)} Mt`}
       provenance={<ChartMeta sourceId="wb-ghg" isDarkMode={isDarkMode} />}
-      height="h-[460px]"
+      height="h-[320px] sm:h-[460px]"
       footnote={
         <>
           Live World Bank EN.ATM.CO2E.KT for the {data.length} roster countries that report it,

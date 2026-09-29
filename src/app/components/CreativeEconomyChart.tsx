@@ -7,6 +7,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { culturalChartColors, formatNumber, formatCurrency, trademarkFallbackData } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CreativeEconomyChartProps {
   isDarkMode: boolean;
@@ -119,10 +121,15 @@ const CreativeEconomyChart: React.FC<CreativeEconomyChartProps> = ({
       </div>
 
       {viewMode === 'goods' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Creative Goods vs Services Exports</h3>
+        <div id={slugify('Creative Goods vs Services Exports')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Creative Goods vs Services Exports</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Creative Goods vs Services Exports" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Billions USD, 2023 UNCTAD data</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={goodsVsServicesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -139,10 +146,15 @@ const CreativeEconomyChart: React.FC<CreativeEconomyChartProps> = ({
       )}
 
       {viewMode === 'films' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Feature Films Produced Annually</h3>
+        <div id={slugify('Feature Films Produced Annually')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Feature Films Produced Annually</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Feature Films Produced Annually" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Number of feature-length films per year</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={filmsData} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -161,10 +173,15 @@ const CreativeEconomyChart: React.FC<CreativeEconomyChartProps> = ({
       )}
 
       {viewMode === 'employment' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Cultural Employment Share</h3>
+        <div id={slugify('Cultural Employment Share')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Cultural Employment Share</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Cultural Employment Share" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>% of total employment in cultural and creative sectors</p>
-          <div className="w-full h-[400px]">
+          <div className="w-full h-[300px] sm:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={employmentData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
@@ -183,11 +200,16 @@ const CreativeEconomyChart: React.FC<CreativeEconomyChartProps> = ({
       )}
 
       {viewMode === 'services' && (
-        <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-          <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Trademark Applications Over Time</h3>
+        <div id={slugify('Trademark Applications Over Time')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>Trademark Applications Over Time</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Trademark Applications Over Time" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>Direct resident trademark filings (World Bank / WIPO)</p>
           {trademarkChartData.length > 0 ? (
-            <div className="w-full h-[400px]">
+            <div className="w-full h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={trademarkChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />

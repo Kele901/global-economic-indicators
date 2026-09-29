@@ -16,6 +16,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatNumber, formatPercent, defaultTechCountries } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface DigitalInfraChartProps {
   isDarkMode: boolean;
@@ -160,7 +162,7 @@ const DigitalInfraChart: React.FC<DigitalInfraChartProps> = ({
   };
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Digital Infrastructure Analysis')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -217,6 +219,8 @@ const DigitalInfraChart: React.FC<DigitalInfraChartProps> = ({
               ))}
             </select>
           )}
+
+          <SocialShareMenu title="Digital Infrastructure Analysis" isDarkMode={isDarkMode} />
         </div>
       </div>
 

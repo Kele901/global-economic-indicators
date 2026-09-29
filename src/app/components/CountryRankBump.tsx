@@ -105,7 +105,7 @@ export default function CountryRankBump({ isDarkMode, data }: Props) {
       subtitle={`Rank among ${coverage} economies, ${metric.higherIsBetter ? 'highest' : 'lowest'} first. Only countries that reach the top ${maxRank} at some point are drawn.`}
       provenance={<ChartMeta sourceId={metric.sourceId} isDarkMode={isDarkMode} />}
       actions={
-        <div className="flex flex-wrap gap-1.5 justify-end max-w-2xl">
+        <div className="flex flex-wrap gap-1.5 justify-start sm:justify-end max-w-2xl">
           <select
             value={metricId}
             onChange={e => setMetricId(e.target.value)}

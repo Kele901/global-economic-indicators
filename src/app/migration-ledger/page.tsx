@@ -24,6 +24,8 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const MigrationTicker            = dynamic(() => import('../components/MigrationTicker'),            { ssr: false });
 const RefugeeFlowsChart          = dynamic(() => import('../components/RefugeeFlowsChart'),          { ssr: false });
@@ -37,15 +39,22 @@ const MigrantSafetyTimeline      = dynamic(() => import('../components/MigrantSa
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: {
-  isDarkMode: boolean; chapter: string; title: string; subtitle: string;
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, shareSubject = 'chart' }: {
+  isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean; shareSubject?: 'chart' | 'dataset';
 }) {
   return (
-    <div className="mb-6">
+    <div id={share ? slugify(title) : undefined} className="mb-6">
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-sky-400' : 'text-sky-600'}`}>
         {chapter}
       </div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} subject={shareSubject} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -161,7 +170,7 @@ export default function MigrationLedgerPage() {
         </div>
 
         {/* Hero: ticker + KPI cards */}
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('Migration Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <MigrationTicker
             isDarkMode={isDarkMode}
             remittances={remittances}
@@ -206,6 +215,7 @@ export default function MigrationLedgerPage() {
             <DataDownloadButton
               isDarkMode={isDarkMode}
               filename="migration-ledger-data"
+              shareTitle="Migration Ledger key figures"
               label="Data"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
@@ -260,6 +270,7 @@ export default function MigrationLedgerPage() {
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
+            share={false}
             title="Remittance Corridors"
             subtitle="The USA-Mexico corridor alone moves $65B a year — more than any bilateral trade flow outside oil. The Gulf-India axis dwarfs everything else combined."
           />
@@ -274,6 +285,7 @@ export default function MigrationLedgerPage() {
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
+            shareSubject="dataset"
             title="Migrant Stocks"
             subtitle="Where the foreign-born actually live. UAE is 88% foreign-born; Japan is 2.4%. Filter by category to see the four archetypes: Gulf labour, OECD immigration, city-state, and OECD emigration."
           />
@@ -296,6 +308,7 @@ export default function MigrationLedgerPage() {
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
+            shareSubject="dataset"
             title="Brain Gain / Brain Drain"
             subtitle="One-third of tertiary-educated Irish adults live abroad — the highest of any OECD member. The US, Canada, Australia are net beneficiaries. India and China lose a small % of graduates but the absolute numbers dominate global tech."
           />

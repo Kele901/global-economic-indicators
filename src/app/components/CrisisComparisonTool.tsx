@@ -13,6 +13,8 @@ import {
   type CrisisEvent,
   type CrisisType
 } from '../data/economicCycles';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CrisisComparisonToolProps {
   isDarkMode: boolean;
@@ -354,15 +356,20 @@ const CrisisComparisonTool: React.FC<CrisisComparisonToolProps> = ({ isDarkMode 
   const displayedCrises = showAllCrises ? comparisons : comparisons.slice(0, 4);
 
   return (
-    <div className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
+    <div id={slugify('"This Time is Different?" - Historical Comparison')} className={`rounded-xl overflow-hidden ${isDarkMode ? 'bg-gray-800/50' : 'bg-white'}`}>
       {/* Header */}
-      <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          &quot;This Time is Different?&quot; - Historical Comparison
-        </h3>
-        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          Comparing current conditions to pre-crisis periods (Reinhart-Rogoff methodology)
-        </p>
+      <div className={`px-4 py-3 border-b flex items-start justify-between gap-2 flex-wrap ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div>
+          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            &quot;This Time is Different?&quot; - Historical Comparison
+          </h3>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Comparing current conditions to pre-crisis periods (Reinhart-Rogoff methodology)
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title={'"This Time is Different?" - Historical Comparison'} isDarkMode={isDarkMode} />
+        </div>
       </div>
 
       <div className="p-6">
@@ -392,10 +399,15 @@ const CrisisComparisonTool: React.FC<CrisisComparisonToolProps> = ({ isDarkMode 
         )}
 
         {/* Current Conditions */}
-        <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-          <h4 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            Current Economic Conditions (2024)
-          </h4>
+        <div id={slugify('Current Economic Conditions (2024)')} className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h4 className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Current Economic Conditions (2024)
+            </h4>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Current Economic Conditions (2024)" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>Public Debt/GDP</div>
@@ -437,10 +449,15 @@ const CrisisComparisonTool: React.FC<CrisisComparisonToolProps> = ({ isDarkMode 
         </div>
 
         {/* International Macro Indicators (Handbook Framework) */}
-        <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-indigo-900/20' : 'bg-indigo-50'}`}>
-          <h4 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-indigo-300' : 'text-indigo-700'}`}>
-            📚 International Macro Indicators (Handbook of Int&apos;l Economics)
-          </h4>
+        <div id={slugify("International Macro Indicators (Handbook of Int'l Economics)")} className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-indigo-900/20' : 'bg-indigo-50'}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h4 className={`text-sm font-semibold ${isDarkMode ? 'text-indigo-300' : 'text-indigo-700'}`}>
+              📚 International Macro Indicators (Handbook of Int&apos;l Economics)
+            </h4>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="International Macro Indicators (Handbook of Int'l Economics)" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div className={`p-2 rounded ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>Current Account/GDP</div>
@@ -485,10 +502,15 @@ const CrisisComparisonTool: React.FC<CrisisComparisonToolProps> = ({ isDarkMode 
         </div>
 
         {/* Historical Crisis Comparison Cards */}
-        <div className="mb-4">
-          <h4 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            Historical Crisis Comparisons
-          </h4>
+        <div id={slugify('Historical Crisis Comparisons')} className="mb-4">
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h4 className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Historical Crisis Comparisons
+            </h4>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Historical Crisis Comparisons" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {displayedCrises.map(comparison => (
               <button
@@ -643,7 +665,7 @@ const CrisisComparisonTool: React.FC<CrisisComparisonToolProps> = ({ isDarkMode 
               <h5 className={`text-xs font-semibold mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 CRISIS OUTCOME
               </h5>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {selectedComparison.crisis.gdpDecline && (
                   <div>
                     <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>GDP Decline</div>

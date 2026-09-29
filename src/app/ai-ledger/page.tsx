@@ -26,6 +26,8 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 
 const ComputeTicker            = dynamic(() => import('../components/ComputeTicker'),            { ssr: false });
 const ModelReleasesTimeline    = dynamic(() => import('../components/ModelReleasesTimeline'),    { ssr: false });
@@ -38,15 +40,22 @@ const AiRegulationTimeline     = dynamic(() => import('../components/AiRegulatio
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
-function ChapterHeader({ isDarkMode, chapter, title, subtitle }: {
-  isDarkMode: boolean; chapter: string; title: string; subtitle: string;
+function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: {
+  isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean;
 }) {
   return (
-    <div className="mb-6">
+    <div className="mb-6" id={share ? slugify(title) : undefined}>
       <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-violet-400' : 'text-violet-600'}`}>
         {chapter}
       </div>
-      <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h2>
+        {share && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDarkMode} />
+          </div>
+        )}
+      </div>
       <p className={`text-sm sm:text-base max-w-3xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{subtitle}</p>
     </div>
   );
@@ -147,7 +156,8 @@ export default function AiLedgerPage() {
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
 
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+        <div id={slugify('AI Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
+          <div className={`text-[11px] uppercase tracking-wider mb-3 ${textMuted}`}>AI Ledger key figures</div>
           <ComputeTicker isDarkMode={isDarkMode} />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
@@ -182,6 +192,7 @@ export default function AiLedgerPage() {
               isDarkMode={isDarkMode}
               filename="ai-ledger-data"
               label="Data"
+              shareTitle="AI Ledger key figures"
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
                 patentApplications.forEach(row => rows.push({ series: 'Patent applications (residents)', ...row }));
@@ -200,6 +211,7 @@ export default function AiLedgerPage() {
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
             title="The Compute Race"
+            share={false}
             subtitle="Stanford AI Index counts &quot;notable&quot; ML models — those with ≥100M parameters or comparable compute. The US leads on absolute count; China leads on year-over-year growth. Everyone else is a smaller order of magnitude."
           />
           <div className={`rounded-xl border p-4 sm:p-6 ${cardBg}`}>

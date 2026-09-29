@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/global-heatmap', {
   title: 'Global Heatmap | Global Economic Indicators',
   description:
     'Choropleth heatmap across 60+ economic, defense, climate and cultural indicators. Toggle categories and compare countries at a glance.',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     description:
       'One-click category toggles across economic, defense, climate, and cultural data.',
   },
-};
+});
 
 export default function GlobalHeatmapLayout({
   children,

@@ -20,7 +20,7 @@ export default function GenderGapChart({ isDarkMode }: Props) {
 
   return (
     <div className={`rounded-lg border p-4 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-      <div className="h-[520px]">
+      <div className="h-[400px] sm:h-[520px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ top: 10, right: 20, bottom: 10, left: 30 }}>
             <CartesianGrid stroke={grid} strokeDasharray="3 3" />

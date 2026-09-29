@@ -96,7 +96,7 @@ export default function CompositionTreemap({
   footnote,
   provenance,
   actions,
-  height = 'h-[420px]',
+  height = 'h-[300px] sm:h-[420px]',
   topN,
   restLabel = 'Everyone else',
 }: Props) {

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/resources', {
   title: 'Resource Atlas | Global Economic Indicators',
   description:
     'Interactive scrollytelling on oil, gas, metals and agricultural commodities. Live FRED / EIA prices, historical super-cycles, and country-level reserves and production.',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     description:
       'Live commodity prices with 30-day sparklines, EIA reserves and production, and curated super-cycle era annotations.',
   },
-};
+});
 
 export default function ResourcesLayout({
   children,

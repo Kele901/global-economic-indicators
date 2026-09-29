@@ -170,7 +170,7 @@ const TechWorldMap: React.FC<TechWorldMapProps> = ({
     <div className="relative">
       {/* Map Container */}
       <div 
-        className="w-full h-[450px] rounded-b-xl overflow-hidden"
+        className="w-full h-[320px] sm:h-[450px] rounded-b-xl overflow-hidden"
         style={{ backgroundColor: themeColors.background }}
       >
         <ComposableMap

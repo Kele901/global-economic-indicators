@@ -10,6 +10,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { COUNTRY_FLAGS as FLAG_MAP } from '../../components/CountryFlag';
 import CountryBrief from '../../components/CountryBrief';
 import WatchlistChip from '../../components/WatchlistChip';
+import SocialShareMenu from '../../components/SocialShareMenu';
+import { slugify } from '../../lib/share';
 
 const HEADLINE_METRICS = ['gdpGrowth', 'inflationRates', 'interestRates', 'unemploymentRates'];
 const KEY_INDICATOR_METRICS = [
@@ -240,12 +242,12 @@ export default function CountryProfilePage() {
     <div className={`min-h-screen transition-colors duration-200 ${tc.bg} ${tc.text}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+        <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${tc.card}`}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="flex items-center gap-4">
-              {FlagComponent && <div className="w-16 h-11 rounded shadow overflow-hidden"><FlagComponent /></div>}
-              <div>
-                <h1 className="text-3xl font-bold">{displayName}</h1>
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              {FlagComponent && <div className="w-12 h-8 sm:w-16 sm:h-11 shrink-0 rounded shadow overflow-hidden"><FlagComponent /></div>}
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold break-words">{displayName}</h1>
                 <p className={tc.textSec}>Economic Profile & Indicators</p>
               </div>
             </div>
@@ -260,6 +262,9 @@ export default function CountryProfilePage() {
               <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Dark</span>
             </div>
           </div>
+          <div id={slugify(`${displayName} headline indicators`)} className="flex justify-end mb-2">
+            <SocialShareMenu title={`${displayName} headline indicators`} isDarkMode={isDarkMode} />
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {HEADLINE_METRICS.map(mk => {
               const metric = getMetricByKey(mk);
@@ -267,11 +272,11 @@ export default function CountryProfilePage() {
               const prev = getPreviousValue(mk);
               const trend = val !== null && prev !== null ? val - prev : null;
               return (
-                <div key={mk} className={`p-4 rounded-lg border ${tc.card} relative`}>
-                  <div className="absolute top-2 right-2">
+                <div key={mk} className={`p-3 sm:p-4 rounded-lg border ${tc.card} relative`}>
+                  <div className="flex justify-end -mt-1 -mr-1 mb-1 sm:m-0 sm:absolute sm:top-2 sm:right-2">
                     <WatchlistChip country={countryKey} metric={mk} isDarkMode={isDarkMode} />
                   </div>
-                  <p className={`text-xs uppercase tracking-wider ${tc.textSec} pr-16`}>{metric?.label || mk}</p>
+                  <p className={`text-xs uppercase tracking-wider break-words ${tc.textSec} sm:pr-16`}>{metric?.label || mk}</p>
                   <p className="text-2xl font-bold mt-1">{val !== null ? formatMetricValue(mk, val) : 'N/A'}</p>
                   {trend !== null && (
                     <p className={`text-sm mt-1 ${trend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -311,8 +316,13 @@ export default function CountryProfilePage() {
         <>
         {/* Economic Summary */}
         {economicSummary && (
-          <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-3">Economic Summary</h2>
+          <div id={slugify('Economic Summary')} className={`rounded-xl border p-4 sm:p-6 mb-8 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+              <h2 className="text-xl font-semibold">Economic Summary</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Economic Summary" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <p className={`text-sm sm:text-base leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
               {displayName} has{' '}
               {economicSummary.gdp !== null
@@ -334,8 +344,13 @@ export default function CountryProfilePage() {
 
         {/* Economic Health Score */}
         {healthScore && (
-          <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-4">Economic Health Score</h2>
+          <div id={slugify('Economic Health Score')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h2 className="text-xl font-semibold">Economic Health Score</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Economic Health Score" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <div className="flex flex-col sm:flex-row items-center gap-8">
               <div className="relative flex-shrink-0">
                 <div
@@ -352,7 +367,7 @@ export default function CountryProfilePage() {
                     className={`rounded-full flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
                     style={{ width: '140px', height: '140px' }}
                   >
-                    <span className="text-4xl font-bold">{healthScore.score}</span>
+                    <span className="text-3xl sm:text-4xl font-bold">{healthScore.score}</span>
                     <span className={`text-xs ${tc.textSec}`}>out of 100</span>
                   </div>
                 </div>
@@ -384,8 +399,13 @@ export default function CountryProfilePage() {
         )}
 
         {/* Key Indicators */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Key Indicators</h2>
+        <div id={slugify('Key Indicators')} className="mb-8">
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Key Indicators</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Key Indicators" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {KEY_INDICATOR_METRICS.map(mk => {
               const metric = getMetricByKey(mk);
@@ -408,8 +428,13 @@ export default function CountryProfilePage() {
         </div>
 
         {/* Historical Trends */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Historical Trends</h2>
+        <div id={slugify('Historical Trends')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Historical Trends</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Historical Trends" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-2 mb-4">
             {METRIC_CATEGORIES.flatMap(c => c.metrics).slice(0, 20).map(m => (
               <button
@@ -449,8 +474,13 @@ export default function CountryProfilePage() {
 
         {/* Peer Comparison Table */}
         {peerComparisonData.length > 0 && (
-          <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-2">Peer Comparison</h2>
+          <div id={slugify('Peer Comparison')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+              <h2 className="text-xl font-semibold">Peer Comparison</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Peer Comparison" subject="dataset" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <p className={`text-sm mb-4 ${tc.textSec}`}>
               {displayName} vs. regional average ({Object.entries(COUNTRY_REGIONS).find(([, c]) => c.includes(countryKey))?.[0] || 'Region'})
             </p>
@@ -496,8 +526,13 @@ export default function CountryProfilePage() {
         )}
 
         {/* Multi-Metric Comparison (Dual Y-Axes) */}
-        <div className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
-          <h2 className="text-xl font-semibold mb-4">Multi-Metric Comparison</h2>
+        <div id={slugify('Multi-Metric Comparison')} className={`rounded-xl border p-6 mb-8 ${tc.card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+            <h2 className="text-xl font-semibold">Multi-Metric Comparison</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Multi-Metric Comparison" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-4 mb-4">
             <div className="flex items-center gap-2">
               <label className={`text-sm font-medium ${tc.textSec}`}>Left Axis:</label>
@@ -554,8 +589,13 @@ export default function CountryProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Radar Chart */}
-          <div className={`rounded-xl border p-6 ${tc.card}`}>
-            <h2 className="text-xl font-semibold mb-4">Economic Radar</h2>
+          <div id={slugify('Economic Radar')} className={`rounded-xl border p-6 ${tc.card}`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h2 className="text-xl font-semibold">Economic Radar</h2>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Economic Radar" isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>

@@ -267,7 +267,7 @@ const PassportStrengthMap: React.FC<PassportStrengthMapProps> = memo(({ isDarkMo
         Drag to pan &middot; Scroll to zoom
       </div>
 
-      <div className="w-full h-[450px]" style={{ cursor: position.zoom > 1 ? 'grab' : 'default' }}>
+      <div className="w-full h-[320px] sm:h-[450px]" style={{ cursor: position.zoom > 1 ? 'grab' : 'default' }}>
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{ scale: 130, center: [0, 30] }}

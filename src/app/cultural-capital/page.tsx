@@ -7,6 +7,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchCulturalData, CulturalData, CountryData, COUNTRY_NAMES } from '../services/worldbank';
 import { fetchCulturalStaticData, CulturalStaticData } from '../services/culturalData';
 import StalenessBanner from '../components/StalenessBanner';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import { QS_SNAPSHOT_DATE } from '../data/universityRankings';
 import {
   culturalChartColors,
@@ -38,7 +40,7 @@ const HeritageWorldMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[320px] sm:h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
       </div>
     )
@@ -50,7 +52,7 @@ const HeritageSitesChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -62,7 +64,7 @@ const CreativeEconomyChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -74,7 +76,7 @@ const TourismTrendsChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -86,7 +88,7 @@ const CulturalInfraChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -98,7 +100,7 @@ const CulturalRankingTable = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading table...</span>
       </div>
     )
@@ -110,7 +112,7 @@ const CulturalHeatmapChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading heatmap...</span>
       </div>
     )
@@ -122,7 +124,7 @@ const CulturalRadarChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading radar...</span>
       </div>
     )
@@ -134,7 +136,7 @@ const IntangibleHeritageChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -146,7 +148,7 @@ const MediaPublishingChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -158,7 +160,7 @@ const DigitalCultureChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -170,7 +172,7 @@ const CulturalParticipationChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -182,7 +184,7 @@ const CulturalTradeChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -194,7 +196,7 @@ const LinguisticDiversityChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -206,7 +208,7 @@ const PassportStrengthMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[320px] sm:h-[450px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
       </div>
     )
@@ -218,7 +220,7 @@ const PassportStrengthChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading chart...</span>
       </div>
     )
@@ -230,7 +232,7 @@ const EducationDashboard = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+      <div className="w-full h-[300px] sm:h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
         <span className="text-gray-500 dark:text-gray-400">Loading education dashboard...</span>
       </div>
     )
@@ -506,30 +508,35 @@ const CulturalCapitalPage = () => {
 
         {/* Quick Stats */}
         {summaryStats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`text-3xl font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                {summaryStats.totalHeritageSites}
-              </div>
-              <div className={`text-sm ${themeColors.textSecondary}`}>Total Heritage Sites</div>
+          <div id={slugify('Cultural capital key figures')} className="mb-8">
+            <div className="flex justify-end mb-2">
+              <SocialShareMenu title="Cultural capital key figures" isDarkMode={isDarkMode} />
             </div>
-            <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`text-3xl font-bold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                {summaryStats.totalCreativeCities}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className={`text-3xl font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                  {summaryStats.totalHeritageSites}
+                </div>
+                <div className={`text-sm ${themeColors.textSecondary}`}>Total Heritage Sites</div>
               </div>
-              <div className={`text-sm ${themeColors.textSecondary}`}>Creative Cities Network</div>
-            </div>
-            <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`text-3xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                {summaryStats.topHeritageCountry?.[0] || 'N/A'}
+              <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className={`text-3xl font-bold ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                  {summaryStats.totalCreativeCities}
+                </div>
+                <div className={`text-sm ${themeColors.textSecondary}`}>Creative Cities Network</div>
               </div>
-              <div className={`text-sm ${themeColors.textSecondary}`}>Most Heritage Sites</div>
-            </div>
-            <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`text-3xl font-bold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
-                {summaryStats.countriesTracked}
+              <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className={`text-3xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                  {summaryStats.topHeritageCountry?.[0] || 'N/A'}
+                </div>
+                <div className={`text-sm ${themeColors.textSecondary}`}>Most Heritage Sites</div>
               </div>
-              <div className={`text-sm ${themeColors.textSecondary}`}>Countries Tracked</div>
+              <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className={`text-3xl font-bold ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                  {summaryStats.countriesTracked}
+                </div>
+                <div className={`text-sm ${themeColors.textSecondary}`}>Countries Tracked</div>
+              </div>
             </div>
           </div>
         )}
@@ -645,12 +652,17 @@ const CulturalCapitalPage = () => {
               </div>
             </div>
 
-            <div className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-                <h2 className="text-xl font-bold">Global Heritage Map</h2>
-                <p className={`text-sm ${themeColors.textSecondary}`}>
-                  UNESCO World Heritage Sites by country
-                </p>
+            <div id={slugify('Global Heritage Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className={`px-4 py-3 border-b ${themeColors.border} flex items-start justify-between gap-2 flex-wrap`}>
+                <div>
+                  <h2 className="text-xl font-bold">Global Heritage Map</h2>
+                  <p className={`text-sm ${themeColors.textSecondary}`}>
+                    UNESCO World Heritage Sites by country
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Global Heritage Map" isDarkMode={isDarkMode} />
+                </div>
               </div>
               <HeritageWorldMap
                 isDarkMode={isDarkMode}
@@ -696,8 +708,13 @@ const CulturalCapitalPage = () => {
               onCountryChange={setSelectedCountries}
             />
 
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Heritage by Region</h3>
+            <div id={slugify('Heritage by Region')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                <h3 className="text-lg font-semibold">Heritage by Region</h3>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Heritage by Region" subject="dataset" isDarkMode={isDarkMode} />
+                </div>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Europe', countries: ['Italy', 'France', 'Germany', 'Spain', 'UK'], color: isDarkMode ? 'text-blue-400' : 'text-blue-600' },
@@ -929,12 +946,17 @@ const CulturalCapitalPage = () => {
               )}
             </div>
 
-            <div className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-                <h2 className="text-xl font-bold">Passport Power World Map</h2>
-                <p className={`text-sm ${themeColors.textSecondary}`}>
-                  Switch metrics to visualize mobility, length of stay, eVisa exposure, or destination safety.
-                </p>
+            <div id={slugify('Passport Power World Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
+              <div className={`px-4 py-3 border-b ${themeColors.border} flex items-start justify-between gap-2 flex-wrap`}>
+                <div>
+                  <h2 className="text-xl font-bold">Passport Power World Map</h2>
+                  <p className={`text-sm ${themeColors.textSecondary}`}>
+                    Switch metrics to visualize mobility, length of stay, eVisa exposure, or destination safety.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <SocialShareMenu title="Passport Power World Map" isDarkMode={isDarkMode} />
+                </div>
               </div>
               <PassportStrengthMap
                 isDarkMode={isDarkMode}
@@ -1026,8 +1048,13 @@ const CulturalCapitalPage = () => {
             />
 
             <div className="grid md:grid-cols-2 gap-6">
-              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <h3 className="text-lg font-semibold mb-4">Heritage Sites Comparison</h3>
+              <div id={slugify('Heritage Sites Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">Heritage Sites Comparison</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Heritage Sites Comparison" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
                 <div className="space-y-3">
                   {selectedCountries.map(country => {
                     const value = staticData.heritageSites[country]?.total || 0;
@@ -1051,8 +1078,13 @@ const CulturalCapitalPage = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <h3 className="text-lg font-semibold mb-4">Creative Goods Exports ($B)</h3>
+              <div id={slugify('Creative Goods Exports ($B)')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">Creative Goods Exports ($B)</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Creative Goods Exports ($B)" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
                 <div className="space-y-3">
                   {selectedCountries.map(country => {
                     const value = staticData.creativeGoodsExports[country] || 0;

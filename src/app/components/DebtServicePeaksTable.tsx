@@ -10,6 +10,10 @@ import { useMemo, useState } from 'react';
 import type { CountryData } from '../services/worldbank';
 import { DEBT_COUNTRY_META } from '../services/debtCurated';
 import { latestEntry } from '../utils/countryData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Debt Service Burden';
 
 interface Props {
   isDarkMode: boolean;
@@ -58,9 +62,14 @@ export default function DebtServicePeaksTable({ isDarkMode, publicDebtService }:
   const badge = (v: number) => v >= 20 ? 'text-red-500 font-semibold' : v >= 10 ? 'text-orange-500 font-semibold' : v >= 5 ? 'text-yellow-500' : 'text-emerald-500';
 
   return (
-    <div className={`rounded-xl border ${bg}`}>
+    <div id={slugify(TITLE)} className={`rounded-xl border ${bg}`}>
       <div className="p-4 sm:p-6">
-        <h3 className={`text-base sm:text-lg font-semibold mb-1 ${text}`}>Debt Service Burden</h3>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+          <h3 className={`text-base sm:text-lg font-semibold ${text}`}>{TITLE}</h3>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} subject="dataset" />
+          </div>
+        </div>
         <p className={`text-xs mb-4 ${muted}`}>
           Public + publicly-guaranteed external debt service as % of exports of goods, services and primary income.
           Above 20% is generally considered distress territory. Coverage limited to developing sovereigns.

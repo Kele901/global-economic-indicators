@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { empireCycles, type EmpireCycle } from '../data/economicCycles';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CycleTimelineProps {
   isDarkMode: boolean;
@@ -86,19 +88,25 @@ const CycleTimeline: React.FC<CycleTimelineProps> = ({
   return (
     <div 
       ref={containerRef}
+      id={slugify('The Rise and Fall of Great Powers')}
       className={`relative w-full rounded-xl overflow-hidden ${
         isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50'
       }`}
       style={{ height: timelineHeight + 80 }}
     >
       {/* Header */}
-      <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          The Rise and Fall of Great Powers
-        </h3>
-        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          Based on Ray Dalio&apos;s &quot;The Big Cycle&quot; framework - tracking 500 years of economic power shifts
-        </p>
+      <div className={`px-4 py-3 border-b flex items-start justify-between gap-2 flex-wrap ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div>
+          <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            The Rise and Fall of Great Powers
+          </h3>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Based on Ray Dalio&apos;s &quot;The Big Cycle&quot; framework - tracking 500 years of economic power shifts
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="The Rise and Fall of Great Powers" isDarkMode={isDarkMode} />
+        </div>
       </div>
 
       {/* SVG Timeline */}

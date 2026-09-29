@@ -18,6 +18,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { techChartColors, formatPercent } from '../data/technologyIndicators';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface DigitalEconomyChartProps {
   isDarkMode: boolean;
@@ -197,7 +199,7 @@ const DigitalEconomyChart: React.FC<DigitalEconomyChartProps> = ({
   }, [digitalPaymentsData, selectedYear]);
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+    <div id={slugify('Digital Economy Analysis')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -256,6 +258,8 @@ const DigitalEconomyChart: React.FC<DigitalEconomyChartProps> = ({
               ))}
             </select>
           )}
+
+          <SocialShareMenu title="Digital Economy Analysis" isDarkMode={isDarkMode} />
         </div>
       </div>
 

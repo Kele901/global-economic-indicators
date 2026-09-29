@@ -7,6 +7,8 @@ import {
 } from 'recharts';
 import { CountryData } from '../services/worldbank';
 import { culturalChartColors } from '../data/culturalMetrics';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface CulturalRadarChartProps {
   isDarkMode: boolean;
@@ -98,13 +100,18 @@ const CulturalRadarChart: React.FC<CulturalRadarChartProps> = ({
   const countriesToShow = selectedCountries.slice(0, 5);
 
   return (
-    <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-      <h3 className={`text-lg font-semibold mb-1 ${themeColors.text}`}>Cultural Profile Comparison</h3>
+    <div id={slugify('Cultural Profile Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+        <h3 className={`text-lg font-semibold ${themeColors.text}`}>Cultural Profile Comparison</h3>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Cultural Profile Comparison" isDarkMode={isDarkMode} />
+        </div>
+      </div>
       <p className={`text-sm mb-4 ${themeColors.textSecondary}`}>
         Radar chart showing relative strengths across cultural dimensions (max 5 countries)
       </p>
 
-      <div className="w-full h-[500px]">
+      <div className="w-full h-[400px] sm:h-[500px]">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
             <PolarGrid stroke={isDarkMode ? '#374151' : '#E5E7EB'} />

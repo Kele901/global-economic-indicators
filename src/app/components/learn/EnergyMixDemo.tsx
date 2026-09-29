@@ -92,7 +92,7 @@ export default function EnergyMixDemo({ isDarkMode }: Props) {
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+      <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 text-sm">
         <div className={`rounded-md p-3 border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-100'}`}>
           <div className={`text-[11px] uppercase tracking-wider ${muted}`}>Cost</div>
           <div className={`text-lg font-bold tabular-nums ${text}`}>£{cost.toFixed(0)}</div>

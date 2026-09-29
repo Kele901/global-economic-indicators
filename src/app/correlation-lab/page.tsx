@@ -7,6 +7,8 @@ import { ALL_METRICS, getMetricByKey } from '../utils/metricCategories';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
 import { pearsonCorrelation } from '../utils/correlationEngine';
 import Breadcrumbs from '../components/Breadcrumbs';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { slugify } from '../lib/share';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -102,6 +104,8 @@ export default function CorrelationLabPage() {
 
   const metricALabel = getMetricByKey(metricA)?.label ?? metricA;
   const metricBLabel = getMetricByKey(metricB)?.label ?? metricB;
+  const scatterTitle = `Cross-country scatter: ${metricALabel} vs ${metricBLabel}`;
+  const tableTitle = `Top-10 country correlations: ${metricALabel} vs ${metricBLabel}`;
 
   const bg = isDarkMode ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900';
   const card = isDarkMode ? 'bg-gray-900/60 border-gray-800' : 'bg-white border-gray-200';
@@ -151,8 +155,13 @@ export default function CorrelationLabPage() {
           </div>
         </div>
 
-        <div className={`rounded-xl border p-4 sm:p-6 mb-6 ${card}`}>
-          <h2 className="text-lg font-semibold mb-3">Cross-country scatter</h2>
+        <div id={slugify(scatterTitle)} className={`rounded-xl border p-4 sm:p-6 mb-6 ${card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h2 className="text-lg font-semibold">Cross-country scatter</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title={scatterTitle} isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             One point per country. X = mean of {metricALabel}, Y = mean of {metricBLabel}{lag ? ` (lagged ${lag > 0 ? `+${lag}` : lag} years)` : ''}.
           </p>
@@ -177,8 +186,13 @@ export default function CorrelationLabPage() {
           </div>
         </div>
 
-        <div className={`rounded-xl border p-4 sm:p-6 mb-6 ${card}`}>
-          <h2 className="text-lg font-semibold mb-3">Top-10 country correlations (|r|)</h2>
+        <div id={slugify(tableTitle)} className={`rounded-xl border p-4 sm:p-6 mb-6 ${card}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h2 className="text-lg font-semibold">Top-10 country correlations (|r|)</h2>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title={tableTitle} subject="dataset" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

@@ -20,6 +20,8 @@ import {
   CountryDebtProfile,
   PushPullFactor
 } from '../data/economicCycles';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface InternationalMacroFrameworksProps {
   darkMode: boolean;
@@ -209,10 +211,15 @@ export default function InternationalMacroFrameworks({ darkMode }: International
       {activeSubSection === 'capital-flows' && (
         <div className="space-y-6">
           {/* Push/Pull Balance */}
-          <div className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
-            <h3 className={`text-xl font-bold ${textPrimary} mb-4`}>
-              Current Push/Pull Capital Flow Assessment
-            </h3>
+          <div id={slugify('Current Push/Pull Capital Flow Assessment')} className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h3 className={`text-xl font-bold ${textPrimary}`}>
+                Current Push/Pull Capital Flow Assessment
+              </h3>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Current Push/Pull Capital Flow Assessment" isDarkMode={darkMode} />
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-red-50'}`}>
                 <div className={`text-sm font-medium ${darkMode ? 'text-red-300' : 'text-red-600'}`}>Push Factors (DM)</div>
@@ -245,8 +252,13 @@ export default function InternationalMacroFrameworks({ darkMode }: International
           </div>
 
           {/* Push/Pull Factors Grid */}
-          <div className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
-            <h4 className={`text-lg font-bold ${textPrimary} mb-4`}>Push & Pull Factors (Calvo Framework)</h4>
+          <div id={slugify('Push & Pull Factors (Calvo Framework)')} className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h4 className={`text-lg font-bold ${textPrimary}`}>Push & Pull Factors (Calvo Framework)</h4>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Push & Pull Factors (Calvo Framework)" isDarkMode={darkMode} />
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Push Factors */}
               <div>
@@ -315,10 +327,10 @@ export default function InternationalMacroFrameworks({ darkMode }: International
           </div>
 
           {/* Capital Flow Events Timeline */}
-          <div className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
-            <div className="flex justify-between items-center mb-4">
+          <div id={slugify('Historical Capital Flow Events')} className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
+            <div className="flex justify-between items-center gap-2 flex-wrap mb-4">
               <h4 className={`text-lg font-bold ${textPrimary}`}>Historical Capital Flow Events</h4>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {['all', 'sudden_stop', 'capital_bonanza', 'flight_to_safety'].map(type => (
                   <button
                     key={type}
@@ -339,6 +351,7 @@ export default function InternationalMacroFrameworks({ darkMode }: International
                     {type === 'all' ? 'All' : getCapitalFlowTypeLabel(type as any)}
                   </button>
                 ))}
+                <SocialShareMenu title="Historical Capital Flow Events" isDarkMode={darkMode} />
               </div>
             </div>
 
@@ -502,10 +515,15 @@ export default function InternationalMacroFrameworks({ darkMode }: International
           </div>
 
           {/* Country Vulnerability Matrix */}
-          <div className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
-            <h4 className={`text-lg font-bold ${textPrimary} mb-4`}>
-              Country Debt Vulnerability Matrix
-            </h4>
+          <div id={slugify('Country Debt Vulnerability Matrix')} className={`${cardBg} rounded-xl p-6 shadow-lg ${borderColor} border`}>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h4 className={`text-lg font-bold ${textPrimary}`}>
+                Country Debt Vulnerability Matrix
+              </h4>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title="Country Debt Vulnerability Matrix" subject="dataset" isDarkMode={darkMode} />
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -602,10 +620,15 @@ export default function InternationalMacroFrameworks({ darkMode }: International
               {countryDebtProfiles
                 .filter(p => p.countryCode === selectedCountry)
                 .map(profile => (
-                  <div key={profile.countryCode}>
-                    <h4 className={`text-xl font-bold ${textPrimary} mb-4`}>
-                      {profile.country} - Debt Profile Analysis
-                    </h4>
+                  <div key={profile.countryCode} id={slugify(`${profile.country} - Debt Profile Analysis`)}>
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                      <h4 className={`text-xl font-bold ${textPrimary}`}>
+                        {profile.country} - Debt Profile Analysis
+                      </h4>
+                      <div className="flex items-center gap-2 flex-wrap shrink-0">
+                        <SocialShareMenu title={`${profile.country} - Debt Profile Analysis`} isDarkMode={darkMode} />
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                         <div className={`text-sm ${textSecondary}`}>Overall Vulnerability</div>

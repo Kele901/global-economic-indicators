@@ -13,6 +13,8 @@ import {
   PISA_OECD_AVG,
 } from '../services/education';
 import { qs2026Top100 } from '../data/universityRankings';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface EducationDashboardProps {
   isDarkMode: boolean;
@@ -64,6 +66,20 @@ const KpiCard: React.FC<KpiCardProps> = ({ label, value, sub, accent, isDarkMode
     {sub && (
       <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{sub}</p>
     )}
+  </div>
+);
+
+interface ChartHeadingProps {
+  title: string;
+  isDarkMode: boolean;
+  className?: string;
+}
+const ChartHeading: React.FC<ChartHeadingProps> = ({ title, isDarkMode, className = '' }) => (
+  <div className={`flex items-start justify-between gap-2 flex-wrap ${className}`}>
+    <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{title}</h3>
+    <div className="flex items-center gap-2 flex-wrap shrink-0">
+      <SocialShareMenu title={title} isDarkMode={isDarkMode} />
+    </div>
   </div>
 );
 
@@ -178,19 +194,24 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
 
     return (
       <div className="space-y-6">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Avg Tertiary Enrollment" value={fmt(aggregate.avgTertiary, 1, '%')}
-                   sub="Gross enrollment, % of cohort" accent="text-purple-500" isDarkMode={isDarkMode} />
-          <KpiCard label="Avg Adult Literacy" value={fmt(aggregate.avgLiteracy, 1, '%')}
-                   sub="Population 15+, World Bank" accent="text-emerald-500" isDarkMode={isDarkMode} />
-          <KpiCard label="Avg Education Spend" value={fmt(aggregate.avgSpend, 2, '% GDP')}
-                   sub="General government, latest year" accent="text-amber-500" isDarkMode={isDarkMode} />
-          <KpiCard label="Avg STEM Graduates" value={fmt(aggregate.avgStem, 1, '%')}
-                   sub="Share of total graduates" accent="text-blue-500" isDarkMode={isDarkMode} />
+        <div id={slugify('Education key figures')}>
+          <div className="flex justify-end mb-2">
+            <SocialShareMenu title="Education key figures" isDarkMode={isDarkMode} />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <KpiCard label="Avg Tertiary Enrollment" value={fmt(aggregate.avgTertiary, 1, '%')}
+                     sub="Gross enrollment, % of cohort" accent="text-purple-500" isDarkMode={isDarkMode} />
+            <KpiCard label="Avg Adult Literacy" value={fmt(aggregate.avgLiteracy, 1, '%')}
+                     sub="Population 15+, World Bank" accent="text-emerald-500" isDarkMode={isDarkMode} />
+            <KpiCard label="Avg Education Spend" value={fmt(aggregate.avgSpend, 2, '% GDP')}
+                     sub="General government, latest year" accent="text-amber-500" isDarkMode={isDarkMode} />
+            <KpiCard label="Avg STEM Graduates" value={fmt(aggregate.avgStem, 1, '%')}
+                     sub="Share of total graduates" accent="text-blue-500" isDarkMode={isDarkMode} />
+          </div>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-3`}>QS 2026 Ranking Concentration (top-500 unis)</h3>
+        <div id={slugify('QS 2026 Ranking Concentration (top-500 unis)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="QS 2026 Ranking Concentration (top-500 unis)" isDarkMode={isDarkMode} className="mb-3" />
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={rankingBar}>
               <CartesianGrid strokeDasharray="3 3" stroke={t.grid} />
@@ -205,8 +226,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </ResponsiveContainer>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Education Spend vs Tertiary Enrollment</h3>
+        <div id={slugify('Education Spend vs Tertiary Enrollment')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Education Spend vs Tertiary Enrollment" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-sm ${t.textSec} mb-3`}>
             Each dot is a country. X = government education spending (% of GDP).
             Y = tertiary gross enrollment (% of cohort, can exceed 100% when mature
@@ -271,8 +292,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
     }));
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Tertiary Gross Enrollment Ratio (latest)</h3>
+        <div id={slugify('Tertiary Gross Enrollment Ratio (latest)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Tertiary Gross Enrollment Ratio (latest)" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-sm ${t.textSec} mb-3`}>
             World Bank <code>SE.TER.ENRR</code>. &gt;100% reflects mature learners and repeaters counted toward enrolment.
           </p>
@@ -293,8 +314,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </ResponsiveContainer>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-3`}>Enrollment Pyramid — Primary, Secondary, Tertiary</h3>
+        <div id={slugify('Enrollment Pyramid — Primary, Secondary, Tertiary')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Enrollment Pyramid — Primary, Secondary, Tertiary" isDarkMode={isDarkMode} className="mb-3" />
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data.slice(0, 18)}>
               <CartesianGrid strokeDasharray="3 3" stroke={t.grid} />
@@ -336,8 +357,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
     return (
       <div className="space-y-6">
         <div className="grid lg:grid-cols-2 gap-6">
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Government Spend (% of GDP)</h3>
+          <div id={slugify('Government Spend (% of GDP)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Government Spend (% of GDP)" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SE.XPD.TOTL.GD.ZS</code>.</p>
             <ResponsiveContainer width="100%" height={Math.max(380, dataGDP.length * 20)}>
               <BarChart data={dataGDP} layout="vertical" margin={{ left: 50 }}>
@@ -352,8 +373,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
             </ResponsiveContainer>
           </div>
 
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Spend per Tertiary Student (% GDP per capita)</h3>
+          <div id={slugify('Spend per Tertiary Student (% GDP per capita)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Spend per Tertiary Student (% GDP per capita)" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SE.XPD.TERT.PC.ZS</code>.</p>
             <ResponsiveContainer width="100%" height={Math.max(380, dataPerStudent.length * 20)}>
               <BarChart data={dataPerStudent} layout="vertical" margin={{ left: 50 }}>
@@ -369,8 +390,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </div>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Does Spending Translate to Enrollment?</h3>
+        <div id={slugify('Does Spending Translate to Enrollment?')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Does Spending Translate to Enrollment?" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-sm ${t.textSec} mb-3`}>
             Each dot is a country. X-axis = share of GDP spent on education by the government;
             Y-axis = tertiary gross enrollment ratio. A rising trend would suggest more
@@ -440,8 +461,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
 
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>STEM Graduates (% of total tertiary grads)</h3>
+        <div id={slugify('STEM Graduates (% of total tertiary grads)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="STEM Graduates (% of total tertiary grads)" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SE.TER.GRAD.SC.ZS</code>.</p>
           <ResponsiveContainer width="100%" height={Math.max(400, stem.length * 22)}>
             <BarChart data={stem} layout="vertical" margin={{ left: 60 }}>
@@ -456,8 +477,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </ResponsiveContainer>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Tertiary Attainment — Population 25+ (%)</h3>
+        <div id={slugify('Tertiary Attainment — Population 25+ (%)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Tertiary Attainment — Population 25+ (%)" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-xs ${t.textSec} mb-3`}>
             World Bank <code>SE.TER.CUAT.BA.ZS</code> (bachelor's) &amp; <code>SE.TER.CUAT.MS.ZS</code> (master's/doctoral).
           </p>
@@ -475,8 +496,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Labor Force with Advanced Education (%)</h3>
+          <div id={slugify('Labor Force with Advanced Education (%)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Labor Force with Advanced Education (%)" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SL.TLF.ADVN.ZS</code>.</p>
             <ResponsiveContainer width="100%" height={Math.max(360, labor.length * 22)}>
               <BarChart data={labor} layout="vertical" margin={{ left: 60 }}>
@@ -488,8 +509,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Unemployment with Advanced Education (%)</h3>
+          <div id={slugify('Unemployment with Advanced Education (%)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Unemployment with Advanced Education (%)" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>
               World Bank <code>SL.UEM.ADVN.ZS</code> — high values can signal credential inflation or brain drain.
             </p>
@@ -544,8 +565,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
 
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Adult vs Youth Literacy (%)</h3>
+        <div id={slugify('Adult vs Youth Literacy (%)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Adult vs Youth Literacy (%)" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-xs ${t.textSec} mb-3`}>
             World Bank <code>SE.ADT.LITR.ZS</code> (15+) &amp; <code>SE.ADT.1524.LT.ZS</code> (15-24).
             Latest available year per country.
@@ -563,7 +584,7 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </ResponsiveContainer>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+        <div id={slugify(`PISA ${educationData.pisaAsOf} — Reading · Math · Science`)} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
           <div className="flex flex-wrap justify-between items-center mb-3 gap-3">
             <div>
               <h3 className={`text-lg font-semibold ${t.text}`}>PISA {educationData.pisaAsOf} — Reading · Math · Science</h3>
@@ -571,6 +592,9 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
                 OECD mean for reference: Reading {PISA_OECD_AVG.reading} · Math {PISA_OECD_AVG.math} · Science {PISA_OECD_AVG.science}.
                 Pick countries:
               </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title={`PISA ${educationData.pisaAsOf} — Reading · Math · Science`} isDarkMode={isDarkMode} />
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-3">
@@ -615,8 +639,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </ResponsiveContainer>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>PISA Outcomes vs Education Spend</h3>
+        <div id={slugify('PISA Outcomes vs Education Spend')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="PISA Outcomes vs Education Spend" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-sm ${t.textSec} mb-3`}>
             Each dot is a country. X = government education spending (% of GDP).
             Y = average PISA {educationData.pisaAsOf} score across reading, math, and science
@@ -685,11 +709,12 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
       .sort((a, b) => b.top200 - a.top200);
 
     const drill = educationData.countries[rankingCountry]?.rankings;
+    const rankingTitle = rankingMode === 'global' ? 'Global Top 100 — Drill Down' : 'Top 10 Universities — Country Drill Down';
 
     return (
       <div className="space-y-6">
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>QS Top-N Counts by Country — {educationData.rankingsAsOf} edition</h3>
+        <div id={slugify(`QS Top-N Counts by Country — ${educationData.rankingsAsOf} edition`)} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title={`QS Top-N Counts by Country — ${educationData.rankingsAsOf} edition`} isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-xs ${t.textSec} mb-3`}>
             Top-100 / Top-200 / Top-500 / Top-1000 university counts.
             Source: <a className="underline" href={educationData.meta.qsSourceUrl} target="_blank" rel="noopener noreferrer">QS World University Rankings 2026</a>.
@@ -710,10 +735,10 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </ResponsiveContainer>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+        <div id={slugify(rankingTitle)} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
           <div className="flex flex-wrap gap-3 justify-between items-center mb-4">
             <h3 className={`text-lg font-semibold ${t.text}`}>
-              {rankingMode === 'global' ? 'Global Top 100 — Drill Down' : 'Top 10 Universities — Country Drill Down'}
+              {rankingTitle}
             </h3>
             <div className="flex flex-wrap gap-2 items-center">
               <div className={`inline-flex rounded-lg p-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
@@ -754,6 +779,7 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
                     ))}
                 </select>
               )}
+              <SocialShareMenu title={rankingTitle} subject="dataset" isDarkMode={isDarkMode} />
             </div>
           </div>
 
@@ -939,8 +965,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
     return (
       <div className="space-y-6">
         <div className="grid lg:grid-cols-2 gap-6">
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Scientific & Technical Journal Articles</h3>
+          <div id={slugify('Scientific & Technical Journal Articles')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Scientific & Technical Journal Articles" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>IP.JRN.ARTC.SC</code> · annual count.</p>
             <ResponsiveContainer width="100%" height={Math.max(380, articles.length * 22)}>
               <BarChart data={articles} layout="vertical" margin={{ left: 60 }}>
@@ -954,8 +980,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Researchers in R&amp;D (per million)</h3>
+          <div id={slugify('Researchers in R&D (per million)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Researchers in R&D (per million)" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SP.POP.SCIE.RD.P6</code>.</p>
             <ResponsiveContainer width="100%" height={Math.max(380, researchers.length * 22)}>
               <BarChart data={researchers} layout="vertical" margin={{ left: 60 }}>
@@ -971,8 +997,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </div>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Researchers vs Article Output</h3>
+        <div id={slugify('Researchers vs Article Output')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Researchers vs Article Output" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-sm ${t.textSec} mb-3`}>
             Each dot is a country. X = researchers in R&amp;D per million people.
             Y = annual count of scientific &amp; technical journal articles published.
@@ -1038,8 +1064,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
     return (
       <div className="space-y-6">
         <div className="grid lg:grid-cols-2 gap-6">
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Primary Completion Rate (%)</h3>
+          <div id={slugify('Primary Completion Rate (%)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Primary Completion Rate (%)" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SE.PRM.CMPT.ZS</code>.</p>
             <ResponsiveContainer width="100%" height={Math.max(380, completion.length * 22)}>
               <BarChart data={completion} layout="vertical" margin={{ left: 60 }}>
@@ -1053,8 +1079,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-            <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Pupil-Teacher Ratio (primary, lower is better)</h3>
+          <div id={slugify('Pupil-Teacher Ratio (primary, lower is better)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+            <ChartHeading title="Pupil-Teacher Ratio (primary, lower is better)" isDarkMode={isDarkMode} className="mb-1" />
             <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SE.PRM.ENRL.TC.ZS</code>.</p>
             <ResponsiveContainer width="100%" height={Math.max(380, pupilTeacher.length * 22)}>
               <BarChart data={pupilTeacher} layout="vertical" margin={{ left: 60 }}>
@@ -1070,8 +1096,8 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
           </div>
         </div>
 
-        <div className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
-          <h3 className={`text-lg font-semibold ${t.text} mb-1`}>Trained Primary Teachers (%)</h3>
+        <div id={slugify('Trained Primary Teachers (%)')} className={`rounded-xl border ${t.border} ${t.cardBg} p-4`}>
+          <ChartHeading title="Trained Primary Teachers (%)" isDarkMode={isDarkMode} className="mb-1" />
           <p className={`text-xs ${t.textSec} mb-3`}>World Bank <code>SE.PRM.TCAQ.ZS</code>.</p>
           <ResponsiveContainer width="100%" height={Math.max(380, trained.length * 22)}>
             <BarChart data={trained} layout="vertical" margin={{ left: 60 }}>
@@ -1110,8 +1136,13 @@ const EducationDashboard: React.FC<EducationDashboardProps> = ({
     const insightCard = (
       title: string, accent: string, items: { label: string; value: string }[], blurb: string,
     ) => (
-      <div className={`rounded-xl border ${t.border} ${t.cardBg} p-5`}>
-        <h3 className={`text-base font-bold mb-2 ${accent}`}>{title}</h3>
+      <div id={slugify(title)} className={`rounded-xl border ${t.border} ${t.cardBg} p-5`}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+          <h3 className={`text-base font-bold ${accent}`}>{title}</h3>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} subject="dataset" isDarkMode={isDarkMode} />
+          </div>
+        </div>
         <p className={`text-xs mb-3 ${t.textSec}`}>{blurb}</p>
         <ul className="space-y-1.5">
           {items.map((it, i) => (

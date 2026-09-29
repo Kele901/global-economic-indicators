@@ -6,6 +6,8 @@ import { fetchGlobalData, CountryData } from '../../services/worldbank';
 import { COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, type CountryKey } from '../../utils/countryMappings';
 import { getMetricByKey, formatMetricValue } from '../../utils/metricCategories';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import SocialShareMenu from '../../components/SocialShareMenu';
+import { slugify } from '../../lib/share';
 
 export default function EmbedChartPage() {
   const params = useParams();
@@ -20,9 +22,19 @@ export default function EmbedChartPage() {
 
   const [data, setData] = useState<Record<string, CountryData[]> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
     fetchGlobalData().then(d => { setData(d as any); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  // Our own gallery and builder previews frame this page and carry their own share.
+  useEffect(() => {
+    try {
+      setShowShare(window.top === window.self || window.top?.location.origin !== window.location.origin);
+    } catch {
+      setShowShare(true);
+    }
   }, []);
 
   const isDark = theme === 'dark';
@@ -33,6 +45,7 @@ export default function EmbedChartPage() {
     : { backgroundColor: '#fff', border: '1px solid #e5e7eb', color: '#111827', borderRadius: '8px' } as React.CSSProperties;
 
   const metricDef = getMetricByKey(metric);
+  const title = metricDef?.label || metric;
 
   const chartData = useMemo(() => {
     if (!data) return [];
@@ -59,8 +72,15 @@ export default function EmbedChartPage() {
   }
 
   return (
-    <div className={`p-3 ${isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      <h3 className="text-sm font-semibold mb-2">{metricDef?.label || metric}</h3>
+    <div id={slugify(title)} className={`p-3 ${isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+        <h3 className="text-sm font-semibold">{title}</h3>
+        {showShare && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={title} isDarkMode={isDark} iconOnly />
+          </div>
+        )}
+      </div>
       <div className="h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 15, left: 5, bottom: 5 }}>

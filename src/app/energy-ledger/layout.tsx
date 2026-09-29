@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/energy-ledger', {
   title: 'Energy Ledger | Global Economic Indicators',
   description:
     'Electricity generation mix, battery storage build-out, LNG flows, nuclear reactor status, capacity factors, hydrocarbon reserves and energy intensity — curated IEA/BNEF/IGU/IAEA/EIA snapshots.',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     description:
       'Eight chapters on the global energy system: electricity mix, battery storage, LNG flows, nuclear status, capacity factors, reserves, intensity.',
   },
-};
+});
 
 export default function EnergyLedgerLayout({ children }: { children: React.ReactNode }) {
   return children;

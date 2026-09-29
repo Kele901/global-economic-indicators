@@ -8,6 +8,11 @@
 
 import { useMemo, useState } from 'react';
 import { SUPPLY_CHAIN_CONCENTRATION, MARITIME_CHOKEPOINTS } from '../services/tradeCurated';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
+
+const TITLE = 'Supply-chain concentration';
+const CHOKEPOINTS_TITLE = 'Maritime chokepoints';
 
 interface Props {
   isDarkMode: boolean;
@@ -41,29 +46,32 @@ export default function SupplyChainConcentrationTable({ isDarkMode }: Props) {
   const headerText = isDarkMode ? 'text-gray-400' : 'text-gray-500';
 
   return (
-    <div className={`rounded-lg border ${cardBg}`}>
+    <div id={slugify(TITLE)} className={`rounded-lg border ${cardBg}`}>
       <div className="p-4 sm:p-6 border-b border-inherit">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>Supply-chain concentration</div>
+            <div className={`text-xs uppercase tracking-wider mb-1 ${textMuted}`}>{TITLE}</div>
             <p className={`text-sm ${textSec}`}>Top-3 producer countries for 15 strategic inputs. Bars &gt;90% flag single-point-of-failure risk.</p>
           </div>
-          <div className="flex flex-wrap gap-1" role="group" aria-label="Filter by category">
-            {(Object.keys(CATEGORY_LABELS) as Category[]).map(c => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCat(c)}
-                aria-pressed={cat === c}
-                className={`text-[11px] px-2 py-1 rounded border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  cat === c
-                    ? (isDarkMode ? 'bg-blue-600 border-blue-500 text-white' : 'bg-blue-600 border-blue-600 text-white')
-                    : (isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50')
-                }`}
-              >
-                {CATEGORY_LABELS[c]}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap gap-1" role="group" aria-label="Filter by category">
+              {(Object.keys(CATEGORY_LABELS) as Category[]).map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCat(c)}
+                  aria-pressed={cat === c}
+                  className={`text-[11px] px-2 py-1 rounded border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    cat === c
+                      ? (isDarkMode ? 'bg-blue-600 border-blue-500 text-white' : 'bg-blue-600 border-blue-600 text-white')
+                      : (isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50')
+                  }`}
+                >
+                  {CATEGORY_LABELS[c]}
+                </button>
+              ))}
+            </div>
+            <SocialShareMenu title={TITLE} isDarkMode={isDarkMode} subject="dataset" />
           </div>
         </div>
       </div>
@@ -102,8 +110,13 @@ export default function SupplyChainConcentrationTable({ isDarkMode }: Props) {
         </table>
       </div>
 
-      <div className={`p-4 sm:p-6 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <div className={`text-xs uppercase tracking-wider mb-2 ${textMuted}`}>Maritime chokepoints</div>
+      <div id={slugify(CHOKEPOINTS_TITLE)} className={`p-4 sm:p-6 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+          <div className={`text-xs uppercase tracking-wider ${textMuted}`}>{CHOKEPOINTS_TITLE}</div>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title={CHOKEPOINTS_TITLE} isDarkMode={isDarkMode} subject="dataset" />
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {MARITIME_CHOKEPOINTS.map(cp => (
             <div key={cp.name} className={`rounded border p-3 ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>

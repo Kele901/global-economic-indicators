@@ -4,6 +4,8 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useEffect, useState, useMemo } from 'react';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
 import { METRIC_CATEGORIES, getMetricByKey } from '../utils/metricCategories';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { absoluteUrl } from '../lib/site';
 
 export default function EmbedBuilderPage() {
   const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
@@ -67,6 +69,7 @@ export default function EmbedBuilderPage() {
   };
 
   const metricDef = getMetricByKey(metric);
+  const previewTitle = `${metricDef?.label || metric} for ${selectedCountries.map(c => COUNTRY_DISPLAY_NAMES[c as CountryKey]).join(', ')}`;
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${tc.bg} ${tc.text}`}>
@@ -190,7 +193,12 @@ export default function EmbedBuilderPage() {
 
           {/* Preview */}
           <div className={`rounded-xl border p-5 ${tc.card}`}>
-            <h3 className="font-semibold mb-4">Live Preview</h3>
+            <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+              <h3 className="font-semibold">Live Preview</h3>
+              <div className="flex items-center gap-2 flex-wrap shrink-0">
+                <SocialShareMenu title={previewTitle} url={absoluteUrl(embedUrl)} isDarkMode={isDarkMode} />
+              </div>
+            </div>
             <div className="rounded-lg overflow-hidden border" style={{ borderColor: theme === 'dark' ? '#374151' : '#e5e7eb' }}>
               <iframe
                 src={embedUrl}
@@ -202,7 +210,7 @@ export default function EmbedBuilderPage() {
               />
             </div>
             <p className={`text-xs mt-3 ${tc.textSec}`}>
-              Showing: {metricDef?.label || metric} for {selectedCountries.map(c => COUNTRY_DISPLAY_NAMES[c as CountryKey]).join(', ')}
+              Showing: {previewTitle}
             </p>
           </div>
         </div>

@@ -96,7 +96,7 @@ export default function DataSourcesPage() {
           </button>
         </div>
 
-        <div className={`rounded-2xl border p-4 sm:p-6 mb-8 ${heroBg}`}>
+        <div id="data-sources-registry" className={`rounded-2xl border p-4 sm:p-6 mb-8 ${heroBg}`}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className={`p-3 rounded-lg border ${cardBg}`}>
               <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>Total datasets</div>
@@ -146,6 +146,7 @@ export default function DataSourcesPage() {
               isDarkMode={isDarkMode}
               filename="data-sources-registry"
               label="Export registry"
+              shareTitle="Data sources registry"
               size="md"
               getData={() =>
                 filtered.map(entry => ({

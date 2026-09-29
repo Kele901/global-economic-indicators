@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { withOgImage } from '../lib/og';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withOgImage('/watchlist', {
   title: 'Watchlist | Global Economic Indicators',
   description:
     'Pin countries and indicators to a personal watchlist to track changes across sessions. Local-only, no account required.',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     description:
       'A personal, browser-local view across your chosen countries and metrics.',
   },
-};
+});
 
 export default function WatchlistLayout({
   children,

@@ -19,6 +19,8 @@ import {
   historicalMarketData,
   type YieldCurveDataPoint,
 } from '../data/marketCyclesData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface LiveBusinessCycleDashboardProps {
   isDarkMode: boolean;
@@ -458,8 +460,8 @@ export default function LiveBusinessCycleDashboard({
     : undefined;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div id={slugify('Live Business Cycle Indicators')} className="space-y-6">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
         <div>
           <h2 className={`text-xl font-bold ${textPrimary}`}>Live Business Cycle Indicators</h2>
           <p className={`text-sm ${textSecondary} mt-1`}>
@@ -475,10 +477,18 @@ export default function LiveBusinessCycleDashboard({
             )}
           </p>
         </div>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <SocialShareMenu title="Live Business Cycle Indicators" isDarkMode={isDarkMode} />
+        </div>
       </div>
 
-      <div className={`rounded-xl border ${cardBorder} ${cardBg} p-6`}>
-        <h3 className={`text-lg font-semibold ${textPrimary} mb-2`}>Recession Probability Gauge</h3>
+      <div id={slugify('Recession Probability Gauge')} className={`rounded-xl border ${cardBorder} ${cardBg} p-6`}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+          <h3 className={`text-lg font-semibold ${textPrimary}`}>Recession Probability Gauge</h3>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <SocialShareMenu title="Recession Probability Gauge" isDarkMode={isDarkMode} />
+          </div>
+        </div>
         <p className={`text-sm ${textSecondary} mb-4`}>
           Smoothed U.S. recession probability from FRED (RECPROUSM156N)
         </p>
@@ -497,8 +507,13 @@ export default function LiveBusinessCycleDashboard({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`rounded-xl border ${cardBorder} ${cardBg} p-6`}>
-          <h3 className={`text-lg font-semibold ${textPrimary} mb-1`}>Yield Curve Monitor</h3>
+        <div id={slugify('Yield Curve Monitor')} className={`rounded-xl border ${cardBorder} ${cardBg} p-6`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${textPrimary}`}>Yield Curve Monitor</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Yield Curve Monitor" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm ${textSecondary} mb-4`}>
             Treasury spread: 10Y-2Y and 10Y-3M (negative = inverted)
           </p>
@@ -584,8 +599,13 @@ export default function LiveBusinessCycleDashboard({
           </div>
         </div>
 
-        <div className={`rounded-xl border ${cardBorder} ${cardBg} p-6`}>
-          <h3 className={`text-lg font-semibold ${textPrimary} mb-1`}>Credit Conditions</h3>
+        <div id={slugify('Credit Conditions')} className={`rounded-xl border ${cardBorder} ${cardBg} p-6`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
+            <h3 className={`text-lg font-semibold ${textPrimary}`}>Credit Conditions</h3>
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              <SocialShareMenu title="Credit Conditions" isDarkMode={isDarkMode} />
+            </div>
+          </div>
           <p className={`text-sm ${textSecondary} mb-4`}>
             ICE BofA High Yield OAS (BAMLH0A0HYM2)
           </p>

@@ -6,6 +6,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG, type CountryKey } from '../utils/countryMappings';
 import { ALL_METRICS, formatMetricValue } from '../utils/metricCategories';
+import SocialShareMenu from '../components/SocialShareMenu';
+import { absoluteUrl } from '../lib/site';
 import { US, GB, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
 
 const FLAG_MAP: Record<string, React.ComponentType<any>> = {
@@ -129,14 +131,26 @@ export default function WatchlistPage() {
 
   const renderCard = (item: typeof enrichedItems[0]) => {
     const FC = FLAG_MAP[item.country];
+    const countryName = COUNTRY_DISPLAY_NAMES[item.country as CountryKey] || item.country;
+    const profilePath = `/country/${COUNTRY_KEY_TO_SLUG[item.country as CountryKey]}`;
     return (
       <div key={item.id} className={`rounded-xl border p-4 transition-all ${item.triggered ? tc.alertTriggered : tc.card}`}>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
             {FC && <div className="w-6 h-4 rounded overflow-hidden shadow-sm"><FC /></div>}
-            <span className="font-medium text-sm">{COUNTRY_DISPLAY_NAMES[item.country as CountryKey] || item.country}</span>
+            <span className="font-medium text-sm">{countryName}</span>
           </div>
-          <button onClick={() => removeItem(item.id)} className="text-xs text-red-500 hover:text-red-400">Remove</button>
+          <div className="flex items-center gap-2 shrink-0">
+            <SocialShareMenu
+              title={`${countryName}: ${item.metricDef?.label || item.metric}`}
+              url={absoluteUrl(profilePath)}
+              metric={item.value !== null ? formatMetricValue(item.metric, item.value) : undefined}
+              series={item.spark}
+              isDarkMode={isDarkMode}
+              iconOnly
+            />
+            <button onClick={() => removeItem(item.id)} className="text-xs text-red-500 hover:text-red-400">Remove</button>
+          </div>
         </div>
         <p className={`text-xs ${tc.textSec}`}>{item.metricDef?.label || item.metric}</p>
         <div className="flex items-center justify-between mt-2">
@@ -150,7 +164,7 @@ export default function WatchlistPage() {
             Alert: {item.threshold.direction} {item.threshold.value} {item.triggered ? '⚠ TRIGGERED' : '✓ OK'}
           </p>
         )}
-        <a href={`/country/${COUNTRY_KEY_TO_SLUG[item.country as CountryKey]}`}
+        <a href={profilePath}
           className="text-xs text-blue-500 hover:underline mt-2 block">View profile →</a>
       </div>
     );

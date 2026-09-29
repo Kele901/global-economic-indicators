@@ -19,6 +19,8 @@ import {
   getLatestReserveShares,
   type ReserveShare
 } from '../data/currencyHierarchyData';
+import SocialShareMenu from './SocialShareMenu';
+import { slugify } from '../lib/share';
 
 interface ReserveCurrencyChartProps {
   isDarkMode: boolean;
@@ -150,15 +152,23 @@ const ReserveCurrencyChart: React.FC<ReserveCurrencyChartProps> = ({ isDarkMode 
     return current - past;
   };
 
+  const shareTitle = `Global Reserve Currency Shares: ${viewType === 'area' ? 'Historical Trend' : 'Current Distribution'}`;
+  const sharesGridTitle = `Current Reserve Shares (${latestData.year})`;
+
   return (
-    <div className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
+    <div id={slugify(shareTitle)} className={`rounded-xl overflow-hidden ${themeColors.cardBg}`}>
       <div className={`px-4 py-3 border-b ${themeColors.border}`}>
-        <h3 className={`text-lg font-semibold ${themeColors.text}`}>
-          Global Reserve Currency Shares
-        </h3>
-        <p className={`text-sm ${themeColors.textSecondary}`}>
-          IMF COFER Data - Allocated Foreign Exchange Reserves by Currency
-        </p>
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div>
+            <h3 className={`text-lg font-semibold ${themeColors.text}`}>
+              Global Reserve Currency Shares
+            </h3>
+            <p className={`text-sm ${themeColors.textSecondary}`}>
+              IMF COFER Data - Allocated Foreign Exchange Reserves by Currency
+            </p>
+          </div>
+          <SocialShareMenu title={shareTitle} isDarkMode={isDarkMode} className="shrink-0" />
+        </div>
       </div>
 
       <div className="p-6">
@@ -303,10 +313,13 @@ const ReserveCurrencyChart: React.FC<ReserveCurrencyChartProps> = ({ isDarkMode 
         </div>
 
         {/* Current Shares and Changes */}
-        <div className={`mt-6 p-4 rounded-lg border ${isDarkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-          <h4 className={`text-sm font-semibold mb-3 ${themeColors.text}`}>
-            Current Reserve Shares ({latestData.year})
-          </h4>
+        <div id={slugify(sharesGridTitle)} className={`mt-6 p-4 rounded-lg border ${isDarkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+          <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+            <h4 className={`text-sm font-semibold ${themeColors.text}`}>
+              {sharesGridTitle}
+            </h4>
+            <SocialShareMenu title={sharesGridTitle} subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {Object.entries(latestData)
               .filter(([key]) => key !== 'year')
