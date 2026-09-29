@@ -3,6 +3,7 @@
 import { createContext, useEffect, useRef, useState, type ComponentType } from 'react';
 import { SITE_NAME, SITE_URL, absoluteUrl } from '../lib/site';
 import { stripSiteName, type CardContent } from '../lib/og';
+import { findChartSurface, snapshotChart, type SnapshotHints } from '../lib/chartSnapshot';
 import {
   SHARE_NETWORKS,
   SHARE_NETWORK_LABEL,
@@ -55,6 +56,8 @@ interface Props {
   description?: string;
   /** Small numeric series drawn as a sparkline on the card (downsampled to 40 points). */
   series?: readonly number[];
+  /** Latest values and x range for the chart this control belongs to, shown on its card. */
+  hints?: SnapshotHints;
 }
 
 type Mode = 'light' | 'dark' | 'auto';
@@ -83,7 +86,16 @@ const STYLES: Record<Mode, { trigger: string; panel: string; item: string; muted
   },
 };
 
-type CardExtras = Pick<CardContent, 'metric' | 'description' | 'series'>;
+type CardExtras = Pick<CardContent, 'metric' | 'description' | 'series' | 'plot'>;
+
+function chartPlot(from: Element | null, title: string | undefined, subject: Subject, hints?: SnapshotHints) {
+  if (subject === 'page' || typeof document === 'undefined') return undefined;
+  try {
+    return snapshotChart(findChartSurface(from, title ? slugify(title) : undefined), hints);
+  } catch {
+    return undefined;
+  }
+}
 
 function isSiteOrigin(origin: string): boolean {
   if (origin === window.location.origin) return true;
@@ -145,6 +157,7 @@ export default function SocialShareMenu({
   metric,
   description,
   series,
+  hints,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -182,7 +195,8 @@ export default function SocialShareMenu({
   };
 
   const share = async (network: ShareNetwork) => {
-    const target = resolveTarget(title, url, subject, { metric, description, series });
+    const plot = chartPlot(ref.current, title, subject, hints);
+    const target = resolveTarget(title, url, subject, { metric, description, series, plot });
     if (network === 'substack') {
       const ok = await copy(substackNote(target.title, target.landing));
       window.open(SUBSTACK_URL, '_blank', 'noopener,noreferrer');

@@ -2,9 +2,11 @@
 // the sitemap, robots, OG tags, citations — reads from here so they cannot drift
 // apart again. Override with NEXT_PUBLIC_SITE_URL for preview deployments.
 
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://globaleconindicators.info'
-).replace(/\/$/, '');
+// The apex domain 307-redirects to www on Vercel, and X will not follow a
+// redirect when fetching twitter:image, so absolute URLs must use www.
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.globaleconindicators.info')
+  .replace(/\/$/, '')
+  .replace(/^https:\/\/globaleconindicators\.info$/, 'https://www.globaleconindicators.info');
 
 export const SITE_NAME = 'Global Economic Indicators';
 
