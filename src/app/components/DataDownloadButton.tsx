@@ -114,7 +114,7 @@ export default function DataDownloadButton({
     size === 'md' ? 'px-3 py-1.5 text-sm' : 'px-2 py-1 text-xs';
 
   return (
-    <div className={`inline-flex items-center gap-2 ${className}`}>
+    <div data-share-exclude className={`inline-flex items-center gap-2 ${className}`}>
     {!inChartCard && (
       <SocialShareMenu title={shareTitle} isDarkMode={isDarkMode} subject="dataset" size={size} />
     )}

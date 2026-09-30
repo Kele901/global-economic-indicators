@@ -92,7 +92,7 @@ export function safeQuery(value: unknown): string {
 export function shareLandingPath(target: ShareTarget, card: CardContent = {}): string {
   const segments = target.path.split('/').filter(Boolean);
   const params = new URLSearchParams();
-  appendCardParams(params, card, ['title', 'metric', 'description', 'subject', 'series', 'plot']);
+  appendCardParams(params, card, ['title', 'metric', 'description', 'subject', 'series', 'plot', 'image']);
   const anchor = safeAnchor(target.hash);
   if (anchor) params.set(SHARE_KEYS.anchor, anchor);
   const query = safeQuery(target.search);

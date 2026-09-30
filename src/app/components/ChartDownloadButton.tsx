@@ -153,7 +153,7 @@ const ChartDownloadButton: React.FC<ChartDownloadButtonProps> = ({
   }, [chartElement, chartData.title]);
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <div data-share-exclude className="inline-flex items-center gap-2">
     {!inChartCard && (
       <SocialShareMenu title={chartData.title} size={size === 'sm' ? 'sm' : 'md'} hints={shareHints} />
     )}

@@ -4,6 +4,7 @@ import { createContext, useEffect, useRef, useState, type ComponentType } from '
 import { SITE_NAME, SITE_URL, absoluteUrl } from '../lib/site';
 import { stripSiteName, type CardContent } from '../lib/og';
 import { findChartSurface, snapshotChart, type SnapshotHints } from '../lib/chartSnapshot';
+import { captureVisual, findShareVisual, uploadVisual } from '../lib/visualCapture';
 import {
   SHARE_NETWORKS,
   SHARE_NETWORK_LABEL,
@@ -86,7 +87,10 @@ const STYLES: Record<Mode, { trigger: string; panel: string; item: string; muted
   },
 };
 
-type CardExtras = Pick<CardContent, 'metric' | 'description' | 'series' | 'plot'>;
+type CardExtras = Pick<CardContent, 'metric' | 'description' | 'series' | 'plot' | 'image'>;
+
+const CAPTURE_TIMEOUT_MS = 6000;
+const CAPTURE_REUSE_MS = 60_000;
 
 function chartPlot(from: Element | null, title: string | undefined, subject: Subject, hints?: SnapshotHints) {
   if (subject === 'page' || typeof document === 'undefined') return undefined;
@@ -95,6 +99,46 @@ function chartPlot(from: Element | null, title: string | undefined, subject: Sub
   } catch {
     return undefined;
   }
+}
+
+/** Photographs and uploads the visual; null on any failure or after the time limit. */
+async function visualImage(from: Element | null, title: string | undefined): Promise<string | null> {
+  const el = findShareVisual(from, title ? slugify(title) : undefined);
+  if (!el) return null;
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), CAPTURE_TIMEOUT_MS);
+  try {
+    const shot = await Promise.race([
+      captureVisual(el),
+      new Promise<null>(resolve => controller.signal.addEventListener('abort', () => resolve(null))),
+    ]);
+    return shot ? await uploadVisual(shot, controller.signal) : null;
+  } catch {
+    return null;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+// Opened synchronously inside the click so popup blockers allow it, then
+// pointed at the network once the preview is ready.
+function openPendingWindow(): Window | null {
+  const win = window.open('', '_blank');
+  if (!win) return null;
+  try {
+    win.opener = null;
+    win.document.title = 'Preparing preview\u2026';
+    win.document.body.style.cssText = 'margin:0;font:15px system-ui,sans-serif;color:#475569;display:flex;align-items:center;justify-content:center;height:100vh';
+    win.document.body.textContent = 'Preparing preview\u2026';
+  } catch {
+    // Some browsers restrict about:blank documents; the window still navigates.
+  }
+  return win;
+}
+
+function sendTo(win: Window | null, href: string) {
+  if (win && !win.closed) win.location.replace(href);
+  else window.open(href, '_blank', 'noopener,noreferrer');
 }
 
 function isSiteOrigin(origin: string): boolean {
@@ -161,7 +205,9 @@ export default function SocialShareMenu({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const captured = useRef<{ id: Promise<string | null>; at: number } | null>(null);
   const mode: Mode = isDarkMode === undefined ? 'auto' : isDarkMode ? 'dark' : 'light';
   const s = STYLES[mode];
 
@@ -194,17 +240,50 @@ export default function SocialShareMenu({
     }
   };
 
+  const startCapture = () => {
+    const cached = captured.current;
+    if (cached && Date.now() - cached.at < CAPTURE_REUSE_MS) return cached.id;
+    const id = visualImage(ref.current, title);
+    captured.current = { id, at: Date.now() };
+    id.then(result => { if (!result && captured.current?.id === id) captured.current = null; });
+    return id;
+  };
+
+  // Photographing starts when the menu opens so it overlaps the user picking a network.
+  const toggleMenu = () => {
+    const opening = !open;
+    setOpen(opening);
+    if (opening && subject !== 'page' && !chartPlot(ref.current, title, subject, hints)) void startCapture();
+  };
+
+  const cardImage = async (): Promise<string | undefined> => {
+    if (subject === 'page') return undefined;
+    const early = captured.current;
+    const id = await startCapture();
+    // An early capture can lose to a page that is still loading; retry it once.
+    if (id || !early) return id ?? undefined;
+    return (await startCapture()) ?? undefined;
+  };
+
   const share = async (network: ShareNetwork) => {
+    if (busy) return;
     const plot = chartPlot(ref.current, title, subject, hints);
-    const target = resolveTarget(title, url, subject, { metric, description, series, plot });
-    if (network === 'substack') {
-      const ok = await copy(substackNote(target.title, target.landing));
-      window.open(SUBSTACK_URL, '_blank', 'noopener,noreferrer');
-      setNotice(ok ? 'Note copied. Paste it into Substack.' : 'Copy failed. Share the page link instead.');
-      return;
+    const win = openPendingWindow();
+    setBusy(true);
+    try {
+      const image = plot ? undefined : await cardImage();
+      const target = resolveTarget(title, url, subject, { metric, description, series, plot, image });
+      if (network === 'substack') {
+        const ok = await copy(substackNote(target.title, target.landing));
+        sendTo(win, SUBSTACK_URL);
+        setNotice(ok ? 'Note copied. Paste it into Substack.' : 'Copy failed. Share the page link instead.');
+        return;
+      }
+      sendTo(win, shareUrl(network, target.title, target.landing));
+      setOpen(false);
+    } finally {
+      setBusy(false);
     }
-    window.open(shareUrl(network, target.title, target.landing), '_blank', 'noopener,noreferrer');
-    setOpen(false);
   };
 
   const copyLink = async () => {
@@ -216,10 +295,10 @@ export default function SocialShareMenu({
   const subjectWord = subject === 'dataset' ? 'dataset' : subject === 'page' ? 'page' : 'chart';
 
   return (
-    <div ref={ref} className={`relative inline-block text-left ${className}`}>
+    <div ref={ref} data-share-exclude className={`relative inline-block text-left ${className}`}>
       <button
         type="button"
-        onClick={() => setOpen(v => !v)}
+        onClick={toggleMenu}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Share this ${subjectWord}`}
@@ -246,8 +325,9 @@ export default function SocialShareMenu({
                 type="button"
                 role="menuitem"
                 onClick={() => share(network)}
+                disabled={busy}
                 aria-label={`Share this ${subjectWord} on ${label}`}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-left ${s.item}`}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-left disabled:opacity-60 disabled:cursor-wait ${s.item}`}
               >
                 <Icon size={16} className="shrink-0" />
                 <span>{label}</span>
@@ -266,8 +346,8 @@ export default function SocialShareMenu({
             </svg>
             <span>Copy link</span>
           </button>
-          {notice && (
-            <p role="status" className={`px-3 pt-1 pb-1.5 text-[11px] ${s.muted}`}>{notice}</p>
+          {(busy || notice) && (
+            <p role="status" className={`px-3 pt-1 pb-1.5 text-[11px] ${s.muted}`}>{busy ? 'Preparing preview\u2026' : notice}</p>
           )}
         </div>
       )}

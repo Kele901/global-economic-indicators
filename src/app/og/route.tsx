@@ -1,7 +1,17 @@
 import { ImageResponse } from 'next/og';
 import type { NextRequest } from 'next/server';
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from '../lib/site';
-import { OG_SIZE, PLOT_SCALE, cardFromParams, cleanText, type CardPlot, type CardSubject, type PlotSeries } from '../lib/og';
+import {
+  OG_SIZE,
+  PLOT_SCALE,
+  cardFromParams,
+  cleanText,
+  parseImageId,
+  shareImageUrl,
+  type CardPlot,
+  type CardSubject,
+  type PlotSeries,
+} from '../lib/og';
 
 // Edge runtime: the Node build of @vercel/og resolves its bundled font via
 // fileURLToPath, which throws on Windows project paths containing spaces.
@@ -395,6 +405,100 @@ function PlotCard({ title, kicker, metric, plot }: { title: string; kicker: stri
   );
 }
 
+interface Picture {
+  src: string;
+  width: number;
+  height: number;
+}
+
+const PICTURE_FETCH_MS = 4000;
+const PICTURE_MAX_BYTES = 1.6 * 1024 * 1024;
+
+/** Inlines the stored picture so a slow or missing file degrades to the text card instead of a broken image. */
+async function loadPicture(id: string | undefined): Promise<Picture | undefined> {
+  const parsed = parseImageId(id);
+  const url = parsed ? shareImageUrl(parsed.hash) : undefined;
+  if (!parsed || !url) return undefined;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(PICTURE_FETCH_MS) });
+    if (!res.ok) return undefined;
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    if (bytes.length > PICTURE_MAX_BYTES) return undefined;
+    const type = bytes[0] === 0x89 && bytes[1] === 0x50 ? 'image/png' : bytes[0] === 0xff && bytes[1] === 0xd8 ? 'image/jpeg' : '';
+    if (!type) return undefined;
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return { src: `data:${type};base64,${btoa(binary)}`, width: parsed.width, height: parsed.height };
+  } catch {
+    return undefined;
+  }
+}
+
+/** Squarish and tall pictures sit beside the title so they keep the card's full height. */
+const SIDE_LAYOUT_MAX_ASPECT = 1.6;
+const SIDE_TEXT_WIDTH = 360;
+const SIDE_GAP = 36;
+
+function sideTitleSize(title: string): number {
+  const n = title.length;
+  if (n <= 30) return 46;
+  if (n <= 60) return 38;
+  return 32;
+}
+
+function PictureCard({ title, kicker, picture }: { title: string; kicker: string; picture: Picture }) {
+  if (picture.width / picture.height <= SIDE_LAYOUT_MAX_ASPECT) {
+    // Padding 40 + header 48 + gap 20 + footer 55 + padding 34.
+    const boxHeight = OG_SIZE.height - (40 + 48 + 20 + 55 + 34);
+    const boxWidth = CONTENT_WIDTH - SIDE_TEXT_WIDTH - SIDE_GAP;
+    const scale = Math.min(boxWidth / picture.width, boxHeight / picture.height);
+    const width = Math.round(picture.width * scale);
+    const height = Math.round(picture.height * scale);
+    return (
+      <div style={{ ...ROOT_STYLE, padding: `40px ${PAD_X}px 34px` }}>
+        <Header />
+        <div style={{ display: 'flex', flexGrow: 1, marginTop: '20px', gap: `${SIDE_GAP}px`, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', width: `${SIDE_TEXT_WIDTH}px`, gap: '12px' }}>
+            {kicker && <div style={{ display: 'flex', fontSize: 20, fontWeight: 700, color: SKY, letterSpacing: '0.12em' }}>{kicker}</div>}
+            <div style={{ display: 'flex', fontSize: sideTitleSize(title), fontWeight: 700, color: '#f8fafc', lineHeight: 1.12 }}>{title}</div>
+          </div>
+          <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center' }}>
+            <div style={{ display: 'flex', borderRadius: '14px', overflow: 'hidden', border: '1px solid #334155' }}>
+              <img src={picture.src} width={width} height={height} alt="" />
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const size = plotTitleSize(title);
+  const lines = titleLines(title, size);
+  // Padding 40 + header 48 + gap 20 + kicker 30 + title + gap 20 + footer 55 + padding 34.
+  const fixed = 40 + 48 + 20 + (kicker ? 30 : 0) + Math.ceil(lines * size * 1.12) + 20 + 55 + 34;
+  const boxHeight = Math.max(160, OG_SIZE.height - fixed);
+  const scale = Math.min(CONTENT_WIDTH / picture.width, boxHeight / picture.height);
+  const width = Math.round(picture.width * scale);
+  const height = Math.round(picture.height * scale);
+
+  return (
+    <div style={{ ...ROOT_STYLE, padding: `40px ${PAD_X}px 34px` }}>
+      <Header />
+      <div style={{ display: 'flex', flexDirection: 'column', marginTop: '20px', gap: '6px' }}>
+        {kicker && <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, color: SKY, letterSpacing: '0.12em' }}>{kicker}</div>}
+        <div style={{ display: 'flex', fontSize: size, fontWeight: 700, color: '#f8fafc', lineHeight: 1.1, maxWidth: `${CONTENT_WIDTH}px` }}>{title}</div>
+      </div>
+      <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', justifyContent: 'center', marginTop: '20px' }}>
+        <div style={{ display: 'flex', borderRadius: '14px', overflow: 'hidden', border: '1px solid #334155' }}>
+          <img src={picture.src} width={width} height={height} alt="" />
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
 function TextCard({ title, kicker, metric, description, series }: { title: string; kicker: string; metric: string; description: string; series?: readonly number[] }) {
   return (
     <div style={{ ...ROOT_STYLE, padding: '56px 64px 48px' }}>
@@ -411,7 +515,7 @@ function TextCard({ title, kicker, metric, description, series }: { title: strin
   );
 }
 
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams;
   const card = cardFromParams(key => q.get(key));
   const title = card.title || SITE_NAME;
@@ -419,8 +523,11 @@ export function GET(req: NextRequest) {
     .filter(Boolean)
     .join('  \u00b7  ')
     .toUpperCase();
+  const picture = card.plot ? undefined : await loadPicture(card.image);
 
-  const body = card.plot ? (
+  const body = picture ? (
+    <PictureCard title={title} kicker={kicker} picture={picture} />
+  ) : card.plot ? (
     <PlotCard title={title} kicker={kicker} metric={card.metric} plot={card.plot} />
   ) : (
     <TextCard

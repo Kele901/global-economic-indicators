@@ -69,6 +69,30 @@ export interface CardContent {
   series?: readonly number[];
   subject?: CardSubject;
   plot?: CardPlot;
+  /** Stored picture of the visual, "<sha256>-<width>x<height>". */
+  image?: string;
+}
+
+/** Blob pathname prefix for pictures uploaded through /api/share-image. */
+export const SHARE_IMAGE_PREFIX = 'share/';
+
+const IMAGE_ID = /^([a-f0-9]{64})-(\d{2,4})x(\d{2,4})$/;
+
+export function parseImageId(value: unknown): { hash: string; width: number; height: number } | undefined {
+  if (typeof value !== 'string') return undefined;
+  const m = value.match(IMAGE_ID);
+  return m ? { hash: m[1], width: Number(m[2]), height: Number(m[3]) } : undefined;
+}
+
+/**
+ * Public URL of a stored share picture. The store's public host is derived from
+ * the Blob token (vercel_blob_rw_<storeId>_<secret>) unless overridden.
+ */
+export function shareImageUrl(hash: string): string | undefined {
+  const override = process.env.SHARE_IMAGE_BASE_URL?.replace(/\/$/, '');
+  const storeId = process.env.BLOB_READ_WRITE_TOKEN?.split('_')[3];
+  const base = override || (storeId ? `https://${storeId.toLowerCase()}.public.blob.vercel-storage.com` : '');
+  return base ? `${base}/${SHARE_IMAGE_PREFIX}${hash}` : undefined;
 }
 
 // C0/C1 controls plus zero-width and bidi-override characters, which could
@@ -149,6 +173,7 @@ export const CARD_KEYS = {
   section: 'k',
   series: 's',
   subject: 'y',
+  image: 'i',
 } as const;
 
 // Kept clear of CARD_KEYS and the /share route's own keys (c, q), since all
@@ -266,7 +291,8 @@ export function parsePlot(get: (key: string) => string | null | undefined): Card
 
 export function cardFromParams(
   get: (key: string) => string | null | undefined,
-): Required<Omit<CardContent, 'series' | 'subject' | 'plot'>> & Pick<CardContent, 'series' | 'subject' | 'plot'> {
+): Required<Omit<CardContent, 'series' | 'subject' | 'plot' | 'image'>> & Pick<CardContent, 'series' | 'subject' | 'plot' | 'image'> {
+  const image = get(CARD_KEYS.image);
   return {
     title: cleanText(get(CARD_KEYS.title), OG_LIMITS.title),
     metric: cleanText(get(CARD_KEYS.metric), OG_LIMITS.metric),
@@ -275,6 +301,7 @@ export function cardFromParams(
     series: parseSeries(get(CARD_KEYS.series)),
     subject: parseSubject(get(CARD_KEYS.subject)),
     plot: parsePlot(get),
+    image: parseImageId(image) ? (image as string) : undefined,
   };
 }
 
@@ -282,6 +309,8 @@ export function appendCardParams(params: URLSearchParams, card: CardContent, key
   for (const key of keys) {
     if (key === 'plot') {
       if (card.plot) encodePlot(params, card.plot);
+    } else if (key === 'image') {
+      if (parseImageId(card.image)) params.set(CARD_KEYS.image, card.image as string);
     } else if (key === 'series') {
       const s = card.series ? encodeSeries(card.series) : '';
       if (s) params.set(CARD_KEYS.series, s);
@@ -297,7 +326,7 @@ export function appendCardParams(params: URLSearchParams, card: CardContent, key
 /** Site-relative image URL; metadataBase makes it absolute in the tags. */
 export function ogImagePath(card: CardContent): string {
   const params = new URLSearchParams();
-  appendCardParams(params, card, ['title', 'metric', 'description', 'section', 'subject', 'series', 'plot']);
+  appendCardParams(params, card, ['title', 'metric', 'description', 'section', 'subject', 'series', 'plot', 'image']);
   const qs = params.toString();
   return qs ? `${OG_IMAGE_PATH}?${qs}` : OG_IMAGE_PATH;
 }
