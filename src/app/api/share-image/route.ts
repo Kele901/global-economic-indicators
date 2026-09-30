@@ -78,7 +78,8 @@ function fail(status: number, error: string) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return fail(503, 'Share images are not configured');
+  // Stores connected with OIDC get BLOB_STORE_ID; older ones get a read-write token.
+  if (!process.env.BLOB_STORE_ID && !process.env.BLOB_READ_WRITE_TOKEN) return fail(503, 'Share images are not configured');
   if (!originAllowed(req)) return fail(403, 'Forbidden');
   if (rateLimited(req)) return fail(429, 'Too many share images, try again shortly');
 

@@ -90,7 +90,7 @@ export function parseImageId(value: unknown): { hash: string; width: number; hei
  */
 export function shareImageUrl(hash: string): string | undefined {
   const override = process.env.SHARE_IMAGE_BASE_URL?.replace(/\/$/, '');
-  const storeId = process.env.BLOB_READ_WRITE_TOKEN?.split('_')[3];
+  const storeId = process.env.BLOB_STORE_ID?.trim().replace(/^store_/, '') || process.env.BLOB_READ_WRITE_TOKEN?.split('_')[3];
   const base = override || (storeId ? `https://${storeId.toLowerCase()}.public.blob.vercel-storage.com` : '');
   return base ? `${base}/${SHARE_IMAGE_PREFIX}${hash}` : undefined;
 }
