@@ -203,7 +203,7 @@ export default function AdvancedVsEmerging({ isDarkMode, series, economy }: Prop
       `At their average projected pace for ${CURRENT_YEAR + 1}–${lastYear} (${pct(facts.mtEm)} and ${pct(facts.mtAe)} a year), emerging economies would double their output in about ${Math.round(doublingYears(facts.mtEm))} years; advanced economies would take about ${Math.round(doublingYears(facts.mtAe))}.`
     );
   }
-  if (facts.historicalYears > 0) {
+  if (facts.historicalYears >= 3) {
     takeaways.push(
       `Emerging economies grew faster than advanced ones (or shrank less, as in ${FIRST_YEAR}) in ${facts.emAheadYears} of the ${facts.historicalYears} years from ${FIRST_YEAR} to ${PREV_YEAR}.`
     );
