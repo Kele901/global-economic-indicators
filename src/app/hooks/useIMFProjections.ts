@@ -1,11 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { IMF_GDP_PROJECTIONS, IMF_INFLATION_PROJECTIONS, REGIONAL_GDP_PROJECTIONS } from '../data/imfProjections';
+import { IMF_GDP_PROJECTIONS, IMF_INFLATION_PROJECTIONS, REGIONAL_GDP_PROJECTIONS, type Projection } from '../data/imfProjections';
 
-export interface Projection {
-  country: string;
-  metric: string;
-  values: Record<number, number>;
-}
+export type { Projection };
 
 export interface RegionalProjection {
   region: string;
@@ -66,7 +62,10 @@ export function useIMFProjections(): UseIMFProjectionsReturn {
         const transformedGdp = gdpData.data.map((item: any) => ({
           country: item.country,
           metric: 'gdpGrowth',
-          values: item.values
+          values: item.values,
+          name: item.name,
+          iso2: item.iso2,
+          isGroup: item.isGroup,
         }));
         setGdpProjections(transformedGdp);
       }
@@ -75,7 +74,10 @@ export function useIMFProjections(): UseIMFProjectionsReturn {
         const transformedInflation = inflationData.data.map((item: any) => ({
           country: item.country,
           metric: 'inflation',
-          values: item.values
+          values: item.values,
+          name: item.name,
+          iso2: item.iso2,
+          isGroup: item.isGroup,
         }));
         setInflationProjections(transformedInflation);
       }
