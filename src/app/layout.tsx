@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import Navbar from './components/Navbar';
 import ThemeProvider from './components/ThemeProvider';
@@ -149,6 +151,8 @@ export default function RootLayout({
           <RouteTracker />
           <HashAnchorScroll />
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
