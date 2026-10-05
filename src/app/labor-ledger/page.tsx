@@ -3,8 +3,9 @@
 // Labor Ledger — 8 chapters on the global labour market. Mirrors
 // the AI/Trade/Migration/Debt/Climate/Defense/Health/Energy Ledger
 // pattern. Live WB (SL.UEM.TOTL.ZS, SL.TLF.CACT.ZS, SL.UEM.1524.ZS)
-// joined with curated ILO wages, OECD union density, ILO informal,
-// UN DESA WPP, OECD AI-exposure and ILO youth-unemployment snapshots.
+// joined with curated ILO wages, OECD/ICTWSS union density, ILOSTAT
+// informal employment and LFP, UN DESA WPP, OECD AI-exposure and ILO
+// modelled youth-unemployment snapshots.
 
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -13,12 +14,13 @@ import { fetchGlobalData } from '../services/worldbank';
 import {
   CURATED_LAST_UPDATED,
   WAGES_2023,
-  UNION_DENSITY_2023,
-  INFORMAL_EMPLOYMENT_2023,
+  UNION_DENSITY_LATEST,
+  INFORMAL_EMPLOYMENT_LATEST,
   WORKING_AGE_2000_2050,
   AI_DISPLACEMENT_RISK_2024,
-  GENDER_GAP_2023,
-  YOUTH_UNEMPLOYMENT_2010_2024,
+  GENDER_GAP_2025,
+  YOUTH_UNEMPLOYMENT_2010_2025,
+  laborCountryName,
 } from '../services/laborCurated';
 import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
@@ -40,7 +42,7 @@ const skeleton = (label: string, height?: string) => {
 const WageTicker                = dynamic(() => import('../components/WageTicker'),                { ssr: false, loading: skeleton('Loading wage ticker', 'h-[64px]') });
 const LaborSlackChart           = dynamic(() => import('../components/LaborSlackChart'),           { ssr: false, loading: skeleton('Loading labour market slack', 'h-[440px] sm:h-[560px]') });
 const WagesChart                = dynamic(() => import('../components/WagesChart'),                { ssr: false, loading: skeleton('Loading wages chart', 'h-[440px] sm:h-[560px]') });
-const UnionisationChart         = dynamic(() => import('../components/UnionisationChart'),         { ssr: false, loading: skeleton('Loading unionisation chart') });
+const UnionisationChart         = dynamic(() => import('../components/UnionisationChart'),         { ssr: false, loading: skeleton('Loading unionisation chart', 'h-[560px] sm:h-[640px]') });
 const InformalEmploymentGrid    = dynamic(() => import('../components/InformalEmploymentGrid'),    { ssr: false, loading: skeleton('Loading informal employment') });
 const WorkingAgeTrajectoryChart = dynamic(() => import('../components/WorkingAgeTrajectoryChart'), { ssr: false, loading: skeleton('Loading working-age trajectory') });
 const AiDisplacementRiskTable   = dynamic(() => import('../components/AiDisplacementRiskTable'),   { ssr: false, loading: skeleton('Loading AI displacement risk') });
@@ -56,8 +58,8 @@ const TOUR_STEPS: TourStep[] = [
   { chapter: 'Chapter 4', title: 'Informality', body: 'No contract, no social insurance, often no minimum wage. Any wage comparison that ignores this overstates reality across most of South Asia and Sub-Saharan Africa.' },
   { chapter: 'Chapter 5', title: 'The demographic cliff', body: 'Working-age population to 2050. China peaked in 2015; Nigeria overtakes both the US and the EU by mid-century.' },
   { chapter: 'Chapter 6', title: 'AI exposure', body: 'Employment shares in occupations with high generative-AI exposure — and the complementarity column that says whether AI augments or replaces them.' },
-  { chapter: 'Chapter 7', title: 'The gender gap', body: 'Male against female participation. Nordic countries are near parity; India, Mexico and Turkey run gaps of 30-50 percentage points.' },
-  { chapter: 'Chapter 8', title: 'Youth unemployment over time', body: 'The same story as Chapter 1 on a time axis, by development band. The 2020-21 COVID spike was the sharpest short-term shock on record.' },
+  { chapter: 'Chapter 7', title: 'The gender gap', body: 'Male against female participation in 2025. Sweden and Norway are near parity; India, Turkey and Mexico run gaps of 30-45 percentage points.' },
+  { chapter: 'Chapter 8', title: 'Youth unemployment over time', body: 'The same story as Chapter 1 on a time axis, by income group through 2025. The 2020-21 COVID spike was the sharpest short-term shock on record.' },
 ];
 
 function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, shareSubject = 'chart' }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean; shareSubject?: 'chart' | 'dataset'; }) {
@@ -106,13 +108,13 @@ export default function LaborLedgerPage() {
   }, []);
 
   const topWage = useMemo(() => [...WAGES_2023].sort((a, b) => b.medianHourlyUsdPpp - a.medianHourlyUsdPpp)[0], []);
-  const worstInformal = useMemo(() => [...INFORMAL_EMPLOYMENT_2023].sort((a, b) => b.informalPct - a.informalPct)[0], []);
+  const worstInformal = useMemo(() => [...INFORMAL_EMPLOYMENT_LATEST].sort((a, b) => b.informalPct - a.informalPct)[0], []);
   const chinaCliff = useMemo(() => {
     const start = WORKING_AGE_2000_2050.find(p => p.year === 2020)?.china ?? 0;
     const end   = WORKING_AGE_2000_2050.find(p => p.year === 2050)?.china ?? 0;
     return { start, end, drop: start - end };
   }, []);
-  const worstYouth2024 = useMemo(() => YOUTH_UNEMPLOYMENT_2010_2024[YOUTH_UNEMPLOYMENT_2010_2024.length - 1]?.world ?? 0, []);
+  const latestYouth = useMemo(() => YOUTH_UNEMPLOYMENT_2010_2025[YOUTH_UNEMPLOYMENT_2010_2025.length - 1], []);
 
   const pageBg = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
   const heroBg = isDarkMode
@@ -156,7 +158,7 @@ export default function LaborLedgerPage() {
 
         <StalenessBanner
           lastUpdated={CURATED_LAST_UPDATED}
-          label="ILO Wage Report 2024, OECD/ICTWSS union density 2023, ILO informal employment 2023, UN DESA WPP 2024, OECD AI exposure 2024, ILO youth unemployment 2024"
+          label="ILO Global Wage Report 2024-25, OECD/ICTWSS union density 2024, ILOSTAT informal employment 2025, UN DESA WPP 2024, OECD AI exposure 2024, ILO modelled LFP and youth unemployment 2025"
           isDarkMode={isDarkMode}
         />
 
@@ -174,12 +176,12 @@ export default function LaborLedgerPage() {
             <div className={`p-3 rounded-lg border ${cardBg}`}>
               <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>Top median wage</div>
               <div className={`text-xl font-semibold tabular-nums mt-0.5 text-emerald-500`}>${topWage.medianHourlyUsdPpp.toFixed(1)}/hr</div>
-              <div className={`text-[11px] ${textMuted}`}>{topWage.code} (ILO PPP)</div>
+              <div className={`text-[11px] ${textMuted}`}>{laborCountryName(topWage.code)} (ILO PPP 2023)</div>
             </div>
             <div className={`p-3 rounded-lg border ${cardBg}`}>
               <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>Worst informality</div>
               <div className={`text-xl font-semibold tabular-nums mt-0.5 text-rose-500`}>{worstInformal.informalPct.toFixed(1)}%</div>
-              <div className={`text-[11px] ${textMuted}`}>{worstInformal.code} (ILO 2023)</div>
+              <div className={`text-[11px] ${textMuted}`}>{laborCountryName(worstInformal.code)} (ILOSTAT {worstInformal.year})</div>
             </div>
             <div className={`p-3 rounded-lg border ${cardBg}`}>
               <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>China demographic cliff</div>
@@ -188,15 +190,15 @@ export default function LaborLedgerPage() {
             </div>
             <div className={`p-3 rounded-lg border ${cardBg}`}>
               <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>Global youth unemployment</div>
-              <div className={`text-xl font-semibold tabular-nums mt-0.5 ${textPrimary}`}>{worstYouth2024.toFixed(1)}%</div>
-              <div className={`text-[11px] ${textMuted}`}>ILO 2024 (15-24)</div>
+              <div className={`text-xl font-semibold tabular-nums mt-0.5 ${textPrimary}`}>{(latestYouth?.world ?? 0).toFixed(1)}%</div>
+              <div className={`text-[11px] ${textMuted}`}>ILO modelled {latestYouth?.year} (15-24)</div>
             </div>
           </div>
 
           <div className={`mt-4 flex items-center justify-between gap-3 flex-wrap text-xs ${textMuted}`}>
             <div className="flex-1 min-w-[240px]">
               Live: WB SL.UEM.TOTL.ZS (unemployment), SL.TLF.CACT.ZS (labour force participation), SL.UEM.1524.ZS (youth unemployment).
-              Curated: ILO Wage Report 2024, OECD/ICTWSS union density 2023, ILO informal 2023, UN DESA WPP 2024, OECD AI 2024, ILO youth 2024.
+              Curated: ILO Global Wage Report 2024-25, OECD/ICTWSS union density 2024, ILOSTAT informal 2025, UN DESA WPP 2024, OECD AI 2024, ILO modelled LFP and youth 2025.
             </div>
             <DataDownloadButton
               isDarkMode={isDarkMode}
@@ -206,12 +208,12 @@ export default function LaborLedgerPage() {
               getData={() => {
                 const rows: Record<string, unknown>[] = [];
                 WAGES_2023.forEach(r => rows.push({ series: 'Wages 2023', ...r }));
-                UNION_DENSITY_2023.forEach(r => rows.push({ series: 'Union density 2023', ...r }));
-                INFORMAL_EMPLOYMENT_2023.forEach(r => rows.push({ series: 'Informal employment 2023', ...r }));
+                UNION_DENSITY_LATEST.forEach(r => rows.push({ series: 'Union density (latest)', ...r }));
+                INFORMAL_EMPLOYMENT_LATEST.forEach(r => rows.push({ series: 'Informal employment (latest)', ...r }));
                 WORKING_AGE_2000_2050.forEach(r => rows.push({ series: 'Working-age 2000-2050', ...r }));
                 AI_DISPLACEMENT_RISK_2024.forEach(r => rows.push({ series: 'AI displacement risk 2024', ...r }));
-                GENDER_GAP_2023.forEach(r => rows.push({ series: 'Gender gap 2023', ...r }));
-                YOUTH_UNEMPLOYMENT_2010_2024.forEach(r => rows.push({ series: 'Youth unemployment 2010-2024', ...r }));
+                GENDER_GAP_2025.forEach(r => rows.push({ series: 'Gender gap 2025', ...r }));
+                YOUTH_UNEMPLOYMENT_2010_2025.forEach(r => rows.push({ series: 'Youth unemployment 2010-2025', ...r }));
                 return rows;
               }}
             />
@@ -231,17 +233,17 @@ export default function LaborLedgerPage() {
         </section>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 2"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 2" share={false}
             title="Wages 2023"
             subtitle="Median hourly wage in USD-PPP terms. Bar colour marks whether real wages grew (green) or shrank (red) between 2019-2023. High inflation between 2021-2023 wiped out cash growth across most of Europe." />
-          <WagesChart isDarkMode={isDarkMode} />
+          <WagesChart isDarkMode={isDarkMode} shareTitle="Wages 2023" inflationRates={data?.inflationRates} />
         </section>
 
         <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3"
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3" share={false}
             title="Unions & Collective Bargaining"
-            subtitle="Density = share of workers who are union members. Coverage = share of workers whose pay is set by collective agreement. In France the two diverge wildly because sectoral agreements extend to non-members." />
-          <UnionisationChart isDarkMode={isDarkMode} />
+            subtitle="Density = share of workers who are union members. Coverage = share of workers whose pay is set by collective agreement. Latest OECD/ICTWSS figures, mostly 2023-24. In France and Spain the two diverge wildly because sectoral agreements extend to non-members." />
+          <UnionisationChart isDarkMode={isDarkMode} shareTitle="Unions & Collective Bargaining" giniCoefficient={data?.giniCoefficient} />
         </section>
 
         <section className="mb-14">
@@ -269,14 +271,14 @@ export default function LaborLedgerPage() {
           <section className="mb-14">
             <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
               title="The Gender Gap"
-              subtitle="Male vs female labour-force participation. Nordic countries lead on parity; India, Mexico and Turkey have gaps of 30-50pp. Closing the gender gap is one of the largest untapped growth signals in labour economics." />
+              subtitle="Male vs female labour-force participation, ILO modelled estimates for 2025. Sweden and Norway lead on parity; India, Turkey and Mexico have gaps of 30-45pp. Closing the gender gap is one of the largest untapped growth signals in labour economics." />
             <GenderGapChart isDarkMode={isDarkMode} />
           </section>
 
           <section className="mb-14">
             <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
-              title="Youth Unemployment 2010-2024"
-              subtitle="ILO estimates by development band. COVID spike in 2020-21 was the sharpest short-term shock in the modern era. Emerging-market youth consistently run 3-4pp above the developing-country average." />
+              title="Youth Unemployment 2010-2025"
+              subtitle="ILO modelled estimates by World Bank income group. The 2020-21 COVID spike was the sharpest short-term shock in the modern era. Middle-income countries now carry the highest youth rates, about 4pp above low-income countries." />
             <YouthUnemploymentTimeline isDarkMode={isDarkMode} />
           </section>
         </LazyMount>
@@ -285,10 +287,10 @@ export default function LaborLedgerPage() {
 
         <footer className={`mt-16 pt-6 border-t text-xs ${textMuted} ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           Live labour data via World Bank API proxy. Curated snapshots refreshed {CURATED_LAST_UPDATED}.
-          Wages from ILO Global Wage Report 2024, union density from OECD/ICTWSS 2023,
-          informal employment from ILO 2023, working-age population from UN DESA WPP 2024,
-          AI-exposure scores from OECD Employment Outlook 2024, gender-gap LFP from ILO 2023,
-          youth unemployment from ILO 2024.
+          Wages from ILO Global Wage Report 2024-25, union density and bargaining coverage from OECD/ICTWSS (latest year, mostly 2023-24),
+          informal employment from ILOSTAT SDG 8.3.1 (latest survey year), working-age population from UN DESA WPP 2024,
+          AI-exposure scores from OECD Employment Outlook 2024, gender-gap LFP from ILO modelled estimates 2025,
+          youth unemployment from ILO modelled estimates via World Bank WDI (2010-2025).
           {loading ? ' Loading…' : ''}
         </footer>
       </div>

@@ -710,7 +710,7 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     refreshCadence: 'annual',
     live: false,
     lastUpdated: LABOR_CURATED_LAST_UPDATED,
-    notes: 'ILO Global Wage Report 2024 median PPP hourly wages + real growth, OECD/ICTWSS union density 2023, ILO informal employment 2023, UN DESA World Population Prospects 2024 working-age 2000-2050, OECD Employment Outlook 2024 AI exposure + complementarity, ILO gender-LFP 2023, ILO youth-unemployment 2024. Powers /labor-ledger.',
+    notes: 'ILO Global Wage Report 2024-25 median PPP hourly wages + real growth, OECD/ICTWSS union density + bargaining coverage (latest year, mostly 2023-24), ILOSTAT SDG 8.3.1 informal employment (latest survey year), UN DESA World Population Prospects 2024 working-age 2000-2050, OECD Employment Outlook 2024 AI exposure + complementarity, ILO modelled gender-LFP 2025, ILO modelled youth unemployment 2010-2025 by income group (WDI). Powers /labor-ledger.',
     sourceUrl: 'https://ilostat.ilo.org/',
   },
 
