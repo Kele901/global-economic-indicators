@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   ResponsiveContainer, ComposedChart, AreaChart, Area, LineChart, Line,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ReferenceLine, Cell, ScatterChart, Scatter,
+  ReferenceLine, ReferenceArea, Cell, ScatterChart, Scatter,
 } from 'recharts';
 import {
   ComposableMap, Geographies, Geography, ZoomableGroup,
@@ -93,6 +93,16 @@ const SUB_VIEWS: { id: SubView; label: string; desc: string }[] = [
   { id: 'tax', label: 'Tax & Policy', desc: 'Progressive taxation and Piketty\'s proposals' },
 ];
 
+const RG_RANGES = [
+  { id: 'modern', label: '1700–2100', from: 1700, ticks: [1700, 1750, 1800, 1850, 1900, 1950, 2000, 2050, 2100] },
+  { id: 'century', label: '1900–2100', from: 1900, ticks: [1900, 1920, 1940, 1960, 1980, 2000, 2020, 2040, 2060, 2080, 2100] },
+  { id: 'all', label: 'All (0–2100)', from: 0, ticks: [0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000] },
+] as const;
+type RgRangeId = (typeof RG_RANGES)[number]['id'];
+const RG_PROJECTION_FROM = 2020;
+const GENERATION_YEARS = 30;
+const RG_SNAPSHOTS = [1900, 1960, 2020, 2100];
+
 const INCOME_COUNTRIES = ['USA', 'France', 'UK', 'Germany', 'Japan', 'Sweden', 'Canada', 'Brazil', 'India', 'South Africa', 'China', 'Australia'];
 const WEALTH_COUNTRIES = ['USA', 'France', 'UK', 'Germany', 'Japan', 'Sweden', 'Canada', 'Brazil', 'India', 'South Africa', 'China', 'Australia'];
 const TAX_COUNTRIES = ['USA', 'UK', 'France', 'Germany'];
@@ -104,6 +114,7 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
   const [selectedCountry, setSelectedCountry] = useState<string>('USA');
   const [expandedSource, setExpandedSource] = useState<number | null>(null);
   const [expandedLaw, setExpandedLaw] = useState<number | null>(null);
+  const [rgRange, setRgRange] = useState<RgRangeId>('modern');
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null);
   const [showTrajectories, setShowTrajectories] = useState(false);
   const [giniData, setGiniData] = useState<Record<string, number>>({});
@@ -215,6 +226,58 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
 
   // ── Data Transforms ──
 
+  const rg = useMemo(() => {
+    const points = PIKETTY_R_VS_G.map(p => {
+      const gap = p.rateOfReturn - p.growthRate;
+      const projected = p.year > RG_PROJECTION_FROM;
+      const joins = p.year === RG_PROJECTION_FROM;
+      return {
+        ...p,
+        gap,
+        projected,
+        r: projected ? undefined : p.rateOfReturn,
+        g: projected ? undefined : p.growthRate,
+        rProj: projected || joins ? p.rateOfReturn : undefined,
+        gProj: projected || joins ? p.growthRate : undefined,
+      };
+    });
+    const avg = (list: typeof points, key: 'rateOfReturn' | 'growthRate' | 'gap') =>
+      list.reduce((s, p) => s + p[key], 0) / Math.max(1, list.length);
+    const preWar = points.filter(p => p.year < 1913);
+    const gAhead = points.filter(p => p.gap < 0);
+    const latest = points.filter(p => p.year <= RG_PROJECTION_FROM).at(-1)!;
+    const end = points.at(-1)!;
+    const generation = (r: number, g: number) => Math.pow((1 + r / 100) / (1 + g / 100), GENERATION_YEARS);
+    const doubling = (r: number, g: number) => {
+      const ratio = (1 + r / 100) / (1 + g / 100);
+      return ratio > 1 ? Math.log(2) / Math.log(ratio) : null;
+    };
+    const snapshots = RG_SNAPSHOTS
+      .map(y => points.find(p => p.year === y))
+      .filter((p): p is (typeof points)[number] => !!p)
+      .map(p => ({ ...p, multiple: generation(p.rateOfReturn, p.growthRate), doubling: doubling(p.rateOfReturn, p.growthRate) }));
+    return {
+      points,
+      preWar: { r: avg(preWar, 'rateOfReturn'), g: avg(preWar, 'growthRate'), gap: avg(preWar, 'gap'), from: preWar[0]?.year ?? 0 },
+      gAhead: gAhead.length ? { from: gAhead[0].year, to: gAhead[gAhead.length - 1].year, count: gAhead.length, deepest: Math.min(...gAhead.map(p => p.gap)) } : null,
+      latest,
+      end,
+      snapshots,
+      total: points.length,
+    };
+  }, []);
+
+  const rgView = useMemo(() => {
+    const range = RG_RANGES.find(r => r.id === rgRange) ?? RG_RANGES[0];
+    const data = rg.points.filter(p => p.year >= range.from);
+    const maxGap = Math.max(...data.map(p => p.gap));
+    const minGap = Math.min(...data.map(p => p.gap));
+    const zeroOffset = minGap >= 0 ? 1 : maxGap <= 0 ? 0 : maxGap / (maxGap - minGap);
+    const gapTicks: number[] = [];
+    for (let v = Math.min(-2, Math.floor(minGap / 2) * 2); v <= Math.max(4, Math.ceil(maxGap / 2) * 2); v += 2) gapTicks.push(v);
+    return { range, data, zeroOffset, gapTicks, gapDomain: [gapTicks[0] - 1, gapTicks[gapTicks.length - 1]] as [number, number] };
+  }, [rg, rgRange]);
+
   const incomeData = useMemo(() => {
     const data = TOP_INCOME_SHARES.filter(d => d.country === selectedCountry)
       .sort((a, b) => a.year - b.year);
@@ -324,35 +387,261 @@ const InequalityCharts: React.FC<Props> = ({ isDarkMode, view, showSources }) =>
           It was caused by wars, inflation, progressive taxation, and rapid post-war growth &mdash; not by
           any natural tendency of capitalism toward equality.
         </p>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {[
+            {
+              label: `Before 1913 (from year ${rg.preWar.from})`,
+              value: `${rg.preWar.gap.toFixed(1)} pp`,
+              detail: `r averaged ${rg.preWar.r.toFixed(1)}%, g just ${rg.preWar.g.toFixed(1)}%`,
+              accent: 'border-t-red-500',
+            },
+            rg.gAhead && {
+              label: 'When g overtook r',
+              value: `${rg.gAhead.from}–${rg.gAhead.to}`,
+              detail: `${rg.gAhead.count} of ${rg.total} data points; widest lead ${Math.abs(rg.gAhead.deepest).toFixed(1)} pp`,
+              accent: 'border-t-blue-500',
+            },
+            {
+              label: `Gap in ${rg.latest.year}`,
+              value: `${rg.latest.gap.toFixed(1)} pp`,
+              detail: `r ${rg.latest.rateOfReturn.toFixed(1)}% vs g ${rg.latest.growthRate.toFixed(1)}%`,
+              accent: 'border-t-amber-500',
+            },
+            {
+              label: `Projected gap, ${rg.end.year}`,
+              value: `${rg.end.gap.toFixed(1)} pp`,
+              detail: `As growth slows to ${rg.end.growthRate.toFixed(1)}%`,
+              accent: 'border-t-gray-400',
+            },
+          ].filter(Boolean).map(tile => {
+            const c = tile as { label: string; value: string; detail: string; accent: string };
+            return (
+              <div key={c.label} className={`rounded-lg border border-t-2 p-3 ${tc.border} ${c.accent} ${tc.infoBg}`}>
+                <div className={`text-[11px] uppercase tracking-wide ${tc.textSec}`}>{c.label}</div>
+                <div className={`text-2xl font-bold tabular-nums mt-0.5 ${tc.text}`}>{c.value}</div>
+                <div className={`text-xs ${tc.textSec}`}>{c.detail}</div>
+              </div>
+            );
+          })}
+        </div>
+
         <div className={`rounded-xl p-4 ${tc.chartBg}`}>
-          <ResponsiveContainer width="100%" height={420}>
-            <AreaChart data={PIKETTY_R_VS_G} margin={{ top: 20, right: 20, bottom: 10, left: 0 }}>
+          <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+            <div className={`text-sm font-semibold ${tc.text}`}>Return on capital vs growth of world output, % a year</div>
+            <div className={`inline-flex rounded-lg border overflow-hidden text-xs ${tc.border}`} data-share-exclude>
+              {RG_RANGES.map(r => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setRgRange(r.id)}
+                  className={`px-3 py-1 ${rgRange === r.id ? 'bg-blue-500/20 text-blue-500 font-medium' : tc.textSec}`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={340}>
+            <ComposedChart data={rgView.data} syncId="rvsg" margin={{ top: 22, right: 16, bottom: 0, left: 0 }}>
               <defs>
-                <linearGradient id="rGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#EF4444" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="#EF4444" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="gGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.02} />
+                <linearGradient id="rgGapFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#EF4444" stopOpacity={0.18} />
+                  <stop offset="100%" stopColor="#EF4444" stopOpacity={0.04} />
                 </linearGradient>
               </defs>
               <CartesianGrid {...gridProps} />
-              <XAxis dataKey="year" {...axisProps} type="number" domain={[0, 2100]} tickCount={10} />
-              <YAxis {...axisProps} domain={[-2, 6]} tickFormatter={(v: number) => `${v}%`} label={{ value: 'Annual Rate (%)', angle: -90, position: 'insideLeft', style: { fill: tc.axisLabel, fontSize: 10, fontWeight: 500 } }} />
-              <Tooltip content={<CustomTooltip valueFormatter={(v: number) => `${v.toFixed(1)}%`} />} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-              <Area type="natural" dataKey="rateOfReturn" name="r (return on capital)" stroke="#EF4444" fill="url(#rGrad)" strokeWidth={2.5} dot={false} activeDot={renderActiveDot} animationDuration={1200} />
-              <Area type="natural" dataKey="growthRate" name="g (economic growth)" stroke="#3B82F6" fill="url(#gGrad)" strokeWidth={2.5} dot={false} activeDot={renderActiveDot} animationDuration={1200} />
-              <ReferenceLine x={1914} stroke={isDarkMode ? '#fbbf24' : '#d97706'} strokeDasharray="6 4" strokeWidth={1.5} strokeOpacity={0.6} label={{ value: '1914', position: 'top', fill: isDarkMode ? '#fde68a' : '#92400e', fontSize: 9 }} />
-              <ReferenceLine x={1945} stroke={isDarkMode ? '#fbbf24' : '#d97706'} strokeDasharray="6 4" strokeWidth={1.5} strokeOpacity={0.6} label={{ value: '1945', position: 'top', fill: isDarkMode ? '#fde68a' : '#92400e', fontSize: 9 }} />
-              <ReferenceLine x={1980} stroke={isDarkMode ? '#fbbf24' : '#d97706'} strokeDasharray="6 4" strokeWidth={1.5} strokeOpacity={0.6} label={{ value: '1980', position: 'top', fill: isDarkMode ? '#fde68a' : '#92400e', fontSize: 9 }} />
+              {rgView.range.from < 1914 && (
+                <ReferenceArea
+                  x1={1914}
+                  x2={1950}
+                  fill={isDarkMode ? '#fbbf24' : '#f59e0b'}
+                  fillOpacity={0.08}
+                  label={rgRange === 'all' ? undefined : { value: 'Wars & depression', position: 'insideTop', fill: isDarkMode ? '#fde68a' : '#92400e', fontSize: 10 }}
+                />
+              )}
+              <ReferenceArea
+                x1={1950}
+                x2={1975}
+                fill="#3B82F6"
+                fillOpacity={0.08}
+                label={rgRange === 'all' ? undefined : { value: 'Post-war boom', position: 'insideTop', fill: isDarkMode ? '#93c5fd' : '#1d4ed8', fontSize: 10 }}
+              />
+              <ReferenceArea
+                x1={RG_PROJECTION_FROM}
+                x2={2100}
+                fill={isDarkMode ? '#9ca3af' : '#6b7280'}
+                fillOpacity={0.08}
+                label={{ value: 'Piketty projection', position: 'insideTop', fill: tc.axisLabel, fontSize: 10 }}
+              />
+              <XAxis dataKey="year" {...axisProps} type="number" domain={[rgView.range.from, 2100]} ticks={[...rgView.range.ticks]} allowDataOverflow />
+              <YAxis {...axisProps} domain={[-2, 6]} ticks={[-2, 0, 2, 4, 6]} tickFormatter={(v: number) => `${v}%`} width={40} />
+              <ReferenceLine y={0} stroke={tc.axisLabel} strokeOpacity={0.4} />
+              <Tooltip
+                content={({ active, payload }: any) => {
+                  const p = active && payload?.[0]?.payload;
+                  if (!p) return null;
+                  return (
+                    <div className="rounded-xl shadow-2xl border" style={{ background: tc.tooltipBg, borderColor: tc.tooltipBorder, padding: '10px 14px', minWidth: 200 }}>
+                      <div className="text-xs font-semibold" style={{ color: tc.tooltipText }}>{p.year === 0 ? 'Year 0' : p.year}{p.projected ? ' (projection)' : ''}</div>
+                      <div className="text-[11px] mb-2" style={{ color: tc.tooltipTextSec }}>{p.era}</div>
+                      {[
+                        ['r, return on capital', p.rateOfReturn, '#EF4444'],
+                        ['g, economic growth', p.growthRate, '#3B82F6'],
+                      ].map(([name, v, color]) => (
+                        <div key={name as string} className="flex justify-between gap-4 text-xs">
+                          <span style={{ color: tc.tooltipText }}><span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ background: color as string }} />{name}</span>
+                          <span className="font-bold tabular-nums" style={{ color: color as string }}>{(v as number).toFixed(1)}%</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between gap-4 text-xs mt-1.5 pt-1.5 border-t" style={{ borderColor: tc.tooltipBorder }}>
+                        <span style={{ color: tc.tooltipText }}>Gap, r − g</span>
+                        <span className="font-bold tabular-nums" style={{ color: p.gap >= 0 ? '#EF4444' : '#3B82F6' }}>
+                          {p.gap > 0 ? '+' : ''}{p.gap.toFixed(1)} pp
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+              <Legend
+                iconSize={14}
+                wrapperStyle={{ fontSize: 12, paddingTop: 6 }}
+                payload={[
+                  { value: 'r (return on capital)', type: 'plainline', color: '#EF4444', payload: { strokeDasharray: '0' } },
+                  { value: 'g (economic growth)', type: 'plainline', color: '#3B82F6', payload: { strokeDasharray: '0' } },
+                  { value: 'Projection', type: 'plainline', color: tc.axisLabel, payload: { strokeDasharray: '6 4' } },
+                  { value: 'Gap between r and g', type: 'square', color: '#fca5a5' },
+                ]}
+              />
+              <Area type="monotone" dataKey={(d: any) => [d.growthRate, d.rateOfReturn]} name="Gap between r and g" stroke="none" fill="url(#rgGapFill)" isAnimationActive={false} legendType="square" />
+              <Line type="monotone" dataKey="r" name="r (return on capital)" stroke="#EF4444" strokeWidth={2.5} dot={false} activeDot={renderActiveDot} connectNulls={false} />
+              <Line type="monotone" dataKey="g" name="g (economic growth)" stroke="#3B82F6" strokeWidth={2.5} dot={false} activeDot={renderActiveDot} connectNulls={false} />
+              <Line type="monotone" dataKey="rProj" name="Projected" stroke="#EF4444" strokeWidth={2} strokeDasharray="6 4" dot={false} activeDot={false} legendType="none" />
+              <Line type="monotone" dataKey="gProj" name="Projected g" stroke="#3B82F6" strokeWidth={2} strokeDasharray="6 4" dot={false} activeDot={false} legendType="none" />
+            </ComposedChart>
+          </ResponsiveContainer>
+
+          <div className={`text-xs font-semibold mt-4 mb-1 ${tc.text}`}>The gap, r − g, in percentage points</div>
+          <ResponsiveContainer width="100%" height={130}>
+            <AreaChart data={rgView.data} syncId="rvsg" margin={{ top: 6, right: 16, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="rgGapSplit" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset={0} stopColor="#EF4444" stopOpacity={0.55} />
+                  <stop offset={rgView.zeroOffset} stopColor="#EF4444" stopOpacity={0.15} />
+                  <stop offset={rgView.zeroOffset} stopColor="#3B82F6" stopOpacity={0.15} />
+                  <stop offset={1} stopColor="#3B82F6" stopOpacity={0.55} />
+                </linearGradient>
+                <linearGradient id="rgGapStroke" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset={rgView.zeroOffset} stopColor="#EF4444" />
+                  <stop offset={rgView.zeroOffset} stopColor="#3B82F6" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid {...gridProps} />
+              <XAxis dataKey="year" {...axisProps} type="number" domain={[rgView.range.from, 2100]} ticks={[...rgView.range.ticks]} allowDataOverflow />
+              <YAxis {...axisProps} domain={rgView.gapDomain} ticks={rgView.gapTicks} tickFormatter={(v: number) => `${v > 0 ? '+' : ''}${v}`} width={40} />
+              <ReferenceLine y={0} stroke={tc.axisLabel} strokeOpacity={0.6} />
+              <Tooltip content={() => null} cursor={{ stroke: tc.axisLabel, strokeOpacity: 0.3 }} />
+              <Area type="monotone" dataKey="gap" name="r − g" stroke="url(#rgGapStroke)" strokeWidth={2} fill="url(#rgGapSplit)" baseValue={0} dot={false} activeDot={false} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
+          <div className={`flex flex-wrap gap-x-4 gap-y-1 text-[11px] mt-1 ${tc.textSec}`}>
+            <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-red-500/60 align-middle mr-1" />Above zero: capital outgrows the economy</span>
+            <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-500/60 align-middle mr-1" />Below zero: the economy outgrows capital</span>
+          </div>
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-5">
+          <div className={`lg:col-span-3 rounded-xl border p-4 ${tc.border}`}>
+            <div className={`text-sm font-semibold ${tc.text}`}>What the gap does over one generation</div>
+            <p className={`text-xs mt-0.5 mb-3 ${tc.textSec}`}>
+              A fortune that reinvests its whole return, compared with the size of the economy, after {GENERATION_YEARS} years.
+            </p>
+            <div className="space-y-2.5">
+              {rg.snapshots.map(s => {
+                const up = s.multiple >= 1;
+                const width = Math.min(100, (s.multiple / Math.max(...rg.snapshots.map(x => x.multiple))) * 100);
+                return (
+                  <div key={s.year} className="grid grid-cols-[5.5rem_1fr_4rem] items-center gap-3 text-xs">
+                    <div>
+                      <div className={`font-semibold ${tc.text}`}>{s.year}{s.projected ? '*' : ''}</div>
+                      <div className={`text-[10px] ${tc.textSec}`}>{s.era}</div>
+                    </div>
+                    <div>
+                      <div className={`h-2.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                        <div className={`h-2.5 rounded-full ${up ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${width}%` }} />
+                      </div>
+                      <div className={`text-[10px] mt-0.5 ${tc.textSec}`}>
+                        r {s.rateOfReturn.toFixed(1)}% vs g {s.growthRate.toFixed(1)}%
+                        {s.doubling ? ` · relative wealth doubles every ~${Math.round(s.doubling)} years` : ' · wealth shrinks relative to the economy'}
+                      </div>
+                    </div>
+                    <div className={`text-right text-base font-bold tabular-nums ${up ? 'text-red-500' : 'text-blue-500'}`}>×{s.multiple.toFixed(2)}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className={`text-[11px] mt-3 ${tc.textSec}`}>
+              Multiple = ((1 + r) ÷ (1 + g))<sup>{GENERATION_YEARS}</sup>. It assumes nothing is consumed, taxed or split between heirs,
+              which is why real fortunes grow more slowly. * Projection.
+            </p>
+          </div>
+
+          <div className={`lg:col-span-2 rounded-xl border p-4 ${tc.border}`}>
+            <div className={`text-sm font-semibold mb-2 ${tc.text}`}>Reading the chart</div>
+            <ul className={`text-xs space-y-2 leading-relaxed ${tc.textTer}`}>
+              <li>
+                <strong className={tc.text}>r</strong> is the average annual return on all capital, including rent,
+                dividends, interest and profits, as a share of its value. <strong className={tc.text}>g</strong> is
+                the growth rate of world output.
+              </li>
+              <li>
+                The dip in r between 1914 and 1950 reflects returns after tax and capital losses: wartime
+                destruction, inflation, nationalisations and new taxes cut what owners actually earned.
+              </li>
+              <li>
+                g peaked in the post-war boom, driven by reconstruction and catch-up growth, plus fast-growing
+                populations.
+              </li>
+              <li>
+                The projection assumes population and productivity growth slow towards 1.5% a year, while
+                r stays near its long-run 4–5%.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className={`rounded-xl border p-4 mt-4 ${tc.warnBg}`}>
+          <div className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-amber-300' : 'text-amber-800'}`}>The debate</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs leading-relaxed">
+            <div>
+              <div className={`font-semibold mb-0.5 ${tc.text}`}>Consumption and heirs</div>
+              <p className={tc.textTer}>
+                Mankiw (2015) argued that r &gt; g need not concentrate wealth, because the rich spend part of their
+                returns, pay taxes and divide estates among several children.
+              </p>
+            </div>
+            <div>
+              <div className={`font-semibold mb-0.5 ${tc.text}`}>Housing</div>
+              <p className={tc.textTer}>
+                Rognlie (2015) found that most of the rise in capital&apos;s share of income since 1950 comes from
+                housing, not from business capital.
+              </p>
+            </div>
+            <div>
+              <div className={`font-semibold mb-0.5 ${tc.text}`}>Institutions</div>
+              <p className={tc.textTer}>
+                Acemoglu and Robinson (2015) argued that political and economic institutions, not a general law,
+                decide how inequality evolves.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className={`text-xs mt-3 ${tc.textSec}`}>
-          Source: Based on Piketty (2014) Figures 10.9&ndash;10.11. Projected values assume
-          a return to historical norms as growth slows.
+          Source: Based on Piketty (2014), <em>Capital in the Twenty-First Century</em>, Figures 10.9&ndash;10.11.
+          Values are period approximations, not annual observations. Projected values assume a return to
+          historical norms as growth slows.
         </div>
       </div>
 
