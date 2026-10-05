@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, Cell, PieChart, Pie, ScatterChart, Scatter,
+  ResponsiveContainer, Cell, PieChart, Pie, ScatterChart, Scatter, LabelList,
   LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
 import {
@@ -24,8 +24,14 @@ import {
   getAdvisoryTier,
   getMobilityTier,
 } from '../services/passport';
+import dynamic from 'next/dynamic';
 import SocialShareMenu from './SocialShareMenu';
 import { slugify } from '../lib/share';
+
+const IsoFlag = dynamic(() => import('./IsoFlag'), {
+  ssr: false,
+  loading: () => <span className="inline-block w-6 h-4 rounded-sm bg-gray-200 dark:bg-gray-700" aria-hidden="true" />,
+});
 
 interface PassportStrengthChartProps {
   isDarkMode: boolean;
@@ -58,6 +64,68 @@ const REGIONS: { label: string; color: string; colorDark: string; chartColor: st
   { label: 'Americas', color: 'text-emerald-600', colorDark: 'text-emerald-400', chartColor: '#10B981', countries: ['USA', 'Canada', 'Mexico', 'Brazil', 'Argentina', 'Chile', 'Uruguay', 'CostaRica', 'Paraguay', 'Peru', 'Colombia', 'Ecuador', 'Venezuela'] },
   { label: 'MENA & Africa', color: 'text-purple-600', colorDark: 'text-purple-400', chartColor: '#8B5CF6', countries: ['Turkey', 'SaudiArabia', 'Egypt', 'Israel', 'Nigeria', 'SouthAfrica', 'Russia', 'UAE', 'Qatar', 'Kuwait', 'Bahrain', 'Oman', 'Morocco', 'Kenya', 'Ghana', 'Tunisia', 'Ethiopia', 'Iran', 'Iraq'] },
 ];
+
+// Share of each axis's data range a dot's code label occupies, sized for the
+// narrowest (mobile) plot so labels stay apart at every width.
+const LABEL_GAP_X = 0.04;
+const LABEL_GAP_Y = 0.06;
+
+/**
+ * Keys of the dots that can carry a code label without colliding with another
+ * label. Isolated dots are placed first so outliers are always named; dots in
+ * dense clusters may go unlabelled but still name themselves in the tooltip.
+ */
+function spacedLabelKeys<T extends { key: string }>(points: T[], x: (p: T) => number, y: (p: T) => number): Set<string> {
+  if (points.length === 0) return new Set();
+  const xs = points.map(x);
+  const ys = points.map(y);
+  const xRange = Math.max(...xs) - Math.min(...xs) || 1;
+  const yRange = Math.max(...ys) - Math.min(...ys) || 1;
+  const near = (a: T, b: T) =>
+    Math.abs(x(a) - x(b)) / xRange < LABEL_GAP_X && Math.abs(y(a) - y(b)) / yRange < LABEL_GAP_Y;
+  const crowding = new Map(points.map(p => [p.key, points.filter(q => q !== p && near(p, q)).length]));
+  const placed: T[] = [];
+  [...points]
+    .sort((a, b) => (crowding.get(a.key) ?? 0) - (crowding.get(b.key) ?? 0))
+    .forEach(p => { if (!placed.some(q => near(p, q))) placed.push(p); });
+  return new Set(placed.map(p => p.key));
+}
+
+interface CountryDot {
+  country: string;
+  iso2: string;
+  fill: string;
+  region: string;
+}
+
+interface CountryDotTooltipProps<T extends CountryDot> {
+  // Recharts injects these two.
+  active?: boolean;
+  payload?: Array<{ payload: T }>;
+  isDarkMode: boolean;
+  rows: (dot: T) => [label: string, value: string][];
+}
+
+function CountryDotTooltip<T extends CountryDot>({ active, payload, isDarkMode, rows }: CountryDotTooltipProps<T>) {
+  const dot = active ? payload?.[0]?.payload : undefined;
+  if (!dot) return null;
+  return (
+    <div className={`rounded-lg border px-3 py-2 shadow-lg ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+      <div className="flex items-center gap-2 font-semibold text-sm">
+        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: dot.fill }} />
+        {dot.country}
+        <span className={`text-xs font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{dot.iso2}</span>
+      </div>
+      <div className={`text-xs mb-1.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{dot.region}</div>
+      {rows(dot).map(([label, value]) => (
+        <div key={label} className="flex justify-between gap-4 text-xs">
+          <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>{label}</span>
+          <span className="font-medium tabular-nums">{value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const TREND_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#84CC16', '#6366F1'];
 
@@ -288,7 +356,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
   }, [passportData]);
 
   const scatterData = useMemo(() => {
-    return trackedInternalKeys
+    const points = trackedInternalKeys
       .filter(c => gdpPerCapitaByCountry[c])
       .map(country => {
         const p = liveByInternalKey[country];
@@ -296,30 +364,40 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
         return {
           country: displayName(country),
           key: country,
+          iso2: p.iso2,
+          rank: p.rank,
           gdp: Math.round(gdpPerCapitaByCountry[country] / 1000),
           visaFree: p.totals.mobility,
           fill: region?.chartColor || '#8B5CF6',
           region: region?.label || 'Other',
         };
       });
+    const labelled = spacedLabelKeys(points, d => d.gdp, d => d.visaFree);
+    return points.map(d => ({ ...d, label: labelled.has(d.key) ? d.iso2 : undefined }));
   }, [liveByInternalKey, trackedInternalKeys]);
 
   const softPowerData = useMemo(() => {
-    return trackedInternalKeys
+    const points = trackedInternalKeys
       .filter(c => softPowerRankings[c])
       .map(country => {
         const p = liveByInternalKey[country];
+        const region = REGIONS.find(r => r.countries.includes(country));
         return {
           country: displayName(country),
           key: country,
+          iso2: p.iso2,
           passportRank: p.rank,
           softPowerRank: softPowerRankings[country].rank,
           softPowerScore: softPowerRankings[country].score,
           visaFree: p.totals.mobility,
           gap: Math.abs(p.rank - softPowerRankings[country].rank),
+          fill: region?.chartColor || '#8B5CF6',
+          region: region?.label || 'Other',
         };
       })
       .sort((a, b) => b.gap - a.gap);
+    const labelled = spacedLabelKeys(points, d => d.softPowerRank, d => d.passportRank);
+    return points.map(d => ({ ...d, label: labelled.has(d.key) ? d.iso2 : undefined }));
   }, [liveByInternalKey, trackedInternalKeys]);
 
   const radarData = useMemo(() => {
@@ -528,9 +606,9 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                 <p className={`text-[11px] mt-1 ${themeColors.textTertiary}`}>
                   Sources: Passport Index Dataset
                   {sources.passportIndex.ok ? '' : ' (offline)'}
-                  {' · '}REST Countries
-                  {sources.restCountries.ok ? '' : ' (offline)'}
-                  {' · '}Travel-Advisory.info
+                  {' · '}Country reference data
+                  {sources.countries.ok ? '' : ' (offline)'}
+                  {' · '}Government of Canada travel advice
                   {sources.travelAdvisory.ok ? '' : ' (offline)'}
                 </p>
               )}
@@ -695,7 +773,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                 <tbody>
                   {destinationsRows.map((d) => (
                     <tr key={d.iso2} className={`border-t ${themeColors.border}`}>
-                      <td className="px-3 py-2 text-xl">{d.flag || '—'}</td>
+                      <td className="px-3 py-2"><IsoFlag iso2={d.iso2} title={d.name} /></td>
                       <td className="px-3 py-2 font-medium">{d.name}</td>
                       <td className="px-3 py-2 text-xs">{d.iso2}</td>
                       <td className={`px-3 py-2 text-xs ${themeColors.textSecondary}`}>{d.region}{d.subregion ? ` · ${d.subregion}` : ''}</td>
@@ -718,7 +796,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
               </table>
             </div>
             <p className={`text-[11px] ${themeColors.textTertiary}`}>
-              Length-of-stay values are reported by the Passport Index dataset (sourced from passportindex.org). &quot;Unlimited / per visa&quot; means the visa policy doesn&apos;t specify a fixed day cap (often Schengen-style internal mobility). Advisory scores are from Travel-Advisory.info (0 = lowest risk, 5 = avoid all travel).
+              Length-of-stay values are reported by the Passport Index dataset (sourced from passportindex.org). &quot;Unlimited / per visa&quot; means the visa policy doesn&apos;t specify a fixed day cap (often Schengen-style internal mobility). Advisory levels are from the Government of Canada&apos;s travel advice (0 = normal precautions, 1 = high degree of caution, 2 = avoid non-essential travel, 3 = avoid all travel).
             </p>
           </div>
         )}
@@ -1178,22 +1256,27 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
         {activeView === 'scatter' && (
           <div className="space-y-4">
             <p className={`text-sm ${themeColors.textSecondary}`}>
-              Each dot represents a country. X-axis: GDP per capita (PPP, thousands $). Y-axis: live mobility score.
+              Each dot represents a country, labelled with its two-letter code where space allows. Hover or tap any dot for the country name. X-axis: GDP per capita (PPP, thousands $). Y-axis: live mobility score.
             </p>
             <div className="w-full h-[320px] sm:h-[450px]">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+                <ScatterChart margin={{ top: 16, right: 20, left: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
                   <XAxis dataKey="gdp" type="number" name="GDP/capita (k$)" unit="k"
                     tick={{ fill: themeColors.tickColor, fontSize: 11 }} label={{ value: 'GDP per Capita (PPP, thousands $)', position: 'insideBottom', offset: -5, fill: themeColors.tickColor, fontSize: 11 }} />
                   <YAxis dataKey="visaFree" type="number" name="Mobility" domain={[0, 200]}
                     tick={{ fill: themeColors.tickColor, fontSize: 11 }} label={{ value: 'Mobility Score', angle: -90, position: 'insideLeft', fill: themeColors.tickColor, fontSize: 11 }} />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ strokeDasharray: '3 3' }}
-                    formatter={(value: number, name: string) => {
-                      if (name === 'GDP/capita (k$)') return [`$${value}k`, 'GDP per Capita'];
-                      return [value, 'Mobility'];
-                    }}
-                    labelFormatter={(_, payload) => payload?.[0]?.payload?.country || ''} />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }}
+                    content={
+                      <CountryDotTooltip
+                        isDarkMode={isDarkMode}
+                        rows={(d: (typeof scatterData)[number]) => [
+                          ['GDP per capita (PPP)', `$${d.gdp}k`],
+                          ['Mobility score', String(d.visaFree)],
+                          ['Passport rank', `#${d.rank}`],
+                        ]}
+                      />
+                    } />
                   {REGIONS.map(region => (
                     <Scatter key={region.label} name={region.label}
                       data={scatterData.filter(d => d.region === region.label)}
@@ -1201,6 +1284,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                       {scatterData.filter(d => d.region === region.label).map((entry) => (
                         <Cell key={entry.key} fill={region.chartColor} />
                       ))}
+                      <LabelList dataKey="label" position="top" offset={6} style={{ fill: themeColors.tickColor, fontSize: 10 }} />
                     </Scatter>
                   ))}
                   <Legend />
@@ -1218,11 +1302,11 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
         {activeView === 'softpower' && (
           <div className="space-y-4">
             <p className={`text-sm ${themeColors.textSecondary}`}>
-              Comparing live passport rank vs Brand Finance Global Soft Power Index rank. Large gaps reveal where global influence diverges from travel freedom.
+              Comparing live passport rank vs Brand Finance Global Soft Power Index rank. Large gaps reveal where global influence diverges from travel freedom. Dots are labelled with two-letter country codes; hover or tap any dot for the country name.
             </p>
             <div className="w-full h-[320px] sm:h-[450px]">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+                <ScatterChart margin={{ top: 16, right: 20, left: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={themeColors.gridColor} />
                   <XAxis dataKey="softPowerRank" type="number" name="Soft Power Rank" reversed
                     tick={{ fill: themeColors.tickColor, fontSize: 11 }}
@@ -1230,17 +1314,22 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                   <YAxis dataKey="passportRank" type="number" name="Passport Rank" reversed
                     tick={{ fill: themeColors.tickColor, fontSize: 11 }}
                     label={{ value: 'Passport Rank (lower = stronger)', angle: -90, position: 'insideLeft', fill: themeColors.tickColor, fontSize: 11 }} />
-                  <Tooltip contentStyle={tooltipStyle}
-                    formatter={(value: number, name: string) => [
-                      `#${value}`,
-                      name === 'Soft Power Rank' ? 'Soft Power Rank' : 'Passport Rank'
-                    ]}
-                    labelFormatter={(_, payload) => payload?.[0]?.payload?.country || ''} />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }}
+                    content={
+                      <CountryDotTooltip
+                        isDarkMode={isDarkMode}
+                        rows={(d: (typeof softPowerData)[number]) => [
+                          ['Passport rank', `#${d.passportRank}`],
+                          ['Soft Power rank', `#${d.softPowerRank}`],
+                          ['Rank gap', `${d.gap} positions`],
+                        ]}
+                      />
+                    } />
                   <Scatter data={softPowerData} fill="#8B5CF6">
-                    {softPowerData.map((entry) => {
-                      const region = REGIONS.find(r => r.countries.includes(entry.key));
-                      return <Cell key={entry.key} fill={region?.chartColor || '#8B5CF6'} />;
-                    })}
+                    {softPowerData.map((entry) => (
+                      <Cell key={entry.key} fill={entry.fill} />
+                    ))}
+                    <LabelList dataKey="label" position="top" offset={6} style={{ fill: themeColors.tickColor, fontSize: 10 }} />
                   </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
@@ -1448,7 +1537,7 @@ const PassportStrengthChart: React.FC<PassportStrengthChartProps> = ({
                 Why are advisory scores included?
               </h4>
               <p className={`text-sm ${themeColors.textSecondary}`}>
-                A passport may grant entry, but Travel-Advisory.info aggregates Foreign Office advice from multiple governments. <strong>0</strong> = no advisory, <strong>5</strong> = avoid all travel. Pair high mobility with low advisory for a realistic picture of where the passport is &quot;actually usable&quot; today.
+                A passport may grant entry, but the destination may still carry an official warning. Levels come from the Government of Canada&apos;s travel advice: <strong>0</strong> = normal precautions, <strong>3</strong> = avoid all travel. Pair high mobility with low advisory for a realistic picture of where the passport is &quot;actually usable&quot; today.
               </p>
             </div>
             <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-50'}`}>

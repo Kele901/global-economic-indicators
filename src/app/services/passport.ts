@@ -14,7 +14,6 @@ export interface DestinationRule {
   iso3: string;
   name: string;
   flag: string;
-  flagPng: string;
   region: string;
   subregion: string;
   visaType: VisaType;
@@ -47,11 +46,9 @@ export interface PassportProfile {
   iso3: string;
   name: string;
   flag: string;
-  flagPng: string;
   region: string;
   subregion: string;
   capital: string;
-  population: number;
   totals: PassportTotals;
   stay: { avgDays: number; medianDays: number; maxDays: number } & PassportStayBuckets;
   rank: number;
@@ -64,12 +61,12 @@ export interface PassportLiveData {
   updatedAt: string;
   sources: {
     passportIndex: { ok: boolean; sourceUrl?: string; updatedAt?: string };
-    restCountries: { ok: boolean; sourceUrl?: string; updatedAt?: string };
+    countries: { ok: boolean; sourceUrl?: string };
     travelAdvisory: { ok: boolean; sourceUrl?: string; updatedAt?: string };
   };
 }
 
-const CACHE_KEY = 'passport_live_v2';
+const CACHE_KEY = 'passport_live_v4';
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24;
 
 interface PassportIndexRaw {
@@ -80,22 +77,16 @@ interface PassportIndexRaw {
   destinationCount: number;
 }
 
-interface RestCountriesRaw {
+interface CountriesRaw {
   countries: Record<string, {
     iso2: string;
     iso3: string;
     commonName: string;
     flagEmoji: string;
-    flagPng: string;
     region: string;
     subregion: string;
     capital: string;
-    population: number;
-    currencies: string[];
-    languages: string[];
-    unMember: boolean;
   }>;
-  updatedAt: string;
   sourceUrl: string;
 }
 
@@ -145,7 +136,7 @@ export async function fetchPassportData(forceRefresh = false): Promise<PassportL
 
   const [pi, rc, ta] = await Promise.all([
     tryFetch<PassportIndexRaw>('/api/passport-index', 'Passport Index'),
-    tryFetch<RestCountriesRaw>('/api/rest-countries', 'REST Countries'),
+    tryFetch<CountriesRaw>('/api/countries', 'Country reference data'),
     tryFetch<TravelAdvisoryRaw>('/api/travel-advisory', 'Travel Advisory'),
   ]);
 
@@ -155,7 +146,7 @@ export async function fetchPassportData(forceRefresh = false): Promise<PassportL
       updatedAt: new Date().toISOString(),
       sources: {
         passportIndex: { ok: false },
-        restCountries: { ok: Boolean(rc), sourceUrl: rc?.sourceUrl, updatedAt: rc?.updatedAt },
+        countries: { ok: Boolean(rc), sourceUrl: rc?.sourceUrl },
         travelAdvisory: { ok: Boolean(ta), sourceUrl: ta?.sourceUrl, updatedAt: ta?.updatedAt },
       },
     };
@@ -209,7 +200,6 @@ export async function fetchPassportData(forceRefresh = false): Promise<PassportL
         iso3: destInfo?.iso3 || '',
         name: destInfo?.commonName || destIso2,
         flag: destInfo?.flagEmoji || '',
-        flagPng: destInfo?.flagPng || '',
         region: destInfo?.region || '',
         subregion: destInfo?.subregion || '',
         visaType,
@@ -275,11 +265,9 @@ export async function fetchPassportData(forceRefresh = false): Promise<PassportL
       iso3: countryInfo?.iso3 || '',
       name: countryInfo?.commonName || iso2,
       flag: countryInfo?.flagEmoji || '',
-      flagPng: countryInfo?.flagPng || '',
       region: countryInfo?.region || '',
       subregion: countryInfo?.subregion || '',
       capital: countryInfo?.capital || '',
-      population: countryInfo?.population || 0,
       totals,
       stay: {
         avgDays,
@@ -311,7 +299,7 @@ export async function fetchPassportData(forceRefresh = false): Promise<PassportL
     updatedAt: new Date().toISOString(),
     sources: {
       passportIndex: { ok: true, sourceUrl: pi.sourceUrl, updatedAt: pi.updatedAt },
-      restCountries: { ok: Boolean(rc), sourceUrl: rc?.sourceUrl, updatedAt: rc?.updatedAt },
+      countries: { ok: Boolean(rc), sourceUrl: rc?.sourceUrl },
       travelAdvisory: { ok: Boolean(ta), sourceUrl: ta?.sourceUrl, updatedAt: ta?.updatedAt },
     },
   };
@@ -342,13 +330,15 @@ export const VISA_TYPE_COLORS: Record<VisaType, { light: string; dark: string }>
   'no-admission':    { light: '#525252', dark: '#A3A3A3' },
 };
 
+/** Scores follow the Government of Canada levels: 0 normal precautions … 3 avoid all travel. */
+export const ADVISORY_MAX_SCORE = 3;
+
 export function getAdvisoryTier(score: number | null): { label: string; color: string; colorDark: string } {
   if (score === null || score === undefined) return { label: 'No Data', color: '#9CA3AF', colorDark: '#6B7280' };
-  if (score < 2) return { label: 'Low Risk', color: '#059669', colorDark: '#34D399' };
-  if (score < 3) return { label: 'Caution', color: '#0891B2', colorDark: '#22D3EE' };
-  if (score < 4) return { label: 'Increased Risk', color: '#D97706', colorDark: '#FBBF24' };
-  if (score < 5) return { label: 'High Risk', color: '#EA580C', colorDark: '#FB923C' };
-  return { label: 'Extreme', color: '#DC2626', colorDark: '#F87171' };
+  if (score < 0.5) return { label: 'Low Risk', color: '#059669', colorDark: '#34D399' };
+  if (score < 1.5) return { label: 'Caution', color: '#D97706', colorDark: '#FBBF24' };
+  if (score < 2.5) return { label: 'High Risk', color: '#EA580C', colorDark: '#FB923C' };
+  return { label: 'Avoid Travel', color: '#DC2626', colorDark: '#F87171' };
 }
 
 export function getMobilityTier(score: number): { label: string; color: string; colorDark: string } {

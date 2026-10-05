@@ -11,6 +11,7 @@ import {
   PassportProfile,
   getMobilityTier,
   getAdvisoryTier,
+  ADVISORY_MAX_SCORE,
 } from '../services/passport';
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -41,7 +42,7 @@ const METRIC_LABELS: Record<MapMetric, { label: string; description: string }> =
   },
   advisory: {
     label: 'Avg Travel Advisory',
-    description: 'Average advisory score of accessible destinations (0 safest, 5 highest risk)',
+    description: 'Average Government of Canada advisory level of accessible destinations (0 normal precautions, 3 avoid all travel)',
   },
 };
 
@@ -150,7 +151,7 @@ function getScaleConfig(metric: MapMetric, isDarkMode: boolean): ScaleConfig {
       };
     case 'advisory':
       return {
-        min: 0, max: 5,
+        min: 0, max: ADVISORY_MAX_SCORE,
         colorLow: isDarkMode ? '#15803D' : '#166534',
         colorHigh: isDarkMode ? '#B91C1C' : '#7F1D1D',
         invert: true,

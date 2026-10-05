@@ -352,8 +352,8 @@ const CulturalCapitalPage = () => {
       const iso2 = INTERNAL_KEY_TO_ISO2[internal];
       if (!iso2) return;
       passports[iso2] = {
-        iso2, iso3: '', name: internal, flag: '', flagPng: '', region: '', subregion: '',
-        capital: '', population: 0,
+        iso2, iso3: '', name: internal, flag: '', region: '', subregion: '',
+        capital: '',
         totals: {
           visaFree: entry.visaFreeDestinations,
           visaOnArrival: 0, eVisa: 0, eta: 0, visaRequired: 0, noAdmission: 0,
@@ -371,7 +371,7 @@ const CulturalCapitalPage = () => {
       updatedAt: new Date().toISOString(),
       sources: {
         passportIndex: { ok: false },
-        restCountries: { ok: false },
+        countries: { ok: false },
         travelAdvisory: { ok: false },
       },
     };
@@ -930,7 +930,7 @@ const CulturalCapitalPage = () => {
               <h3 className="font-semibold">Global Passport &amp; Visa Intelligence</h3>
               <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 Live mobility scores, per-destination visa types, length-of-stay limits, and travel advisories,
-                sourced from the open Passport Index Dataset, REST Countries, and Travel-Advisory.info.
+                sourced from the open Passport Index Dataset, the mledoze/countries dataset, and the Government of Canada&apos;s travel advice.
                 Use the &quot;Visa Details&quot; tab to drill down into the exact technical rules for any
                 passport–destination pair.
               </p>
@@ -980,11 +980,11 @@ const CulturalCapitalPage = () => {
                 <a href="https://github.com/ilyankou/passport-index-dataset" target="_blank" rel="noopener noreferrer"
                   className="underline hover:text-emerald-500">Passport Index Dataset (Ilyankou, MIT)</a>
                 {' · '}
-                <a href="https://restcountries.com" target="_blank" rel="noopener noreferrer"
-                  className="underline hover:text-emerald-500">REST Countries v3.1</a>
+                <a href="https://github.com/mledoze/countries" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-emerald-500">mledoze/countries (ODbL)</a>
                 {' · '}
-                <a href="https://www.travel-advisory.info" target="_blank" rel="noopener noreferrer"
-                  className="underline hover:text-emerald-500">Travel-Advisory.info</a>
+                <a href="https://travel.gc.ca/travelling/advisories" target="_blank" rel="noopener noreferrer"
+                  className="underline hover:text-emerald-500">Government of Canada travel advice (Open Government Licence – Canada)</a>
                 . Mobility = visa-free + visa-on-arrival + ETA. Length-of-stay reflects the per-entry day limit
                 published in the destination&apos;s policy; &quot;Unlimited / per visa&quot; applies to mobility
                 blocs (e.g. Schengen, GCC) and bilateral free-movement agreements. Historical trend chart still
