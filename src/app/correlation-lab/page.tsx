@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData, type CountryData } from '../services/worldbank';
 import { ALL_METRICS, getMetricByKey } from '../utils/metricCategories';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
@@ -116,7 +117,10 @@ export default function CorrelationLabPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <Breadcrumbs isDarkMode={isDarkMode} />
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Correlation lab</h1>
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <h1 className="text-3xl sm:text-4xl font-bold">Correlation lab</h1>
+            <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
+          </div>
           <p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Pick any two metrics, optionally lag one by N years, and see the Pearson correlation for every country in the dataset. Higher magnitude = stronger linear relationship. Positive = same direction, negative = opposite.
           </p>

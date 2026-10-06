@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { economicMetrics } from '../data/economicMetrics';
@@ -21,7 +22,7 @@ const CATEGORIES: Record<string, string[]> = {
 };
 
 export default function GlossaryPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [tab, setTab] = useState<Tab>('metrics');
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -129,17 +130,7 @@ export default function GlossaryPage() {
               {allMetrics.length} charted metrics and {sortedTerms.length} macroeconomic terms, in one place
             </p>
           </div>
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <span className={`text-xs font-medium ${tc.textSec}`}>Light</span>
-            <button
-              aria-label="Toggle dark mode"
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 shadow-sm ${isDarkMode ? 'translate-x-6' : ''}`} />
-            </button>
-            <span className={`text-xs font-medium ${tc.textSec}`}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
 
         {/* Tabs */}

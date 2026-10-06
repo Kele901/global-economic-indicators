@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useLearnProgress } from '../hooks/useLearnProgress';
 import { MODULES, TOTAL_LESSONS, WRAP_UP_QUIZ, lessonsByModule } from './lessons';
 import LearnHero from '../components/learn/LearnHero';
@@ -20,7 +21,7 @@ import LearnPrintPack from '../components/learn/LearnPrintPack';
 const WRAP_UP_LESSON_ID = 'wrap-up';
 
 export default function LearnPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const { state, markComplete, setName, resetProgress } = useLearnProgress();
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function LearnPage() {
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="flex justify-end mb-4 gap-2 print:hidden">
+        <div className="flex justify-end items-center mb-4 gap-3 print:hidden">
           <button
             onClick={() => window.print()}
             className={`text-xs px-3 py-2 rounded-md border transition-colors ${
@@ -65,16 +66,7 @@ export default function LearnPage() {
           >
             Download printable lesson pack
           </button>
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`text-xs px-3 py-2 rounded-md border transition-colors ${
-              isDarkMode
-                ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white'
-                : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900'
-            }`}
-          >
-            {isDarkMode ? 'Light mode' : 'Dark mode'}
-          </button>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
 
         <LearnHero

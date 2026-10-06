@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SocialShareMenu from '../components/SocialShareMenu';
@@ -211,7 +212,7 @@ const TechCapitalCyclesChart = dynamic(
 );
 
 const TechnologyPage = () => {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [activeSection, setActiveSection] = useState<string>('overview');
   const [techData, setTechData] = useState<TechnologyData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -348,20 +349,7 @@ const TechnologyPage = () => {
               R&amp;D investment, high-tech exports, and innovation indicators.
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className={themeColors.textSecondary}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${
-                isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${
-                isDarkMode ? 'translate-x-6' : ''
-              }`} />
-            </button>
-            <span className={themeColors.textSecondary}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
 
         {/* Static intro content - always visible for SEO */}

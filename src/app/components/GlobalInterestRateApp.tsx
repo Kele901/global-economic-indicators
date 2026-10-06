@@ -6,6 +6,7 @@ import { fetchGlobalData } from '../services/worldbank';
 import type { CountryData } from '../services/worldbank';
 import { COUNTRY_FLAGS as countryFlags } from './CountryFlag';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from './ThemeToggle';
 import {
   COUNTRY_COLORS as countryColors,
   COUNTRY_KEYS,
@@ -698,7 +699,7 @@ const GlobalInterestRateApp = () => {
   const [selectedPeriod, setSelectedPeriod] = useLocalStorage('selectedPeriod', 'all');
   const [selectedCountries, setSelectedCountries] = useLocalStorage<string[]>('selectedCountries', [...DEFAULT_DASHBOARD_SELECTION]);
   const [maxYAxis, setMaxYAxis] = useLocalStorage('maxYAxis', 20);
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [isGridView, setIsGridView] = useLocalStorage('isGridView', false);
   const [selectedMetric, setSelectedMetric] = useLocalStorage<'interest' | 'employment' | 'unemployment' | 'debt' | 'inflation' | 'gdp' | 'cpi' | 'population' | 'fdi' | 'trade' | 'spending' | 'productivity' | 'gini' | 'rd' | 'energy' | 'gdpPerCapita' | 'currentAccount' | 'capitalFormation' | 'reserves' | 'exchangeRate' | 'poverty' | 'education' | 'taxRevenue' | 'credit' | 'exports' | 'imports' | 'lifeExpectancy' | 'urbanization' | 'hightech' | 'co2' | 'migration' | 'laborForce' | 'budget' | 'healthcare' | 'eduExpenditure' | 'internet' | 'youthUnemployment' | 'manufacturing' | 'household' | 'renewable' | 'femaleLaborForce' | 'military' | 'marketCap' | 'sciPublications' | 'ictExports' | 'mobile' | 'patents' | 'socialSpending' | 'debtService' | 'services' | 'agriculture' | 'tradeOpen' | 'tariffs' | 'tourism' | 'privateInvest' | 'newBusiness' | 'realPolicy' | 'termSpread' | 'govCorruption' | 'govEffectiveness' | 'govStability' | 'govRegulation' | 'govRuleOfLaw' | 'govVoice' | 'popAge014' | 'popAge1564' | 'popAge65Plus' | 'fertility' | 'dependencyRatio' | 'physicians' | 'hospitalBeds' | 'immunDPT' | 'immunMeasles' | 'under5Mortality' | 'maternalMortality' | 'houseRealPrice' | 'houseNominalPrice' | 'totalRents' | 'oilRents' | 'mineralRents' | 'incomeTop10' | 'incomeBottom40' | 'palma' | 'externalDebt' | 'reer' | 'pm25' | 'all'>('selectedMetric', 'all');
   
@@ -1294,16 +1295,7 @@ const GlobalInterestRateApp = () => {
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Global Economic Indicators</h1>
           <div className="flex items-center space-x-2">
             <BulkChartDownload variant="primary" size="sm" />
-            <span className="text-xs sm:text-sm">Light</span>
-            <button
-              className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white transform transition-transform ${isDarkMode ? 'translate-x-5 sm:translate-x-6' : ''}`} />
-            </button>
-            <span className="text-xs sm:text-sm">Dark</span>
+            <ThemeToggle isDarkMode={isDarkMode} />
           </div>
         </div>
         <div className="space-y-2 sm:space-y-3">

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { CHANGELOG, type ChangeTag } from '../data/changelog';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 const TAG_STYLES: Record<ChangeTag, { bg: string; text: string; label: string }> = {
@@ -38,7 +39,10 @@ export default function ChangelogPage() {
         <Breadcrumbs isDarkMode={isDarkMode} />
 
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Changelog</h1>
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <h1 className="text-3xl sm:text-4xl font-bold">Changelog</h1>
+            <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
+          </div>
           <p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Everything that&apos;s shipped on globaleconindicators.info. Newest first. Filter by category or search for a keyword.
           </p>

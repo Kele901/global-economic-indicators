@@ -14,6 +14,7 @@ import {
   AreaChart, Area, BarChart, Bar
 } from 'recharts';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import SocialShareMenu from '../components/SocialShareMenu';
@@ -199,7 +200,7 @@ const MAP_METRICS: { id: MapMetric; label: string }[] = [
 ];
 
 const TradingPlacesPage: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [viewMode, setViewMode] = useLocalStorage<ViewMode>('tradingPlacesViewMode', 'rankings');
   const [selectedCountry, setSelectedCountry] = useState(mockTradeData.countries[0]);
   const [detailCountry, setDetailCountry] = useState<string | null>(null);
@@ -522,13 +523,7 @@ const TradingPlacesPage: React.FC = () => {
             <h1 className={`text-3xl font-bold ${tc.text}`}>Trading Places</h1>
             <p className={tc.textSec}>Global trade flows, tariffs, and economic relationships</p>
                     </div>
-          <div className="flex items-center gap-3">
-              <span className={`text-xs ${tc.textSec}`}>Light</span>
-              <button onClick={() => setIsDarkMode(!isDarkMode)} className={`relative w-11 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${isDarkMode ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
-                    </button>
-              <span className={`text-xs ${tc.textSec}`}>Dark</span>
-                </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
             </div>
 
         {(loading || liveUnavailable) && (

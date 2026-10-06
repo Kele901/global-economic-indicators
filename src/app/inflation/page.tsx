@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { fetchGlobalData } from '../services/worldbank';
 import { latestEntry } from '../utils/countryData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useIsMobile } from '../hooks/useViewportSize';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
@@ -94,7 +95,7 @@ export default function InflationPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["USA", "UK", "Germany"]);
   const [selectedPeriod, setSelectedPeriod] = useState<'5y' | '10y' | 'all'>('all');
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [activeTab, setActiveTab] = useState<InflationTab>('inflation');
   const [selectedCityTab, setSelectedCityTab] = useState<CityTab>('overview');
   const inflationChartRef = useRef<HTMLDivElement>(null);
@@ -148,14 +149,7 @@ export default function InflationPage() {
           </div>
           <div className="flex items-center space-x-2">
             <BulkChartDownload variant="primary" size="sm" />
-            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
-            </button>
-            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
+            <ThemeToggle isDarkMode={isDarkMode} />
           </div>
         </div>
 

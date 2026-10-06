@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
 export default function EmergingDevelopedGuide() {
@@ -21,8 +22,9 @@ export default function EmergingDevelopedGuide() {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="max-w-4xl mx-auto p-6 sm:p-8">
-        <div className="mb-4">
+        <div className="flex justify-between items-center gap-4 mb-4">
           <a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">&larr; All Guides</a>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Emerging vs. Developed Economies</h1>
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>

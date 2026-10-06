@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
@@ -28,7 +29,7 @@ const PERIOD_OPTIONS = [
 const COLORS = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export default function ReportsPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [data, setData] = useState<Record<string, CountryData[]> | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(['USA', 'UK']);
@@ -141,16 +142,7 @@ export default function ReportsPage() {
             <h1 className="text-3xl font-bold mb-2">Report Builder</h1>
             <p className={`${tc.textSec}`}>Generate custom reports with selected countries and metrics</p>
           </div>
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 shadow-sm ${isDarkMode ? 'translate-x-6' : ''}`} />
-            </button>
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
 
         <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'}`}>

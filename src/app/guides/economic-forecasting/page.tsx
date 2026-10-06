@@ -1,10 +1,11 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
 export default function EconomicForecastingGuide() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -23,16 +24,7 @@ export default function EconomicForecastingGuide() {
       <div className="max-w-4xl mx-auto p-6 sm:p-8">
         <div className="flex justify-between items-center mb-4">
           <a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">&larr; All Guides</a>
-          <div className="flex items-center space-x-2">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 shadow-sm ${isDarkMode ? 'translate-x-6' : ''}`} />
-            </button>
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Economic Forecasting &amp; Outlook</h1>
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>

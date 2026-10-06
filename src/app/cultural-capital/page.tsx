@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchCulturalData, CulturalData, CountryData, COUNTRY_NAMES } from '../services/worldbank';
@@ -240,7 +241,7 @@ const EducationDashboard = dynamic(
 );
 
 const CulturalCapitalPage = () => {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [activeSection, setActiveSection] = useState<string>('overview');
   const [culturalData, setCulturalData] = useState<CulturalData | null>(null);
   const [staticData, setStaticData] = useState<CulturalStaticData | null>(null);
@@ -468,20 +469,7 @@ const CulturalCapitalPage = () => {
               creative economies, tourism, and the infrastructure that sustains cultural influence.
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className={themeColors.textSecondary}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${
-                isDarkMode ? 'bg-purple-600' : 'bg-gray-300'
-              }`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${
-                isDarkMode ? 'translate-x-6' : ''
-              }`} />
-            </button>
-            <span className={themeColors.textSecondary}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
 
         <StalenessBanner

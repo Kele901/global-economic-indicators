@@ -6,6 +6,7 @@ import AdSense from '../components/AdSense';
 import { calculateCurrencyPairs } from '../services/forex';
 import { fetchAllCurrencyRates, type CurrencyRateHistory } from '../services/currencyRates';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import InfoPanel from '../components/InfoPanel';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
@@ -99,7 +100,7 @@ const CurrencyHierarchyPage = () => {
   const [exchangeRates, setExchangeRates] = useState<{ [key: string]: { [key: string]: number } }>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [refreshInterval, setRefreshInterval] = useState(5 * 60 * 1000); // 5 minutes default
   const [converterAmount, setConverterAmount] = useState<string>('100');
@@ -382,16 +383,7 @@ const CurrencyHierarchyPage = () => {
           )}
           
           {/* Theme Toggle */}
-          <div className="flex items-center space-x-2">
-            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
-            </button>
-            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
       </div>
 

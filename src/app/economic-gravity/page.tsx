@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { ResponsiveContainer, LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import InfoPanel from '../components/InfoPanel';
 import SocialShareMenu from '../components/SocialShareMenu';
@@ -353,7 +354,7 @@ const REGION_COLORS: Record<string, string> = {
 };
 
 const EconomicGravityPage = () => {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [selectedPoint, setSelectedPoint] = useState<HistoricalPoint | null>(null);
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
   const [activeChart, setActiveChart] = useState<ChartType>('line');
@@ -402,16 +403,7 @@ const EconomicGravityPage = () => {
             Tracking the shift of global economic power from ancient civilizations to modern times. Explore how economic dominance has moved across continents and empires throughout human history.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Light</span>
-          <button
-            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-            onClick={() => setIsDarkMode(!isDarkMode)}
-          >
-            <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ${isDarkMode ? 'translate-x-6' : ''}`} />
-          </button>
-          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Dark</span>
-        </div>
+        <ThemeToggle isDarkMode={isDarkMode} />
       </div>
 
       {/* Static intro content - always visible for SEO */}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useEffect } from 'react';
 
 export default function DisclaimerPage() {
@@ -27,7 +28,10 @@ export default function DisclaimerPage() {
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="max-w-4xl mx-auto p-6 sm:p-8">
 
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2">Disclaimer</h1>
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold">Disclaimer</h1>
+          <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
+        </div>
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         </p>

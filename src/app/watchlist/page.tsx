@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useWatchlist, type WatchlistItem } from '../hooks/useWatchlist';
 import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
@@ -53,7 +54,7 @@ function MiniSparkline({ data, color }: { data: number[]; color: string }) {
 }
 
 export default function WatchlistPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const { items, addItem, removeItem, updateThreshold } = useWatchlist();
   const [data, setData] = useState<Record<string, CountryData[]> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -179,16 +180,7 @@ export default function WatchlistPage() {
             <p className={tc.textSec}>Track metrics and get notified when thresholds are crossed</p>
           </div>
           <div className="flex items-center gap-4 flex-shrink-0">
-            <div className="flex items-center space-x-2">
-              <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Light</span>
-              <button
-                className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-                onClick={() => setIsDarkMode(!isDarkMode)}
-              >
-                <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 shadow-sm ${isDarkMode ? 'translate-x-6' : ''}`} />
-              </button>
-              <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Dark</span>
-            </div>
+            <ThemeToggle isDarkMode={isDarkMode} />
             <button onClick={() => setShowAdd(!showAdd)}
               className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors">
               + Add Item

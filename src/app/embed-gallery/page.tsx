@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import Breadcrumbs from '../components/Breadcrumbs';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
@@ -122,7 +123,10 @@ export default function EmbedGalleryPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <Breadcrumbs isDarkMode={isDarkMode} />
         <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Embed gallery</h1>
+          <div className="flex items-start justify-between gap-4 mb-3">
+            <h1 className="text-3xl sm:text-4xl font-bold">Embed gallery</h1>
+            <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
+          </div>
           <p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Six ready-to-paste chart embeds. Each ships as an iframe that inherits your host page&apos;s width where possible. All embeds are ad-free, cache-friendly (ISR 1h), and update automatically as underlying data refreshes.
           </p>

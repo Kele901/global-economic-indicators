@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchGlobalData } from '../services/worldbank';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import InflationCalculator from '../components/InflationCalculator';
@@ -16,7 +17,7 @@ const countryFlags: { [key: string]: React.ComponentType<any> } = {
 };
 
 export default function InflationCalculatorPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cpiData, setCpiData] = useState<any[]>([]);
@@ -71,22 +72,7 @@ export default function InflationCalculatorPage() {
             }`}>
               Multi-Country Inflation Calculator
             </h1>
-            <div className="flex items-center space-x-2">
-              <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Light</span>
-              <button
-                className={`w-10 h-5 sm:w-12 sm:h-6 rounded-full p-1 transition-colors duration-200 ${
-                  isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
-                }`}
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white transform transition-transform ${
-                  isDarkMode ? 'translate-x-5 sm:translate-x-6' : ''
-                }`} />
-              </button>
-              <span className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Dark</span>
-            </div>
+            <ThemeToggle isDarkMode={isDarkMode} />
           </div>
           <p className={`text-base sm:text-lg ${
             isDarkMode ? 'text-gray-300' : 'text-gray-600'

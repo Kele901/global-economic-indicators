@@ -161,32 +161,175 @@ export const GLOBAL_RESERVES_AGGREGATES: GlobalReservesAggregate[] = [
     id: 'copper',
     label: 'Copper',
     unit: 'million tonnes (reserves)',
-    reserves: 1000,
-    annualProduction: 22.0,
+    reserves: 980,
+    annualProduction: 23.0,
     productionUnit: 'Mt / year',
     category: 'metals',
-    notes: 'USGS Mineral Commodity Summaries 2024.',
+    notes: 'USGS MCS 2025: reserves ~980 Mt, mine output ~23 Mt in 2024. Chile holds ~19% of reserves.',
   },
   {
     id: 'lithium',
     label: 'Lithium',
     unit: 'million tonnes (reserves)',
-    reserves: 28,
-    annualProduction: 0.18,
+    reserves: 30,
+    annualProduction: 0.24,
     productionUnit: 'Mt / year',
     category: 'metals',
-    notes: 'Reserves growing rapidly; production ~180 kt/yr in 2024.',
+    notes: 'USGS MCS 2025: output ~240 kt in 2024, up ~18% in a year as EV demand pulls new brine and hard-rock supply.',
   },
   {
     id: 'nickel',
     label: 'Nickel',
     unit: 'million tonnes (reserves)',
     reserves: 130,
-    annualProduction: 3.6,
+    annualProduction: 3.7,
     productionUnit: 'Mt / year',
     category: 'metals',
-    notes: 'USGS 2024; Indonesia dominant producer.',
+    notes: 'USGS MCS 2025; Indonesia mines ~60% of the world total and holds ~42% of reserves.',
   },
+  {
+    id: 'cobalt',
+    label: 'Cobalt',
+    unit: 'million tonnes (reserves)',
+    reserves: 11,
+    annualProduction: 0.29,
+    productionUnit: 'Mt / year',
+    category: 'metals',
+    notes: 'USGS MCS 2025; DR Congo mines roughly three-quarters of world supply, mostly as a copper by-product.',
+  },
+  {
+    id: 'rareEarths',
+    label: 'Rare Earths',
+    unit: 'million tonnes REO (reserves)',
+    reserves: 90,
+    annualProduction: 0.39,
+    productionUnit: 'Mt REO / year',
+    category: 'metals',
+    notes: 'USGS MCS 2025. Geologically plentiful; the bottleneck is separation and refining, ~90% of which is in China.',
+  },
+];
+
+// OPEC members (2024 onwards; Angola left in January 2024) and the non-OPEC
+// partners in the OPEC+ Declaration of Cooperation.
+export const OPEC_MEMBERS = new Set([
+  'Algeria', 'Congo', 'Equatorial Guinea', 'Gabon', 'Iran', 'Iraq', 'Kuwait',
+  'Libya', 'Nigeria', 'Saudi Arabia', 'UAE', 'Venezuela',
+]);
+export const OPEC_PLUS_PARTNERS = new Set([
+  'Russia', 'Kazakhstan', 'Mexico', 'Oman', 'Azerbaijan', 'Bahrain', 'Brunei',
+  'Malaysia', 'Sudan', 'South Sudan',
+]);
+
+// World totals used as the denominator for "share of world" bars.
+export const WORLD_RESOURCE_TOTALS = {
+  oilReserves: 1650,        // billion barrels
+  oilProduction: 84100,     // thousand barrels / day
+  gasReserves: 7200,        // trillion cubic feet
+  coalReserves: 1075000,    // million short tons
+};
+
+// Proven oil reserves vs. cumulative extraction. BP Statistical Review of
+// World Energy 2021, the last edition to publish global reserves (later
+// editions by the Energy Institute dropped the series). Production includes
+// NGLs; R/P is reserves ÷ that year's output.
+export interface OilReservesHistoryPoint {
+  year: number;
+  reserves: number;   // billion barrels
+  production: number; // million barrels / day
+}
+
+export const OIL_RESERVES_HISTORY: OilReservesHistoryPoint[] = [
+  { year: 1980, reserves: 683,  production: 62.9 },
+  { year: 1985, reserves: 770,  production: 57.5 },
+  { year: 1990, reserves: 1028, production: 65.5 },
+  { year: 1995, reserves: 1127, production: 68.1 },
+  { year: 2000, reserves: 1301, production: 74.9 },
+  { year: 2005, reserves: 1374, production: 81.3 },
+  { year: 2010, reserves: 1637, production: 83.1 },
+  { year: 2015, reserves: 1692, production: 91.7 },
+  { year: 2020, reserves: 1732, production: 88.4 },
+];
+
+// Supply concentration for transition-critical minerals.
+// Mine output: USGS Mineral Commodity Summaries 2025 (2024 estimates).
+// Refining: IEA Global Critical Minerals Outlook 2024 (2023 shares). Rounded.
+export interface CriticalMineralConcentration {
+  mineral: string;
+  topProducer: string;
+  topProducerShare: number;   // % of world mine output
+  top3Share: number;          // % of world mine output
+  chinaRefiningShare: number; // % of world refined output
+  use: string;
+}
+
+export const CRITICAL_MINERALS: CriticalMineralConcentration[] = [
+  { mineral: 'Graphite',    topProducer: 'China',       topProducerShare: 79, top3Share: 90, chinaRefiningShare: 95, use: 'Battery anodes' },
+  { mineral: 'Cobalt',      topProducer: 'DR Congo',    topProducerShare: 76, top3Share: 89, chinaRefiningShare: 76, use: 'Battery cathodes, superalloys' },
+  { mineral: 'Rare earths', topProducer: 'China',       topProducerShare: 69, top3Share: 89, chinaRefiningShare: 90, use: 'Magnets for EV motors & wind turbines' },
+  { mineral: 'Nickel',      topProducer: 'Indonesia',   topProducerShare: 59, top3Share: 74, chinaRefiningShare: 35, use: 'Battery cathodes, stainless steel' },
+  { mineral: 'Lithium',     topProducer: 'Australia',   topProducerShare: 37, top3Share: 74, chinaRefiningShare: 65, use: 'Battery cathodes & electrolyte' },
+  { mineral: 'Copper',      topProducer: 'Chile',       topProducerShare: 23, top3Share: 48, chinaRefiningShare: 44, use: 'Grids, motors, wiring' },
+];
+
+// Fiscal break-even oil prices: the Brent price at which each government's
+// budget balances. IMF Regional Economic Outlook (Middle East & Central Asia),
+// 2025 estimates, rounded to the nearest dollar.
+export interface FiscalBreakeven {
+  country: string;
+  breakeven: number; // $/bbl
+}
+
+export const FISCAL_BREAKEVEN_2025: FiscalBreakeven[] = [
+  { country: 'Bahrain',      breakeven: 125 },
+  { country: 'Saudi Arabia', breakeven: 91 },
+  { country: 'Kuwait',       breakeven: 82 },
+  { country: 'Oman',         breakeven: 54 },
+  { country: 'UAE',          breakeven: 50 },
+  { country: 'Qatar',        breakeven: 44 },
+];
+
+// Commodity-funded sovereign wealth funds. Assets under management are
+// rounded 2025 estimates (Global SWF / fund annual reports); per-head uses
+// UN WPP 2024 population.
+export interface SovereignWealthFund {
+  country: string;
+  fund: string;
+  assetsBn: number;     // USD billion
+  populationM: number;  // million people
+  source: string;       // commodity that funds it
+}
+
+export const SOVEREIGN_WEALTH_FUNDS: SovereignWealthFund[] = [
+  { country: 'Norway',       fund: 'Government Pension Fund Global', assetsBn: 1800, populationM: 5.6,  source: 'Oil & gas' },
+  { country: 'UAE',          fund: 'ADIA + Mubadala',                 assetsBn: 1430, populationM: 10.9, source: 'Oil' },
+  { country: 'Kuwait',       fund: 'Kuwait Investment Authority',     assetsBn: 1000, populationM: 4.9,  source: 'Oil' },
+  { country: 'Saudi Arabia', fund: 'Public Investment Fund',          assetsBn: 930,  populationM: 33.9, source: 'Oil' },
+  { country: 'Qatar',        fund: 'Qatar Investment Authority',      assetsBn: 530,  populationM: 2.7,  source: 'Gas' },
+  { country: 'Libya',        fund: 'Libyan Investment Authority',     assetsBn: 70,   populationM: 7.4,  source: 'Oil' },
+  { country: 'Kazakhstan',   fund: 'National Fund',                   assetsBn: 60,   populationM: 20.6, source: 'Oil' },
+  { country: 'Chile',        fund: 'ESSF + Pension Reserve Fund',     assetsBn: 13,   populationM: 19.7, source: 'Copper' },
+];
+
+// Annual crude benchmark before the FRED daily series begin (WTI 1986, Brent
+// 1987). BP Statistical Review: Arabian Light posted at Ras Tanura to 1983,
+// Brent dated from 1984. US$ per barrel, money of the day.
+export const HISTORIC_OIL_PRICES: { year: number; value: number }[] = [
+  { year: 1970, value: 1.80 },
+  { year: 1971, value: 2.24 },
+  { year: 1972, value: 2.48 },
+  { year: 1973, value: 3.29 },
+  { year: 1974, value: 11.58 },
+  { year: 1975, value: 11.53 },
+  { year: 1976, value: 12.80 },
+  { year: 1977, value: 13.92 },
+  { year: 1978, value: 14.02 },
+  { year: 1979, value: 31.61 },
+  { year: 1980, value: 36.83 },
+  { year: 1981, value: 35.93 },
+  { year: 1982, value: 32.97 },
+  { year: 1983, value: 29.55 },
+  { year: 1984, value: 28.78 },
+  { year: 1985, value: 27.56 },
 ];
 
 // Commodity supercycle era annotations for the scrubbable timeline.

@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData } from '../services/worldbank';
 import {
   CURATED_LAST_UPDATED,
@@ -79,7 +80,7 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: {
 }
 
 export default function EnergyLedgerPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [data, setData] = useState<GlobalData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -125,7 +126,7 @@ export default function EnergyLedgerPage() {
     <div className={`min-h-screen transition-colors duration-200 ${pageBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <Breadcrumbs isDarkMode={isDarkMode} />
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
           <div>
             <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>The Energy Ledger</div>
             <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 ${textPrimary}`}>Mix, Storage, Flows, Reserves</h1>
@@ -137,12 +138,7 @@ export default function EnergyLedgerPage() {
               EIA snapshots.
             </p>
           </div>
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`hidden sm:flex items-center gap-2 text-xs px-3 py-2 rounded-md border transition-colors ${
-              isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white' : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900'
-            }`}
-          >{isDarkMode ? 'Light mode' : 'Dark mode'}</button>
+          <ThemeToggle isDarkMode={isDarkMode} className="self-end sm:self-auto" />
         </div>
 
         <GuidedTour

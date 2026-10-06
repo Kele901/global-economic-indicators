@@ -8,6 +8,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import {
   DATA_SOURCES,
   CATEGORY_LABELS,
@@ -20,7 +21,7 @@ import DataDownloadButton from '../components/DataDownloadButton';
 type FreshnessFilter = 'all' | 'live' | 'curated';
 
 export default function DataSourcesPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [filter, setFilter] = useState<FreshnessFilter>('all');
   const [query, setQuery] = useState('');
 
@@ -74,7 +75,7 @@ export default function DataSourcesPage() {
   return (
     <div className={`min-h-screen ${bg} ${textPrimary}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
           <div>
             <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-sky-400' : 'text-sky-600'}`}>
               Reference
@@ -88,12 +89,7 @@ export default function DataSourcesPage() {
               date and get an amber banner on their pages once they age past twelve months.
             </p>
           </div>
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`hidden sm:flex items-center gap-2 text-xs px-3 py-2 rounded-md border transition-colors ${chipInactive}`}
-          >
-            {isDarkMode ? 'Light mode' : 'Dark mode'}
-          </button>
+          <ThemeToggle isDarkMode={isDarkMode} className="self-end sm:self-auto" />
         </div>
 
         <div id="data-sources-registry" className={`rounded-2xl border p-4 sm:p-6 mb-8 ${heroBg}`}>

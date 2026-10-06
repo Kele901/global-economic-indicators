@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { GUIDES, GUIDE_TOPICS, type GuideLevel, type GuideTopic } from '../data/guides';
 
 const LEVELS: GuideLevel[] = ['Beginner', 'Intermediate', 'Advanced'];
@@ -74,7 +75,10 @@ export default function GuidesIndexPage() {
           <span aria-current="page">Guides</span>
         </nav>
 
-        <h1 className="text-3xl sm:text-4xl font-bold mb-3">Economic Guides</h1>
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <h1 className="text-3xl sm:text-4xl font-bold">Economic Guides</h1>
+          <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
+        </div>
         <p className={`text-base leading-relaxed mb-2 max-w-3xl ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           Plain-English explanations of the indicators, institutions and cycles behind the charts on
           this site. Every guide is free, self-contained and written to be read in one sitting.

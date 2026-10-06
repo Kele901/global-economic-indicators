@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData, type CountryData } from '../services/worldbank';
 import {
   ACTIVE_STATE_CONFLICTS,
@@ -119,7 +120,7 @@ function mergeSipriIntoSeries(
 }
 
 export default function DefenseLedgerPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [data, setData] = useState<GlobalData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -217,7 +218,7 @@ export default function DefenseLedgerPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <Breadcrumbs isDarkMode={isDarkMode} />
         {/* Header */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
           <div>
             <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-rose-400' : 'text-rose-600'}`}>
               The Defense Ledger
@@ -231,16 +232,7 @@ export default function DefenseLedgerPage() {
             </p>
           </div>
           <div className="hidden sm:flex flex-col items-end gap-2">
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`flex items-center gap-2 text-xs px-3 py-2 rounded-md border transition-colors ${
-                isDarkMode
-                  ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white'
-                  : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900'
-              }`}
-            >
-              {isDarkMode ? 'Light mode' : 'Dark mode'}
-            </button>
+            <ThemeToggle isDarkMode={isDarkMode} className="self-end sm:self-auto" />
             <GuidedTour
               storageKey="defense-ledger-tour-seen"
               steps={DEFENSE_TOUR_STEPS}

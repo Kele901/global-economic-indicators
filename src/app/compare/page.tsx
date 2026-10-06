@@ -8,6 +8,7 @@ import AdSense from '../components/AdSense';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 
 const CountryRankBump      = dynamic(() => import('../components/CountryRankBump'),      { ssr: false });
 const MetricSparklineGrid  = dynamic(() => import('../components/MetricSparklineGrid'),  { ssr: false });
@@ -49,7 +50,7 @@ export default function ComparePage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
 
   useEffect(() => {
     // Apply theme changes to DOM
@@ -95,16 +96,7 @@ export default function ComparePage() {
               Compare key economic indicators across multiple countries to analyze trends, patterns, and relationships between different economies.
             </p>
           </div>
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 shadow-sm ${isDarkMode ? 'translate-x-6' : ''}`} />
-            </button>
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
 
         <StaticIntroContent isDarkMode={isDarkMode} />

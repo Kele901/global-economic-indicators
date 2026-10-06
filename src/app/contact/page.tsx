@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useEffect, useState } from 'react';
 import { CONTACT_EMAIL } from '../lib/site';
 
@@ -98,7 +99,10 @@ export default function ContactPage() {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="max-w-4xl mx-auto p-6 sm:p-8">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-8">Contact Us</h1>
+        <div className="flex items-start justify-between gap-4 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold">Contact Us</h1>
+          <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
+        </div>
 
         <div className="space-y-8">
           <section>

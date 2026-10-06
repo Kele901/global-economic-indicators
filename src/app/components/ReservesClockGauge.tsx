@@ -84,7 +84,7 @@ export default function ReservesClockGauge({ isDarkMode }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         {gauges.map(({ agg, years, band, color }) => {
           const chartData = [{ name: agg.label, value: Math.min(years, MAX_YEARS) }];
           return (

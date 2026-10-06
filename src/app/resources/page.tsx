@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { fetchGlobalData, type CountryData } from '../services/worldbank';
+import ThemeToggle from '../components/ThemeToggle';
+import { fetchGlobalData } from '../services/worldbank';
 import { fetchAllCommodityPrices, clearCommodityCache, RESOURCES_CURATED_LAST_UPDATED, type CommodityHistory } from '../services/commodities';
 import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
@@ -14,10 +15,15 @@ import { slugify } from '../lib/share';
 import { fetchOilReserves, fetchOilProduction, type ReservesSnapshot, type ProductionSnapshot } from '../services/eia';
 
 const CommodityTicker = dynamic(() => import('../components/CommodityTicker'), { ssr: false });
+const ResourceHoldersPanel = dynamic(() => import('../components/ResourceHoldersPanel'), { ssr: false });
 const ResourceDependenceQuadrant = dynamic(() => import('../components/ResourceDependenceQuadrant'), { ssr: false });
 const CommoditySupercycleTimeline = dynamic(() => import('../components/CommoditySupercycleTimeline'), { ssr: false });
 const ReservesClockGauge = dynamic(() => import('../components/ReservesClockGauge'), { ssr: false });
 const PetrostateVulnerabilityTable = dynamic(() => import('../components/PetrostateVulnerabilityTable'), { ssr: false });
+const OilReserveGrowthChart = dynamic(() => import('../components/ResourceAtlasExtras').then(m => m.OilReserveGrowthChart), { ssr: false });
+const CriticalMineralsPanel = dynamic(() => import('../components/ResourceAtlasExtras').then(m => m.CriticalMineralsPanel), { ssr: false });
+const FiscalBreakevenPanel = dynamic(() => import('../components/ResourceAtlasExtras').then(m => m.FiscalBreakevenPanel), { ssr: false });
+const SovereignWealthPanel = dynamic(() => import('../components/ResourceAtlasExtras').then(m => m.SovereignWealthPanel), { ssr: false });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
@@ -57,31 +63,13 @@ function SkeletonCard({ isDarkMode, className = 'h-64' }: { isDarkMode: boolean;
   );
 }
 
-// Find the most recent non-null, non-zero value for a country.
-function latest(series: CountryData[] | undefined, country: string): number | null {
-  if (!series) return null;
-  for (let i = series.length - 1; i >= 0; i--) {
-    const v = Number(series[i][country]);
-    if (!isNaN(v) && v !== 0) return v;
-  }
-  return null;
-}
-
-// Rank countries by latest value in a series, returning the top N with country + value.
-function topCountries(series: CountryData[] | undefined, n: number): { country: string; value: number }[] {
-  if (!series || series.length === 0) return [];
-  const countries = new Set<string>();
-  series.forEach(row => Object.keys(row).forEach(k => k !== 'year' && countries.add(k)));
-  const values: { country: string; value: number }[] = [];
-  countries.forEach(c => {
-    const v = latest(series, c);
-    if (v != null) values.push({ country: c, value: v });
-  });
-  return values.sort((a, b) => b.value - a.value).slice(0, n);
+function kpiChange(latest?: { value: number } | null, prior?: { value: number } | null): number | null {
+  if (!latest || !prior || prior.value === 0) return null;
+  return ((latest.value - prior.value) / prior.value) * 100;
 }
 
 export default function ResourcesPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [data, setData] = useState<GlobalData | null>(null);
   const [commodities, setCommodities] = useState<{ [id: string]: CommodityHistory }>({});
   const [reserves, setReserves] = useState<ReservesSnapshot | null>(null);
@@ -151,16 +139,23 @@ export default function ResourcesPage() {
     }
   };
 
-  const topOilRentsCountries = useMemo(() => topCountries(data?.oilRents, 5), [data]);
-  const topReserves = useMemo(() => reserves?.data?.slice(0, 5) ?? [], [reserves]);
-  const topProducers = useMemo(() => production?.data?.slice(0, 5) ?? [], [production]);
-
   const kpi = useMemo(() => {
-    const wtiLatest = commodities['wti']?.latest;
-    const brentLatest = commodities['brent']?.latest;
-    const gasLatest = commodities['henryHub']?.latest;
-    const copperLatest = commodities['copper']?.latest;
-    return { wtiLatest, brentLatest, gasLatest, copperLatest };
+    const tile = (id: string, label: string, unit: string) => {
+      const h = commodities[id];
+      return {
+        label,
+        unit,
+        obs: h?.latest,
+        change: kpiChange(h?.latest, h?.latestPrior),
+        ytd: kpiChange(h?.latest, h?.ytdStart),
+      };
+    };
+    return [
+      tile('wti', 'WTI Crude', '$/bbl'),
+      tile('brent', 'Brent Crude', '$/bbl'),
+      tile('henryHub', 'Natural Gas', '$/MMBtu'),
+      tile('copper', 'Copper', '$/t'),
+    ];
   }, [commodities]);
 
   const pageBg = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
@@ -177,7 +172,7 @@ export default function ResourcesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <Breadcrumbs isDarkMode={isDarkMode} />
         {/* Header */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
           <div>
             <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
               The Resource Atlas
@@ -190,16 +185,7 @@ export default function ResourcesPage() {
               resource-rent dependence and the boom-and-bust cycles that reshape petrostates.
             </p>
           </div>
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`hidden sm:flex items-center gap-2 text-xs px-3 py-2 rounded-md border transition-colors ${
-              isDarkMode
-                ? 'bg-gray-800 border-gray-700 text-gray-300 hover:text-white'
-                : 'bg-white border-gray-200 text-gray-700 hover:text-gray-900'
-            }`}
-          >
-            {isDarkMode ? 'Light mode' : 'Dark mode'}
-          </button>
+          <ThemeToggle isDarkMode={isDarkMode} className="self-end sm:self-auto" />
         </div>
 
         <StalenessBanner
@@ -252,12 +238,7 @@ export default function ResourcesPage() {
           />
 
           <div id={slugify(KPI_TITLE)} className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
-            {[
-              { label: 'WTI Crude', obs: kpi.wtiLatest, unit: '$/bbl' },
-              { label: 'Brent Crude', obs: kpi.brentLatest, unit: '$/bbl' },
-              { label: 'Natural Gas', obs: kpi.gasLatest, unit: '$/MMBtu' },
-              { label: 'Copper', obs: kpi.copperLatest, unit: '$/t' },
-            ].map(k => (
+            {kpi.map(k => (
               <div key={k.label} className={`p-3 rounded-lg border ${cardBg}`}>
                 <div className={`text-[11px] uppercase tracking-wider ${textMuted}`}>{k.label}</div>
                 <div className={`text-xl font-semibold tabular-nums mt-0.5 ${textPrimary}`}>
@@ -265,8 +246,16 @@ export default function ResourcesPage() {
                     ? `$${k.obs.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                     : commoditiesLoading ? '…' : '—'}
                 </div>
-                <div className={`text-[11px] ${textMuted}`}>
-                  {k.obs ? `${k.obs.date} · ${k.unit}` : k.unit}
+                <div className={`flex items-center justify-between gap-2 text-[11px] mt-0.5`}>
+                  <span className={textMuted}>{k.obs ? `${k.obs.date} · ${k.unit}` : k.unit}</span>
+                  {k.change != null && (
+                    <span className={`tabular-nums font-medium ${k.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {k.change >= 0 ? '▲' : '▼'} {Math.abs(k.change).toFixed(1)}%
+                      {k.ytd != null && (
+                        <span className={`ml-1 font-normal ${textMuted}`}>YTD {k.ytd >= 0 ? '+' : ''}{k.ytd.toFixed(0)}%</span>
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
@@ -287,93 +276,21 @@ export default function ResourcesPage() {
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
             title="Who Has What?"
-            subtitle="Proven reserves and production concentrate in a handful of countries — often the same ones. Together they set global supply."
+            subtitle="Reserves, output and rent dependence concentrate in a handful of countries — often not the same ones. The US pumps the most oil while holding little of it; Venezuela sits on a century of supply it barely produces."
             share={false}
           />
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div id={slugify('Top Oil Reserves')} className={`rounded-lg border p-5 ${cardBg}`}>
-              <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-                <h4 className={`text-base font-semibold ${textPrimary}`}>Top Oil Reserves</h4>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                    reserves?.source === 'EIA' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-600'
-                  }`}>
-                    {reserves?.source === 'EIA' ? 'EIA live' : 'Seed 2024'}
-                  </span>
-                  <SocialShareMenu title="Top Oil Reserves" subject="dataset" isDarkMode={isDarkMode} />
-                </div>
-              </div>
-              {loading && !topReserves.length ? (
-                <SkeletonCard isDarkMode={isDarkMode} className="h-48" />
-              ) : (
-                <ul className="space-y-2">
-                  {topReserves.map((r, i) => (
-                    <li key={r.country} className="flex items-center justify-between">
-                      <span className={`text-sm ${textPrimary}`}>{i + 1}. {r.country}</span>
-                      <span className={`text-sm font-medium tabular-nums ${textSec}`}>
-                        {r.value.toLocaleString()} <span className={`text-[11px] ${textMuted}`}>bn bbl</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div id={slugify('Top Oil Producers')} className={`rounded-lg border p-5 ${cardBg}`}>
-              <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-                <h4 className={`text-base font-semibold ${textPrimary}`}>Top Oil Producers</h4>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                    production?.source === 'EIA' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-600'
-                  }`}>
-                    {production?.source === 'EIA' ? 'EIA live' : 'Seed 2024'}
-                  </span>
-                  <SocialShareMenu title="Top Oil Producers" subject="dataset" isDarkMode={isDarkMode} />
-                </div>
-              </div>
-              {loading && !topProducers.length ? (
-                <SkeletonCard isDarkMode={isDarkMode} className="h-48" />
-              ) : (
-                <ul className="space-y-2">
-                  {topProducers.map((r, i) => (
-                    <li key={r.country} className="flex items-center justify-between">
-                      <span className={`text-sm ${textPrimary}`}>{i + 1}. {r.country}</span>
-                      <span className={`text-sm font-medium tabular-nums ${textSec}`}>
-                        {r.value.toLocaleString()} <span className={`text-[11px] ${textMuted}`}>kb/d</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div id={slugify('Most Oil-Rent Dependent')} className={`rounded-lg border p-5 ${cardBg}`}>
-              <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-                <h4 className={`text-base font-semibold ${textPrimary}`}>Most Oil-Rent Dependent</h4>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <span className={`text-[10px] uppercase tracking-wider ${textMuted}`}>World Bank</span>
-                  <SocialShareMenu title="Most Oil-Rent Dependent" subject="dataset" isDarkMode={isDarkMode} />
-                </div>
-              </div>
-              {loading ? (
-                <SkeletonCard isDarkMode={isDarkMode} className="h-48" />
-              ) : topOilRentsCountries.length === 0 ? (
-                <div className={`text-sm ${textMuted}`}>No data available.</div>
-              ) : (
-                <ul className="space-y-2">
-                  {topOilRentsCountries.map((r, i) => (
-                    <li key={r.country} className="flex items-center justify-between">
-                      <span className={`text-sm ${textPrimary}`}>{i + 1}. {r.country}</span>
-                      <span className={`text-sm font-medium tabular-nums ${textSec}`}>
-                        {r.value.toFixed(1)}<span className={`text-[11px] ${textMuted}`}>% of GDP</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
+          <ResourceHoldersPanel
+            isDarkMode={isDarkMode}
+            loading={loading}
+            reserves={reserves}
+            production={production}
+            totalResourceRents={data?.totalResourceRents}
+            oilRents={data?.oilRents}
+            naturalGasRents={data?.naturalGasRents}
+            coalRents={data?.coalRents}
+            mineralRents={data?.mineralRents}
+            forestRents={data?.forestRents}
+          />
         </section>
 
         {/* Chapter 2 — Dependence Quadrant */}
@@ -392,6 +309,11 @@ export default function ResourcesPage() {
               totalResourceRents={data.totalResourceRents}
               gdpGrowth={data.gdpGrowth}
               gdpPerCapita={data.gdpPerCapitaPPP}
+              oilRents={data.oilRents}
+              naturalGasRents={data.naturalGasRents}
+              coalRents={data.coalRents}
+              mineralRents={data.mineralRents}
+              forestRents={data.forestRents}
             />
           ) : null}
         </section>
@@ -421,10 +343,14 @@ export default function ResourcesPage() {
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
             title="The Reserves Clock"
-            subtitle="Reserves ÷ production = years of supply at today's extraction rate. Not a doomsday countdown — proven reserves grow as prices rise — but a snapshot of geological pressure."
+            subtitle="Reserves ÷ production = years of supply at today's extraction rate. Not a doomsday countdown: booked oil reserves doubled even as we extracted a trillion barrels. Transition metals, though, are more concentrated than OPEC oil."
             share={false}
           />
           <ReservesClockGauge isDarkMode={isDarkMode} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            <OilReserveGrowthChart isDarkMode={isDarkMode} />
+            <CriticalMineralsPanel isDarkMode={isDarkMode} />
+          </div>
         </section>
 
         {/* Chapter 5 — Petrostate Vulnerability */}
@@ -433,7 +359,7 @@ export default function ResourcesPage() {
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
             title="Curse or Blessing?"
-            subtitle="A composite vulnerability score for every tracked economy — the higher, the more exposed to commodity swings. Sort by any column."
+            subtitle="A composite vulnerability score for every tracked economy — the higher, the more exposed to commodity swings. Beside the ranking: the oil price each Gulf budget needs, and who actually saved the windfall."
             shareSubject="dataset"
           />
           {loading ? (
@@ -448,6 +374,10 @@ export default function ResourcesPage() {
               gdpGrowth={data.gdpGrowth}
             />
           ) : null}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            <FiscalBreakevenPanel isDarkMode={isDarkMode} brentPrice={commodities['brent']?.latest?.value} />
+            <SovereignWealthPanel isDarkMode={isDarkMode} />
+          </div>
 
           <div className={`mt-4 text-sm ${textSec}`}>
             Want to explore this further?{' '}

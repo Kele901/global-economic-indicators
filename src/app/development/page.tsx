@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import ThemeToggle from '../components/ThemeToggle';
 import { useEffect, useState, useMemo } from 'react';
 import { fetchGlobalData, fetchExtraIndicators, CountryData } from '../services/worldbank';
 import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_COLORS, COUNTRY_REGIONS, type CountryKey } from '../utils/countryMappings';
@@ -92,7 +93,7 @@ const DEV_METRIC_OPTIONS: { key: DevMetricKey; label: string; yLabel: string; fo
 ];
 
 export default function DevelopmentPage() {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('isDarkMode', false);
+  const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [data, setData] = useState<Record<string, CountryData[]> | null>(null);
   const [extraData, setExtraData] = useState<Record<string, CountryData[]>>({});
   const [loading, setLoading] = useState(true);
@@ -757,16 +758,7 @@ export default function DevelopmentPage() {
             <h1 className="text-3xl font-bold mb-2">Inequality & Development Index</h1>
             <p className={`${tc.textSec}`}>Human development, inequality, and social progress indicators</p>
           </div>
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Light</span>
-            <button
-              className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}
-              onClick={() => setIsDarkMode(!isDarkMode)}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 shadow-sm ${isDarkMode ? 'translate-x-6' : ''}`} />
-            </button>
-            <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Dark</span>
-          </div>
+          <ThemeToggle isDarkMode={isDarkMode} />
         </div>
 
         <div className={`rounded-xl border p-4 sm:p-6 mb-8 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'}`}>
