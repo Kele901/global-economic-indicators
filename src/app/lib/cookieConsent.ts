@@ -26,5 +26,6 @@ export function writeCookieConsent(value: CookieConsentValue) {
     ad_storage: granted,
     ad_user_data: granted,
     ad_personalization: granted,
+    analytics_storage: granted,
   });
 }
