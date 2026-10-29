@@ -4,6 +4,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { fetchGlobalData, CountryData } from '../../services/worldbank';
 import { COUNTRY_SLUGS, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG, COUNTRY_COLORS, COUNTRY_KEYS, COUNTRY_REGIONS, type CountryKey } from '../../utils/countryMappings';
 import { METRIC_CATEGORIES, getMetricByKey, formatMetricValue } from '../../utils/metricCategories';
@@ -250,6 +251,11 @@ export default function CountryProfilePage() {
               <div className="min-w-0">
                 <h1 className="text-2xl sm:text-3xl font-bold break-words">{displayName}</h1>
                 <p className={tc.textSec}>Economic Profile & Indicators</p>
+                {countryKey && (
+                  <Link href={`/politics-ledger/${COUNTRY_KEY_TO_SLUG[countryKey]}`} className={`text-sm hover:underline ${tc.accent}`}>
+                    Government, parties and political history →
+                  </Link>
+                )}
               </div>
             </div>
             <ThemeToggle isDarkMode={isDarkMode} />

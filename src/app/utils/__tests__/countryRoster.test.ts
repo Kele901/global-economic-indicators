@@ -25,6 +25,7 @@ import { HEALTH_COUNTRY_META } from '../../services/healthCurated';
 import { ENERGY_COUNTRY_META } from '../../services/energyCurated';
 import { LABOR_COUNTRY_META } from '../../services/laborCurated';
 import { INEQUALITY_NAME_TO_WB_KEY } from '../../data/inequalityData';
+import { POLITICS_PROFILES } from '../../services/politicsCurated';
 
 const fetchedKeys = new Set(Object.values(COUNTRY_NAMES));
 const curatedOnly = new Set(Object.keys(CURATED_ONLY_COUNTRIES));
@@ -46,6 +47,7 @@ const ISO3_KEYED_METAS: Array<[string, Array<{ code: string }>]> = [
   ['HEALTH_COUNTRY_META', HEALTH_COUNTRY_META],
   ['ENERGY_COUNTRY_META', ENERGY_COUNTRY_META],
   ['LABOR_COUNTRY_META', LABOR_COUNTRY_META],
+  ['POLITICS_PROFILES', POLITICS_PROFILES.map(p => ({ code: p.iso3 }))],
 ];
 
 describe('canonical country roster', () => {

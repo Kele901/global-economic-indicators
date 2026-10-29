@@ -3,13 +3,26 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import ThemeToggle from '../components/ThemeToggle';
 import { useEffect, useState, useMemo } from 'react';
-import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, type CountryKey } from '../utils/countryMappings';
+import { COUNTRY_KEYS, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG, type CountryKey } from '../utils/countryMappings';
 import { METRIC_CATEGORIES, getMetricByKey } from '../utils/metricCategories';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { absoluteUrl } from '../lib/site';
+import { POLITICS_PROFILES } from '../services/politicsCurated';
+
+type BuilderTab = 'charts' | 'politics';
+type PoliticsWidget = 'regime-map' | 'hemicycle' | 'elections';
+
+const POLITICS_WIDGET_LABELS: Record<PoliticsWidget, string> = {
+  'regime-map': 'World regime map',
+  hemicycle: 'Parliament hemicycle',
+  elections: 'Election calendar',
+};
 
 export default function EmbedBuilderPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
+  const [tab, setTab] = useState<BuilderTab>('charts');
+  const [widget, setWidget] = useState<PoliticsWidget>('regime-map');
+  const [politicsCountry, setPoliticsCountry] = useState<CountryKey>('Germany' as CountryKey);
   const [metric, setMetric] = useState('gdpGrowth');
   const [selectedCountries, setSelectedCountries] = useState<string[]>(['USA', 'UK']);
   const [period, setPeriod] = useState('10');
@@ -50,6 +63,10 @@ export default function EmbedBuilderPage() {
   };
 
   const embedUrl = useMemo(() => {
+    if (tab === 'politics') {
+      const params = new URLSearchParams(widget === 'hemicycle' ? { country: COUNTRY_KEY_TO_SLUG[politicsCountry], theme } : { theme });
+      return `/embed/politics/${widget}?${params.toString()}`;
+    }
     const params = new URLSearchParams({
       metric,
       countries: selectedCountries.join(','),
@@ -57,7 +74,7 @@ export default function EmbedBuilderPage() {
       theme,
     });
     return `/embed/chart?${params.toString()}`;
-  }, [metric, selectedCountries, period, theme]);
+  }, [tab, widget, politicsCountry, metric, selectedCountries, period, theme]);
 
   const embedCode = useMemo(() => {
     return `<iframe src="${origin}${embedUrl}" width="${width}" height="${height}" frameborder="0" style="border-radius: 8px; border: 1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'};"></iframe>`;
@@ -70,7 +87,9 @@ export default function EmbedBuilderPage() {
   };
 
   const metricDef = getMetricByKey(metric);
-  const previewTitle = `${metricDef?.label || metric} for ${selectedCountries.map(c => COUNTRY_DISPLAY_NAMES[c as CountryKey]).join(', ')}`;
+  const previewTitle = tab === 'politics'
+    ? `${POLITICS_WIDGET_LABELS[widget]}${widget === 'hemicycle' ? ` for ${COUNTRY_DISPLAY_NAMES[politicsCountry]}` : ''}`
+    : `${metricDef?.label || metric} for ${selectedCountries.map(c => COUNTRY_DISPLAY_NAMES[c as CountryKey]).join(', ')}`;
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${tc.bg} ${tc.text}`}>
@@ -99,9 +118,44 @@ export default function EmbedBuilderPage() {
           {/* Configuration */}
           <div className="space-y-6">
             <div className={`rounded-xl border p-5 ${tc.card}`}>
-              <h3 className="font-semibold mb-4">Chart Configuration</h3>
+              <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+                <h3 className="font-semibold">{tab === 'politics' ? 'Widget Configuration' : 'Chart Configuration'}</h3>
+                <div className="flex gap-1" role="tablist">
+                  {(['charts', 'politics'] as BuilderTab[]).map(t => (
+                    <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
+                      className={`px-2.5 py-1 rounded text-xs border ${tab === t ? tc.activeBtn : tc.inactiveBtn}`}>
+                      {t === 'charts' ? 'Economic charts' : 'Politics widgets'}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <div className="space-y-4">
+                {tab === 'politics' && (
+                  <>
+                    <div>
+                      <label className={`block text-xs mb-1 ${tc.textSec}`}>Widget</label>
+                      <select value={widget} onChange={e => setWidget(e.target.value as PoliticsWidget)}
+                        className={`w-full px-3 py-2 rounded-lg border text-sm ${tc.inputBg}`}>
+                        {(Object.keys(POLITICS_WIDGET_LABELS) as PoliticsWidget[]).map(w => (
+                          <option key={w} value={w}>{POLITICS_WIDGET_LABELS[w]}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {widget === 'hemicycle' && (
+                      <div>
+                        <label className={`block text-xs mb-1 ${tc.textSec}`}>Country</label>
+                        <select value={politicsCountry} onChange={e => setPoliticsCountry(e.target.value as CountryKey)}
+                          className={`w-full px-3 py-2 rounded-lg border text-sm ${tc.inputBg}`}>
+                          {[...POLITICS_PROFILES]
+                            .sort((a, b) => COUNTRY_DISPLAY_NAMES[a.key].localeCompare(COUNTRY_DISPLAY_NAMES[b.key]))
+                            .map(p => <option key={p.key} value={p.key}>{COUNTRY_DISPLAY_NAMES[p.key]}</option>)}
+                        </select>
+                      </div>
+                    )}
+                  </>
+                )}
+                {tab === 'charts' && (<>
                 <div>
                   <label className={`block text-xs mb-1 ${tc.textSec}`}>Metric</label>
                   <select value={metric} onChange={e => setMetric(e.target.value)}
@@ -143,6 +197,10 @@ export default function EmbedBuilderPage() {
                       <option value="0">All time</option>
                     </select>
                   </div>
+                </div>
+                </>)}
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={`block text-xs mb-1 ${tc.textSec}`}>Theme</label>
                     <select value={theme} onChange={e => setTheme(e.target.value)}

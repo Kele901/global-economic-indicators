@@ -103,6 +103,7 @@ const Navbar = () => {
     {
       label: 'Ledgers',
       children: [
+        { href: '/politics-ledger', label: 'Politics Ledger' },
         { href: '/defense-ledger', label: 'Defense Ledger' },
         { href: '/climate-ledger', label: 'Climate Ledger' },
         { href: '/trade-ledger', label: 'Trade Ledger' },

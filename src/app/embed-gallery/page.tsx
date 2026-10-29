@@ -11,9 +11,11 @@ interface EmbedRecipe {
   id: string;
   title: string;
   description: string;
-  metric: string;
-  countries: string[];
-  period: string;
+  metric?: string;
+  countries?: string[];
+  period?: string;
+  widget?: 'regime-map' | 'hemicycle' | 'elections';
+  country?: string;
   theme: 'light' | 'dark';
   width: number;
   height: number;
@@ -86,6 +88,34 @@ const RECIPES: EmbedRecipe[] = [
     width: 640,
     height: 400,
   },
+  {
+    id: 'politics-regime-map',
+    title: 'World regime map',
+    description: 'Liberal democracies to closed autocracies across 47 countries, from the Politics Ledger.',
+    widget: 'regime-map',
+    theme: 'light',
+    width: 720,
+    height: 520,
+  },
+  {
+    id: 'politics-hemicycle',
+    title: 'Parliament hemicycle',
+    description: 'Seat-by-seat view of a national parliament. Change ?country= to any profiled country, e.g. germany or india.',
+    widget: 'hemicycle',
+    country: 'germany',
+    theme: 'light',
+    width: 640,
+    height: 460,
+  },
+  {
+    id: 'politics-elections',
+    title: 'Election calendar',
+    description: 'Upcoming national elections with dates and offices at stake. Dark theme for newsroom dashboards.',
+    widget: 'elections',
+    theme: 'dark',
+    width: 640,
+    height: 520,
+  },
 ];
 
 export default function EmbedGalleryPage() {
@@ -96,13 +126,17 @@ export default function EmbedGalleryPage() {
   useEffect(() => { setOrigin(window.location.origin); }, []);
 
   const cards = useMemo(() => RECIPES.map(r => {
-    const params = new URLSearchParams({
-      metric: r.metric,
-      countries: r.countries.join(','),
-      period: r.period,
-      theme: r.theme,
-    });
-    const url = `${origin}/embed/chart?${params.toString()}`;
+    const params = r.widget
+      ? new URLSearchParams({ ...(r.country ? { country: r.country } : {}), theme: r.theme })
+      : new URLSearchParams({
+          metric: r.metric ?? '',
+          countries: (r.countries ?? []).join(','),
+          period: r.period ?? '10',
+          theme: r.theme,
+        });
+    const url = r.widget
+      ? `${origin}/embed/politics/${r.widget}?${params.toString()}`
+      : `${origin}/embed/chart?${params.toString()}`;
     const iframe = `<iframe src="${url}" width="${r.width}" height="${r.height}" frameborder="0" style="border-radius: 8px; border: 1px solid ${r.theme === 'dark' ? '#374151' : '#e5e7eb'};"></iframe>`;
     return { ...r, url, iframe };
   }), [origin]);
@@ -128,7 +162,7 @@ export default function EmbedGalleryPage() {
             <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
           </div>
           <p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Six ready-to-paste chart embeds. Each ships as an iframe that inherits your host page&apos;s width where possible. All embeds are ad-free, cache-friendly (ISR 1h), and update automatically as underlying data refreshes.
+            Nine ready-to-paste embeds: six economic charts and three politics widgets. Each ships as an iframe that inherits your host page&apos;s width where possible. All embeds are ad-free, cache-friendly (ISR 1h), and update automatically as underlying data refreshes.
           </p>
           <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
             Want something custom? Head to the <a className="text-blue-500 hover:underline" href="/embed-builder">Embed Builder</a>.

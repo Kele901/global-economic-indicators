@@ -15,6 +15,35 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: '2026-10-29',
+    version: '2.9',
+    title: 'Politics Ledger v2',
+    tags: ['ledger', 'feature', 'data', 'trust'],
+    highlights: [
+      'Leaders since 1945 for all 47 countries: a timeline of every head of state and government, with turnover and coup counts',
+      'National vote shares over time, with contested elections clearly marked',
+      'Checks and balances: eight institutional constraints scored per country, plus a power-concentration ranking',
+      'Politics and prosperity: how governance relates to income, growth, inflation, debt, inequality and life expectancy',
+      'Who leads: women leaders, ages, routes to power and tenure',
+      'Find your political match: a twelve-question quiz that places you among parties and governments worldwide',
+      'What changed: a log of leadership changes and elections from the past year, plus per-field freshness banners',
+      'Politics embed widgets, two new Learn lessons, and a Wikidata cross-check for every leader',
+    ],
+  },
+  {
+    date: '2026-10-29',
+    version: '2.8',
+    title: 'Politics Ledger',
+    tags: ['ledger', 'feature', 'data'],
+    highlights: [
+      '/politics-ledger: nine chapters on who governs 47 countries and how',
+      'Regime world map with layers for system of government and six governance indices',
+      'Leadership table, ideological compass, election calendar and governance scorecard with live World Bank WGI',
+      'Fifty years of V-Dem democracy readings and thirteen political traditions explained',
+      'A political profile for every country: parliament hemicycle, party landscape, history timeline, political culture and founding philosophy',
+    ],
+  },
+  {
     date: '2026-08-13',
     version: '2.7',
     title: 'Community & extras — Wave 7',

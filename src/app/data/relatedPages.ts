@@ -3,7 +3,14 @@
 // Order matters — first-listed = most relevant.
 
 export const RELATED_PAGES: Record<string, { href: string; label: string }[]> = {
+  '/politics-ledger': [
+    { href: '/defense-ledger',   label: 'Defense Ledger' },
+    { href: '/development',      label: 'Development Index' },
+    { href: '/inequality',       label: 'Inequality' },
+    { href: '/cultural-capital', label: 'Cultural Capital' },
+  ],
   '/defense-ledger': [
+    { href: '/politics-ledger',  label: 'Politics Ledger' },
     { href: '/trade-ledger',     label: 'Trade Ledger' },
     { href: '/ai-ledger',        label: 'AI Ledger' },
     { href: '/energy-ledger',    label: 'Energy Ledger' },

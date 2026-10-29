@@ -4,6 +4,7 @@
 // so it stays in sync with client-side navigation.
 
 import { usePathname } from 'next/navigation';
+import { COUNTRY_SLUGS, COUNTRY_DISPLAY_NAMES } from '../utils/countryMappings';
 
 interface Crumb { label: string; href?: string; }
 
@@ -18,6 +19,12 @@ const LEDGER_LABEL: Record<string, string> = {
   'energy-ledger':    'Energy Ledger',
   'labor-ledger':     'Labor Ledger',
   'resources':        'Resource Atlas',
+  'politics-ledger':  'Politics Ledger',
+};
+
+// Static sub-pages of a ledger that would otherwise be looked up as a country slug.
+const SUBPAGE_LABEL: Record<string, string> = {
+  'politics-ledger/match': 'Political Match',
 };
 
 interface Props { isDarkMode?: boolean; }
@@ -33,6 +40,12 @@ export default function Breadcrumbs({ isDarkMode }: Props) {
   if (parts.length === 1 && LEDGER_LABEL[parts[0]]) {
     crumbs.push({ label: 'Ledgers' });
     crumbs.push({ label: LEDGER_LABEL[parts[0]] });
+  } else if (parts.length === 2 && LEDGER_LABEL[parts[0]]) {
+    crumbs.push({ label: 'Ledgers' });
+    crumbs.push({ label: LEDGER_LABEL[parts[0]], href: '/' + parts[0] });
+    const key = COUNTRY_SLUGS[parts[1].toLowerCase()];
+    const sub = SUBPAGE_LABEL[`${parts[0]}/${parts[1]}`];
+    crumbs.push({ label: sub ?? (key ? COUNTRY_DISPLAY_NAMES[key] : parts[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')) });
   } else {
     parts.forEach((p, i) => {
       const href = '/' + parts.slice(0, i + 1).join('/');

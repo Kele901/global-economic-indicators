@@ -16,6 +16,7 @@ import { CURATED_LAST_UPDATED as AI_CURATED_LAST_UPDATED } from '../services/aiC
 import { CURATED_LAST_UPDATED as HEALTH_CURATED_LAST_UPDATED } from '../services/healthCurated';
 import { CURATED_LAST_UPDATED as ENERGY_CURATED_LAST_UPDATED } from '../services/energyCurated';
 import { CURATED_LAST_UPDATED as LABOR_CURATED_LAST_UPDATED } from '../services/laborCurated';
+import { CURATED_LAST_UPDATED as POLITICS_CURATED_LAST_UPDATED } from '../services/politicsCurated';
 
 export type DataCategory =
   | 'macro'
@@ -67,7 +68,14 @@ export type DataProvider =
   | 'BNEF'
   | 'IGU'
   | 'IAEA'
-  | 'ILO';
+  | 'ILO'
+  | 'V-Dem'
+  | 'Freedom House'
+  | 'EIU'
+  | 'RSF'
+  | 'Transparency International'
+  | 'IPU'
+  | 'Wikidata';
 
 export type RefreshCadence =
   | 'daily'
@@ -244,6 +252,136 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     notes: 'Control of Corruption, Government Effectiveness, Political Stability, Regulatory Quality, Rule of Law, Voice & Accountability. Fetched via source=3 (dedicated WGI database).',
     sourceUrl: 'https://www.worldbank.org/en/publication/worldwide-governance-indicators',
     qualityFlags: ['estimate'],
+  },
+
+  // ── Politics Ledger (curated snapshots) ───────────────────────────────
+  {
+    id: 'politics-profiles-curated',
+    name: 'Political profiles: leaders, parties, parliaments, elections (47 countries)',
+    category: 'governance',
+    provider: 'Curated',
+    refreshCadence: 'monthly',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Heads of state and government, ruling coalitions, lower-house seat counts, last and next national elections, plus history, political culture and philosophy summaries. Verified against parliaments, election commissions and wire reporting. Party ideological placements are editorial estimates.',
+    qualityFlags: ['curated'],
+  },
+  {
+    id: 'politics-indices-curated',
+    name: 'Democracy, freedom, press-freedom and corruption indices (47 countries)',
+    category: 'governance',
+    provider: 'Curated',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Approximate readings from the EIU Democracy Index 2024, Freedom House 2025, V-Dem v15, RSF 2025, Transparency International CPI 2024 and IPU Parline. See the individual entries below.',
+    qualityFlags: ['curated', 'estimate'],
+  },
+  {
+    id: 'politics-history-curated',
+    name: 'Leaders since 1945 and national vote shares (47 countries)',
+    category: 'governance',
+    provider: 'Curated',
+    refreshCadence: 'irregular',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Every head of state and government since 1945 with route to power, and headline vote shares for recent national elections. Elections widely judged unfree are flagged as contested. Some shares are rounded; seat shares are used where vote totals are unpublished.',
+    qualityFlags: ['curated'],
+  },
+  {
+    id: 'politics-checks-curated',
+    name: 'Checks and balances scores (47 countries)',
+    category: 'governance',
+    provider: 'Curated',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Editorial 0-4 scores on eight institutional constraints (judiciary, legislature, term limits, federalism, central bank, media, elections, removability), informed by V-Dem, Freedom House and constitutional texts. Power concentration is derived from their mean.',
+    qualityFlags: ['curated', 'estimate'],
+  },
+  {
+    id: 'wikidata-leaders',
+    name: 'Wikidata heads of state and government (cross-check)',
+    category: 'governance',
+    provider: 'Wikidata',
+    seriesIds: ['P35', 'P6'],
+    refreshCadence: 'monthly',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Used only to verify curated leaders: a monthly script compares the curated head of state and government for each country with Wikidata and flags disagreements for manual review.',
+    sourceUrl: 'https://query.wikidata.org',
+  },
+  {
+    id: 'vdem-libdem',
+    name: 'V-Dem Liberal Democracy Index and Regimes of the World',
+    category: 'governance',
+    provider: 'V-Dem',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Five-yearly readings 1975-2025 (v15), approximate. Regime classification follows Regimes of the World.',
+    sourceUrl: 'https://www.v-dem.net/data/the-v-dem-dataset/',
+    qualityFlags: ['curated', 'estimate'],
+  },
+  {
+    id: 'freedom-house-fiw',
+    name: 'Freedom House, Freedom in the World',
+    category: 'governance',
+    provider: 'Freedom House',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Aggregate 0-100 score and Free / Partly Free / Not Free status, 2025 edition.',
+    sourceUrl: 'https://freedomhouse.org/report/freedom-world',
+    qualityFlags: ['curated'],
+  },
+  {
+    id: 'eiu-democracy-index',
+    name: 'EIU Democracy Index',
+    category: 'governance',
+    provider: 'EIU',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: '0-10 score and regime category, 2024 edition.',
+    sourceUrl: 'https://www.eiu.com/n/campaigns/democracy-index-2024/',
+    qualityFlags: ['curated'],
+  },
+  {
+    id: 'rsf-press-freedom',
+    name: 'RSF World Press Freedom Index',
+    category: 'governance',
+    provider: 'RSF',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Global rank out of 180, 2025 edition.',
+    sourceUrl: 'https://rsf.org/en/index',
+    qualityFlags: ['curated'],
+  },
+  {
+    id: 'ti-cpi',
+    name: 'Transparency International Corruption Perceptions Index',
+    category: 'governance',
+    provider: 'Transparency International',
+    refreshCadence: 'annual',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: '0-100 score, 2024 edition.',
+    sourceUrl: 'https://www.transparency.org/en/cpi',
+    qualityFlags: ['curated'],
+  },
+  {
+    id: 'ipu-women-parliament',
+    name: 'IPU Parline: women in national parliaments',
+    category: 'governance',
+    provider: 'IPU',
+    refreshCadence: 'monthly',
+    live: false,
+    lastUpdated: POLITICS_CURATED_LAST_UPDATED,
+    notes: 'Share of lower or sole chamber seats held by women.',
+    sourceUrl: 'https://data.ipu.org/',
+    qualityFlags: ['curated'],
   },
 
   // ── Housing (BIS via FRED) ────────────────────────────────────────────

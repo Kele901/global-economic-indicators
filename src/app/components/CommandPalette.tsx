@@ -32,6 +32,8 @@ const PAGE_ENTRIES: Entry[] = [
   { id: 'economic-gravity',  label: 'Economic Gravity',       category: 'Page', href: '/economic-gravity' },
   { id: 'economic-cycles',   label: 'Economic Cycles',        category: 'Page', href: '/economic-cycles' },
   { id: 'resources',         label: 'Resource Atlas',         category: 'Page', href: '/resources' },
+  { id: 'politics-ledger',   label: 'Politics Ledger',        category: 'Page', href: '/politics-ledger' },
+  { id: 'politics-match',    label: 'Political match quiz',   category: 'Page', href: '/politics-ledger/match' },
   { id: 'defense-ledger',    label: 'Defense Ledger',         category: 'Page', href: '/defense-ledger' },
   { id: 'climate-ledger',    label: 'Climate Ledger',         category: 'Page', href: '/climate-ledger' },
   { id: 'trade-ledger',      label: 'Trade Ledger',           category: 'Page', href: '/trade-ledger' },
@@ -62,7 +64,17 @@ const COUNTRY_ENTRIES: Entry[] = COUNTRY_KEYS.map(k => ({
   href: `/country/${COUNTRY_KEY_TO_SLUG[k as CountryKey]}`,
 }));
 
+const POLITICS_ENTRIES: Entry[] = COUNTRY_KEYS.map(k => ({
+  id: `politics-${k}`,
+  label: `${COUNTRY_DISPLAY_NAMES[k as CountryKey]} politics`,
+  category: 'Country' as const,
+  href: `/politics-ledger/${COUNTRY_KEY_TO_SLUG[k as CountryKey]}`,
+}));
+
 const METRIC_ENTRIES: Entry[] = [
+  { id: 'm-democracy',  label: 'Democracy Index',           category: 'Metric', href: '/politics-ledger#governance-scorecard' },
+  { id: 'm-leaders',    label: 'World Leaders',             category: 'Metric', href: '/politics-ledger#who-rules' },
+  { id: 'm-elections',  label: 'Election Calendar',         category: 'Metric', href: '/politics-ledger#election-calendar' },
   { id: 'm-gdp',        label: 'GDP Growth',                category: 'Metric', href: '/?metric=gdpGrowth' },
   { id: 'm-cpi',        label: 'Inflation (CPI)',           category: 'Metric', href: '/?metric=inflationRates' },
   { id: 'm-rates',      label: 'Interest / Policy Rates',   category: 'Metric', href: '/monetary-policy' },
@@ -79,7 +91,7 @@ const METRIC_ENTRIES: Entry[] = [
   { id: 'm-patents',    label: 'Patents',                   category: 'Metric', href: '/ai-ledger' },
 ];
 
-const ALL_ENTRIES = [...PAGE_ENTRIES, ...COUNTRY_ENTRIES, ...METRIC_ENTRIES];
+const ALL_ENTRIES = [...PAGE_ENTRIES, ...COUNTRY_ENTRIES, ...POLITICS_ENTRIES, ...METRIC_ENTRIES];
 
 function score(entry: Entry, q: string): number {
   if (!q) return 1;

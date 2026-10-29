@@ -1,0 +1,31 @@
+import type { PoliticalChange } from './types';
+
+// The last 12 months to CURATED_LAST_UPDATED, newest first.
+export const RECENT_CHANGES: PoliticalChange[] = [
+  { date: '2026-10-27', key: 'Israel', kind: 'election', summary: 'Knesset election leaves no bloc with 61 seats; Likud first on 27 seats.' },
+  { date: '2026-10-25', key: 'Brazil', kind: 'election', summary: 'Lula wins a fourth term, beating Flávio Bolsonaro 51.8% to 48.2% in the runoff.' },
+  { date: '2026-10-15', key: 'Sweden', kind: 'coalition', summary: 'Riksdag rejects Magdalena Andersson as PM 248-99; Kristersson stays on as caretaker.' },
+  { date: '2026-09-29', key: 'Morocco', kind: 'new-leader', summary: 'Fatima Ezzahra El Mansouri (PAM) becomes the first woman head of government.' },
+  { date: '2026-09-23', key: 'Morocco', kind: 'election', summary: 'PAM wins 97 seats, displacing RNI as the largest party.' },
+  { date: '2026-09-20', key: 'Russia', kind: 'election', summary: 'United Russia takes 349 of 450 Duma seats amid reports of pervasive irregularities.' },
+  { date: '2026-09-13', key: 'Sweden', kind: 'election', summary: 'Social Democrats finish first, but neither bloc wins a majority.' },
+  { date: '2026-08-07', key: 'Colombia', kind: 'new-leader', summary: 'Abelardo de la Espriella is inaugurated, ending Gustavo Petro\'s left-wing government.' },
+  { date: '2026-07-20', key: 'UK', kind: 'new-leader', summary: 'Andy Burnham becomes prime minister after Keir Starmer resigns.' },
+  { date: '2026-07-16', key: 'Ukraine', kind: 'new-leader', summary: 'Serhii Koretskyi replaces Yulia Svyrydenko as prime minister.' },
+  { date: '2026-06-21', key: 'Colombia', kind: 'election', summary: 'De la Espriella defeats Iván Cepeda in the presidential runoff.' },
+  { date: '2026-06-01', key: 'Ethiopia', kind: 'election', summary: 'Prosperity Party wins 438 of 501 contested seats; no voting in Tigray.' },
+  { date: '2026-04-07', key: 'Vietnam', kind: 'new-leader', summary: 'Tô Lâm combines the Party general secretaryship with the state presidency.' },
+  { date: '2026-03-19', key: 'Thailand', kind: 'new-leader', summary: 'Anutin Charnvirakul is re-elected prime minister by the new House.' },
+  { date: '2026-03-11', key: 'Chile', kind: 'new-leader', summary: 'José Antonio Kast is sworn in as president.' },
+  { date: '2026-03-09', key: 'Portugal', kind: 'new-leader', summary: 'António José Seguro takes office as president.' },
+  { date: '2026-03-08', key: 'Iran', kind: 'new-leader', summary: 'The Assembly of Experts names Mojtaba Khamenei Supreme Leader, succeeding his father.' },
+  { date: '2026-02-23', key: 'Netherlands', kind: 'coalition', summary: 'Rob Jetten (D66) becomes prime minister at the head of a new coalition.' },
+  { date: '2026-02-17', key: 'Bangladesh', kind: 'new-leader', summary: 'Tarique Rahman becomes prime minister after the BNP landslide.' },
+  { date: '2026-02-12', key: 'Bangladesh', kind: 'constitution', summary: 'BNP wins a large majority; voters approve the July Charter reform referendum.' },
+  { date: '2026-02-08', key: 'Japan', kind: 'election', summary: 'Takaichi\'s LDP wins 316 seats in a snap election, its best result in decades.' },
+  { date: '2026-02-08', key: 'Thailand', kind: 'election', summary: 'Bhumjaithai wins 192 seats in the general election.' },
+  { date: '2026-02-08', key: 'Portugal', kind: 'election', summary: 'Seguro defeats Chega\'s André Ventura with 66.8% in the presidential runoff.' },
+  { date: '2026-01-01', key: 'Switzerland', kind: 'other', summary: 'Guy Parmelin takes the rotating presidency of the Confederation for 2026.' },
+  { date: '2025-12-14', key: 'Chile', kind: 'election', summary: 'Kast defeats Jeannette Jara in the presidential runoff.' },
+  { date: '2025-12-01', key: 'Egypt', kind: 'election', summary: 'Pro-government parties sweep a low-turnout House election; some results annulled and rerun.' },
+];

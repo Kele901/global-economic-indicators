@@ -36,6 +36,8 @@ const TOPICS: Route[] = [
   { path: '/trading-places', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/trade-network', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/cultural-capital', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/politics-ledger', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/politics-ledger/match', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/defense-ledger', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/climate-ledger', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/trade-ledger', changeFrequency: 'weekly', priority: 0.8 },
@@ -88,9 +90,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  const politicsRoutes: Route[] = Object.values(COUNTRY_KEY_TO_SLUG).map((slug) => ({
+    path: `/politics-ledger/${slug}`,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
   const lastModified = new Date();
 
-  return [...CORE, ...TOPICS, ...TOOLS, ...LEARN, ...SITE, ...guideRoutes, ...countryRoutes].map(
+  return [...CORE, ...TOPICS, ...TOOLS, ...LEARN, ...SITE, ...guideRoutes, ...countryRoutes, ...politicsRoutes].map(
     (route) => ({
       url: `${SITE_URL}${route.path}`,
       lastModified,

@@ -19,6 +19,11 @@ const SUGGESTIONS: { href: string; label: string; description: string }[] = [
     description: 'Oil, gas, metals and agricultural commodities in one scroll.',
   },
   {
+    href: '/politics-ledger',
+    label: 'Politics Ledger',
+    description: 'Leaders, parties, elections, democracy scores and political philosophy.',
+  },
+  {
     href: '/defense-ledger',
     label: 'Defense Ledger',
     description: 'Military spending, alliances, arms trade, nuclear arsenals.',

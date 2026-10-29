@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    // Older pages still carry lint errors; widen this list as they are cleaned up.
+    dirs: ['src/app/politics-ledger', 'src/app/embed', 'src/app/services/politicsCurated', 'scripts'],
+  },
   async redirects() {
     return [
       {

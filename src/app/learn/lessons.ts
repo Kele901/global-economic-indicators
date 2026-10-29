@@ -796,6 +796,123 @@ export const LESSONS: Lesson[] = [
       },
     ],
   },
+  {
+    id: 'political-systems',
+    module: 'countries',
+    order: 15,
+    title: 'Presidential vs Parliamentary Systems',
+    emoji: '\uD83C\uDFDB\uFE0F',
+    minutes: 4,
+    analogy: 'Picture a school club. In one version, every member votes directly for a captain who then picks a team. In another, members elect a committee, and whoever can keep the committee on side becomes captain until they lose its support.',
+    body: [
+      'In a presidential system (the USA, Brazil, Mexico) voters elect the head of government directly for a fixed term. The president runs the government and the legislature is elected separately, so the two can be controlled by rival parties.',
+      'In a parliamentary system (the UK, Germany, Japan, India) voters elect a parliament, and the prime minister is whoever can command a majority there. Lose that majority in a confidence vote and the government falls, sometimes without any election.',
+      'Many countries mix the two. France and Poland have a directly elected president alongside a prime minister answerable to parliament, a set-up called semi-presidential. When the president and prime minister come from rival camps, the French call it cohabitation.',
+      'Monarchies such as the UK, Japan or Sweden are usually parliamentary: the king or emperor is a ceremonial head of state, and power sits with the prime minister. In absolute monarchies such as Saudi Arabia, the monarch actually governs.',
+      'Neither model is automatically more democratic. What matters most is whether power is checked by courts, a free press, independent institutions and competitive elections.',
+    ],
+    bigIdeas: [
+      'Presidents are elected separately and serve fixed terms; prime ministers depend on parliament\u2019s confidence.',
+      'Semi-presidential systems split power between a president and a prime minister.',
+      'A king or president can be purely ceremonial; who really governs is the key question.',
+    ],
+    jargonBox: [
+      { term: 'Head of state', plain: 'The country\u2019s top representative, such as a monarch or president.' },
+      { term: 'Head of government', plain: 'The person who actually runs the government day to day.' },
+      { term: 'Confidence vote', plain: 'A parliamentary vote on whether the government can stay in office.' },
+      { term: 'Coalition', plain: 'Two or more parties governing together because none has a majority alone.' },
+    ],
+    linksTo: [
+      { label: 'Explore government systems in the Politics Ledger', href: '/politics-ledger' },
+      { label: 'See France\u2019s semi-presidential system', href: '/politics-ledger/france' },
+    ],
+    quiz: [
+      {
+        q: 'In a parliamentary system, how does the prime minister usually get the job?',
+        options: [
+          'By commanding a majority in parliament',
+          'By winning a separate nationwide vote for prime minister',
+          'By being appointed for life by the courts',
+        ],
+        answerIdx: 0,
+        explanation: 'Prime ministers hold office because parliament supports them, and they can be removed if that support goes.',
+      },
+      {
+        q: 'Which country is semi-presidential?',
+        options: ['France', 'United Kingdom', 'United States'],
+        answerIdx: 0,
+        explanation: 'France has a directly elected president and a prime minister who must keep the confidence of the National Assembly.',
+      },
+      {
+        q: 'What can happen in a presidential system that is rare in a parliamentary one?',
+        options: [
+          'The leader and the legislature are controlled by different parties',
+          'The government falls after losing a confidence vote',
+          'The head of government is chosen by parliament',
+        ],
+        answerIdx: 0,
+        explanation: 'Because presidents and legislatures are elected separately, divided government is common; in parliamentary systems the government is drawn from the majority.',
+      },
+    ],
+  },
+  {
+    id: 'measuring-democracy',
+    module: 'countries',
+    order: 16,
+    title: 'How Democracy Is Measured',
+    emoji: '\uD83D\uDCCF',
+    minutes: 4,
+    analogy: 'Judging a football league is not just about whether matches are played. You also check whether referees are fair, whether every team can enter, and whether the results are actually respected. Democracy indices do the same for countries.',
+    body: [
+      'Holding elections is not enough to count as a democracy. Researchers also ask whether those elections are free and fair, whether people can speak and organise freely, and whether courts and parliaments can restrain the people in power.',
+      'Three big indices dominate. V-Dem, run from the University of Gothenburg, surveys thousands of country experts and scores liberal democracy from 0 to 1. The EIU Democracy Index scores 0 to 10 across 60 indicators. Freedom House scores political rights and civil liberties out of 100.',
+      'V-Dem\u2019s "Regimes of the World" sorts countries into four groups: liberal democracies, electoral democracies, electoral autocracies (elections happen but are unfair) and closed autocracies (no meaningful elections at all).',
+      'The World Bank\u2019s Worldwide Governance Indicators measure something related but different: how well a state works, including rule of law, control of corruption and government effectiveness. Some autocracies score well on effectiveness but poorly on voice and accountability.',
+      'Every index involves judgement calls, so they sometimes disagree. When they all point the same way, you can be fairly confident; when they diverge, read the methodology to understand why.',
+    ],
+    bigIdeas: [
+      'Democracy is measured on fair elections, freedoms and limits on power, not elections alone.',
+      'V-Dem, the EIU and Freedom House are the three most cited indices.',
+      'Electoral autocracies hold elections that cannot realistically remove the government.',
+    ],
+    jargonBox: [
+      { term: 'Electoral autocracy', plain: 'A country with elections that are not free or fair enough to change who rules.' },
+      { term: 'Liberal democracy', plain: 'Free elections plus strong protection of rights and real checks on power.' },
+      { term: 'Rule of law', plain: 'Everyone, including leaders, must follow the same laws, enforced by independent courts.' },
+    ],
+    linksTo: [
+      { label: 'Compare democracy scores in the Politics Ledger', href: '/politics-ledger' },
+      { label: 'See checks and balances in Germany', href: '/politics-ledger/germany' },
+    ],
+    quiz: [
+      {
+        q: 'What is an electoral autocracy?',
+        options: [
+          'A country with elections that are not free or fair',
+          'A country with no elections at all',
+          'A democracy run by a monarch',
+        ],
+        answerIdx: 0,
+        explanation: 'Electoral autocracies hold elections, but repression or manipulation means voters cannot realistically remove the government.',
+      },
+      {
+        q: 'Which index scores liberal democracy from 0 to 1 using expert surveys?',
+        options: ['V-Dem', 'Freedom House', 'The EIU Democracy Index'],
+        answerIdx: 0,
+        explanation: 'V-Dem aggregates thousands of expert assessments into a 0 to 1 liberal democracy index.',
+      },
+      {
+        q: 'Why might a country score well on government effectiveness but poorly on democracy?',
+        options: [
+          'A state can deliver services efficiently without free elections or free speech',
+          'Effectiveness scores are always copied from democracy scores',
+          'Democracy indices only measure GDP',
+        ],
+        answerIdx: 0,
+        explanation: 'Governance indicators measure how well a state works; democracy indices measure who holds power and how freely. They are related but distinct.',
+      },
+    ],
+  },
 
   // ───────────────────────────────────────────────────────────────────
   // Module 4 — Big Global Themes
@@ -803,7 +920,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'climate',
     module: 'themes',
-    order: 15,
+    order: 17,
     title: 'The Planet\u2019s Weather: Climate & Emissions',
     emoji: '🌍',
     minutes: 4,
@@ -851,7 +968,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'energy',
     module: 'themes',
-    order: 16,
+    order: 18,
     title: 'Powering the World: Energy & Electricity',
     emoji: '⚡',
     minutes: 4,
@@ -902,7 +1019,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'defense',
     module: 'themes',
-    order: 19,
+    order: 21,
     title: 'Who Spends on Defense?',
     emoji: '🛡️',
     minutes: 3,
@@ -950,7 +1067,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'resources',
     module: 'themes',
-    order: 17,
+    order: 19,
     title: 'Oil, Metals & the Stuff We Use',
     emoji: '⛽',
     minutes: 3,
@@ -998,7 +1115,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'health',
     module: 'themes',
-    order: 18,
+    order: 20,
     title: 'Health & Wealth',
     emoji: '🩺',
     minutes: 4,
@@ -1048,7 +1165,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'ai',
     module: 'themes',
-    order: 20,
+    order: 22,
     title: 'The AI Boom',
     emoji: '🤖',
     minutes: 3,
@@ -1100,7 +1217,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'charts',
     module: 'analyst',
-    order: 21,
+    order: 23,
     title: 'Reading a Chart Without Being Fooled',
     emoji: '📊',
     minutes: 4,
@@ -1162,7 +1279,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'correlation',
     module: 'analyst',
-    order: 22,
+    order: 24,
     title: 'Correlation vs Causation',
     emoji: '🔗',
     minutes: 4,
@@ -1222,7 +1339,7 @@ export const LESSONS: Lesson[] = [
   {
     id: 'provenance',
     module: 'analyst',
-    order: 23,
+    order: 25,
     title: 'Where Does Data Come From?',
     emoji: '🗂️',
     minutes: 4,

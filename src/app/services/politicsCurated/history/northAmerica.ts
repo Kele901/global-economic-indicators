@@ -1,0 +1,90 @@
+import { terms, vote, type HistoryMap } from './helpers';
+
+const DEM = '#2563eb', GOP = '#dc2626', LIB = '#16a34a';
+
+export const NORTH_AMERICA_HISTORY: HistoryMap = {
+  USA: {
+    leaders: terms('hos', [
+      ['Franklin D. Roosevelt', 'Democratic', '1933-03-04', '1945-04-12', 'e'],
+      ['Harry S. Truman', 'Democratic', '1945-04-12', '1953-01-20', 's'],
+      ['Dwight D. Eisenhower', 'Republican', '1953-01-20', '1961-01-20', 'e'],
+      ['John F. Kennedy', 'Democratic', '1961-01-20', '1963-11-22', 'e', 'Assassinated'],
+      ['Lyndon B. Johnson', 'Democratic', '1963-11-22', '1969-01-20', 's'],
+      ['Richard Nixon', 'Republican', '1969-01-20', '1974-08-09', 'e', 'Resigned over Watergate'],
+      ['Gerald Ford', 'Republican', '1974-08-09', '1977-01-20', 's'],
+      ['Jimmy Carter', 'Democratic', '1977-01-20', '1981-01-20', 'e'],
+      ['Ronald Reagan', 'Republican', '1981-01-20', '1989-01-20', 'e'],
+      ['George H. W. Bush', 'Republican', '1989-01-20', '1993-01-20', 'e'],
+      ['Bill Clinton', 'Democratic', '1993-01-20', '2001-01-20', 'e'],
+      ['George W. Bush', 'Republican', '2001-01-20', '2009-01-20', 'e'],
+      ['Barack Obama', 'Democratic', '2009-01-20', '2017-01-20', 'e'],
+      ['Donald Trump', 'Republican', '2017-01-20', '2021-01-20', 'e'],
+      ['Joe Biden', 'Democratic', '2021-01-20', '2025-01-20', 'e'],
+      ['Donald Trump', 'Republican', '2025-01-20', null, 'e'],
+    ]),
+    votes: [
+      vote(2004, 'Presidential (popular vote)', [['GOP', 'Republican', 50.7, GOP], ['DEM', 'Democratic', 48.3, DEM]], { turnoutPct: 60.1 }),
+      vote(2008, 'Presidential (popular vote)', [['DEM', 'Democratic', 52.9, DEM], ['GOP', 'Republican', 45.7, GOP]], { turnoutPct: 61.6 }),
+      vote(2012, 'Presidential (popular vote)', [['DEM', 'Democratic', 51.1, DEM], ['GOP', 'Republican', 47.2, GOP]], { turnoutPct: 58.6 }),
+      vote(2016, 'Presidential (popular vote)', [['DEM', 'Democratic', 48.2, DEM], ['GOP', 'Republican', 46.1, GOP], ['LIB', 'Libertarian', 3.3, '#eab308']], { turnoutPct: 60.1 }),
+      vote(2020, 'Presidential (popular vote)', [['DEM', 'Democratic', 51.3, DEM], ['GOP', 'Republican', 46.8, GOP]], { turnoutPct: 66.6 }),
+      vote(2024, 'Presidential (popular vote)', [['GOP', 'Republican', 49.8, GOP], ['DEM', 'Democratic', 48.3, DEM]], { turnoutPct: 63.9 }),
+    ],
+  },
+
+  Canada: {
+    leaders: terms('hog', [
+      ['William Lyon Mackenzie King', 'Liberal', '1935-10-23', '1948-11-15', 'e'],
+      ['Louis St. Laurent', 'Liberal', '1948-11-15', '1957-06-21', 'ps'],
+      ['John Diefenbaker', 'Progressive Conservative', '1957-06-21', '1963-04-22', 'e'],
+      ['Lester B. Pearson', 'Liberal', '1963-04-22', '1968-04-20', 'e'],
+      ['Pierre Trudeau', 'Liberal', '1968-04-20', '1979-06-04', 'ps'],
+      ['Joe Clark', 'Progressive Conservative', '1979-06-04', '1980-03-03', 'e'],
+      ['Pierre Trudeau', 'Liberal', '1980-03-03', '1984-06-30', 'e'],
+      ['John Turner', 'Liberal', '1984-06-30', '1984-09-17', 'ps'],
+      ['Brian Mulroney', 'Progressive Conservative', '1984-09-17', '1993-06-25', 'e'],
+      ['Kim Campbell', 'Progressive Conservative', '1993-06-25', '1993-11-04', 'ps'],
+      ['Jean Chrétien', 'Liberal', '1993-11-04', '2003-12-12', 'e'],
+      ['Paul Martin', 'Liberal', '2003-12-12', '2006-02-06', 'ps'],
+      ['Stephen Harper', 'Conservative', '2006-02-06', '2015-11-04', 'e'],
+      ['Justin Trudeau', 'Liberal', '2015-11-04', '2025-03-14', 'e'],
+      ['Mark Carney', 'Liberal', '2025-03-14', null, 'ps'],
+    ]),
+    votes: [
+      vote(2008, 'Federal', [['CPC', 'Conservative', 37.7, '#1d4ed8'], ['LPC', 'Liberal', 26.3, '#dc2626'], ['NDP', 'New Democratic', 18.2, '#f97316'], ['BQ', 'Bloc Québécois', 10.0, '#0ea5e9'], ['GPC', 'Green', 6.8, LIB]]),
+      vote(2011, 'Federal', [['CPC', 'Conservative', 39.6, '#1d4ed8'], ['NDP', 'New Democratic', 30.6, '#f97316'], ['LPC', 'Liberal', 18.9, '#dc2626'], ['BQ', 'Bloc Québécois', 6.0, '#0ea5e9'], ['GPC', 'Green', 3.9, LIB]]),
+      vote(2015, 'Federal', [['LPC', 'Liberal', 39.5, '#dc2626'], ['CPC', 'Conservative', 31.9, '#1d4ed8'], ['NDP', 'New Democratic', 19.7, '#f97316'], ['BQ', 'Bloc Québécois', 4.7, '#0ea5e9'], ['GPC', 'Green', 3.4, LIB]]),
+      vote(2019, 'Federal', [['CPC', 'Conservative', 34.3, '#1d4ed8'], ['LPC', 'Liberal', 33.1, '#dc2626'], ['NDP', 'New Democratic', 16.0, '#f97316'], ['BQ', 'Bloc Québécois', 7.6, '#0ea5e9'], ['GPC', 'Green', 6.5, LIB]]),
+      vote(2021, 'Federal', [['CPC', 'Conservative', 33.7, '#1d4ed8'], ['LPC', 'Liberal', 32.6, '#dc2626'], ['NDP', 'New Democratic', 17.8, '#f97316'], ['BQ', 'Bloc Québécois', 7.6, '#0ea5e9'], ['PPC', "People's Party", 4.9, '#6d28d9']]),
+      vote(2025, 'Federal', [['LPC', 'Liberal', 43.8, '#dc2626'], ['CPC', 'Conservative', 41.3, '#1d4ed8'], ['BQ', 'Bloc Québécois', 6.3, '#0ea5e9'], ['NDP', 'New Democratic', 6.3, '#f97316'], ['GPC', 'Green', 1.2, LIB]]),
+    ],
+  },
+
+  Mexico: {
+    leaders: terms('hos', [
+      ['Manuel Ávila Camacho', 'PRM', '1940-12-01', '1946-11-30', 'e', 'Single-party era'],
+      ['Miguel Alemán Valdés', 'PRI', '1946-12-01', '1952-11-30', 'e', 'Single-party era'],
+      ['Adolfo Ruiz Cortines', 'PRI', '1952-12-01', '1958-11-30', 'e', 'Single-party era'],
+      ['Adolfo López Mateos', 'PRI', '1958-12-01', '1964-11-30', 'e', 'Single-party era'],
+      ['Gustavo Díaz Ordaz', 'PRI', '1964-12-01', '1970-11-30', 'e', 'Single-party era'],
+      ['Luis Echeverría', 'PRI', '1970-12-01', '1976-11-30', 'e', 'Single-party era'],
+      ['José López Portillo', 'PRI', '1976-12-01', '1982-11-30', 'e', 'Single-party era'],
+      ['Miguel de la Madrid', 'PRI', '1982-12-01', '1988-11-30', 'e'],
+      ['Carlos Salinas de Gortari', 'PRI', '1988-12-01', '1994-11-30', 'e', 'Disputed 1988 count'],
+      ['Ernesto Zedillo', 'PRI', '1994-12-01', '2000-11-30', 'e'],
+      ['Vicente Fox', 'PAN', '2000-12-01', '2006-11-30', 'e', 'First opposition president in 71 years'],
+      ['Felipe Calderón', 'PAN', '2006-12-01', '2012-11-30', 'e'],
+      ['Enrique Peña Nieto', 'PRI', '2012-12-01', '2018-11-30', 'e'],
+      ['Andrés Manuel López Obrador', 'Morena', '2018-12-01', '2024-09-30', 'e'],
+      ['Claudia Sheinbaum', 'Morena', '2024-10-01', null, 'e'],
+    ]),
+    votes: [
+      vote(1994, 'Presidential', [['PRI', 'PRI', 48.7, '#16a34a'], ['PAN', 'PAN', 25.9, '#1d4ed8'], ['PRD', 'PRD', 16.6, '#eab308']]),
+      vote(2000, 'Presidential', [['PAN', 'PAN (Fox)', 42.5, '#1d4ed8'], ['PRI', 'PRI', 36.1, '#16a34a'], ['PRD', 'PRD', 16.6, '#eab308']]),
+      vote(2006, 'Presidential', [['PAN', 'PAN (Calderón)', 35.9, '#1d4ed8'], ['PRD', 'PRD (López Obrador)', 35.3, '#eab308'], ['PRI', 'PRI', 22.3, '#16a34a']]),
+      vote(2012, 'Presidential', [['PRI', 'PRI (Peña Nieto)', 38.2, '#16a34a'], ['PRD', 'PRD (López Obrador)', 31.6, '#eab308'], ['PAN', 'PAN', 25.4, '#1d4ed8']]),
+      vote(2018, 'Presidential', [['MORENA', 'Morena (López Obrador)', 53.2, '#9f1239'], ['PAN', 'PAN', 22.3, '#1d4ed8'], ['PRI', 'PRI', 16.4, '#16a34a'], ['IND', 'Independent (Rodríguez)', 5.2, '#6b7280']]),
+      vote(2024, 'Presidential', [['MORENA', 'Morena (Sheinbaum)', 59.8, '#9f1239'], ['PAN', 'PAN-PRI-PRD (Gálvez)', 27.5, '#1d4ed8'], ['MC', 'Movimiento Ciudadano', 10.3, '#f97316']]),
+    ],
+  },
+};
