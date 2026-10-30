@@ -1,13 +1,14 @@
 'use client';
 
-// The Inequality Ledger — 8 chapters on the distribution of income and
+// The Inequality Ledger — 11 chapters on the distribution of income and
 // wealth. Follows the same template as the Defense/Labor/Energy ledgers:
 // breadcrumbs, staleness disclosure, provenance badges, a live hero, a
-// guided tour, eight numbered chapters and a related-pages row.
+// guided tour, eleven numbered chapters and a related-pages row.
 //
-// Chapter 1 is live World Bank SI.POV.GINI. Chapters 2-8 are the
-// Piketty/WID historical reconstructions, each rendered as a single
-// addressable view of components/InequalityCharts.
+// Chapters 1-4 are live World Bank distribution data (Gini, quintile shares,
+// Palma) plus the Great Gatsby curve. Chapters 5-11 are the Piketty/WID
+// historical reconstructions, each rendered as a single addressable view of
+// components/InequalityCharts.
 
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -39,6 +40,7 @@ import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
+import { useQuintileShares } from '../components/inequality/quintileShares';
 
 const GiniTicker = dynamic(() => import('../components/GiniTicker'), {
   ssr: false,
@@ -52,6 +54,10 @@ const InequalityCharts = dynamic(() => import('../components/InequalityCharts'),
   ssr: false,
   loading: () => <SkeletonCard height="h-[400px] sm:h-[520px]" label="Loading chapter" />,
 });
+const liveLoading = () => <SkeletonCard height="h-[420px]" label="Loading chart" />;
+const GiniOverTime = dynamic(() => import('../components/inequality/LiveDistribution').then((m) => m.GiniOverTime), { ssr: false, loading: liveLoading });
+const WhoGetsWhat = dynamic(() => import('../components/inequality/LiveDistribution').then((m) => m.WhoGetsWhat), { ssr: false, loading: liveLoading });
+const GreatGatsbyCurve = dynamic(() => import('../components/inequality/LiveDistribution').then((m) => m.GreatGatsbyCurve), { ssr: false, loading: liveLoading });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
@@ -61,13 +67,16 @@ const CURATED_LAST_UPDATED = '2025-09-01';
 
 const TOUR_STEPS: TourStep[] = [
   { chapter: 'Chapter 1', title: 'Where inequality stands now', body: 'Live World Bank Gini for every country in the roster. One number per country, from its most recent household survey — which for some economies is nearly a decade old.' },
-  { chapter: 'Chapter 2', title: 'r > g', body: 'Piketty\'s central claim: when the return on capital outruns economic growth, existing wealth compounds faster than wages and fortunes concentrate without anyone deciding they should.' },
-  { chapter: 'Chapter 3', title: 'The Kuznets curve', body: 'The mid-century hope was that inequality rises then falls automatically as a country develops. The cross-section shows why that hope did not survive contact with the data.' },
-  { chapter: 'Chapter 4', title: 'Income shares', body: 'Top 1%, top 10% and bottom 50% shares over a century. The U-shape for the US and UK is the single most cited fact in modern inequality research.' },
-  { chapter: 'Chapter 5', title: 'Wealth shares', body: 'Wealth is far more concentrated than income everywhere, and it did not compress as much after the world wars as income did.' },
-  { chapter: 'Chapter 6', title: 'Two centuries of dynamics', body: 'Capital/income ratios, inheritance flows and the policy milestones that compressed or widened the distribution.' },
-  { chapter: 'Chapter 7', title: 'The world map', body: 'Live Gini on a choropleth, so you can see the regional clustering that country-by-country bars hide.' },
-  { chapter: 'Chapter 8', title: 'Tax and policy', body: 'Top marginal rates from 1900 to today, and the policy levers that actually move the distribution.' },
+  { chapter: 'Chapter 2', title: 'Gini over time', body: 'Every household survey since 1980 for the countries you pick, so you can see whether inequality is rising or falling rather than a single snapshot.' },
+  { chapter: 'Chapter 3', title: 'Who gets what', body: 'Income shares by fifth of the population and the Palma ratio, the richest tenth against the poorest four-tenths.' },
+  { chapter: 'Chapter 4', title: 'The Great Gatsby curve', body: 'More unequal countries tend to have less mobility between generations: where you start matters more.' },
+  { chapter: 'Chapter 5', title: 'r > g', body: 'Piketty\'s central claim: when the return on capital outruns economic growth, existing wealth compounds faster than wages and fortunes concentrate without anyone deciding they should.' },
+  { chapter: 'Chapter 6', title: 'The Kuznets curve', body: 'The mid-century hope was that inequality rises then falls automatically as a country develops. The cross-section shows why that hope did not survive contact with the data.' },
+  { chapter: 'Chapter 7', title: 'Income shares', body: 'Top 1%, top 10% and bottom 50% shares over a century. The U-shape for the US and UK is the single most cited fact in modern inequality research.' },
+  { chapter: 'Chapter 8', title: 'Wealth shares', body: 'Wealth is far more concentrated than income everywhere, and it did not compress as much after the world wars as income did.' },
+  { chapter: 'Chapter 9', title: 'Two centuries of dynamics', body: 'Capital/income ratios, inheritance flows and the policy milestones that compressed or widened the distribution.' },
+  { chapter: 'Chapter 10', title: 'The world map', body: 'Live Gini on a choropleth, so you can see the regional clustering that country-by-country bars hide.' },
+  { chapter: 'Chapter 11', title: 'Tax and policy', body: 'Top marginal rates from 1900 to today, and the policy levers that actually move the distribution.' },
 ];
 
 function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; }) {
@@ -114,6 +123,7 @@ export default function InequalityPage() {
   }, []);
 
   const gini = data?.giniCoefficient;
+  const shares = useQuintileShares();
 
   // Live KPIs. Everything derives from the same latest-survey-per-country
   // extraction the Chapter 1 chart uses, so the hero can never disagree
@@ -185,7 +195,7 @@ export default function InequalityPage() {
           storageKey="tour-inequality"
           steps={TOUR_STEPS}
           isDarkMode={isDarkMode}
-          ctaLabel="Take the 60-second tour of the 8 chapters"
+          ctaLabel="Take the 60-second tour of the 11 chapters"
         />
 
         <StalenessBanner
@@ -263,6 +273,7 @@ export default function InequalityPage() {
                     rows.push({ series: 'Gini index (World Bank, live)', country: COUNTRY_DISPLAY_NAMES[key] ?? key, year: entry.year, value: entry.value });
                   }
                 });
+                shares.rows.forEach(({ key, ...r }) => rows.push({ series: 'Income shares by fifth and Palma ratio (World Bank, live)', country: COUNTRY_DISPLAY_NAMES[key] ?? key, ...r }));
                 PIKETTY_R_VS_G.forEach(r => rows.push({ series: 'r vs g', ...r }));
                 CAPITAL_INCOME_RATIO.forEach(r => rows.push({ series: 'Capital/income ratio', ...r }));
                 TOP_INCOME_SHARES.forEach(r => rows.push({ series: 'Top income shares', ...r }));
@@ -279,60 +290,84 @@ export default function InequalityPage() {
           </div>
         </div>
 
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-24">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
             title="Where Inequality Stands Now"
             subtitle="Live World Bank Gini for every country in the roster, ranked. Survey years differ by country and faded bars flag the stale ones — a single &quot;latest Gini&quot; table is one of the easiest places to accidentally compare 2023 against 2011." />
           <GiniRankChart isDarkMode={isDarkMode} gini={gini} shareTitle="Where Inequality Stands Now" />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-24">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 2"
+            title="Gini over Time"
+            subtitle="One survey number per country hides the direction of travel. Brazil and China have fallen from their peaks, while the US and Sweden have drifted up since the 1990s." />
+          <GiniOverTime isDarkMode={isDarkMode} />
+        </section>
+
+        <section id="chapter-3" className="mb-14 scroll-mt-24">
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3"
+            title="Who Gets What"
+            subtitle="The same Gini can hide very different distributions. Shares by fifth show where the income actually goes, and the Palma ratio compares the two tails directly." />
+          <WhoGetsWhat isDarkMode={isDarkMode} />
+        </section>
+
+        <section id="chapter-4" className="mb-14 scroll-mt-24">
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4"
+            title="Inequality and Mobility"
+            subtitle="Alan Krueger's Great Gatsby curve: where the rungs of the ladder are further apart, children are more likely to stay on the rung they were born on. For what inequality does to health and schooling, see the Development Ledger." />
+          <GreatGatsbyCurve isDarkMode={isDarkMode} />
+          <p className={`text-xs mt-3 ${textMuted}`}>
+            Related: <a href="/development#chapter-5" className="underline">inequality-adjusted human development</a> in the Development Ledger.
+          </p>
+        </section>
+
+        <section id="chapter-5" className="mb-14 scroll-mt-24">
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5"
             title="r > g: The Central Contradiction"
             subtitle="Piketty's thesis in one chart: the return on capital has sat near 4-5% for two millennia while growth only briefly exceeded it during the 20th century. Whenever r runs above g, inherited wealth compounds faster than earned income." />
           <InequalityCharts isDarkMode={isDarkMode} view="rvsg" />
         </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3"
+        <section id="chapter-6" className="mb-14 scroll-mt-24">
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6"
             title="The Kuznets Curve and Its Refutation"
             subtitle="Kuznets (1955) argued inequality rises then falls as economies industrialise. The cross-section of GDP per capita against Gini shows the inverted U is at best a weak tendency — rich countries span Gini 25 to 45." />
           <InequalityCharts isDarkMode={isDarkMode} view="kuznets" />
         </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4"
+        <section id="chapter-7" className="mb-14 scroll-mt-24">
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
             title="Income Concentration"
             subtitle="Top 1%, top 10% and bottom 50% income shares from 1910 to today, plus Milanovic's elephant curve of who actually gained from globalisation. The US and UK trace a U; France, Japan and Sweden do not." />
           <InequalityCharts isDarkMode={isDarkMode} view="income" />
         </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5"
+        <section id="chapter-8" className="mb-14 scroll-mt-24">
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
             title="Wealth Concentration"
             subtitle="Wealth is roughly twice as concentrated as income in every country measured, and its composition differs sharply — housing dominates European balance sheets while financial and business assets dominate American ones." />
           <InequalityCharts isDarkMode={isDarkMode} view="wealth" />
         </section>
 
-        <section className="mb-14">
-          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6"
+        <section id="chapter-9" className="mb-14 scroll-mt-24">
+          <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 9"
             title="Two Centuries of Dynamics"
             subtitle="Capital/income ratios from 1700, inheritance flows as a share of national income, and the milestones that compressed or widened the distribution. The egalitarian mid-20th century was produced by war, inflation and policy, not by markets." />
           <InequalityCharts isDarkMode={isDarkMode} view="historical" />
         </section>
 
         <LazyMount isDarkMode={isDarkMode}>
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
+          <section id="chapter-10" className="mb-14 scroll-mt-24">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 10"
               title="The Global Map"
               subtitle="Live Gini on a world choropleth. The regional clustering is the point: Southern Africa and Latin America sit above 45, continental and Northern Europe below 33, with most of Asia in between." />
             <InequalityCharts isDarkMode={isDarkMode} view="global" />
           </section>
 
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
+          <section id="chapter-11" className="mb-14 scroll-mt-24">
+            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 11"
               title="Tax and Policy Levers"
-              subtitle="Top marginal income and capital-gains rates from 1900. Anglo-American rates above 90% in the mid-century are the clearest single correlate of the income compression in Chapter 4 — and their reversal after 1980 of its undoing." />
+              subtitle="Top marginal income and capital-gains rates from 1900. Anglo-American rates above 90% in the mid-century are the clearest single correlate of the income compression in Chapter 7 — and their reversal after 1980 of its undoing." />
             <InequalityCharts isDarkMode={isDarkMode} view="tax" showSources />
           </section>
         </LazyMount>
@@ -340,7 +375,8 @@ export default function InequalityPage() {
         <RelatedPages currentPath="/inequality" isDarkMode={isDarkMode} />
 
         <footer className={`mt-16 pt-6 border-t text-xs ${textMuted} ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          Gini index fetched live from the World Bank API (SI.POV.GINI) via our own proxy.
+          Gini index and income shares fetched live from the World Bank API (SI.POV.GINI, SI.DST.*) via our own proxy.
+          Intergenerational elasticities are rounded estimates from Corak (2013).
           Historical series transcribed from Thomas Piketty, <em>Capital in the Twenty-First Century</em> (2014),
           Piketty &amp; Saez (2003), the World Inequality Database, Branko Milanovic, <em>Global Inequality</em> (2016)
           and Saez &amp; Zucman (2019); curated snapshot refreshed {CURATED_LAST_UPDATED}. Pre-1950 figures are

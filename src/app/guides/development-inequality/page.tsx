@@ -64,10 +64,9 @@ export default function DevelopmentInequalityGuide() {
               ))}
             </div>
             <p className="mt-4 mb-4 text-base leading-relaxed">
-              On our <a href="/development" className="text-blue-600 dark:text-blue-400 hover:underline">Inequality &amp; Development</a> page,
-              we compute a simplified HDI-like score using available World Bank data (life expectancy,
-              school enrollment, and GDP per capita), normalized and averaged to produce a comparable
-              development index for each country.
+              The <a href="/development" className="text-blue-600 dark:text-blue-400 hover:underline">Development Ledger</a> uses
+              the official UNDP HDI for all 47 economies, alongside the inequality-adjusted HDI, the gender indices and the
+              planetary-pressures-adjusted HDI, and lets you build your own index with different weights.
             </p>
           </section>
 
@@ -111,8 +110,8 @@ export default function DevelopmentInequalityGuide() {
             <p className="mb-4 text-base leading-relaxed">
               Increasingly, development analysis includes environmental sustainability. A country
               that achieves high GDP growth by depleting natural resources or generating massive
-              carbon emissions may be undermining its long-term well-being. Our development page
-              includes a scatter plot comparing CO2 emissions per capita against renewable energy
+              carbon emissions may be undermining its long-term well-being. The Development Ledger&apos;s
+              sustainability chapter compares CO2 emissions per capita against renewable energy
               consumption. The ideal quadrant is <strong>bottom-right</strong>: low emissions and
               high renewable energy use.
             </p>
@@ -125,20 +124,22 @@ export default function DevelopmentInequalityGuide() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Reading the Development Scorecard</h2>
+            <h2 className="text-2xl font-semibold mb-4">Building Your Own Index</h2>
             <p className="mb-4 text-base leading-relaxed">
-              On our dashboard, countries are ranked by their computed development score (0-100).
-              The score combines life expectancy, education enrollment, GDP per capita, inequality
-              (Gini), and healthcare spending into a single comparable number. Keep in mind that
-              any composite index involves subjective weighting choices -- the score is meant to
-              facilitate comparison, not to be a definitive ranking.
+              The index builder in the Development Ledger lets you weight ten dimensions, from income and
+              health to equality, gender, the planet and wellbeing, and see how each country&apos;s rank moves
+              against its official HDI rank. Keep in mind that any composite index involves subjective
+              weighting choices: the point is to see how much the ranking depends on them, not to produce a
+              definitive league table.
             </p>
           </section>
 
           <section className={`mt-8 p-6 rounded-lg ${isDarkMode ? 'bg-blue-900/20 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
             <h2 className="text-xl font-semibold mb-3">Explore More</h2>
             <ul className="space-y-2">
-              <li><a href="/development" className="text-blue-600 dark:text-blue-400 hover:underline">Inequality &amp; Development Index</a> &mdash; Interactive development and inequality dashboard</li>
+              <li><a href="/development" className="text-blue-600 dark:text-blue-400 hover:underline">Development Ledger</a> &mdash; Human development, poverty, health, gender and the SDGs across 47 economies</li>
+              <li><a href="/inequality" className="text-blue-600 dark:text-blue-400 hover:underline">Inequality Ledger</a> &mdash; Gini over time, income shares, the Palma ratio and two centuries of wealth concentration</li>
+              <li><a href="/development/where-do-you-stand" className="text-blue-600 dark:text-blue-400 hover:underline">Global Income Calculator</a> &mdash; Where your household income ranks among 8 billion people</li>
               <li><a href="/guides/trade-networks" className="text-blue-600 dark:text-blue-400 hover:underline">Trade Networks &amp; Supply Chains</a> &mdash; How trade affects development outcomes</li>
               <li><a href="/global-heatmap" className="text-blue-600 dark:text-blue-400 hover:underline">Global Heatmap</a> &mdash; Visualize development metrics geographically</li>
             </ul>

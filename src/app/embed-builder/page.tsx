@@ -9,19 +9,42 @@ import SocialShareMenu from '../components/SocialShareMenu';
 import { absoluteUrl } from '../lib/site';
 import { POLITICS_PROFILES } from '../services/politicsCurated';
 
-type BuilderTab = 'charts' | 'politics';
-type PoliticsWidget = 'regime-map' | 'hemicycle' | 'elections';
+type BuilderTab = 'charts' | 'ledgers';
+type LedgerWidget =
+  | 'politics/regime-map'
+  | 'politics/hemicycle'
+  | 'politics/elections'
+  | 'development/bubble'
+  | 'development/hdi-map'
+  | 'development/profile-card';
 
-const POLITICS_WIDGET_LABELS: Record<PoliticsWidget, string> = {
-  'regime-map': 'World regime map',
-  hemicycle: 'Parliament hemicycle',
-  elections: 'Election calendar',
-};
+const LEDGER_WIDGET_GROUPS: { label: string; widgets: { id: LedgerWidget; label: string }[] }[] = [
+  {
+    label: 'Politics Ledger',
+    widgets: [
+      { id: 'politics/regime-map', label: 'World regime map' },
+      { id: 'politics/hemicycle', label: 'Parliament hemicycle' },
+      { id: 'politics/elections', label: 'Election calendar' },
+    ],
+  },
+  {
+    label: 'Development Ledger',
+    widgets: [
+      { id: 'development/bubble', label: 'Wealth and health bubble chart' },
+      { id: 'development/hdi-map', label: 'Human development map' },
+      { id: 'development/profile-card', label: 'Development profile card' },
+    ],
+  },
+];
+const LEDGER_WIDGET_LABELS = Object.fromEntries(
+  LEDGER_WIDGET_GROUPS.flatMap((g) => g.widgets.map((w) => [w.id, w.label]))
+) as Record<LedgerWidget, string>;
+const COUNTRY_WIDGETS: LedgerWidget[] = ['politics/hemicycle', 'development/profile-card'];
 
 export default function EmbedBuilderPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [tab, setTab] = useState<BuilderTab>('charts');
-  const [widget, setWidget] = useState<PoliticsWidget>('regime-map');
+  const [widget, setWidget] = useState<LedgerWidget>('politics/regime-map');
   const [politicsCountry, setPoliticsCountry] = useState<CountryKey>('Germany' as CountryKey);
   const [metric, setMetric] = useState('gdpGrowth');
   const [selectedCountries, setSelectedCountries] = useState<string[]>(['USA', 'UK']);
@@ -63,9 +86,9 @@ export default function EmbedBuilderPage() {
   };
 
   const embedUrl = useMemo(() => {
-    if (tab === 'politics') {
-      const params = new URLSearchParams(widget === 'hemicycle' ? { country: COUNTRY_KEY_TO_SLUG[politicsCountry], theme } : { theme });
-      return `/embed/politics/${widget}?${params.toString()}`;
+    if (tab === 'ledgers') {
+      const params = new URLSearchParams(COUNTRY_WIDGETS.includes(widget) ? { country: COUNTRY_KEY_TO_SLUG[politicsCountry], theme } : { theme });
+      return `/embed/${widget}?${params.toString()}`;
     }
     const params = new URLSearchParams({
       metric,
@@ -87,8 +110,8 @@ export default function EmbedBuilderPage() {
   };
 
   const metricDef = getMetricByKey(metric);
-  const previewTitle = tab === 'politics'
-    ? `${POLITICS_WIDGET_LABELS[widget]}${widget === 'hemicycle' ? ` for ${COUNTRY_DISPLAY_NAMES[politicsCountry]}` : ''}`
+  const previewTitle = tab === 'ledgers'
+    ? `${LEDGER_WIDGET_LABELS[widget]}${COUNTRY_WIDGETS.includes(widget) ? ` for ${COUNTRY_DISPLAY_NAMES[politicsCountry]}` : ''}`
     : `${metricDef?.label || metric} for ${selectedCountries.map(c => COUNTRY_DISPLAY_NAMES[c as CountryKey]).join(', ')}`;
 
   return (
@@ -119,37 +142,39 @@ export default function EmbedBuilderPage() {
           <div className="space-y-6">
             <div className={`rounded-xl border p-5 ${tc.card}`}>
               <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
-                <h3 className="font-semibold">{tab === 'politics' ? 'Widget Configuration' : 'Chart Configuration'}</h3>
+                <h3 className="font-semibold">{tab === 'ledgers' ? 'Widget Configuration' : 'Chart Configuration'}</h3>
                 <div className="flex gap-1" role="tablist">
-                  {(['charts', 'politics'] as BuilderTab[]).map(t => (
+                  {(['charts', 'ledgers'] as BuilderTab[]).map(t => (
                     <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
                       className={`px-2.5 py-1 rounded text-xs border ${tab === t ? tc.activeBtn : tc.inactiveBtn}`}>
-                      {t === 'charts' ? 'Economic charts' : 'Politics widgets'}
+                      {t === 'charts' ? 'Economic charts' : 'Ledger widgets'}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-4">
-                {tab === 'politics' && (
+                {tab === 'ledgers' && (
                   <>
                     <div>
                       <label className={`block text-xs mb-1 ${tc.textSec}`}>Widget</label>
-                      <select value={widget} onChange={e => setWidget(e.target.value as PoliticsWidget)}
+                      <select value={widget} onChange={e => setWidget(e.target.value as LedgerWidget)}
                         className={`w-full px-3 py-2 rounded-lg border text-sm ${tc.inputBg}`}>
-                        {(Object.keys(POLITICS_WIDGET_LABELS) as PoliticsWidget[]).map(w => (
-                          <option key={w} value={w}>{POLITICS_WIDGET_LABELS[w]}</option>
+                        {LEDGER_WIDGET_GROUPS.map(g => (
+                          <optgroup key={g.label} label={g.label}>
+                            {g.widgets.map(w => <option key={w.id} value={w.id}>{w.label}</option>)}
+                          </optgroup>
                         ))}
                       </select>
                     </div>
-                    {widget === 'hemicycle' && (
+                    {COUNTRY_WIDGETS.includes(widget) && (
                       <div>
                         <label className={`block text-xs mb-1 ${tc.textSec}`}>Country</label>
                         <select value={politicsCountry} onChange={e => setPoliticsCountry(e.target.value as CountryKey)}
                           className={`w-full px-3 py-2 rounded-lg border text-sm ${tc.inputBg}`}>
-                          {[...POLITICS_PROFILES]
-                            .sort((a, b) => COUNTRY_DISPLAY_NAMES[a.key].localeCompare(COUNTRY_DISPLAY_NAMES[b.key]))
-                            .map(p => <option key={p.key} value={p.key}>{COUNTRY_DISPLAY_NAMES[p.key]}</option>)}
+                          {(widget === 'politics/hemicycle' ? POLITICS_PROFILES.map(p => p.key) : [...COUNTRY_KEYS])
+                            .sort((a, b) => COUNTRY_DISPLAY_NAMES[a].localeCompare(COUNTRY_DISPLAY_NAMES[b]))
+                            .map(k => <option key={k} value={k}>{COUNTRY_DISPLAY_NAMES[k]}</option>)}
                         </select>
                       </div>
                     )}

@@ -20,11 +20,14 @@ const LEDGER_LABEL: Record<string, string> = {
   'labor-ledger':     'Labor Ledger',
   'resources':        'Resource Atlas',
   'politics-ledger':  'Politics Ledger',
+  'development':      'Development Ledger',
+  'inequality':       'Inequality Ledger',
 };
 
 // Static sub-pages of a ledger that would otherwise be looked up as a country slug.
 const SUBPAGE_LABEL: Record<string, string> = {
   'politics-ledger/match': 'Political Match',
+  'development/where-do-you-stand': 'Global Income Calculator',
 };
 
 interface Props { isDarkMode?: boolean; }

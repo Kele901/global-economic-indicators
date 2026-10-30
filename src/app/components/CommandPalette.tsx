@@ -26,8 +26,9 @@ const PAGE_ENTRIES: Entry[] = [
   { id: 'debt',              label: 'Debt Ledger',            category: 'Page', href: '/debt' },
   { id: 'outlook',           label: 'Forecasts & Outlook',    category: 'Page', href: '/outlook' },
   { id: 'simulator',         label: 'Scenario Simulator',     category: 'Page', href: '/simulator' },
-  { id: 'development',       label: 'Development Index',      category: 'Page', href: '/development' },
-  { id: 'inequality',        label: 'Inequality',             category: 'Page', href: '/inequality' },
+  { id: 'development',       label: 'Development Ledger',     category: 'Page', href: '/development', hint: 'HDI, poverty, SDGs' },
+  { id: 'income-calc',       label: 'Global Income Calculator', category: 'Page', href: '/development/where-do-you-stand', hint: 'Where does your income stand?' },
+  { id: 'inequality',        label: 'Inequality Ledger',      category: 'Page', href: '/inequality' },
   { id: 'trade-network',     label: 'Trade Network',          category: 'Page', href: '/trade-network' },
   { id: 'economic-gravity',  label: 'Economic Gravity',       category: 'Page', href: '/economic-gravity' },
   { id: 'economic-cycles',   label: 'Economic Cycles',        category: 'Page', href: '/economic-cycles' },
@@ -71,6 +72,13 @@ const POLITICS_ENTRIES: Entry[] = COUNTRY_KEYS.map(k => ({
   href: `/politics-ledger/${COUNTRY_KEY_TO_SLUG[k as CountryKey]}`,
 }));
 
+const DEVELOPMENT_ENTRIES: Entry[] = COUNTRY_KEYS.map(k => ({
+  id: `development-${k}`,
+  label: `${COUNTRY_DISPLAY_NAMES[k as CountryKey]} development`,
+  category: 'Country' as const,
+  href: `/development/${COUNTRY_KEY_TO_SLUG[k as CountryKey]}`,
+}));
+
 const METRIC_ENTRIES: Entry[] = [
   { id: 'm-democracy',  label: 'Democracy Index',           category: 'Metric', href: '/politics-ledger#governance-scorecard' },
   { id: 'm-leaders',    label: 'World Leaders',             category: 'Metric', href: '/politics-ledger#who-rules' },
@@ -89,9 +97,13 @@ const METRIC_ENTRIES: Entry[] = [
   { id: 'm-military',   label: 'Military Spending',         category: 'Metric', href: '/defense-ledger' },
   { id: 'm-remit',      label: 'Remittances',               category: 'Metric', href: '/migration-ledger' },
   { id: 'm-patents',    label: 'Patents',                   category: 'Metric', href: '/ai-ledger' },
+  { id: 'm-hdi',        label: 'Human Development Index',   category: 'Metric', href: '/development#chapter-1' },
+  { id: 'm-poverty',    label: 'Extreme Poverty ($3.00/day)', category: 'Metric', href: '/development#chapter-4' },
+  { id: 'm-sdg',        label: 'SDG Progress',              category: 'Metric', href: '/development#chapter-11' },
+  { id: 'm-gini',       label: 'Gini Coefficient',          category: 'Metric', href: '/inequality#chapter-1' },
 ];
 
-const ALL_ENTRIES = [...PAGE_ENTRIES, ...COUNTRY_ENTRIES, ...POLITICS_ENTRIES, ...METRIC_ENTRIES];
+const ALL_ENTRIES = [...PAGE_ENTRIES, ...COUNTRY_ENTRIES, ...POLITICS_ENTRIES, ...DEVELOPMENT_ENTRIES, ...METRIC_ENTRIES];
 
 function score(entry: Entry, q: string): number {
   if (!q) return 1;

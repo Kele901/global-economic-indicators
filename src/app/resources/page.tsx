@@ -381,8 +381,8 @@ export default function ResourcesPage() {
 
           <div className={`mt-4 text-sm ${textSec}`}>
             Want to explore this further?{' '}
-            <a href="/development" className={`underline underline-offset-2 ${isDarkMode ? 'text-amber-400 hover:text-amber-300' : 'text-amber-600 hover:text-amber-700'}`}>
-              Resource Curse chart on the Development Index
+            <a href="/development#chapter-9" className={`underline underline-offset-2 ${isDarkMode ? 'text-amber-400 hover:text-amber-300' : 'text-amber-600 hover:text-amber-700'}`}>
+              Resource Curse chart in the Development Ledger
             </a>
             {' '}·{' '}
             <a href="/global-heatmap" className={`underline underline-offset-2 ${isDarkMode ? 'text-amber-400 hover:text-amber-300' : 'text-amber-600 hover:text-amber-700'}`}>

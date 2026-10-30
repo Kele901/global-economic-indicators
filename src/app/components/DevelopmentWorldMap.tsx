@@ -14,33 +14,41 @@ import { slugify } from '../lib/share';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
+export type DevMapMetric = 'hdi' | 'ihdi' | 'gdpPc' | 'lifeExp' | 'poverty';
+
 export interface CountryScore {
   country: CountryKey;
   hdi: number | null;
-  gini: number | null;
+  ihdi: number | null;
   gdpPc: number | null;
   lifeExp: number | null;
+  poverty: number | null;
 }
 
 interface DevelopmentWorldMapProps {
   isDarkMode: boolean;
   scoreCards: CountryScore[];
-  metric?: 'hdi' | 'gini' | 'gdpPc' | 'lifeExp';
-  onMetricChange?: (metric: 'hdi' | 'gini' | 'gdpPc' | 'lifeExp') => void;
+  metric?: DevMapMetric;
+  onMetricChange?: (metric: DevMapMetric) => void;
+  hideShare?: boolean;
 }
 
-const metricLabels: Record<string, { label: string; unit: string; range: [number, number]; colorLow: string; colorHigh: string; invert: boolean }> = {
-  hdi: { label: 'HDI Score', unit: '', range: [0.4, 0.95], colorLow: '#fee2e2', colorHigh: '#15803d', invert: false },
-  gini: { label: 'Gini Index', unit: '', range: [25, 55], colorLow: '#15803d', colorHigh: '#991b1b', invert: true },
+const metricLabels: Record<DevMapMetric, { label: string; unit: string; range: [number, number]; colorLow: string; colorHigh: string; invert: boolean }> = {
+  hdi: { label: 'HDI (UNDP)', unit: '', range: [0.45, 0.97], colorLow: '#fee2e2', colorHigh: '#15803d', invert: false },
+  ihdi: { label: 'Inequality-adjusted HDI', unit: '', range: [0.3, 0.92], colorLow: '#fee2e2', colorHigh: '#0f766e', invert: false },
   gdpPc: { label: 'GDP per capita (PPP)', unit: '$', range: [1000, 80000], colorLow: '#fef3c7', colorHigh: '#1e40af', invert: false },
   lifeExp: { label: 'Life Expectancy', unit: ' yrs', range: [55, 85], colorLow: '#fee2e2', colorHigh: '#15803d', invert: false },
+  poverty: { label: 'Poverty ($3.00/day)', unit: '%', range: [0, 40], colorLow: '#ecfdf5', colorHigh: '#991b1b', invert: true },
 };
+
+const METRIC_ORDER: DevMapMetric[] = ['hdi', 'ihdi', 'gdpPc', 'lifeExp', 'poverty'];
 
 const DevelopmentWorldMap: React.FC<DevelopmentWorldMapProps> = ({
   isDarkMode,
   scoreCards,
   metric = 'hdi',
   onMetricChange,
+  hideShare = false,
 }) => {
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
 
@@ -72,9 +80,10 @@ const DevelopmentWorldMap: React.FC<DevelopmentWorldMapProps> = ({
 
   const formatValue = (value: number | null): string => {
     if (value === null) return 'N/A';
-    if (metric === 'hdi') return value.toFixed(3);
+    if (metric === 'hdi' || metric === 'ihdi') return value.toFixed(3);
     if (metric === 'gdpPc') return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
     if (metric === 'lifeExp') return `${value.toFixed(1)} yrs`;
+    if (metric === 'poverty') return `${value.toFixed(1)}%`;
     return value.toFixed(1);
   };
 
@@ -93,7 +102,7 @@ const DevelopmentWorldMap: React.FC<DevelopmentWorldMapProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             {onMetricChange && (
               <div className={`flex flex-wrap gap-1 p-1 rounded-lg ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
-                {(['hdi', 'gini', 'gdpPc', 'lifeExp'] as const).map(m => (
+                {METRIC_ORDER.map(m => (
                   <button
                     key={m}
                     onClick={() => onMetricChange(m)}
@@ -112,7 +121,7 @@ const DevelopmentWorldMap: React.FC<DevelopmentWorldMapProps> = ({
                 ))}
               </div>
             )}
-            <SocialShareMenu title="Global Development Map" isDarkMode={isDarkMode} className="shrink-0" />
+            {!hideShare && <SocialShareMenu title="Global Development Map" isDarkMode={isDarkMode} className="shrink-0" />}
           </div>
         </div>
       </div>

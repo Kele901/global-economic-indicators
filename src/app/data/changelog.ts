@@ -15,6 +15,22 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: '2026-10-30',
+    version: '3.0',
+    title: 'Development Ledger',
+    tags: ['ledger', 'feature', 'data', 'trust'],
+    highlights: [
+      'The Development Index page is now the Development Ledger: thirteen chapters on human development across 47 economies, with a guided tour and chapter menu',
+      'Official UNDP Human Development Index, inequality-adjusted HDI, gender indices and planet-adjusted HDI replace the homemade score',
+      'An animated wealth-and-health bubble chart from 1960, eight paired development stories, and the biggest HDI risers and fallers',
+      'Poverty at the new $3.00, $4.20 and $8.30 lines, the prosperity gap, multidimensional poverty, and SDG progress projected to 2030',
+      'A development profile for every country with peers, years behind the leader and trend projections',
+      'Where does your income stand? A global income calculator built on the World Bank distribution of 8 billion people',
+      'Gini over time, income shares by fifth, the Palma ratio and the Great Gatsby curve move to the Inequality Ledger, now eleven chapters',
+      'Build-your-own development index with shareable weights, and three new development embed widgets',
+    ],
+  },
+  {
     date: '2026-10-29',
     version: '2.9',
     title: 'Politics Ledger v2',

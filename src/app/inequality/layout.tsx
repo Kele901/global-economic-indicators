@@ -4,7 +4,7 @@ import { withOgImage } from '../lib/og';
 
 const title = `The Inequality Ledger | ${SITE_NAME}`;
 const description =
-  'Eight chapters on the distribution of income and wealth: live World Bank Gini across 47 countries, Piketty\'s r > g, the Kuznets curve, top income and wealth shares since 1910, capital/income ratios since 1700, inheritance flows and a century of top marginal tax rates.';
+  'Eleven chapters on the distribution of income and wealth: live World Bank Gini across 47 countries and how it has moved over time, income shares by fifth and the Palma ratio, the Great Gatsby curve, Piketty\'s r > g, the Kuznets curve, top income and wealth shares since 1910, capital/income ratios since 1700, inheritance flows and a century of top marginal tax rates.';
 
 export const metadata: Metadata = withOgImage('/inequality', {
   title,

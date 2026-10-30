@@ -372,7 +372,7 @@ export const LESSONS: Lesson[] = [
     ],
     demoKey: 'gdp',
     linksTo: [
-      { label: 'See the Development Index', href: '/development' },
+      { label: 'See the Development Ledger', href: '/development' },
     ],
     quiz: [
       {
@@ -620,8 +620,8 @@ export const LESSONS: Lesson[] = [
     workshopKey: 'buildIndex',
     workshopTitle: 'Workshop: build your own development index',
     linksTo: [
-      { label: 'Open the Development Index', href: '/development' },
-      { label: 'See Inequality data', href: '/inequality' },
+      { label: 'Open the Development Ledger', href: '/development' },
+      { label: 'Open the Inequality Ledger', href: '/inequality' },
     ],
     quiz: [
       {
@@ -1137,7 +1137,7 @@ export const LESSONS: Lesson[] = [
     ],
     linksTo: [
       { label: 'Open the Health Ledger', href: '/health-ledger' },
-      { label: 'See the Development Index', href: '/development' },
+      { label: 'See health in the Development Ledger', href: '/development#chapter-7' },
     ],
     quiz: [
       {

@@ -14,8 +14,10 @@ interface EmbedRecipe {
   metric?: string;
   countries?: string[];
   period?: string;
-  widget?: 'regime-map' | 'hemicycle' | 'elections';
+  ledger?: 'politics' | 'development';
+  widget?: 'regime-map' | 'hemicycle' | 'elections' | 'bubble' | 'hdi-map' | 'profile-card';
   country?: string;
+  year?: string;
   theme: 'light' | 'dark';
   width: number;
   height: number;
@@ -116,6 +118,38 @@ const RECIPES: EmbedRecipe[] = [
     width: 640,
     height: 520,
   },
+  {
+    id: 'development-bubble',
+    title: 'Wealth and health bubble chart',
+    description: 'Gapminder-style animation of income against life expectancy since 1960, from the Development Ledger. Set ?year= to open on a given year.',
+    ledger: 'development',
+    widget: 'bubble',
+    year: '1980',
+    theme: 'light',
+    width: 720,
+    height: 560,
+  },
+  {
+    id: 'development-hdi-map',
+    title: 'Human development map',
+    description: 'UNDP Human Development Index on a world map, switchable to inequality-adjusted HDI, income, life expectancy and poverty.',
+    ledger: 'development',
+    widget: 'hdi-map',
+    theme: 'light',
+    width: 720,
+    height: 560,
+  },
+  {
+    id: 'development-profile-card',
+    title: 'Development profile card',
+    description: 'HDI, world rank, life expectancy, schooling and income for one country with a 1990-2023 trend. Change ?country= to any profiled country.',
+    ledger: 'development',
+    widget: 'profile-card',
+    country: 'india',
+    theme: 'dark',
+    width: 480,
+    height: 340,
+  },
 ];
 
 export default function EmbedGalleryPage() {
@@ -127,7 +161,7 @@ export default function EmbedGalleryPage() {
 
   const cards = useMemo(() => RECIPES.map(r => {
     const params = r.widget
-      ? new URLSearchParams({ ...(r.country ? { country: r.country } : {}), theme: r.theme })
+      ? new URLSearchParams({ ...(r.country ? { country: r.country } : {}), ...(r.year ? { year: r.year } : {}), theme: r.theme })
       : new URLSearchParams({
           metric: r.metric ?? '',
           countries: (r.countries ?? []).join(','),
@@ -135,7 +169,7 @@ export default function EmbedGalleryPage() {
           theme: r.theme,
         });
     const url = r.widget
-      ? `${origin}/embed/politics/${r.widget}?${params.toString()}`
+      ? `${origin}/embed/${r.ledger ?? 'politics'}/${r.widget}?${params.toString()}`
       : `${origin}/embed/chart?${params.toString()}`;
     const iframe = `<iframe src="${url}" width="${r.width}" height="${r.height}" frameborder="0" style="border-radius: 8px; border: 1px solid ${r.theme === 'dark' ? '#374151' : '#e5e7eb'};"></iframe>`;
     return { ...r, url, iframe };
@@ -162,7 +196,7 @@ export default function EmbedGalleryPage() {
             <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
           </div>
           <p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Nine ready-to-paste embeds: six economic charts and three politics widgets. Each ships as an iframe that inherits your host page&apos;s width where possible. All embeds are ad-free, cache-friendly (ISR 1h), and update automatically as underlying data refreshes.
+            Twelve ready-to-paste embeds: six economic charts, three politics widgets and three development widgets. Each ships as an iframe that inherits your host page&apos;s width where possible. All embeds are ad-free, cache-friendly (ISR 1h), and update automatically as underlying data refreshes.
           </p>
           <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
             Want something custom? Head to the <a className="text-blue-500 hover:underline" href="/embed-builder">Embed Builder</a>.

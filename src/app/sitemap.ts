@@ -29,6 +29,7 @@ const TOPICS: Route[] = [
   { path: '/debt', changeFrequency: 'weekly', priority: 0.9 },
   { path: '/technology', changeFrequency: 'weekly', priority: 0.9 },
   { path: '/development', changeFrequency: 'weekly', priority: 0.8 },
+  { path: '/development/where-do-you-stand', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/inequality', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/economic-cycles', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/currency-hierarchy', changeFrequency: 'weekly', priority: 0.8 },
@@ -96,9 +97,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
+  const developmentRoutes: Route[] = Object.values(COUNTRY_KEY_TO_SLUG).map((slug) => ({
+    path: `/development/${slug}`,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
   const lastModified = new Date();
 
-  return [...CORE, ...TOPICS, ...TOOLS, ...LEARN, ...SITE, ...guideRoutes, ...countryRoutes, ...politicsRoutes].map(
+  return [...CORE, ...TOPICS, ...TOOLS, ...LEARN, ...SITE, ...guideRoutes, ...countryRoutes, ...politicsRoutes, ...developmentRoutes].map(
     (route) => ({
       url: `${SITE_URL}${route.path}`,
       lastModified,

@@ -5,8 +5,8 @@
 export const RELATED_PAGES: Record<string, { href: string; label: string }[]> = {
   '/politics-ledger': [
     { href: '/defense-ledger',   label: 'Defense Ledger' },
-    { href: '/development',      label: 'Development Index' },
-    { href: '/inequality',       label: 'Inequality' },
+    { href: '/development',      label: 'Development Ledger' },
+    { href: '/inequality',       label: 'Inequality Ledger' },
     { href: '/cultural-capital', label: 'Cultural Capital' },
   ],
   '/defense-ledger': [
@@ -31,7 +31,7 @@ export const RELATED_PAGES: Record<string, { href: string; label: string }[]> = 
   '/migration-ledger': [
     { href: '/labor-ledger',     label: 'Labor Ledger' },
     { href: '/climate-ledger',   label: 'Climate Ledger' },
-    { href: '/inequality',       label: 'Inequality' },
+    { href: '/inequality',       label: 'Inequality Ledger' },
     { href: '/cultural-capital', label: 'Cultural Capital' },
   ],
   '/debt': [
@@ -49,8 +49,8 @@ export const RELATED_PAGES: Record<string, { href: string; label: string }[]> = 
   '/health-ledger': [
     { href: '/labor-ledger',     label: 'Labor Ledger' },
     { href: '/climate-ledger',   label: 'Climate Ledger' },
-    { href: '/inequality',       label: 'Inequality' },
-    { href: '/development',      label: 'Development Index' },
+    { href: '/inequality',       label: 'Inequality Ledger' },
+    { href: '/development',      label: 'Development Ledger' },
   ],
   '/energy-ledger': [
     { href: '/climate-ledger',   label: 'Climate Ledger' },
@@ -61,14 +61,21 @@ export const RELATED_PAGES: Record<string, { href: string; label: string }[]> = 
   '/labor-ledger': [
     { href: '/ai-ledger',        label: 'AI Ledger' },
     { href: '/health-ledger',    label: 'Health Ledger' },
-    { href: '/inequality',       label: 'Inequality' },
+    { href: '/inequality',       label: 'Inequality Ledger' },
     { href: '/migration-ledger', label: 'Migration Ledger' },
   ],
   '/inequality': [
+    { href: '/development',      label: 'Development Ledger' },
     { href: '/labor-ledger',     label: 'Labor Ledger' },
-    { href: '/development',      label: 'Development Index' },
     { href: '/health-ledger',    label: 'Health Ledger' },
     { href: '/migration-ledger', label: 'Migration Ledger' },
+  ],
+  '/development': [
+    { href: '/inequality',       label: 'Inequality Ledger' },
+    { href: '/health-ledger',    label: 'Health Ledger' },
+    { href: '/climate-ledger',   label: 'Climate Ledger' },
+    { href: '/labor-ledger',     label: 'Labor Ledger' },
+    { href: '/development/where-do-you-stand', label: 'Global Income Calculator' },
   ],
   '/resources': [
     { href: '/energy-ledger',    label: 'Energy Ledger' },

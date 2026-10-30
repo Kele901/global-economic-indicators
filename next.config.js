@@ -2,7 +2,16 @@
 const nextConfig = {
   eslint: {
     // Older pages still carry lint errors; widen this list as they are cleaned up.
-    dirs: ['src/app/politics-ledger', 'src/app/embed', 'src/app/services/politicsCurated', 'scripts'],
+    dirs: [
+      'src/app/politics-ledger',
+      'src/app/embed',
+      'src/app/services/politicsCurated',
+      'src/app/development',
+      'src/app/components/development',
+      'src/app/components/inequality',
+      'src/app/services/developmentCurated',
+      'scripts',
+    ],
   },
   async redirects() {
     return [

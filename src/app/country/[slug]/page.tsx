@@ -252,9 +252,14 @@ export default function CountryProfilePage() {
                 <h1 className="text-2xl sm:text-3xl font-bold break-words">{displayName}</h1>
                 <p className={tc.textSec}>Economic Profile & Indicators</p>
                 {countryKey && (
-                  <Link href={`/politics-ledger/${COUNTRY_KEY_TO_SLUG[countryKey]}`} className={`text-sm hover:underline ${tc.accent}`}>
-                    Government, parties and political history →
-                  </Link>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    <Link href={`/politics-ledger/${COUNTRY_KEY_TO_SLUG[countryKey]}`} className={`text-sm hover:underline ${tc.accent}`}>
+                      Government, parties and political history →
+                    </Link>
+                    <Link href={`/development/${COUNTRY_KEY_TO_SLUG[countryKey]}`} className={`text-sm hover:underline ${tc.accent}`}>
+                      Human development, poverty and SDGs →
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

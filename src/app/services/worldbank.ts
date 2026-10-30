@@ -1651,13 +1651,20 @@ const completeData = {
 
 // Fetch additional named indicators (for pages needing data beyond fetchGlobalData's default set).
 // Accepts a map of { alias: worldBankIndicatorCode } and returns { alias: CountryData[] }.
+// Series outside WDI (source 2) need their World Bank source id: { code, source }.
+export type ExtraIndicatorSpec = string | { code: string; source: number };
+
 export async function fetchExtraIndicators(
-  indicators: Record<string, string>,
+  indicators: Record<string, ExtraIndicatorSpec>,
   forceRefresh: boolean = false
 ): Promise<Record<string, CountryData[]>> {
   const entries = Object.entries(indicators);
   const results = await Promise.allSettled(
-    entries.map(([, code]) => fetchIndicatorData(code, COUNTRY_CODES, !forceRefresh))
+    entries.map(([, spec]) =>
+      typeof spec === 'string'
+        ? fetchIndicatorData(spec, COUNTRY_CODES, !forceRefresh)
+        : fetchIndicatorData(spec.code, COUNTRY_CODES, !forceRefresh, spec.source)
+    )
   );
   const out: Record<string, CountryData[]> = {};
   entries.forEach(([alias], i) => {

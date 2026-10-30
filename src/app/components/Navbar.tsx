@@ -104,6 +104,8 @@ const Navbar = () => {
       label: 'Ledgers',
       children: [
         { href: '/politics-ledger', label: 'Politics Ledger' },
+        { href: '/development', label: 'Development Ledger' },
+        { href: '/inequality', label: 'Inequality Ledger' },
         { href: '/defense-ledger', label: 'Defense Ledger' },
         { href: '/climate-ledger', label: 'Climate Ledger' },
         { href: '/trade-ledger', label: 'Trade Ledger' },
@@ -123,8 +125,6 @@ const Navbar = () => {
         { href: '/outlook', label: 'Forecasts & Outlook' },
         { href: '/simulator', label: 'Scenario Simulator' },
         { href: '/correlation-lab', label: 'Correlation Lab' },
-        { href: '/development', label: 'Development Index' },
-        { href: '/inequality', label: 'Inequality' },
         { href: '/trade-network', label: 'Trade Network' },
         { href: '/economic-gravity', label: 'Economic Gravity' },
         { href: '/economic-cycles', label: 'Economic Cycles' },
@@ -144,6 +144,7 @@ const Navbar = () => {
       label: 'Tools',
       children: [
         { href: '/inflation-calculator', label: 'Inflation Calculator' },
+        { href: '/development/where-do-you-stand', label: 'Global Income Calculator' },
         { href: '/watchlist', label: 'Watchlist & Alerts' },
         { href: '/reports', label: 'Report Builder' },
         { href: '/embed-builder', label: 'Embed Builder' },

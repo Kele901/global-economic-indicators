@@ -291,24 +291,53 @@ export default function PoliticsLedgerPage() {
           {stats.recent.length > 0 && (
             <div className="mt-4">
               <div className={`text-[11px] uppercase tracking-wider mb-2 ${textMuted}`}>Latest results</div>
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {stats.recent.slice(0, 8).map((e) => {
-                  const Flag = COUNTRY_FLAGS[e.key];
-                  return (
-                    <Link
-                      key={`${e.key}-${e.date}`}
-                      href={`/politics-ledger/${COUNTRY_KEY_TO_SLUG[e.key]}`}
-                      className={`shrink-0 w-64 p-3 rounded-lg border text-xs ${cardBg} hover:shadow-sm`}
-                    >
-                      <div className={`flex items-center gap-2 font-medium text-sm ${textPrimary}`}>
-                        {Flag && <Flag className="w-5 h-3.5 rounded-sm" />}
-                        {COUNTRY_DISPLAY_NAMES[e.key]}
-                        <span className={`ml-auto text-[11px] font-normal ${textMuted}`}>{e.date.slice(0, 7)}</span>
-                      </div>
-                      <div className={`mt-1 line-clamp-3 ${textSec}`}>{e.summary}</div>
-                    </Link>
-                  );
-                })}
+              <div
+                className={`results-ticker relative overflow-hidden rounded-lg border ${isDarkMode ? 'bg-gray-900/60 border-gray-700' : 'bg-white/70 border-indigo-100'}`}
+                role="region"
+                aria-label="Latest election results, scrolling ticker. Hover or focus to pause."
+              >
+                <div className="results-ticker-track flex py-2" style={{ animationDuration: `${Math.max(30, stats.recent.slice(0, 12).length * 7)}s` }}>
+                  {[...stats.recent.slice(0, 12), ...stats.recent.slice(0, 12)].map((e, i) => {
+                    const Flag = COUNTRY_FLAGS[e.key];
+                    const copy = i >= Math.min(12, stats.recent.length);
+                    return (
+                      <Link
+                        key={`${e.key}-${e.date}-${i}`}
+                        href={`/politics-ledger/${COUNTRY_KEY_TO_SLUG[e.key]}`}
+                        aria-hidden={copy || undefined}
+                        tabIndex={copy ? -1 : undefined}
+                        className={`shrink-0 w-72 mr-2 p-3 rounded-lg border text-xs ${cardBg} hover:shadow-sm`}
+                      >
+                        <div className={`flex items-center gap-2 font-medium text-sm ${textPrimary}`}>
+                          {Flag && <Flag className="w-5 h-3.5 rounded-sm" />}
+                          {COUNTRY_DISPLAY_NAMES[e.key]}
+                          <span className={`ml-auto text-[11px] font-normal ${textMuted}`}>{e.date.slice(0, 7)}</span>
+                        </div>
+                        <div className={`mt-1 line-clamp-2 ${textSec}`}>{e.summary}</div>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className={`absolute left-0 inset-y-0 w-10 pointer-events-none bg-gradient-to-r ${isDarkMode ? 'from-gray-900' : 'from-white'}`} />
+                <div className={`absolute right-0 inset-y-0 w-10 pointer-events-none bg-gradient-to-l ${isDarkMode ? 'from-gray-900' : 'from-white'}`} />
+                <style jsx>{`
+                  .results-ticker-track {
+                    width: max-content;
+                    animation: results-ticker-scroll linear infinite;
+                  }
+                  .results-ticker:hover .results-ticker-track,
+                  .results-ticker:focus-within .results-ticker-track {
+                    animation-play-state: paused;
+                  }
+                  @keyframes results-ticker-scroll {
+                    from { transform: translateX(0); }
+                    to { transform: translateX(-50%); }
+                  }
+                  @media (prefers-reduced-motion: reduce) {
+                    .results-ticker { overflow-x: auto; }
+                    .results-ticker-track { animation: none; }
+                  }
+                `}</style>
               </div>
             </div>
           )}
