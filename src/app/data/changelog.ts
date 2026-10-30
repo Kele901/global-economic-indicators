@@ -16,6 +16,20 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
   {
     date: '2026-10-30',
+    version: '3.1',
+    title: 'Insights, editor\u2019s summaries and editorial policy',
+    tags: ['feature', 'trust'],
+    highlights: [
+      'New Insights section with dated analysis pieces, starting with an October 2026 elections roundup and a look at where the world stands on human development',
+      'Every ledger and major dashboard now opens with an editor\u2019s summary: what the page shows, why it matters and what changed',
+      'Guides show when they were published and last revised',
+      'Country profiles open with a written at-a-glance summary of each country\u2019s government and development record',
+      'A new editorial policy explains how sources are chosen, how data is labelled and reviewed, and how to report a correction',
+      'The Politics Ledger\u2019s latest results now scroll as a ticker that pauses on hover',
+    ],
+  },
+  {
+    date: '2026-10-30',
     version: '3.0',
     title: 'Development Ledger',
     tags: ['ledger', 'feature', 'data', 'trust'],

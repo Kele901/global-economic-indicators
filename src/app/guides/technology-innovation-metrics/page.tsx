@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -27,6 +28,7 @@ export default function TechInnovationGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Technology and Innovation Metrics</h1>
+        <GuideByline slug="technology-innovation-metrics" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           How nations measure innovation, what R&amp;D and patent data reveal, and how to use our Technology page.
         </p>

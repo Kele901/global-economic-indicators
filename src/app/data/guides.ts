@@ -21,7 +21,41 @@ export interface Guide {
   level: GuideLevel;
   /** Approximate read time in minutes. */
   minutes: number;
+  /** ISO date the guide was first published. */
+  published: string;
+  /** ISO date of the last substantive content revision. */
+  updated: string;
 }
+
+// From each guide's git history. `updated` ignores sitewide theme and hydration
+// refactors that touched every page without changing the writing.
+const GUIDE_DATES: Record<string, { published: string; updated: string }> = {
+  'reading-economic-data': { published: '2026-02-27', updated: '2026-04-01' },
+  'gdp-and-national-accounts': { published: '2026-02-27', updated: '2026-02-27' },
+  'understanding-employment-data': { published: '2026-02-27', updated: '2026-02-27' },
+  'emerging-vs-developed-economies': { published: '2026-02-27', updated: '2026-02-27' },
+  'development-inequality': { published: '2026-03-03', updated: '2026-10-30' },
+  'understanding-interest-rates': { published: '2026-02-27', updated: '2026-02-27' },
+  'how-central-banks-work': { published: '2026-02-27', updated: '2026-02-27' },
+  'inflation-guide': { published: '2026-02-27', updated: '2026-02-27' },
+  'monetary-policy-decisions': { published: '2026-03-03', updated: '2026-03-03' },
+  'monetary-policy-regimes': { published: '2026-04-01', updated: '2026-04-01' },
+  'currencies-and-exchange-rates': { published: '2026-02-27', updated: '2026-02-27' },
+  'economic-cycles-explained': { published: '2026-02-27', updated: '2026-02-27' },
+  'business-cycle-indicators': { published: '2026-04-01', updated: '2026-04-01' },
+  'market-cycle-indicators': { published: '2026-04-01', updated: '2026-04-01' },
+  'kondratiev-long-waves': { published: '2026-04-01', updated: '2026-04-01' },
+  'minsky-financial-instability': { published: '2026-04-01', updated: '2026-04-01' },
+  'geopolitical-cycles': { published: '2026-04-01', updated: '2026-04-01' },
+  'global-trade-explained': { published: '2026-02-27', updated: '2026-02-27' },
+  'trade-networks': { published: '2026-03-03', updated: '2026-03-03' },
+  'government-debt-explained': { published: '2026-02-27', updated: '2026-02-27' },
+  'debt-sustainability': { published: '2026-03-03', updated: '2026-03-03' },
+  'technology-innovation-metrics': { published: '2026-02-27', updated: '2026-02-27' },
+  'digital-economy-and-ai': { published: '2026-02-27', updated: '2026-02-27' },
+  'economic-forecasting': { published: '2026-03-03', updated: '2026-03-03' },
+  'scenario-analysis': { published: '2026-03-03', updated: '2026-03-03' },
+};
 
 export const GUIDE_TOPICS: GuideTopic[] = [
   'Foundations',
@@ -33,7 +67,7 @@ export const GUIDE_TOPICS: GuideTopic[] = [
   'Forecasting',
 ];
 
-export const GUIDES: Guide[] = [
+const GUIDE_ENTRIES: Omit<Guide, 'published' | 'updated'>[] = [
   {
     slug: 'reading-economic-data',
     title: 'How to Read Economic Data',
@@ -260,6 +294,11 @@ export const GUIDES: Guide[] = [
     minutes: 9,
   },
 ];
+
+export const GUIDES: Guide[] = GUIDE_ENTRIES.map((g) => ({
+  ...g,
+  ...(GUIDE_DATES[g.slug] ?? { published: '2026-02-27', updated: '2026-02-27' }),
+}));
 // Note: the glossary lives at /glossary, not under /guides. The old
 // /guides/glossary route redirects there (see next.config.js).
 

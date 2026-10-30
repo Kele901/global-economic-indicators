@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -27,6 +28,7 @@ export default function MarketCycleIndicatorsGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Market Cycle Indicators</h1>
+        <GuideByline slug="market-cycle-indicators" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           How valuation ratios, sector behavior, global timing, and the yield curve help locate markets within the recurring rhythm from undervaluation through euphoria, stress, and recovery.
         </p>

@@ -254,6 +254,10 @@ Inputs:
               get in touch. We are committed to transparency and happy to clarify any aspect of our
               data processing approach.
             </p>
+            <p className="leading-relaxed mt-3">
+              How we choose sources, label curated and estimated data, review content and handle corrections is
+              set out in our <a href="/editorial-policy" className="text-blue-600 dark:text-blue-400 hover:underline">editorial policy</a>.
+            </p>
           </section>
         </div>
       </div>

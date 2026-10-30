@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import dynamic from 'next/dynamic';
 import CycleTimeline from '../components/CycleTimeline';
@@ -119,6 +120,7 @@ const EconomicCyclesPage = () => {
             helps contextualize current economic conditions and anticipate future shifts.
           </p>
         </div>
+        <PageTakeaways page="economic-cycles" isDarkMode={isDarkMode} />
 
         {/* Quick Stats */}
         <div className="flex justify-end mb-2">

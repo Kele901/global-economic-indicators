@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -27,6 +28,7 @@ export default function TradeNetworksGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Trade Networks &amp; Supply Chains</h1>
+        <GuideByline slug="trade-networks" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           How international trade connects economies, what trade balances reveal, why supply chain concentration matters, and how to read trade network visualizations.
         </p>

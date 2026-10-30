@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -27,6 +28,7 @@ export default function DevelopmentInequalityGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Human Development &amp; Inequality</h1>
+        <GuideByline slug="development-inequality" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Why GDP alone is insufficient, how the Human Development Index captures well-being, what the Gini coefficient reveals about inequality, and how sustainability metrics connect to development.
         </p>

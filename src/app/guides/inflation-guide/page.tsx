@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -27,6 +28,7 @@ export default function InflationGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Understanding Inflation</h1>
+        <GuideByline slug="inflation-guide" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           What drives price increases, how inflation is measured, and why central banks treat it as a primary policy target.
         </p>

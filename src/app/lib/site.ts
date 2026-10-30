@@ -22,3 +22,11 @@ export const CONTACT_EMAIL = 'hello@globaleconindicators.info';
 export function absoluteUrl(path: string): string {
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
+
+// schema.org publisher for Article structured data.
+export const PUBLISHER_JSONLD = {
+  '@type': 'Organization',
+  name: SITE_NAME,
+  url: absoluteUrl('/'),
+  logo: { '@type': 'ImageObject', url: absoluteUrl('/logo.png') },
+};

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { COUNTRY_SLUGS, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG } from '../../utils/countryMappings';
 import { POLITICS_BY_KEY, getEffectiveLeader, governmentSeatShare, type Leader } from '../../services/politicsCurated';
 import { withOgImage } from '../../lib/og';
+import { countryProfileRobots } from '../../lib/indexing';
 import { absoluteUrl } from '../../lib/site';
 import JsonLd from '../../components/JsonLd';
 
@@ -31,6 +32,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return withOgImage(canonical, {
     title: `${title} | Global Economic Indicators`,
     description,
+    robots: countryProfileRobots(COUNTRY_KEY_TO_SLUG[key]),
     keywords: `${name} politics, ${name} government, ${name} political parties, ${leader.name}, ${name} election, ${name} political system, ${name} political history`,
     alternates: { canonical },
     openGraph: {

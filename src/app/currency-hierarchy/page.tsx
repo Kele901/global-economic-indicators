@@ -6,6 +6,7 @@ import AdSense from '../components/AdSense';
 import { calculateCurrencyPairs } from '../services/forex';
 import { fetchAllCurrencyRates, type CurrencyRateHistory } from '../services/currencyRates';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import InfoPanel from '../components/InfoPanel';
 import SocialShareMenu from '../components/SocialShareMenu';
@@ -409,6 +410,7 @@ const CurrencyHierarchyPage = () => {
           </div>
         </div>
       </div>
+      <PageTakeaways page="currency-hierarchy" isDarkMode={isDarkMode} />
 
       {/* Live FX Ticker */}
       <div className="mb-6">

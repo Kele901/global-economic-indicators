@@ -52,10 +52,13 @@ const PAGE_ENTRIES: Entry[] = [
   { id: 'watchlist',         label: 'Watchlist & Alerts',     category: 'Page', href: '/watchlist' },
   { id: 'reports',           label: 'Report Builder',         category: 'Page', href: '/reports' },
   { id: 'embed-builder',     label: 'Embed Builder',          category: 'Page', href: '/embed-builder' },
+  { id: 'insights',          label: 'Insights',               category: 'Page', href: '/insights' },
+  { id: 'guides-index',      label: 'Guides',                 category: 'Page', href: '/guides' },
   { id: 'glossary',          label: 'Glossary',               category: 'Page', href: '/glossary' },
   { id: 'guides',            label: 'Reading Economic Data',  category: 'Page', href: '/guides/reading-economic-data' },
   { id: 'data-sources',      label: 'Data Sources',           category: 'Page', href: '/data-sources' },
   { id: 'about',             label: 'About',                  category: 'Page', href: '/about' },
+  { id: 'editorial-policy',  label: 'Editorial Policy',       category: 'Page', href: '/editorial-policy' },
 ];
 
 const COUNTRY_ENTRIES: Entry[] = COUNTRY_KEYS.map(k => ({

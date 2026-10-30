@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { fetchGlobalData } from '../services/worldbank';
 import { latestEntry } from '../utils/countryData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { useIsMobile } from '../hooks/useViewportSize';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -168,6 +169,7 @@ export default function InflationPage() {
             tab for city-level price comparisons including rent, groceries, and purchasing power indices.
           </p>
         </div>
+        <PageTakeaways page="inflation" isDarkMode={isDarkMode} />
 
         {loading && <LoadingSpinner />}
         {error && <ErrorMessage message={error} />}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -50,6 +51,7 @@ export default function KondratievLongWavesGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Kondratiev Long Waves</h1>
+        <GuideByline slug="kondratiev-long-waves" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           A guide to multi-decade &ldquo;super-cycles&rdquo; of technology and finance: Nikolai Kondratiev&apos;s original idea, the five long waves, seasonal metaphors, Carlota Perez&apos;s refinement, and why the framework still sparks debate today.
         </p>

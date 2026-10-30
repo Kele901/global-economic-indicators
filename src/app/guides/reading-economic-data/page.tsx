@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 import { GUIDES } from '../../data/guides';
@@ -27,6 +28,7 @@ export default function ReadingEconomicDataGuide() {
           <h1 className="text-3xl sm:text-4xl font-bold">How to Read Economic Data</h1>
           <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
         </div>
+        <GuideByline slug="reading-economic-data" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           A beginner-friendly introduction to interpreting charts, understanding key indicators, and making sense of the numbers on our platform.
         </p>

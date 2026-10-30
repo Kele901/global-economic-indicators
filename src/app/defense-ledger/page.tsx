@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData, type CountryData } from '../services/worldbank';
 import {
@@ -254,6 +255,7 @@ export default function DefenseLedgerPage() {
           <ChartMeta sourceId="sipri-military-spend-fallback" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="frozen" isDarkMode={isDarkMode} />
         </div>
+        <PageTakeaways page="defense" isDarkMode={isDarkMode} />
 
         <div className="mb-6 flex justify-end">
           <DataDownloadButton

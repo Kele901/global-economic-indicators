@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { useEffect, useState, useMemo } from 'react';
 import { CENTRAL_BANK_RATES } from '../data/currencyHierarchyData';
@@ -248,6 +249,7 @@ export default function MonetaryPolicyPage() {
             <a href="/guides/monetary-policy-decisions" className="text-blue-500 hover:underline ml-1">Learn more in our guide &rarr;</a>
           </p>
         </div>
+        <PageTakeaways page="monetary-policy" isDarkMode={isDarkMode} />
 
         {loading && (
           <div className="flex flex-col items-center gap-4 py-16">

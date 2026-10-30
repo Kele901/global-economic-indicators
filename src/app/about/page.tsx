@@ -3,6 +3,10 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import ThemeToggle from '../components/ThemeToggle';
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { formatLongDate } from '../lib/dates';
+
+const ABOUT_UPDATED = '2026-10-30';
 
 export default function AboutPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -22,10 +26,13 @@ export default function AboutPage() {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="max-w-4xl mx-auto p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-4 mb-8">
+        <div className="flex items-start justify-between gap-4 mb-2">
           <h1 className="text-3xl sm:text-4xl font-bold">About Global Economic Indicators</h1>
           <ThemeToggle isDarkMode={isDarkMode} className="mt-2" />
         </div>
+        <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          Last updated <time dateTime={ABOUT_UPDATED}>{formatLongDate(ABOUT_UPDATED)}</time>
+        </p>
 
         <div className="space-y-8">
           <section>
@@ -53,6 +60,14 @@ export default function AboutPage() {
             </p>
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               {[
+                {
+                  title: 'The Ledgers',
+                  desc: 'Chapter-by-chapter explainers on politics, human development, inequality, defence, climate, trade, migration, AI, health, energy, labour, debt and natural resources, each built from curated institutional datasets with sources on every chart.'
+                },
+                {
+                  title: 'Guides and Insights',
+                  desc: 'Plain-English guides to the concepts behind the data, from interest rates to Kondratiev waves, and dated Insights pieces that explain what recent figures show and why they matter.'
+                },
                 {
                   title: 'Economic Dashboard',
                   desc: 'Track GDP growth, unemployment, inflation, interest rates, government debt, and trade balances across 30+ countries with historical data from 1990 to present.'
@@ -175,6 +190,41 @@ export default function AboutPage() {
               All charts and visualizations are rendered client-side using Recharts, an open-source charting
               library built on React and D3. Maps use react-simple-maps for geographic visualizations. The
               application is built with Next.js and deployed on Vercel for global performance and reliability.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">How We Work</h2>
+            <p className="mb-4 text-base leading-relaxed">
+              The site is independently written and maintained. We do not take payment for coverage, and
+              advertising never influences what we publish or how data is presented.
+            </p>
+            <ul className={`list-disc pl-6 space-y-2 mb-4 text-base leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              <li>
+                <strong>Sourcing.</strong> Every chart names its source and edition. We use official statistics and
+                peer-reviewed research datasets, and label anything we have compiled or estimated ourselves as
+                &ldquo;curated&rdquo; or &ldquo;estimate&rdquo;.
+              </li>
+              <li>
+                <strong>Review.</strong> Curated tables are re-checked against their publishers when a new edition comes
+                out. Fast-moving data, such as who leads each government, is checked at least monthly, and each page
+                shows when its data was last verified.
+              </li>
+              <li>
+                <strong>Change log.</strong> Every significant addition or correction is recorded in the{' '}
+                <Link href="/changelog" className="text-blue-600 dark:text-blue-400 hover:underline">changelog</Link>.
+              </li>
+              <li>
+                <strong>Corrections.</strong> If you spot an error, tell us through the{' '}
+                <Link href="/contact" className="text-blue-600 dark:text-blue-400 hover:underline">contact page</Link>. We fix
+                confirmed errors promptly and record material corrections in the changelog.
+              </li>
+            </ul>
+            <p className="text-base leading-relaxed">
+              Read the full{' '}
+              <Link href="/editorial-policy" className="text-blue-600 dark:text-blue-400 hover:underline">editorial policy</Link>{' '}
+              and our{' '}
+              <Link href="/methodology" className="text-blue-600 dark:text-blue-400 hover:underline">methodology</Link>.
             </p>
           </section>
 

@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData } from '../services/worldbank';
 import {
@@ -164,6 +165,7 @@ export default function HealthLedgerPage() {
           <ChartMeta sourceId="health-ledger-curated" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
+        <PageTakeaways page="health" isDarkMode={isDarkMode} />
 
         <div id={slugify('Health Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <HealthSpendTicker isDarkMode={isDarkMode} />

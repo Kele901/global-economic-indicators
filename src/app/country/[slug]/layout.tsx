@@ -5,6 +5,7 @@ import {
   COUNTRY_KEY_TO_SLUG,
 } from '../../utils/countryMappings';
 import { withOgImage } from '../../lib/og';
+import { countryProfileRobots } from '../../lib/indexing';
 
 export function generateStaticParams() {
   return Object.values(COUNTRY_KEY_TO_SLUG).map((slug) => ({ slug }));
@@ -28,6 +29,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return withOgImage(canonical, {
     title: `${title} | Global Economic Indicators`,
     description,
+    robots: countryProfileRobots(COUNTRY_KEY_TO_SLUG[key]),
     keywords: `${name} economy, ${name} GDP, ${name} inflation rate, ${name} interest rates, ${name} unemployment, ${name} government debt, ${name} economic indicators`,
     alternates: { canonical },
     openGraph: {

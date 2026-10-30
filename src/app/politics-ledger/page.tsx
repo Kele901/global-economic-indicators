@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData } from '../services/worldbank';
 import {
@@ -199,6 +200,7 @@ export default function PoliticsLedgerPage() {
           <span className={`text-[11px] ${textMuted}`}>|</span>
           <ChartMeta sourceId="wb-wgi-suite" isDarkMode={isDarkMode} />
         </div>
+        <PageTakeaways page="politics" isDarkMode={isDarkMode} className="mt-4" />
 
         <div className="mb-6 flex justify-end">
           <DataDownloadButton

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -27,6 +28,7 @@ export default function BusinessCycleIndicatorsGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Real-Time Business Cycle Indicators</h1>
+        <GuideByline slug="business-cycle-indicators" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           How policymakers, investors, and businesses use forward-looking data&mdash;from the yield curve to PMIs&mdash;to gauge where the economy is headed before official recession calls arrive.
         </p>

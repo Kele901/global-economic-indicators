@@ -101,11 +101,13 @@ export default function RootLayout({
                       <a href="/about" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">About</a>
                       <a href="/contact" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Contact</a>
                       <a href="/methodology" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Methodology</a>
+                      <a href="/editorial-policy" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Editorial Policy</a>
                     </div>
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white transition-colors duration-200">Guides</h3>
                     <div className="flex flex-col gap-1.5 text-xs sm:text-sm">
+                      <a href="/insights" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200 font-medium">Insights: latest analysis</a>
                       <a href="/guides/reading-economic-data" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">How to Read Economic Data</a>
                       <a href="/guides/understanding-interest-rates" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Understanding Interest Rates</a>
                       <a href="/guides/inflation-guide" className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Understanding Inflation</a>

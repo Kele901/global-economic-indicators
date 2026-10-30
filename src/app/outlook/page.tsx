@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { fetchGlobalData, CountryData } from '../services/worldbank';
@@ -529,6 +530,7 @@ export default function OutlookPage() {
             <a href="/guides/economic-forecasting" className="text-blue-500 hover:underline ml-1">Learn more in our guide &rarr;</a>
           </p>
         </div>
+        <PageTakeaways page="outlook" isDarkMode={isDarkMode} />
 
         {loading && (
           <div className="flex flex-col items-center gap-4 py-16">

@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData } from '../services/worldbank';
 import {
@@ -164,6 +165,7 @@ export default function LaborLedgerPage() {
           <DataQualityBadge flag="estimate" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
+        <PageTakeaways page="labor" isDarkMode={isDarkMode} />
 
         <div id={slugify('Labor Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <WageTicker isDarkMode={isDarkMode} />

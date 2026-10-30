@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState, type ComponentType } from 'r
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import Breadcrumbs from '../components/Breadcrumbs';
 import RelatedPages from '../components/RelatedPages';
@@ -205,6 +206,7 @@ export default function DevelopmentPage() {
         <div className="mt-4">
           <ChapterMeta isDarkMode={isDarkMode} sourceIds={['undp-hdr', 'wb-development-suite', 'wb-poverty', 'development-curated']} flags={['curated', 'estimate']} />
         </div>
+        <PageTakeaways page="development" isDarkMode={isDarkMode} className="mt-4" />
 
         <div id={slugify('Development Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-6 ${t.hero}`}>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

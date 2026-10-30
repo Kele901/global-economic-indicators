@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import GuideByline from '../../components/GuideByline';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useEffect } from 'react';
 
@@ -27,6 +28,7 @@ export default function MinskyFinancialInstabilityGuide() {
           <ThemeToggle isDarkMode={isDarkMode} />
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-4">Minsky&apos;s Financial Instability Hypothesis</h1>
+        <GuideByline slug="minsky-financial-instability" isDarkMode={isDarkMode} />
         <p className={`text-sm mb-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Why long stretches of calm in finance can plant the seeds of crisis, how hedge and Ponzi finance differ, and what policymakers watch for when credit runs ahead of the real economy.
         </p>

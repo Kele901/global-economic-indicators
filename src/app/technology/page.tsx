@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -368,6 +369,7 @@ const TechnologyPage = () => {
             Use the tabs below to navigate between different aspects of the global technology landscape.
           </p>
         </div>
+        <PageTakeaways page="technology" isDarkMode={isDarkMode} />
 
         {loading && (
           <div className="flex items-center justify-center py-16">

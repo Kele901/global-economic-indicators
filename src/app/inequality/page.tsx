@@ -13,6 +13,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
 import { fetchGlobalData } from '../services/worldbank';
 import { latestEntry } from '../utils/countryData';
@@ -210,6 +211,7 @@ export default function InequalityPage() {
           <DataQualityBadge flag="estimate" isDarkMode={isDarkMode} />
           <DataQualityBadge flag="curated" isDarkMode={isDarkMode} />
         </div>
+        <PageTakeaways page="inequality" isDarkMode={isDarkMode} />
 
         <div id={slugify('Inequality Ledger key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-10 ${heroBg}`}>
           <GiniTicker isDarkMode={isDarkMode} gini={gini} />

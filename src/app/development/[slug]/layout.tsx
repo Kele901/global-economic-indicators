@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { COUNTRY_SLUGS, COUNTRY_DISPLAY_NAMES, COUNTRY_KEY_TO_SLUG } from '../../utils/countryMappings';
 import { HDR, HDR_DATA_YEAR, getIncomeGroup } from '../../services/developmentCurated';
 import { withOgImage } from '../../lib/og';
+import { countryProfileRobots } from '../../lib/indexing';
 import { absoluteUrl } from '../../lib/site';
 import JsonLd from '../../components/JsonLd';
 
@@ -32,6 +33,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return withOgImage(canonical, {
     title: `${title} | Global Economic Indicators`,
     description,
+    robots: countryProfileRobots(COUNTRY_KEY_TO_SLUG[key]),
     keywords: `${name} human development index, ${name} HDI, ${name} poverty, ${name} life expectancy, ${name} SDG progress, ${name} development`,
     alternates: { canonical },
     openGraph: { type: 'article', title, description, url: canonical },
