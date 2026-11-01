@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 import { costOfLivingData } from '../../data/costOfLiving';
 import SocialShareMenu from '../SocialShareMenu';
 import { slugify } from '../../lib/share';
+import { theme } from './ui';
 
 const TABLE_TITLE = 'Cost of living index by city, 2026 (New York = 100)';
 
@@ -52,19 +53,20 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
     }
   };
 
+  const t = theme(isDarkMode);
   return (
-    <>
-      <div id={slugify(TABLE_TITLE)} className={`rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow overflow-hidden`}>
-        <div className={`flex items-center justify-between gap-2 flex-wrap px-4 py-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <h3 className="text-base font-semibold">{TABLE_TITLE}</h3>
+    <div className="space-y-6">
+      <div id={slugify(TABLE_TITLE)} data-chart-container data-chart-title={TABLE_TITLE} className={`rounded-xl border overflow-hidden ${t.card}`}>
+        <div className={`flex items-center justify-between gap-2 flex-wrap px-4 py-3 border-b ${t.border}`}>
+          <h3 className={`text-base sm:text-lg font-semibold ${t.text}`}>{TABLE_TITLE}</h3>
           <SocialShareMenu title={TABLE_TITLE} subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className={`w-full text-sm ${t.text}`}>
             <caption className="sr-only">
               Cost of living index by city, 2026, with New York City as the baseline of 100.
             </caption>
-            <thead className={isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}>
+            <thead className={isDarkMode ? 'bg-gray-900/60' : 'bg-gray-50'}>
               <tr>
                 {COLUMNS.map(col => (
                   <th
@@ -103,9 +105,9 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
                         ? 'bg-gray-800'
                         : 'bg-white'
                       : isDarkMode
-                        ? 'bg-gray-750'
+                        ? 'bg-gray-900/40'
                         : 'bg-gray-50'
-                  } hover:bg-opacity-80`}
+                  }`}
                 >
                   <td className="px-4 py-3 font-medium">{row.rank}</td>
                   <td className="px-4 py-3 font-medium">{row.city}</td>
@@ -136,9 +138,9 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div id={slugify('Most Expensive Cities')} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+        <div id={slugify('Most Expensive Cities')} className={`p-5 rounded-xl border ${t.card}`}>
           <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
-            <h3 className="text-lg font-bold">Most Expensive Cities</h3>
+            <h3 className={`text-base sm:text-lg font-semibold ${t.text}`}>Most Expensive Cities</h3>
             <SocialShareMenu title="Most Expensive Cities" subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
           </div>
           <ul className={`space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -148,9 +150,9 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
             <li><span className="font-semibold">San Francisco, USA</span> - Tech hub with high costs (97.6)</li>
           </ul>
         </div>
-        <div id={slugify('Best Purchasing Power')} className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+        <div id={slugify('Best Purchasing Power')} className={`p-5 rounded-xl border ${t.card}`}>
           <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
-            <h3 className="text-lg font-bold">Best Purchasing Power</h3>
+            <h3 className={`text-base sm:text-lg font-semibold ${t.text}`}>Best Purchasing Power</h3>
             <SocialShareMenu title="Best Purchasing Power" subject="dataset" isDarkMode={isDarkMode} className="shrink-0" />
           </div>
           <ul className={`space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -162,9 +164,7 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
         </div>
       </div>
 
-      <div
-        className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'} border`}
-      >
+      <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'}`}>
         <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           <span className="font-semibold">Data Source:</span> This data is sourced from{' '}
           <a
@@ -179,6 +179,6 @@ export default function CostOfLivingOverview({ isDarkMode }: { isDarkMode: boole
           shows a representative sample of major global cities. Visit Numbeo for the complete dataset with 400+ cities.
         </p>
       </div>
-    </>
+    </div>
   );
 }

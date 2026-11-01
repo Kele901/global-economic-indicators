@@ -1,4 +1,4 @@
-import { CountryData } from './worldbank';
+import type { CountryData } from './worldbank';
 
 export interface InflationCalculation {
   originalAmount: number;
@@ -150,8 +150,8 @@ export function calculateInflation(
     throw new Error('Amount must be greater than zero');
   }
 
-  // Convert historical currency to Euros if needed
-  const conversion = convertToEuros(originalAmount, country, startYear);
+  // Convert historical currency to Euros if the period spans adoption
+  const conversion = convertToEuros(originalAmount, country, startYear, endYear);
   const amountInEuros = conversion.convertedAmount;
 
   // Get CPI values for both years
@@ -247,21 +247,45 @@ const EURO_ADOPTION_COUNTRIES = {
     oldCurrency: 'fr',
     oldName: 'Belgian Franc',
     euroConversionRate: 40.3399 // 1 EUR = 40.3399 BEF
+  },
+  Greece: {
+    year: 2001,
+    oldCurrency: 'Dr',
+    oldName: 'Greek Drachma',
+    euroConversionRate: 340.75 // 1 EUR = 340.75 GRD
   }
 };
 
+export type EuroAdoption = (typeof EURO_ADOPTION_COUNTRIES)[keyof typeof EURO_ADOPTION_COUNTRIES];
+
+export function euroAdoption(country: string): EuroAdoption | null {
+  return EURO_ADOPTION_COUNTRIES[country as keyof typeof EURO_ADOPTION_COUNTRIES] ?? null;
+}
+
+/**
+ * Old-currency units per euro when the period from `fromYear` to `toYear` spans
+ * the country's euro adoption, otherwise 1.
+ */
+export function euroConversionRate(country: string, fromYear: number, toYear: number): number {
+  const adoption = euroAdoption(country);
+  return adoption && fromYear < adoption.year && toYear >= adoption.year ? adoption.euroConversionRate : 1;
+}
+
 /**
  * Convert historical currency amount to Euros if needed
- * For Euro adoption countries before 2002, converts using official fixed rates
+ * For Euro adoption countries before adoption, converts using official fixed rates.
+ * When `toYear` is given and is also before adoption, no conversion happens: both
+ * ends of the period are in the old currency.
  */
 export function convertToEuros(
   amount: number,
   country: string,
-  year: number
+  year: number,
+  toYear?: number
 ): { convertedAmount: number; wasConverted: boolean; rate: number } {
-  const adoption = EURO_ADOPTION_COUNTRIES[country as keyof typeof EURO_ADOPTION_COUNTRIES];
+  const adoption = euroAdoption(country);
   
-  if (adoption && year < adoption.year) {
+  if (adoption && year < adoption.year && (toYear === undefined || toYear >= adoption.year)) {
     // Convert from old currency to Euros using official fixed rate
     const convertedAmount = amount / adoption.euroConversionRate;
     return {
@@ -291,40 +315,80 @@ export function getCurrencySymbol(country: string, year?: number): string {
     }
   }
 
-  // Default currency map (current currencies)
-  const currencyMap: { [key: string]: string } = {
-    USA: '$',
-    UK: '£',
-    Canada: 'C$',
-    France: '€',
-    Germany: '€',
-    Italy: '€',
-    Spain: '€',
-    Japan: '¥',
-    China: '¥',
-    Australia: 'A$',
-    Mexico: 'MX$',
-    SouthKorea: '₩',
-    Sweden: 'kr',
-    Switzerland: 'CHF',
-    Turkey: '₺',
-    Nigeria: '₦',
-    Russia: '₽',
-    Brazil: 'R$',
-    Chile: 'CLP$',
-    Argentina: 'ARS$',
-    India: '₹',
-    Norway: 'kr',
-    Netherlands: '€',
-    Portugal: '€',
-    Belgium: '€',
-    Indonesia: 'Rp',
-    SouthAfrica: 'R',
-    Poland: 'zł',
-    SaudiArabia: 'SR',
-    Egypt: 'E£'
-  };
-  return currencyMap[country] || '$';
+  return CURRENCIES[country]?.symbol ?? '$';
+}
+
+/** Current currency of every roster country, keyed by wbKey. */
+export const CURRENCIES: Record<string, { symbol: string; name: string; decimals?: number }> = {
+  USA: { symbol: '$', name: 'US Dollar' },
+  Canada: { symbol: 'C$', name: 'Canadian Dollar' },
+  Mexico: { symbol: 'MX$', name: 'Mexican Peso' },
+  Brazil: { symbol: 'R$', name: 'Brazilian Real' },
+  Chile: { symbol: 'CLP$', name: 'Chilean Peso', decimals: 0 },
+  Argentina: { symbol: 'ARS$', name: 'Argentine Peso' },
+  Colombia: { symbol: 'COL$', name: 'Colombian Peso', decimals: 0 },
+  UK: { symbol: '£', name: 'British Pound' },
+  France: { symbol: '€', name: 'Euro' },
+  Germany: { symbol: '€', name: 'Euro' },
+  Italy: { symbol: '€', name: 'Euro' },
+  Spain: { symbol: '€', name: 'Euro' },
+  Sweden: { symbol: 'kr', name: 'Swedish Krona' },
+  Switzerland: { symbol: 'CHF', name: 'Swiss Franc' },
+  Norway: { symbol: 'kr', name: 'Norwegian Krone' },
+  Netherlands: { symbol: '€', name: 'Euro' },
+  Portugal: { symbol: '€', name: 'Euro' },
+  Belgium: { symbol: '€', name: 'Euro' },
+  Poland: { symbol: 'zł', name: 'Polish Złoty' },
+  Greece: { symbol: '€', name: 'Euro' },
+  Russia: { symbol: '₽', name: 'Russian Ruble' },
+  Ukraine: { symbol: '₴', name: 'Ukrainian Hryvnia' },
+  Turkey: { symbol: '₺', name: 'Turkish Lira' },
+  SaudiArabia: { symbol: 'SR', name: 'Saudi Riyal' },
+  Egypt: { symbol: 'E£', name: 'Egyptian Pound' },
+  Israel: { symbol: '₪', name: 'Israeli New Shekel' },
+  Iran: { symbol: 'IRR', name: 'Iranian Rial', decimals: 0 },
+  UAE: { symbol: 'AED', name: 'UAE Dirham' },
+  Qatar: { symbol: 'QAR', name: 'Qatari Riyal' },
+  Morocco: { symbol: 'MAD', name: 'Moroccan Dirham' },
+  Nigeria: { symbol: '₦', name: 'Nigerian Naira' },
+  SouthAfrica: { symbol: 'R', name: 'South African Rand' },
+  Kenya: { symbol: 'KSh', name: 'Kenyan Shilling' },
+  Ethiopia: { symbol: 'Br', name: 'Ethiopian Birr' },
+  Ghana: { symbol: 'GH₵', name: 'Ghanaian Cedi' },
+  Japan: { symbol: '¥', name: 'Japanese Yen', decimals: 0 },
+  Australia: { symbol: 'A$', name: 'Australian Dollar' },
+  SouthKorea: { symbol: '₩', name: 'South Korean Won', decimals: 0 },
+  China: { symbol: '¥', name: 'Chinese Yuan' },
+  India: { symbol: '₹', name: 'Indian Rupee' },
+  Indonesia: { symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 },
+  Singapore: { symbol: 'S$', name: 'Singapore Dollar' },
+  Vietnam: { symbol: '₫', name: 'Vietnamese Dong', decimals: 0 },
+  Thailand: { symbol: '฿', name: 'Thai Baht' },
+  Philippines: { symbol: '₱', name: 'Philippine Peso' },
+  Pakistan: { symbol: 'Rs', name: 'Pakistani Rupee' },
+  Bangladesh: { symbol: '৳', name: 'Bangladeshi Taka' },
+};
+
+/**
+ * Currencies that removed zeros. The CPI index runs straight through these, so
+ * results are in today's units; an amount from before the change should be
+ * entered in new units (divide old notes by `factor`).
+ */
+export const REDENOMINATIONS: Record<string, { year: number; factor: number; oldName: string }> = {
+  Israel: { year: 1985, factor: 1_000, oldName: 'old shekels' },
+  Argentina: { year: 1992, factor: 10_000, oldName: 'australes' },
+  Mexico: { year: 1993, factor: 1_000, oldName: 'old pesos' },
+  Brazil: { year: 1994, factor: 2_750, oldName: 'cruzeiros reais' },
+  Poland: { year: 1995, factor: 10_000, oldName: 'old złoty' },
+  Ukraine: { year: 1996, factor: 100_000, oldName: 'karbovanets' },
+  Russia: { year: 1998, factor: 1_000, oldName: 'old rubles' },
+  Turkey: { year: 2005, factor: 1_000_000, oldName: 'old lira' },
+  Ghana: { year: 2007, factor: 10_000, oldName: 'old cedis' },
+};
+
+export function redenominationIn(country: string, fromYear: number, toYear: number) {
+  const r = REDENOMINATIONS[country];
+  return r && fromYear < r.year && toYear >= r.year ? r : null;
 }
 
 /**
@@ -339,54 +403,38 @@ export function getCurrencyName(country: string, year?: number): string {
     }
   }
 
-  // Default currency names (current currencies)
-  const currencyNames: { [key: string]: string } = {
-    USA: 'US Dollar',
-    UK: 'British Pound',
-    Canada: 'Canadian Dollar',
-    France: 'Euro',
-    Germany: 'Euro',
-    Italy: 'Euro',
-    Spain: 'Euro',
-    Japan: 'Japanese Yen',
-    China: 'Chinese Yuan',
-    Australia: 'Australian Dollar',
-    Mexico: 'Mexican Peso',
-    SouthKorea: 'South Korean Won',
-    Sweden: 'Swedish Krona',
-    Switzerland: 'Swiss Franc',
-    Turkey: 'Turkish Lira',
-    Nigeria: 'Nigerian Naira',
-    Russia: 'Russian Ruble',
-    Brazil: 'Brazilian Real',
-    Chile: 'Chilean Peso',
-    Argentina: 'Argentine Peso',
-    India: 'Indian Rupee',
-    Norway: 'Norwegian Krone',
-    Netherlands: 'Euro',
-    Portugal: 'Euro',
-    Belgium: 'Euro',
-    Indonesia: 'Indonesian Rupiah',
-    SouthAfrica: 'South African Rand',
-    Poland: 'Polish Złoty',
-    SaudiArabia: 'Saudi Riyal',
-    Egypt: 'Egyptian Pound'
-  };
-  return currencyNames[country] || 'Currency';
+  return CURRENCIES[country]?.name ?? 'Currency';
 }
+
+// Alphabetic symbols ("CHF", "kr", "Rp") read better with a space before the number.
+const withSymbol = (symbol: string, digits: string) => (/\p{L}$/u.test(symbol) ? `${symbol} ${digits}` : `${symbol}${digits}`);
 
 /**
  * Format currency value with appropriate symbol and decimals for a specific year
  */
 export function formatCurrency(value: number, country: string, year?: number): string {
   const symbol = getCurrencySymbol(country, year);
-  // Some currencies don't use decimal places in everyday use
-  const decimals = ['SouthKorea', 'Japan', 'Indonesia'].includes(country) ? 0 : 2;
-  
-  return `${symbol}${value.toLocaleString('en-US', {
+  // Some currencies don't use decimal places in everyday use; large sums drop cents too.
+  const decimals = (CURRENCIES[country]?.decimals ?? 2) === 0 || Math.abs(value) >= 1e6 ? 0 : 2;
+  const sign = value < 0 ? '-' : '';
+  return sign + withSymbol(symbol, Math.abs(value).toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
-  })}`;
+  }));
+}
+
+/** Short form for chart axes: "$1.2k", "₺3.4m", "IRR 2.1bn". */
+export function formatCurrencyCompact(value: number, country: string, year?: number): string {
+  const symbol = getCurrencySymbol(country, year);
+  const a = Math.abs(value);
+  const scaled =
+    a >= 1e12 ? `${(value / 1e12).toFixed(1)}tn`
+    : a >= 1e9 ? `${(value / 1e9).toFixed(1)}bn`
+    : a >= 1e6 ? `${(value / 1e6).toFixed(1)}m`
+    : a >= 1e4 ? `${(value / 1e3).toFixed(0)}k`
+    : a >= 1e3 ? `${(value / 1e3).toFixed(1)}k`
+    : value.toFixed(a >= 10 || a === 0 ? 0 : a >= 1 ? 1 : 2);
+  return withSymbol(symbol, scaled);
 }
 
 /**

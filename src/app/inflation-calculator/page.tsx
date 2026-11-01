@@ -1,354 +1,179 @@
-"use client";
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import { useEffect, useState, type ReactNode } from 'react';
+import Link from 'next/link';
 import { fetchGlobalData } from '../services/worldbank';
+import type { CountryData } from '../services/worldbank';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import ThemeToggle from '../components/ThemeToggle';
-import LoadingSpinner from '../components/LoadingSpinner';
+import Breadcrumbs from '../components/Breadcrumbs';
+import RelatedPages from '../components/RelatedPages';
+import BulkChartDownload from '../components/BulkChartDownload';
+import SocialShareMenu from '../components/SocialShareMenu';
 import ErrorMessage from '../components/ErrorMessage';
+import SkeletonCard from '../components/SkeletonCard';
 import InflationCalculator from '../components/InflationCalculator';
-import { GB, US, CA, FR, DE, IT, JP, AU, MX, KR, ES, SE, CH, TR, NG, CN, RU, BR, CL, AR, IN, NO, NL, PT, BE, ID, ZA, PL, SA, EG } from 'country-flag-icons/react/3x2';
+import { ChapterMeta, theme } from '../components/inflation/ui';
 
-const countryFlags: { [key: string]: React.ComponentType<any> } = {
-  UK: GB, USA: US, Canada: CA, France: FR, Germany: DE, Italy: IT, Japan: JP,
-  Australia: AU, Mexico: MX, SouthKorea: KR, Spain: ES, Sweden: SE, Switzerland: CH,
-  Turkey: TR, Nigeria: NG, China: CN, Russia: RU, Brazil: BR, Chile: CL,
-  Argentina: AR, India: IN, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
-  Indonesia: ID, SouthAfrica: ZA, Poland: PL, SaudiArabia: SA, Egypt: EG
-};
+function Explainer({ isDarkMode, title, children }: { isDarkMode: boolean; title: string; children: ReactNode }) {
+  const t = theme(isDarkMode);
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`rounded-xl border overflow-hidden ${t.card}`}>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className={`w-full px-5 py-4 flex items-center justify-between gap-3 text-left transition-colors ${isDarkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}`}
+      >
+        <h3 className={`text-base sm:text-lg font-semibold ${t.text}`}>{title}</h3>
+        <svg className={`w-5 h-5 shrink-0 transition-transform ${open ? 'rotate-180' : ''} ${t.textSec}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && <div className={`px-5 pb-5 pt-4 border-t text-sm space-y-4 ${t.border} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{children}</div>}
+    </div>
+  );
+}
 
 export default function InflationCalculatorPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
-  const [loading, setLoading] = useState(true);
+  const [cpiData, setCpiData] = useState<CountryData[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [cpiData, setCpiData] = useState<any[]>([]);
-  const [showHowItWorks, setShowHowItWorks] = useState(false);
-  const [showUnderstanding, setShowUnderstanding] = useState(false);
-  const [showAccuracy, setShowAccuracy] = useState(false);
 
   useEffect(() => {
-    // Apply theme changes to DOM
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.body.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-      document.body.classList.remove('dark');
-    }
-    
-    // Dispatch event for other components
-    window.dispatchEvent(new Event('themeChange'));
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchGlobalData();
-        setCpiData(data.cpiData);
-      } catch (err) {
-        console.error('Error loading CPI data:', err);
-        setError('Failed to load inflation data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
+    fetchGlobalData()
+      .then((data) => setCpiData(data.cpiData))
+      .catch(() => setError('Failed to load inflation data. Please try again later.'));
   }, []);
 
+  const t = theme(isDarkMode);
+  const link = isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-700 hover:text-blue-800';
+  const inset = `rounded-lg border p-4 ${t.inset}`;
+  const code = `mt-2 rounded-md px-3 py-2 font-mono text-xs sm:text-sm ${isDarkMode ? 'bg-gray-950 text-gray-200' : 'bg-white text-gray-800 border border-gray-200'}`;
+
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4">
-            <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
-              Multi-Country Inflation Calculator
-            </h1>
+    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <Breadcrumbs isDarkMode={isDarkMode} />
+
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
+          <div>
+            <Link href="/inflation" className={`inline-block text-[11px] uppercase tracking-[0.2em] mb-2 ${link}`}>
+              &larr; Inflation &amp; Cost of Living
+            </Link>
+            <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 ${t.text}`}>Inflation Calculator</h1>
+            <p className={`text-base sm:text-lg max-w-3xl ${t.textSec}`}>
+              See what an amount of money from one year is worth in another for 47 economies, compare how far the same amount went in up
+              to four countries, or work backwards from today. For the bigger picture on why prices move, see{' '}
+              <Link href="/inflation" className={`underline underline-offset-2 ${link}`}>
+                inflation around the world
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <BulkChartDownload variant="primary" size="sm" />
+            <SocialShareMenu title="Inflation Calculator" isDarkMode={isDarkMode} />
             <ThemeToggle isDarkMode={isDarkMode} />
           </div>
-          <p className={`text-base sm:text-lg ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-600'
-          }`}>
-            See how the value of money has changed over time across different economies. 
-            Understand the impact of inflation on your purchasing power.
+        </div>
+
+        <ChapterMeta isDarkMode={isDarkMode} sourceIds={['wb-cpi-index']} />
+
+        <div className={`rounded-xl border p-4 sm:p-5 mb-6 ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-blue-900/30 border-gray-700' : 'bg-gradient-to-br from-blue-50 via-white to-amber-50 border-blue-100'}`}>
+          <h2 className={`text-base sm:text-lg font-semibold mb-2 ${t.text}`}>How the inflation calculator works</h2>
+          <p className={`text-sm ${t.textSec}`}>
+            Enter an amount, a country and two years. The calculator scales the amount by the change in that country&rsquo;s consumer price
+            index (CPI) between the years, using World Bank data (FRED for the United States). <strong>Value over time</strong> carries an
+            amount forward, <strong>Compare countries</strong> carries the same amount through up to four economies side by side, and{' '}
+            <strong>Reverse</strong> tells you what a past amount had to be to match a sum today. Every result comes with a shrinking-banknote
+            picture, the years prices doubled and a year-by-year table you can download.
           </p>
         </div>
 
-        {/* Static intro content - always visible for SEO */}
-        <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
-          <h2 className="text-lg sm:text-xl font-semibold mb-3">How the Inflation Calculator Works</h2>
-          <p className={`text-sm sm:text-base mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            This calculator shows you the real impact of inflation on purchasing power over time.
-            Enter an amount, select a base country and year, and see what that money would be worth
-            in a different year &mdash; or compare the same amount across multiple economies. The
-            calculations use official consumer price index (CPI) data from the World Bank and
-            national statistical agencies to provide accurate historical purchasing power comparisons.
-          </p>
-          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Select multiple countries to compare how inflation has affected different currencies.
-            Use the chart view to visualize purchasing power erosion over your selected time period.
-          </p>
-        </div>
+        {error && <ErrorMessage message={error} />}
+        {!cpiData && !error && <SkeletonCard height="h-[520px]" label="Loading price data" />}
+        {cpiData && <InflationCalculator cpiData={cpiData} isDarkMode={isDarkMode} />}
 
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <LoadingSpinner />
-          </div>
-        )}
-        {error && (
-          <div className="py-8">
-            <ErrorMessage message={error} />
-          </div>
-        )}
-
-        {!loading && !error && (
-        <>
-        {/* Calculator */}
-        <InflationCalculator
-          cpiData={cpiData}
-          isDarkMode={isDarkMode}
-          countryFlags={countryFlags}
-        />
-
-        {/* Information Sections */}
-        <div className="mt-8 space-y-4">
-          {/* How the Calculator Works */}
-          <div className={`rounded-lg shadow-lg overflow-hidden ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
-            <button
-              onClick={() => setShowHowItWorks(!showHowItWorks)}
-              className={`w-full px-6 py-4 text-left flex justify-between items-center ${
-                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
-              }`}
-            >
-              <h3 className={`text-lg font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                How the Inflation Calculator Works
-              </h3>
-              <svg
-                className={`w-5 h-5 transform transition-transform ${
-                  showHowItWorks ? 'rotate-180' : ''
-                } ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {showHowItWorks && (
-              <div className={`px-6 py-4 border-t ${
-                isDarkMode ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-700'
-              }`}>
-                <p className="mb-4">
-                  Our inflation calculator works for amounts between 1 and 1 trillion in any supported currency.
-                </p>
-                <p className="mb-4">
-                  For example, imagine you want to know what goods and services costing $23 in 1975 
-                  would have cost in 1985:
-                </p>
-                <div className={`p-4 rounded-lg mb-4 ${
-                  isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
-                }`}>
-                  <p className="mb-2">&bull; The price index for 1975 = 17.78</p>
-                  <p className="mb-2">&bull; The price index for 1985 = 44.6</p>
-                  <p className="mb-4">
-                    The calculator increases the cost in 1975 by the change in prices between 
-                    1975 and 1985 with this formula:
-                  </p>
-                  <div className={`p-3 rounded font-mono text-sm ${
-                    isDarkMode ? 'bg-gray-800' : 'bg-white'
-                  }`}>
-                    Cost in 1985 = Cost in 1975 &times; (1985 CPI / 1975 CPI)
-                    <br />
-                    $57.68 = $23 &times; (44.6 / 17.78)
-                  </div>
-                </div>
-                <p>
-                  So the cost in 1985 of the same goods and services has risen to $57.68.
-                </p>
+        <div className="mt-10 space-y-3">
+          <Explainer isDarkMode={isDarkMode} title="How the Inflation Calculator Works">
+            <p>The calculator works for amounts up to one quadrillion in any supported currency.</p>
+            <p>For example, imagine you want to know what goods and services costing $23 in 1975 would have cost in 1985:</p>
+            <div className={inset}>
+              <ul className="space-y-1">
+                <li>&bull; The price index for 1975 = 17.78</li>
+                <li>&bull; The price index for 1985 = 44.6</li>
+              </ul>
+              <p className="mt-3">The calculator increases the 1975 cost by the change in prices between 1975 and 1985:</p>
+              <div className={code}>
+                Cost in 1985 = Cost in 1975 &times; (1985 CPI / 1975 CPI)
+                <br />
+                $57.68 = $23 &times; (44.6 / 17.78)
               </div>
-            )}
-          </div>
+            </div>
+            <p>So the cost in 1985 of the same goods and services has risen to $57.68. Reverse mode runs the same formula the other way round.</p>
+          </Explainer>
 
-          {/* Understanding Your Results */}
-          <div className={`rounded-lg shadow-lg overflow-hidden ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
-            <button
-              onClick={() => setShowUnderstanding(!showUnderstanding)}
-              className={`w-full px-6 py-4 text-left flex justify-between items-center ${
-                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
-              }`}
-            >
-              <h3 className={`text-lg font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                Understanding Your Results
-              </h3>
-              <svg
-                className={`w-5 h-5 transform transition-transform ${
-                  showUnderstanding ? 'rotate-180' : ''
-                } ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {showUnderstanding && (
-              <div className={`px-6 py-4 border-t ${
-                isDarkMode ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-700'
-              }`}>
-                <p className="mb-4">
-                  This calculator shows how the value of money changes. Prices for things we buy 
-                  tend to go up over time, which is called inflation.
-                </p>
-                <p className="mb-4">
-                  When prices go up, the same amount of money buys you less stuff. This is a 
-                  decrease in &apos;purchasing power&apos;.
-                </p>
-                <div className={`p-4 rounded-lg ${
-                  isDarkMode ? 'bg-gray-700' : 'bg-blue-50'
-                }`}>
-                  <h4 className={`font-semibold mb-2 ${
-                    isDarkMode ? 'text-blue-400' : 'text-blue-900'
-                  }`}>
-                    Average Inflation Rate
-                  </h4>
-                  <p className="mb-3">
-                    The calculator also shows the average yearly inflation rate between two years.
-                    For example, if you compare 1975 to 1985, the formula is:
-                  </p>
-                  <div className={`p-3 rounded font-mono text-sm ${
-                    isDarkMode ? 'bg-gray-800' : 'bg-white'
-                  }`}>
-                    Average Inflation = (((CPI_end / CPI_start) ^ (1 / years)) - 1) &times; 100
-                  </div>
-                </div>
-                <div className={`mt-4 p-4 rounded-lg ${
-                  isDarkMode ? 'bg-gray-700' : 'bg-red-50'
-                }`}>
-                  <h4 className={`font-semibold mb-2 ${
-                    isDarkMode ? 'text-red-400' : 'text-red-900'
-                  }`}>
-                    Deflation
-                  </h4>
-                  <p>
-                    If prices fell between the two years you selected, average inflation will be 
-                    negative. This is called deflation. For example, prices fell in almost every 
-                    year between 1920 and 1933, resulting in negative inflation.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+          <Explainer isDarkMode={isDarkMode} title="Understanding Your Results">
+            <p>
+              Prices for the things we buy tend to go up over time, which is called inflation. When prices go up, the same amount of money buys
+              less: a fall in &lsquo;purchasing power&rsquo;. The shrinking banknote shows this directly, with each note&rsquo;s area matching what it
+              still buys.
+            </p>
+            <div className={inset}>
+              <h4 className={`font-semibold mb-1 ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>Average inflation rate</h4>
+              <p>The calculator also shows the average yearly inflation rate between the two years:</p>
+              <div className={code}>Average Inflation = (((CPI_end / CPI_start) ^ (1 / years)) - 1) &times; 100</div>
+            </div>
+            <div className={inset}>
+              <h4 className={`font-semibold mb-1 ${isDarkMode ? 'text-rose-300' : 'text-rose-800'}`}>Deflation</h4>
+              <p>
+                If prices fell between the two years, average inflation is negative. This is called deflation: Japan saw it for long stretches
+                after the late 1990s, and the cash line in the value chart rises instead of falling.
+              </p>
+            </div>
+          </Explainer>
 
-          {/* Data Accuracy */}
-          <div className={`rounded-lg shadow-lg overflow-hidden ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
-            <button
-              onClick={() => setShowAccuracy(!showAccuracy)}
-              className={`w-full px-6 py-4 text-left flex justify-between items-center ${
-                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
-              }`}
-            >
-              <h3 className={`text-lg font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                Data Accuracy and Sources
-              </h3>
-              <svg
-                className={`w-5 h-5 transform transition-transform ${
-                  showAccuracy ? 'rotate-180' : ''
-                } ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {showAccuracy && (
-              <div className={`px-6 py-4 border-t ${
-                isDarkMode ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-700'
-              }`}>
-                <p className="mb-4">
-                  Our inflation calculator is designed for illustrative and general reference 
-                  purposes only. The calculations are approximate and provide a rough guide to 
-                  the buying power of currency for goods and services.
-                </p>
-                <div className="mb-4">
-                  <h4 className="font-semibold mb-2">Data Sources:</h4>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>World Bank Consumer Price Index (CPI) data (base year 2010 = 100)</li>
-                    <li>Federal Reserve Economic Data (FRED) for USA-specific data</li>
-                    <li>Coverage period: 1960-2024 (varies by country)</li>
-                  </ul>
-                </div>
-                <div className={`p-4 rounded-lg ${
-                  isDarkMode ? 'bg-gray-700' : 'bg-yellow-50'
-                }`}>
-                  <h4 className={`font-semibold mb-2 ${
-                    isDarkMode ? 'text-yellow-400' : 'text-yellow-900'
-                  }`}>
-                    Important Notes:
-                  </h4>
-                  <ul className="space-y-2">
-                    <li>
-                      Over long periods, the definitions of goods and services in the price 
-                      index have changed significantly.
-                    </li>
-                    <li>
-                      A family&apos;s consumption today is very different from that of a typical 
-                      family decades ago.
-                    </li>
-                    <li>
-                      Changes in household spending reflect higher incomes and a wider range 
-                      of available goods and services.
-                    </li>
-                    <li>
-                      Comparisons over longer periods and further back in time are generally 
-                      less accurate than comparisons over shorter recent periods.
-                    </li>
-                    <li>
-                      Data availability varies significantly by country - some countries have 
-                      complete data from 1960, while others have limited historical coverage.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
+          <Explainer isDarkMode={isDarkMode} title="Data Accuracy and Sources">
+            <p>
+              The calculator is for illustration and general reference. Results are approximate and give a rough guide to the buying power of a
+              currency for goods and services.
+            </p>
+            <div>
+              <h4 className={`font-semibold mb-1 ${t.text}`}>Data sources</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>World Bank consumer price index (FP.CPI.TOTL, 2010 = 100) for 47 economies</li>
+                <li>Federal Reserve Economic Data (FRED) for the United States</li>
+                <li>Coverage from 1960 to the latest reported year; it varies by country</li>
+              </ul>
+            </div>
+            <div className={`rounded-lg border p-4 ${isDarkMode ? 'bg-amber-950/30 border-amber-900 text-amber-100' : 'bg-amber-50 border-amber-200 text-amber-900'}`}>
+              <h4 className="font-semibold mb-2">Important notes</h4>
+              <ul className="space-y-2">
+                <li>Over long periods, the goods and services in the price index have changed significantly.</li>
+                <li>A family&apos;s consumption today is very different from that of a typical family decades ago.</li>
+                <li>Changes in household spending reflect higher incomes and a wider range of available goods and services.</li>
+                <li>Comparisons over longer periods and further back in time are generally less accurate than recent, shorter ones.</li>
+                <li>
+                  Euro countries are converted at the fixed adoption rates. Where a currency removed zeros (Türkiye in 2005, for example), the
+                  index runs straight through, so older amounts should be entered in today&rsquo;s units.
+                </li>
+              </ul>
+            </div>
+          </Explainer>
         </div>
 
-        {/* Footer Note */}
-        <div className={`mt-8 p-4 rounded-lg border ${
-          isDarkMode 
-            ? 'bg-gray-800 border-gray-700 text-gray-400' 
-            : 'bg-gray-50 border-gray-200 text-gray-600'
-        }`}>
-          <p className="text-sm">
-            This inflation calculator uses Consumer Price Index (CPI) data to measure price 
-            changes over time. The CPI measures the average change in prices paid by consumers 
-            for a market basket of goods and services. Data coverage and accuracy varies by 
-            country and time period.
-          </p>
-        </div>
-        </>
-        )}
+        <RelatedPages currentPath="/inflation-calculator" isDarkMode={isDarkMode} />
+
+        <footer className={`mt-16 pt-6 border-t text-xs ${t.textMuted} ${t.border}`}>
+          Consumer price indices fetched live from the World Bank API via our proxy, with FRED CPI for the United States. See all sources on
+          the{' '}
+          <Link href="/data-sources" className={`underline ${link}`}>
+            data sources page
+          </Link>
+          .
+        </footer>
       </div>
     </div>
   );

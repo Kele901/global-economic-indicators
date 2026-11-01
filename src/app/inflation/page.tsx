@@ -1,446 +1,228 @@
-"use client";
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
+'use client';
+
+// Inflation & Cost of Living: eight chapters on consumer-price inflation across
+// the 47-economy roster. The first load pulls fetchGlobalData only; chapters
+// below the fold mount (and fetch their extra series) when scrolled into range.
+
+import { useCallback, useEffect, useMemo, useState, type ComponentType } from 'react';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { fetchGlobalData } from '../services/worldbank';
-import { latestEntry } from '../utils/countryData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import PageTakeaways from '../components/PageTakeaways';
 import ThemeToggle from '../components/ThemeToggle';
-import { useIsMobile } from '../hooks/useViewportSize';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorMessage from '../components/ErrorMessage';
-import { COUNTRY_FLAGS as countryFlags } from '../components/CountryFlag';
-import { COUNTRY_COLORS as countryColors } from '../utils/countryMappings';
+import Breadcrumbs from '../components/Breadcrumbs';
+import RelatedPages from '../components/RelatedPages';
 import BulkChartDownload from '../components/BulkChartDownload';
-import ChartDownloadButton from '../components/ChartDownloadButton';
 import SocialShareMenu from '../components/SocialShareMenu';
+import DataDownloadButton from '../components/DataDownloadButton';
+import ErrorMessage from '../components/ErrorMessage';
+import SkeletonCard from '../components/SkeletonCard';
 import ChapterNav from '../components/ChapterNav';
 import ChapterSection from '../components/ChapterSection';
+import { ChapterMeta, Stat, countryName, pct, type GlobalData, type InflationChapterProps } from '../components/inflation/ui';
 import { slugify } from '../lib/share';
-import InfoPanel from '../components/InfoPanel';
-import { economicMetrics } from '../data/economicMetrics';
-import dynamic from 'next/dynamic';
-import { CITY_LABELS, CITY_ORDER, type CityId } from '../data/cities';
+import { COUNTRY_KEYS, COUNTRY_KEY_TO_SLUG, COUNTRY_SLUGS, type CountryKey } from '../utils/countryMappings';
+import { smartDefaultYear } from '../utils/heatmap/values';
+import { countNearTarget, median, risingFalling, valueAt } from '../utils/inflation/stats';
 
-// Dynamically import the map component to avoid SSR issues
-const GlobalEconomicMap = dynamic(
-  () => import('../components/GlobalEconomicMap'),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="w-full aspect-video bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center min-h-[400px]">
-        <span className="text-gray-500 dark:text-gray-400">Loading map...</span>
-      </div>
-    )
-  }
-);
+const loading = () => <SkeletonCard height="h-[600px]" label="Loading chapter" />;
+const chapter = (load: () => Promise<{ default: ComponentType<InflationChapterProps> }>) => dynamic(load, { ssr: false, loading });
 
-// Forty-odd curated price charts across four cities. Most readers come here
-// for the headline inflation series, so the city panels and the index table
-// load on demand rather than in the page's first JavaScript payload.
-const panelSkeleton = (label: string) => () => (
-  <div className="w-full rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center min-h-[300px] mt-10">
-    <span className="text-gray-500 dark:text-gray-400">Loading {label}…</span>
-  </div>
-);
+const CHAPTERS: { label: string; title: string; Component: ComponentType<InflationChapterProps> }[] = [
+  { label: 'Today', title: 'Inflation today', Component: chapter(() => import('../components/inflation/ChapterToday')) },
+  { label: 'History', title: 'Sixty years of inflation', Component: chapter(() => import('../components/inflation/ChapterHistory')) },
+  { label: 'Central banks', title: 'Central banks and real interest rates', Component: chapter(() => import('../components/inflation/ChapterCentralBanks')) },
+  { label: 'Drivers', title: 'What drives inflation', Component: chapter(() => import('../components/inflation/ChapterDrivers')) },
+  { label: 'Your money', title: 'Your money over time', Component: chapter(() => import('../components/inflation/ChapterMoney')) },
+  { label: 'Cost of living', title: 'Cost of living', Component: chapter(() => import('../components/inflation/ChapterCostOfLiving')) },
+  { label: 'World map', title: 'World map', Component: chapter(() => import('../components/inflation/ChapterMap')) },
+  { label: 'Tools & quiz', title: 'Tools and quiz', Component: chapter(() => import('../components/inflation/ChapterTools')) },
+];
 
-const CityCostPanel = dynamic(() => import('../components/inflation/CityCostPanel'), {
-  ssr: false,
-  loading: panelSkeleton('city prices'),
-});
+const NAV = CHAPTERS.map((c, i) => ({ id: `chapter-${i + 1}`, label: c.label }));
+const DEFAULT_SELECTED: CountryKey[] = ['USA', 'UK', 'Germany', 'Japan', 'Brazil', 'India'];
+const EAGER_CHAPTERS = 2;
 
-const CostOfLivingOverview = dynamic(() => import('../components/inflation/CostOfLivingOverview'), {
-  ssr: false,
-  loading: panelSkeleton('the index table'),
-});
-
-// In the Inflation chapter all four cities are stacked, which is a lot of
-// recharts to mount at once. Each panel waits until it is near the viewport.
-function LazyCityPanel({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || visible) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      setVisible(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries.some(e => e.isIntersecting)) setVisible(true);
-      },
-      { rootMargin: '400px' },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [visible]);
-
-  return (
-    <div ref={ref}>
-      {visible ? children : <div className="min-h-[300px]" aria-hidden="true" />}
-    </div>
-  );
+function parseSelected(param: string | null): CountryKey[] | null {
+  if (!param) return null;
+  const keys = param
+    .split(',')
+    .map((s) => COUNTRY_SLUGS[s.trim().toLowerCase()])
+    .filter((k): k is CountryKey => !!k);
+  return keys.length ? [...new Set(keys)].slice(0, 8) : null;
 }
 
-
-const NAV = ['Inflation rates', 'Cost of living', 'World map'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
-
-const LATEST_STATS_TITLE = 'Latest inflation rate by country';
-
-// City tab type for Cost of Living section
-type CityTab = 'overview' | CityId;
+function headline(data: GlobalData | null) {
+  const rows = data?.inflationRates;
+  const year = rows?.length ? smartDefaultYear({ inflationRates: rows }, 'inflationRates') : null;
+  if (!rows || year == null) return null;
+  const vals = COUNTRY_KEYS.map((k) => ({ key: k, value: valueAt(rows, k, year) })).filter(
+    (r): r is { key: CountryKey; value: number } => r.value != null,
+  );
+  const sorted = [...vals].sort((a, b) => b.value - a.value);
+  const dir = risingFalling(rows, COUNTRY_KEYS, 0.1, year);
+  return {
+    year,
+    count: vals.length,
+    median: median(vals.map((v) => v.value)),
+    nearTarget: countNearTarget(vals.map((v) => v.value), 2, 1),
+    highest: sorted[0],
+    lowest: sorted[sorted.length - 1],
+    rising: dir.rising.length,
+    falling: dir.falling.length,
+    vals,
+  };
+}
 
 export default function InflationPage() {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedCountries, setSelectedCountries] = useState<string[]>(["USA", "UK", "Germany"]);
-  const [selectedPeriod, setSelectedPeriod] = useState<'5y' | '10y' | 'all'>('all');
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
-  const [selectedCityTab, setSelectedCityTab] = useState<CityTab>('overview');
-  const inflationChartRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
+  const [data, setData] = useState<GlobalData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<CountryKey[]>(DEFAULT_SELECTED);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const globalData = await fetchGlobalData();
-        setData(globalData);
-      } catch (err) {
-        setError('Failed to fetch economic data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchGlobalData()
+      .then(setData)
+      .catch(() => setError('Failed to fetch economic data. Please try again later.'));
   }, []);
 
-  const inflationData = useMemo(() => {
-    if (!data) return [];
-    let filtered = data.inflationRates || [];
-    const endYear = new Date().getFullYear();
-    const startYear = selectedPeriod === '5y' ? endYear - 5 : selectedPeriod === '10y' ? endYear - 10 : 1960;
-    return filtered.filter((item: any) => parseInt(item.year) >= startYear && parseInt(item.year) <= endYear);
-  }, [data, selectedPeriod]);
+  useEffect(() => {
+    const fromUrl = parseSelected(new URLSearchParams(window.location.search).get('c'));
+    if (fromUrl) setSelected(fromUrl);
+  }, []);
 
-  const latestStats = useMemo(() => {
-    if (!inflationData.length) return [];
-    return selectedCountries.map(country => {
-      const entry = latestEntry(inflationData, country);
-      return { country, value: entry?.value };
-    });
-  }, [inflationData, selectedCountries]);
+  const updateSelected = useCallback((keys: CountryKey[]) => {
+    setSelected(keys);
+    const url = new URL(window.location.href);
+    if (keys.length) url.searchParams.set('c', keys.map((k) => COUNTRY_KEY_TO_SLUG[k]).join(','));
+    else url.searchParams.delete('c');
+    window.history.replaceState(null, '', url.toString());
+  }, []);
 
-  const handleCountryToggle = (country: string) => {
-    setSelectedCountries(prev =>
-      prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]
-    );
+  const hero = useMemo(() => headline(data), [data]);
+
+  const t = {
+    page: isDarkMode ? 'dark bg-gray-900' : 'bg-gray-50',
+    hero: isDarkMode
+      ? 'bg-gradient-to-br from-gray-800 via-gray-800 to-blue-900/30 border-gray-700'
+      : 'bg-gradient-to-br from-blue-50 via-white to-amber-50 border-blue-100',
+    text: isDarkMode ? 'text-white' : 'text-gray-900',
+    sec: isDarkMode ? 'text-gray-400' : 'text-gray-600',
+    muted: 'text-gray-500',
+    link: isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-700 hover:text-blue-800',
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+    <div className={`min-h-screen transition-colors duration-200 ${t.page}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <Breadcrumbs isDarkMode={isDarkMode} />
+
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Inflation & Cost of Living</h1>
-            <p className="text-gray-600 dark:text-gray-300 max-w-xl">
-              Track inflation rates across countries and explore cost of living indices for major cities worldwide.
+            <div className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>Inflation & Cost of Living</div>
+            <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 ${t.text}`}>What Prices Are Doing, and Why</h1>
+            <p className={`text-base sm:text-lg max-w-3xl ${t.sec}`}>
+              Inflation measures how fast prices rise and how quickly money loses its purchasing power. This page tracks consumer-price
+              inflation across 47 economies from the World Bank, central-bank policy rates from FRED and IMF forecasts: where inflation
+              stands today, sixty years of history, how central banks are responding, what drives it, what it does to your savings and
+              wages, and what everyday items cost in four major cities. To work out what an amount of money is worth in another year, use
+              the{' '}
+              <Link href="/inflation-calculator" className={`underline underline-offset-2 ${t.link}`}>
+                inflation calculator
+              </Link>
+              .
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2 self-end sm:self-auto">
             <BulkChartDownload variant="primary" size="sm" />
+            <SocialShareMenu title="Inflation & Cost of Living" isDarkMode={isDarkMode} />
             <ThemeToggle isDarkMode={isDarkMode} />
           </div>
         </div>
 
-        {/* Static intro content - always visible for SEO */}
-        <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
-          <h2 className="text-lg sm:text-xl font-semibold mb-3">Global Inflation Tracker</h2>
-          <p className={`text-sm sm:text-base mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            Inflation measures the rate at which prices for goods and services rise over time, eroding
-            purchasing power. This dashboard tracks consumer price inflation across 30+ economies using
-            data from the World Bank and IMF, with historical coverage spanning decades. Compare how
-            different countries have managed price stability, identify periods of elevated inflation
-            or deflation, and explore cost of living differences across major cities worldwide.
-          </p>
-          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Start with Inflation Rates for cross-country analysis, then Cost of Living for city-level
-            price comparisons including rent, groceries, and purchasing power indices.
-          </p>
-        </div>
-        <PageTakeaways page="inflation" isDarkMode={isDarkMode} />
+        <ChapterMeta
+          isDarkMode={isDarkMode}
+          sourceIds={['wb-inflation', 'fred-policy-rates', 'imf-weo-inflation', 'numbeo-city-prices']}
+          flags={['curated']}
+        />
+        <PageTakeaways page="inflation" isDarkMode={isDarkMode} className="mt-4" />
 
-        {loading && <LoadingSpinner />}
-        {error && <ErrorMessage message={error} />}
-
-        {!loading && !error && (
-        <>
-        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="blue" />
-
-        {/* Inflation Tab Content */}
-        <ChapterSection id="chapter-1" index={1} title="Inflation Rates" isDarkMode={isDarkMode} accent="blue">
-        <>
-        {/* Country Selector */}
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {Object.keys(countryColors).map(country => {
-              const isSelected = selectedCountries.includes(country);
-              const FlagComponent = countryFlags[country];
-              return (
-                <button
-                  key={country}
-                  onClick={() => handleCountryToggle(country)}
-                  className={`p-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium
-                    ${isSelected 
-                      ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-900') 
-                      : (isDarkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')}
-                  `}
-                >
-                  {FlagComponent && <FlagComponent className="w-6 h-4 rounded" />}
-                  {country}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Time Period Selector */}
-        <div className="mb-4 flex gap-2">
-          <select
-            value={selectedPeriod}
-            onChange={e => setSelectedPeriod(e.target.value as typeof selectedPeriod)}
-            className={`px-3 py-2 rounded-md border ${isDarkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
-          >
-            <option value="all">All Time</option>
-            <option value="10y">Last 10 Years</option>
-            <option value="5y">Last 5 Years</option>
-          </select>
-        </div>
-
-        {/* Key Stats */}
-        <div id={slugify(LATEST_STATS_TITLE)} className="mb-6">
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
-          <h2 className="text-lg font-semibold">{LATEST_STATS_TITLE}</h2>
-          <SocialShareMenu title={LATEST_STATS_TITLE} isDarkMode={isDarkMode} className="shrink-0" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {latestStats.map(({ country, value }) => {
-            const FlagComponent = countryFlags[country];
-            return (
-              <div key={country} className={`p-4 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  {FlagComponent && <FlagComponent className="w-6 h-4 rounded" />}
-                  <span className="font-semibold text-lg">{country}</span>
-                </div>
-                <div className="text-2xl font-bold">{value !== undefined ? `${value.toFixed(2)}%` : 'N/A'}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Latest available</div>
-              </div>
-            );
-          })}
-        </div>
-        </div>
-
-        {/* Chart */}
-        <div 
-          id={slugify('Inflation Rate Over Time')}
-          ref={inflationChartRef}
-          data-chart-container
-          data-chart-title="Inflation Rate Over Time"
-          className={`rounded-lg shadow p-4 relative ${isDarkMode ? 'bg-[#181f2a]' : 'bg-white'} transition-colors duration-200`}
-        >
-          <div className="flex justify-between items-start mb-2">
-            <h2 className="text-lg font-semibold">Inflation Rate Over Time</h2>
-            <ChartDownloadButton
-              chartElement={inflationChartRef.current}
-              chartRef={inflationChartRef}
-              chartData={{
-                title: "Inflation Rate Over Time",
-                data: inflationData,
-                type: 'line',
-                countries: selectedCountries
-              }}
-              variant="outline"
-              size="sm"
+        <div id={slugify('Inflation key figures')} className={`rounded-2xl border p-4 sm:p-6 mb-6 ${t.hero}`}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Stat
+              isDarkMode={isDarkMode}
+              label={`Median inflation${hero ? `, ${hero.year}` : ''}`}
+              value={hero ? pct(hero.median) : '\u2026'}
+              sub={hero ? `across ${hero.count} economies` : 'loading World Bank data'}
+              tone="text-blue-500"
+            />
+            <Stat
+              isDarkMode={isDarkMode}
+              label="Within 1pp of 2%"
+              value={hero ? `${hero.nearTarget} of ${hero.count}` : '\u2026'}
+              sub="the usual central-bank target"
+              tone="text-emerald-500"
+            />
+            <Stat
+              isDarkMode={isDarkMode}
+              label="Highest / lowest"
+              value={hero?.highest ? pct(hero.highest.value) : '\u2026'}
+              sub={hero?.highest && hero.lowest ? `${countryName(hero.highest.key)}; lowest ${countryName(hero.lowest.key)} ${pct(hero.lowest.value)}` : ''}
+              tone="text-rose-500"
+            />
+            <Stat
+              isDarkMode={isDarkMode}
+              label="Rising vs falling"
+              value={hero ? `${hero.rising} \u2191 / ${hero.falling} \u2193` : '\u2026'}
+              sub="vs the previous year"
+              tone="text-amber-500"
             />
           </div>
-          
-          {/* Info Panel for Inflation Rate */}
-          <InfoPanel
-            metric={economicMetrics.inflationRate}
-            isDarkMode={isDarkMode}
-            position="top-right"
-            size="medium"
-          />
-          
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">
-            Data source: World Bank consumer price inflation (FP.CPI.TOTL.ZG), fetched live.
-            Drag the handles under the chart to zoom into a period.
-          </p>
-          <div className="h-[300px] sm:h-[420px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={inflationData} margin={isMobile ? { top: 5, right: 8, left: 0, bottom: 5 } : { top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#ccc'} />
-                <XAxis dataKey="year" stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
-                <YAxis width={isMobile ? 32 : 60} stroke={isDarkMode ? '#e5e7eb' : '#374151'} tick={{ fill: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 500 }} />
-                <Tooltip
-                  contentStyle={isDarkMode ? { backgroundColor: '#232946', border: '1px solid #6366f1', color: '#fff', fontSize: 16 } : { fontSize: 16 }}
-                  labelStyle={{ color: isDarkMode ? '#fff' : '#374151', fontWeight: 600 }}
-                  formatter={(value: number) => `${value?.toFixed(2)}%`}
-                />
-                <Legend wrapperStyle={{ color: isDarkMode ? '#e5e7eb' : '#374151', fontWeight: 600, fontSize: isMobile ? 12 : 15 }} />
-                {selectedCountries.map((country, idx) => (
-                  <Line
-                    key={country}
-                    type="monotone"
-                    dataKey={country}
-                    stroke={countryColors[country as keyof typeof countryColors] || '#6366f1'}
-                    strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{ r: 5 }}
-                  />
-                ))}
-                {/* Sixty-plus years of annual CPI compresses the 1970s spike and
-                    the post-2021 one into the same few pixels. The brush lets the
-                    reader isolate either without losing the full-series context. */}
-                {inflationData.length > 15 && (
-                  <Brush
-                    dataKey="year"
-                    height={28}
-                    travellerWidth={10}
-                    stroke={isDarkMode ? '#6366f1' : '#4f46e5'}
-                    fill={isDarkMode ? '#1f2937' : '#f9fafb'}
-                  />
-                )}
-                </LineChart>
-              </ResponsiveContainer>
+          <div className={`mt-4 flex items-center justify-between gap-3 flex-wrap text-xs ${t.muted}`}>
+            <div className="flex-1 min-w-[240px]">
+              Annual average consumer-price inflation (World Bank FP.CPI.TOTL.ZG). The latest year is the most recent one most countries
+              have reported.
             </div>
-          </div>
-
-        {CITY_ORDER.map(city => (
-          <LazyCityPanel key={city}>
-            <CityCostPanel city={city} isDarkMode={isDarkMode} />
-          </LazyCityPanel>
-        ))}
-        </>
-        </ChapterSection>
-
-        {/* Cost of Living Tab Content */}
-        <ChapterSection id="chapter-2" index={2} title="Cost of Living" isDarkMode={isDarkMode} accent="blue">
-          <div className="space-y-6">
-            {/* Introduction */}
-            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-              <h2 className="text-xl font-bold mb-3">Cost of Living Index by City 2026</h2>
-              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
-                The Cost of Living Index compares the relative cost of living across cities worldwide, using New York City as the baseline (index = 100). 
-                A city with an index of 80 means it is 20% cheaper than New York, while an index of 120 means it is 20% more expensive.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                  <span className="font-semibold">Cost of Living Index:</span> Relative indicator of consumer goods prices including groceries, restaurants, transportation, and utilities (excluding rent)
-                </div>
-                <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                  <span className="font-semibold">Rent Index:</span> Estimation of apartment rent prices compared to New York City
-                </div>
-                <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                  <span className="font-semibold">Purchasing Power:</span> Relative purchasing power in buying goods and services based on average net salary
-                </div>
-              </div>
-            </div>
-
-            {/* City Tabs Navigation */}
-            <div className={`flex flex-wrap gap-2 p-2 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-              {[
-                { id: 'overview' as CityTab, label: 'Overview', flag: null },
-                ...CITY_ORDER.map(id => ({
-                  id: id as CityTab,
-                  label: CITY_LABELS[id].name,
-                  flag: CITY_LABELS[id].flag,
-                })),
-              ].map(city => (
-                <button
-                  key={city.id}
-                  onClick={() => setSelectedCityTab(city.id)}
-                  aria-pressed={selectedCityTab === city.id}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
-                    selectedCityTab === city.id
-                      ? isDarkMode
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'bg-blue-500 text-white shadow-lg'
-                      : isDarkMode
-                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {city.flag && <span aria-hidden="true">{city.flag}</span>}
-                  {city.label}
-                </button>
-              ))}
-            </div>
-
-            {selectedCityTab === 'overview' && <CostOfLivingOverview isDarkMode={isDarkMode} />}
-
-            {selectedCityTab !== 'overview' && (
-              <CityCostPanel city={selectedCityTab} isDarkMode={isDarkMode} compact />
-            )}
-                  </div>
-        </ChapterSection>
-
-        {/* World Map Tab Content */}
-        <ChapterSection id="chapter-3" index={3} title="World Map" isDarkMode={isDarkMode} accent="blue" lazy>
-          <div className="space-y-6">
-            {/* Introduction */}
-            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-              <h2 className="text-xl font-bold mb-3">Global Economic Map</h2>
-              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
-                Explore inflation rates by country and cost of living by city on an interactive world map. 
-                Toggle between views to compare economic conditions across the globe.
-              </p>
-              <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                <p><strong>Inflation View:</strong> Countries are colored based on their annual inflation rate, from green (low) to red (high).</p>
-                <p className="mt-1"><strong>Cost of Living View:</strong> City markers show relative cost of living index where New York City = 100.</p>
-                <p className="mt-1"><strong>Both View:</strong> See both country inflation and city cost of living data together.</p>
-              </div>
-            </div>
-
-            {/* World Map Component */}
-            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-              <GlobalEconomicMap 
-                isDarkMode={isDarkMode} 
-                inflationData={data?.inflationRates || []}
+            {hero && (
+              <DataDownloadButton
+                isDarkMode={isDarkMode}
+                filename={`inflation-${hero.year}`}
+                shareTitle="Inflation key figures"
+                label="Data"
+                getData={() => hero.vals.map((v) => ({ country: countryName(v.key), year: hero.year, inflation: v.value }))}
               />
-            </div>
-
-            {/* Key Insights */}
-            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-              <h3 className="text-lg font-bold mb-4">Key Insights</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                  <h4 className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Developed Economies</h4>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Generally maintain low to moderate inflation (2-5%) with high cost of living in major cities like Zurich, New York, and London.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                  <h4 className={`font-semibold mb-2 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>Emerging Markets</h4>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Often experience higher inflation rates but offer lower cost of living, making cities like Mumbai, Cairo, and Jakarta more affordable.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                  <h4 className={`font-semibold mb-2 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>High Inflation Countries</h4>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Countries like Turkey and Argentina face significant inflation challenges, impacting purchasing power and economic stability.
-                  </p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
-        </ChapterSection>
-        </>
-        )}
+        </div>
+
+        {error && <ErrorMessage message={error} />}
+
+        {/* Chapter sections only exist once data arrives; remount so the nav observes them. */}
+        <ChapterNav key={data ? 'ready' : 'loading'} isDarkMode={isDarkMode} chapters={NAV} accent="blue" />
+
+        {!data && !error && <SkeletonCard height="h-[600px]" label="Loading inflation data" />}
+
+        {data &&
+          CHAPTERS.map(({ title, Component }, i) => (
+            <ChapterSection key={title} id={`chapter-${i + 1}`} index={i + 1} title={title} isDarkMode={isDarkMode} accent="blue" lazy={i >= EAGER_CHAPTERS}>
+              <Component isDarkMode={isDarkMode} data={data} selected={selected} onSelectedChange={updateSelected} />
+            </ChapterSection>
+          ))}
+
+        <RelatedPages currentPath="/inflation" isDarkMode={isDarkMode} />
+
+        <footer className={`mt-16 pt-6 border-t text-xs ${t.muted} ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          Inflation, CPI, unemployment, broad money, real interest and exchange-rate series fetched live from the World Bank API via our
+          proxy. Policy rates, Brent crude and the IMF food price index from FRED; forecasts from the IMF World Economic Outlook. City prices
+          are annual Numbeo snapshots for 2011-2024, used with credit. Central-bank targets, the episode timeline and hyperinflation case
+          studies are curated. See all sources on the{' '}
+          <Link href="/data-sources" className={`underline ${t.link}`}>
+            data sources page
+          </Link>
+          .
+        </footer>
       </div>
     </div>
   );
-} 
+}

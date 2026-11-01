@@ -438,14 +438,32 @@ async function fetchIndicatorData(
   }
 }
 
-// Helper function to merge FRED USA data into World Bank data
+// Helper function to merge FRED USA data into World Bank data.
+// `rebase` is for index series with different base years (World Bank CPI is
+// 2010 = 100, FRED CPIAUCSL is 1982-84 = 100): FRED values are scaled to the
+// World Bank base at the latest overlapping year before filling gaps, so a
+// FRED-only year is never compared against a World Bank one on another base.
 function mergeUSADataFromFRED(
   worldBankData: CountryData[],
-  fredData: USADataPoint[]
+  fredData: USADataPoint[],
+  { rebase = false }: { rebase?: boolean } = {}
 ): CountryData[] {
   if (fredData.length === 0) {
     console.warn('No FRED data to merge for USA');
     return worldBankData;
+  }
+
+  if (rebase) {
+    const wbUsa = new Map<number, number>();
+    worldBankData.forEach(item => {
+      if (typeof item.USA === 'number' && item.USA > 0) wbUsa.set(item.year, item.USA);
+    });
+    if (wbUsa.size > 0) {
+      const anchor = [...fredData].reverse().find(p => p.value > 0 && wbUsa.has(p.year));
+      if (!anchor) return worldBankData;
+      const factor = wbUsa.get(anchor.year)! / anchor.value;
+      fredData = fredData.map(p => ({ ...p, value: p.value * factor }));
+    }
   }
 
   // Create a map of existing years
@@ -1239,7 +1257,8 @@ const completeData = {
       ),
       cpiData: mergeUSADataFromFRED(
         cpiDataResult.status === 'fulfilled' ? cpiDataResult.value : [],
-        usaData.cpiData
+        usaData.cpiData,
+        { rebase: true }
       ),
       populationGrowth: mergeUSADataFromFRED(
         populationGrowthResult.status === 'fulfilled' ? populationGrowthResult.value : [],

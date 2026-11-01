@@ -258,7 +258,11 @@ export const clientCache = new ClientCache();
 //      EG.ELC.COAL.ZS, EG.ELC.RNEW.ZS, SL.UEM.TOTL.ZS, SL.TLF.CACT.ZS,
 //      SL.UEM.1524.ZS) with the curated snapshots. Bump forces a clean
 //      re-fetch so all 24 new chart components pick up complete rows.
-export const CURRENT_CACHE_VERSION = 31;
+// v32: USA CPI fix. FRED CPIAUCSL (1982-84 = 100) used to fill years
+//      missing from the World Bank series (2010 = 100) without
+//      rebasing, so the inflation calculator compared 2025 against
+//      earlier years on a different base. Bump drops the mixed series.
+export const CURRENT_CACHE_VERSION = 32;
 
 // Export cache key generators for consistency
 export const CacheKeys = {

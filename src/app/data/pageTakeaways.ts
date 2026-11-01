@@ -202,9 +202,9 @@ export const PAGE_TAKEAWAYS: Record<TakeawayPage, PageTakeaway> = {
     ],
   },
   inflation: {
-    dataNote: 'World Bank CPI (live); Numbeo cost-of-living index; city prices to 2024',
+    dataNote: 'World Bank CPI, money and FX (live); FRED policy rates, oil and food; IMF WEO; Numbeo city prices to 2024',
     whatItShows:
-      'Consumer-price inflation across major economies from World Bank data, plus a city-level cost-of-living comparison.',
+      'Consumer-price inflation across 47 economies: where it stands, sixty years of history, central-bank stance, what drives it, what it does to your money, and city-level costs.',
     whyItMatters: [
       'Inflation decides how fast real incomes grow or shrink, and is the main thing central banks set interest rates against.',
       'Zurich is about 18% more expensive than New York on the cost-of-living index, while Tokyo is roughly half as expensive and Mumbai about a quarter.',
@@ -212,7 +212,7 @@ export const PAGE_TAKEAWAYS: Record<TakeawayPage, PageTakeaway> = {
     ],
     whatChanged: [
       'The 2021\u20132023 surge was the sharpest in four decades for most advanced economies; the country chart shows how unevenly each has come back down since.',
-      'City price series run to 2024. Use the country tabs to compare the latest annual CPI readings.',
+      'City price series run to 2024. The disinflation race in chapter 1 shows how far each country has come back from its post-2021 peak.',
     ],
   },
   technology: {

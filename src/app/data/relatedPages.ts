@@ -77,6 +77,19 @@ export const RELATED_PAGES: Record<string, { href: string; label: string }[]> = 
     { href: '/labor-ledger',     label: 'Labor Ledger' },
     { href: '/development/where-do-you-stand', label: 'Global Income Calculator' },
   ],
+  '/inflation': [
+    { href: '/inflation-calculator', label: 'Inflation Calculator' },
+    { href: '/monetary-policy',  label: 'Monetary Policy' },
+    { href: '/outlook',          label: 'Economic Outlook' },
+    { href: '/labor-ledger',     label: 'Labor Ledger' },
+    { href: '/currency-hierarchy', label: 'Currency Hierarchy' },
+    { href: '/global-heatmap?metric=inflationRates&view=choropleth', label: 'Global Heatmap' },
+  ],
+  '/inflation-calculator': [
+    { href: '/inflation',        label: 'Inflation & Cost of Living' },
+    { href: '/monetary-policy',  label: 'Monetary Policy' },
+    { href: '/outlook',          label: 'Economic Outlook' },
+  ],
   '/resources': [
     { href: '/energy-ledger',    label: 'Energy Ledger' },
     { href: '/trade-ledger',     label: 'Trade Ledger' },
