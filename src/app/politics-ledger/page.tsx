@@ -34,6 +34,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { COUNTRY_FLAGS } from '../components/CountryFlag';
@@ -91,6 +92,8 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle }: ChapterHeaderPr
     </div>
   );
 }
+
+const NAV = ['Regimes', 'Leaders', 'Systems', 'Ideology', 'Elections', 'Scorecard', 'Prosperity', 'Who leads', 'Checks', 'Democracy', 'Traditions', 'Compare'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function PoliticsLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -371,7 +374,9 @@ export default function PoliticsLedgerPage() {
           </Link>
         </div>
 
-        <section className="mb-14">
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="indigo" />
+
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -383,7 +388,7 @@ export default function PoliticsLedgerPage() {
           </div>
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -395,7 +400,7 @@ export default function PoliticsLedgerPage() {
           </div>
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -405,7 +410,7 @@ export default function PoliticsLedgerPage() {
           <GovernmentSystemsGrid isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -417,7 +422,7 @@ export default function PoliticsLedgerPage() {
           </div>
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
@@ -427,90 +432,116 @@ export default function PoliticsLedgerPage() {
           <ElectionCalendar isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 6"
-              title="Governance Scorecard"
-              subtitle="Five independent assessments of democracy, freedom, press freedom and corruption, alongside live World Bank governance indicators. Where they agree, the picture is clear; where they diverge, the methodology matters."
-            />
-            <div className={`rounded-lg border p-4 ${cardBg}`}>
-              <GovernanceScorecard isDarkMode={isDarkMode} wgi={wgi} wgiLoading={loading} />
-            </div>
-          </section>
-
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 7"
-              title="Politics and Prosperity"
-              subtitle="Do freer, cleaner or more constrained governments preside over richer, healthier and more equal societies? Pick a governance measure and a live World Bank outcome to test the relationship across all 47 countries."
-            />
-            <div className={`rounded-lg border p-4 ${cardBg}`}>
-              <PoliticsProsperityChart isDarkMode={isDarkMode} data={data} wgi={wgi} loading={loading} />
-              <div className="mt-2">
-                <ChartMeta sourceId="wb-wgi-suite" isDarkMode={isDarkMode} />
+        <div id="chapter-6" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 6"
+                title="Governance Scorecard"
+                subtitle="Five independent assessments of democracy, freedom, press freedom and corruption, alongside live World Bank governance indicators. Where they agree, the picture is clear; where they diverge, the methodology matters."
+              />
+              <div className={`rounded-lg border p-4 ${cardBg}`}>
+                <GovernanceScorecard isDarkMode={isDarkMode} wgi={wgi} wgiLoading={loading} />
               </div>
-            </div>
-          </section>
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 8"
-              title="Who Leads"
-              subtitle="The 47 people who hold executive power: how old they are, how many are women, how they got the job and how long they have kept it."
-            />
-            <LeaderDemographics isDarkMode={isDarkMode} />
-          </section>
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 7"
+                title="Politics and Prosperity"
+                subtitle="Do freer, cleaner or more constrained governments preside over richer, healthier and more equal societies? Pick a governance measure and a live World Bank outcome to test the relationship across all 47 countries."
+              />
+              <div className={`rounded-lg border p-4 ${cardBg}`}>
+                <PoliticsProsperityChart isDarkMode={isDarkMode} data={data} wgi={wgi} loading={loading} />
+                <div className="mt-2">
+                  <ChartMeta sourceId="wb-wgi-suite" isDarkMode={isDarkMode} />
+                </div>
+              </div>
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 9"
-              title="Checks and Balances"
-              subtitle="Elections choose leaders; institutions limit them. Eight constraints, from veto players and courts to central banks, term limits and federalism, combine into a single power-concentration score."
-            />
-            <div className={`rounded-lg border p-4 ${cardBg}`}>
-              <ChecksBalancesPanel isDarkMode={isDarkMode} />
-            </div>
-          </section>
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 8"
+                title="Who Leads"
+                subtitle="The 47 people who hold executive power: how old they are, how many are women, how they got the job and how long they have kept it."
+              />
+              <LeaderDemographics isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 10"
-              title="Democracy's Long Arc"
-              subtitle="Half a century of the V-Dem Liberal Democracy Index: the third wave of democratisation from the mid-1970s, the post-Cold War peak, and the backsliding of the last fifteen years."
-            />
-            <div className={`rounded-lg border p-4 ${cardBg}`}>
-              <DemocracyTrendChart isDarkMode={isDarkMode} />
-            </div>
-          </section>
+        <div id="chapter-9" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 9"
+                title="Checks and Balances"
+                subtitle="Elections choose leaders; institutions limit them. Eight constraints, from veto players and courts to central banks, term limits and federalism, combine into a single power-concentration score."
+              />
+              <div className={`rounded-lg border p-4 ${cardBg}`}>
+                <ChecksBalancesPanel isDarkMode={isDarkMode} />
+              </div>
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 11"
-              title="Ideas That Shape States"
-              subtitle="Behind every constitution sits a philosophy. These thirteen traditions, from Westminster parliamentarism to Confucian statecraft and Islamic governance, explain why similar institutions behave so differently."
-            />
-            <PoliticalTraditionsGrid isDarkMode={isDarkMode} />
-          </section>
+        <div id="chapter-10" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 10"
+                title="Democracy's Long Arc"
+                subtitle="Half a century of the V-Dem Liberal Democracy Index: the third wave of democratisation from the mid-1970s, the post-Cold War peak, and the backsliding of the last fifteen years."
+              />
+              <div className={`rounded-lg border p-4 ${cardBg}`}>
+                <DemocracyTrendChart isDarkMode={isDarkMode} />
+              </div>
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-6">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 12"
-              title="Compare Political Systems"
-              subtitle="Put up to four countries side by side: institutions, leaders, parliamentary arithmetic, governance scores, traditions and values."
-            />
-            <div className={`rounded-lg border p-4 ${cardBg}`}>
-              <PoliticalCompare isDarkMode={isDarkMode} />
-            </div>
-          </section>
-        </LazyMount>
+        <div id="chapter-11" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 11"
+                title="Ideas That Shape States"
+                subtitle="Behind every constitution sits a philosophy. These thirteen traditions, from Westminster parliamentarism to Confucian statecraft and Islamic governance, explain why similar institutions behave so differently."
+              />
+              <PoliticalTraditionsGrid isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
+
+        <div id="chapter-12" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-6">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 12"
+                title="Compare Political Systems"
+                subtitle="Put up to four countries side by side: institutions, leaders, parliamentary arithmetic, governance scores, traditions and values."
+              />
+              <div className={`rounded-lg border p-4 ${cardBg}`}>
+                <PoliticalCompare isDarkMode={isDarkMode} />
+              </div>
+            </section>
+          </LazyMount>
+        </div>
 
         <section className="mt-10">
           <h3 className={`text-lg font-semibold mb-3 ${textPrimary}`}>Country political profiles</h3>

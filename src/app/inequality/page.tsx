@@ -37,6 +37,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
 import SocialShareMenu from '../components/SocialShareMenu';
@@ -89,6 +90,8 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle }: { isDarkMode: b
     </div>
   );
 }
+
+const NAV = ['Snapshot', 'Trends', 'Shares', 'Mobility', 'r > g', 'Kuznets', 'Income', 'Wealth', 'History', 'Map', 'Tax'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function InequalityPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -292,28 +295,30 @@ export default function InequalityPage() {
           </div>
         </div>
 
-        <section id="chapter-1" className="mb-14 scroll-mt-24">
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="rose" />
+
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
             title="Where Inequality Stands Now"
             subtitle="Live World Bank Gini for every country in the roster, ranked. Survey years differ by country and faded bars flag the stale ones — a single &quot;latest Gini&quot; table is one of the easiest places to accidentally compare 2023 against 2011." />
           <GiniRankChart isDarkMode={isDarkMode} gini={gini} shareTitle="Where Inequality Stands Now" />
         </section>
 
-        <section id="chapter-2" className="mb-14 scroll-mt-24">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 2"
             title="Gini over Time"
             subtitle="One survey number per country hides the direction of travel. Brazil and China have fallen from their peaks, while the US and Sweden have drifted up since the 1990s." />
           <GiniOverTime isDarkMode={isDarkMode} />
         </section>
 
-        <section id="chapter-3" className="mb-14 scroll-mt-24">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3"
             title="Who Gets What"
             subtitle="The same Gini can hide very different distributions. Shares by fifth show where the income actually goes, and the Palma ratio compares the two tails directly." />
           <WhoGetsWhat isDarkMode={isDarkMode} />
         </section>
 
-        <section id="chapter-4" className="mb-14 scroll-mt-24">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4"
             title="Inequality and Mobility"
             subtitle="Alan Krueger's Great Gatsby curve: where the rungs of the ladder are further apart, children are more likely to stay on the rung they were born on. For what inequality does to health and schooling, see the Development Ledger." />
@@ -323,56 +328,62 @@ export default function InequalityPage() {
           </p>
         </section>
 
-        <section id="chapter-5" className="mb-14 scroll-mt-24">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5"
             title="r > g: The Central Contradiction"
             subtitle="Piketty's thesis in one chart: the return on capital has sat near 4-5% for two millennia while growth only briefly exceeded it during the 20th century. Whenever r runs above g, inherited wealth compounds faster than earned income." />
           <InequalityCharts isDarkMode={isDarkMode} view="rvsg" />
         </section>
 
-        <section id="chapter-6" className="mb-14 scroll-mt-24">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6"
             title="The Kuznets Curve and Its Refutation"
             subtitle="Kuznets (1955) argued inequality rises then falls as economies industrialise. The cross-section of GDP per capita against Gini shows the inverted U is at best a weak tendency — rich countries span Gini 25 to 45." />
           <InequalityCharts isDarkMode={isDarkMode} view="kuznets" />
         </section>
 
-        <section id="chapter-7" className="mb-14 scroll-mt-24">
+        <section id="chapter-7" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
             title="Income Concentration"
             subtitle="Top 1%, top 10% and bottom 50% income shares from 1910 to today, plus Milanovic's elephant curve of who actually gained from globalisation. The US and UK trace a U; France, Japan and Sweden do not." />
           <InequalityCharts isDarkMode={isDarkMode} view="income" />
         </section>
 
-        <section id="chapter-8" className="mb-14 scroll-mt-24">
+        <section id="chapter-8" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
             title="Wealth Concentration"
             subtitle="Wealth is roughly twice as concentrated as income in every country measured, and its composition differs sharply — housing dominates European balance sheets while financial and business assets dominate American ones." />
           <InequalityCharts isDarkMode={isDarkMode} view="wealth" />
         </section>
 
-        <section id="chapter-9" className="mb-14 scroll-mt-24">
+        <section id="chapter-9" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 9"
             title="Two Centuries of Dynamics"
             subtitle="Capital/income ratios from 1700, inheritance flows as a share of national income, and the milestones that compressed or widened the distribution. The egalitarian mid-20th century was produced by war, inflation and policy, not by markets." />
           <InequalityCharts isDarkMode={isDarkMode} view="historical" />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          <section id="chapter-10" className="mb-14 scroll-mt-24">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 10"
-              title="The Global Map"
-              subtitle="Live Gini on a world choropleth. The regional clustering is the point: Southern Africa and Latin America sit above 45, continental and Northern Europe below 33, with most of Asia in between." />
-            <InequalityCharts isDarkMode={isDarkMode} view="global" />
-          </section>
+        <div id="chapter-10" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 10"
+                title="The Global Map"
+                subtitle="Live Gini on a world choropleth. The regional clustering is the point: Southern Africa and Latin America sit above 45, continental and Northern Europe below 33, with most of Asia in between." />
+              <InequalityCharts isDarkMode={isDarkMode} view="global" />
+            </section>
+          </LazyMount>
+        </div>
 
-          <section id="chapter-11" className="mb-14 scroll-mt-24">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 11"
-              title="Tax and Policy Levers"
-              subtitle="Top marginal income and capital-gains rates from 1900. Anglo-American rates above 90% in the mid-century are the clearest single correlate of the income compression in Chapter 7 — and their reversal after 1980 of its undoing." />
-            <InequalityCharts isDarkMode={isDarkMode} view="tax" showSources />
-          </section>
-        </LazyMount>
+        <div id="chapter-11" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 11"
+                title="Tax and Policy Levers"
+                subtitle="Top marginal income and capital-gains rates from 1900. Anglo-American rates above 90% in the mid-century are the clearest single correlate of the income compression in Chapter 7 — and their reversal after 1980 of its undoing." />
+              <InequalityCharts isDarkMode={isDarkMode} view="tax" showSources />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/inequality" isDarkMode={isDarkMode} />
 

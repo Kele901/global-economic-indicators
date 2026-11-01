@@ -20,6 +20,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
@@ -119,6 +120,8 @@ function mergeSipriIntoSeries(
     sipriUsedFor,
   };
 }
+
+const NAV = ['Spending', 'Superpowers', 'Alliances', 'Arms trade', 'Industry', 'Nuclear', 'Human cost', 'Guns vs butter'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function DefenseLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -342,8 +345,10 @@ export default function DefenseLedgerPage() {
           </div>
         </div>
 
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="rose" />
+
         {/* Chapter 1 — The Global Bill */}
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -444,7 +449,7 @@ export default function DefenseLedgerPage() {
         </section>
 
         {/* Chapter 2 — The Superpowers */}
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -463,7 +468,7 @@ export default function DefenseLedgerPage() {
         </section>
 
         {/* Chapter 3 — Alliances & Institutions */}
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -474,7 +479,7 @@ export default function DefenseLedgerPage() {
         </section>
 
         {/* Chapter 4 — The Arms Trade */}
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -493,7 +498,7 @@ export default function DefenseLedgerPage() {
         </section>
 
         {/* Chapter 5 — The Arms Industry */}
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
@@ -504,7 +509,7 @@ export default function DefenseLedgerPage() {
         </section>
 
         {/* Chapter 6 — The Nuclear Balance */}
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
@@ -514,45 +519,51 @@ export default function DefenseLedgerPage() {
           <NuclearArsenalGrid isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          {/* Chapter 7 — The Human Cost */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 7"
-              title="The Human Cost"
-              subtitle="Battle deaths were sliding through the 2000s. Syria in the 2010s and Ukraine plus Gaza in the 2020s reversed the trend."
-            />
-            <ConflictDeathsTimeline isDarkMode={isDarkMode} />
-          </section>
-
-          {/* Chapter 8 — Guns vs Butter */}
-          <section className="mb-6">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 8"
-              title="Guns vs Butter"
-              subtitle="Every dollar a government spends on defense is a dollar it isn&apos;t spending on schools, hospitals, or transfers. Here&apos;s where each economy sits on that trade-off."
-            />
-            {loading ? (
-              <SkeletonCard isDarkMode={isDarkMode} className="h-[400px] sm:h-[520px]" />
-            ) : data ? (
-              <GunsVsButterQuadrant
+        {/* Chapter 7 — The Human Cost */}
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
                 isDarkMode={isDarkMode}
-                militaryExpenditurePctGdp={spendPct.merged}
-                educationExpenditurePctGdp={data.educationExpenditure}
-                gdpPerCapita={data.gdpPerCapitaPPP}
+                chapter="Chapter 7"
+                title="The Human Cost"
+                subtitle="Battle deaths were sliding through the 2000s. Syria in the 2010s and Ukraine plus Gaza in the 2020s reversed the trend."
               />
-            ) : null}
+              <ConflictDeathsTimeline isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-            <div className={`mt-4 text-sm ${textSec}`}>
-              Want to see how these trade-offs interact with the rest of the fiscal picture?{' '}
-              <a href="/global-heatmap" className={`underline underline-offset-2 ${isDarkMode ? 'text-rose-400 hover:text-rose-300' : 'text-rose-600 hover:text-rose-700'}`}>
-                Explore the global heatmap →
-              </a>
-            </div>
-          </section>
-        </LazyMount>
+        {/* Chapter 8 — Guns vs Butter */}
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-6">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 8"
+                title="Guns vs Butter"
+                subtitle="Every dollar a government spends on defense is a dollar it isn&apos;t spending on schools, hospitals, or transfers. Here&apos;s where each economy sits on that trade-off."
+              />
+              {loading ? (
+                <SkeletonCard isDarkMode={isDarkMode} className="h-[400px] sm:h-[520px]" />
+              ) : data ? (
+                <GunsVsButterQuadrant
+                  isDarkMode={isDarkMode}
+                  militaryExpenditurePctGdp={spendPct.merged}
+                  educationExpenditurePctGdp={data.educationExpenditure}
+                  gdpPerCapita={data.gdpPerCapitaPPP}
+                />
+              ) : null}
+
+              <div className={`mt-4 text-sm ${textSec}`}>
+                Want to see how these trade-offs interact with the rest of the fiscal picture?{' '}
+                <a href="/global-heatmap" className={`underline underline-offset-2 ${isDarkMode ? 'text-rose-400 hover:text-rose-300' : 'text-rose-600 hover:text-rose-700'}`}>
+                  Explore the global heatmap →
+                </a>
+              </div>
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/defense-ledger" isDarkMode={isDarkMode} />
 

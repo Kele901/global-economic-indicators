@@ -18,6 +18,8 @@ import ThemeToggle from '../components/ThemeToggle';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import SocialShareMenu from '../components/SocialShareMenu';
+import ChapterNav from '../components/ChapterNav';
+import ChapterSection, { RequestOnMount } from '../components/ChapterSection';
 import { slugify } from '../lib/share';
 import { useTradeData, useHistoricalTradeData } from '../hooks/useTradeData';
 import { COUNTRY_MAPPINGS } from '../services/tradeData';
@@ -145,14 +147,7 @@ const advancedTradeMetrics: Record<string, Record<string, Record<string, number>
   tradeResilience: { US: { supplyChainRisk: 0.34, tradeConcentration: 0.28, resilience: 0.87, adaptability: 0.82 }, CN: { supplyChainRisk: 0.45, tradeConcentration: 0.31, resilience: 0.76, adaptability: 0.79 }, DE: { supplyChainRisk: 0.38, tradeConcentration: 0.42, resilience: 0.81, adaptability: 0.85 }, JP: { supplyChainRisk: 0.52, tradeConcentration: 0.48, resilience: 0.73, adaptability: 0.78 }, GB: { supplyChainRisk: 0.41, tradeConcentration: 0.35, resilience: 0.79, adaptability: 0.81 }, IN: { supplyChainRisk: 0.67, tradeConcentration: 0.58, resilience: 0.56, adaptability: 0.62 }, BR: { supplyChainRisk: 0.71, tradeConcentration: 0.62, resilience: 0.52, adaptability: 0.58 }, KR: { supplyChainRisk: 0.49, tradeConcentration: 0.51, resilience: 0.71, adaptability: 0.74 }, CA: { supplyChainRisk: 0.43, tradeConcentration: 0.39, resilience: 0.76, adaptability: 0.72 }, AU: { supplyChainRisk: 0.56, tradeConcentration: 0.67, resilience: 0.64, adaptability: 0.68 }, MX: { supplyChainRisk: 0.59, tradeConcentration: 0.73, resilience: 0.61, adaptability: 0.65 }, RU: { supplyChainRisk: 0.78, tradeConcentration: 0.81, resilience: 0.45, adaptability: 0.48 }, SA: { supplyChainRisk: 0.85, tradeConcentration: 0.89, resilience: 0.38, adaptability: 0.41 } },
 };
 
-type ViewMode = 'rankings' | 'countryFocus' | 'historical' | 'tariffs' | 'map';
-const VIEW_MODE_CONFIG: { id: ViewMode; label: string; description: string }[] = [
-  { id: 'rankings', label: 'Rankings', description: 'Sortable country table' },
-  { id: 'countryFocus', label: 'Country Focus', description: 'Detailed country analysis' },
-  { id: 'historical', label: 'Historical', description: 'Trade trends over time' },
-  { id: 'tariffs', label: 'Tariffs & Blocs', description: 'Disputes, blocs & metrics' },
-  { id: 'map', label: 'Trade Map', description: 'Geographic trade flow visualization' },
-];
+const NAV = ['Rankings', 'Country focus', 'Historical', 'Tariffs & blocs', 'Trade map'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 const METRIC_CATEGORIES = [
   { id: 'complexity', label: 'Economic Complexity', keys: ['eci', 'rank', 'productComplexity', 'opportunityValue'] },
@@ -201,7 +196,6 @@ const MAP_METRICS: { id: MapMetric; label: string }[] = [
 
 const TradingPlacesPage: React.FC = () => {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
-  const [viewMode, setViewMode] = useLocalStorage<ViewMode>('tradingPlacesViewMode', 'rankings');
   const [selectedCountry, setSelectedCountry] = useState(mockTradeData.countries[0]);
   const [detailCountry, setDetailCountry] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('totalExports');
@@ -250,10 +244,6 @@ const TradingPlacesPage: React.FC = () => {
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
   }, []);
-
-  useEffect(() => {
-    if (viewMode === 'historical' && !showHistoricalView) setShowHistoricalView(true);
-  }, [viewMode, showHistoricalView]);
 
   useEffect(() => { setSelectedFlow(null); }, [detailCountry]);
 
@@ -592,111 +582,36 @@ const TradingPlacesPage: React.FC = () => {
           </div>
         </div>
           
-        {/* View Mode Selector */}
-        <div className={`rounded-xl border p-3 mb-4 ${tc.card}`}>
-          <div className="flex flex-wrap gap-2">
-            {VIEW_MODE_CONFIG.map(vm => (
-              <button key={vm.id} onClick={() => setViewMode(vm.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${viewMode === vm.id ? tc.activeBg : tc.inactiveBg}`}>
-                {vm.label}
-              </button>
-            ))}
-            </div>
-          </div>
-          
-        {/* Controls Card - shown for Rankings and Country Focus */}
-        {(viewMode === 'rankings' || viewMode === 'countryFocus') && (
-          <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
-            {viewMode === 'rankings' && (
-              <>
-                <div className="min-w-[140px]">
-                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Region</label>
-                  <select value={filterRegion} onChange={e => setFilterRegion(e.target.value)} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
-                    {regions.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-              </div>
-                <div className="min-w-[140px]">
-                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Sort By</label>
-                  <select value={sortBy} onChange={e => { setSortBy(e.target.value); setSortDir('desc'); }} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
-                    {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-            </div>
-              </>
-            )}
-            <div className="flex-1 min-w-[180px]">
-              <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Search</label>
-              <div className="relative">
-                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${tc.textSec}`} />
-                <input value={countrySearch} onChange={e => setCountrySearch(e.target.value)} placeholder="Search countries..."
-                  className={`w-full pl-9 pr-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`} />
-                  </div>
-                </div>
-              </div>
-            )}
-
-        {/* Historical controls */}
-        {viewMode === 'historical' && (
-          <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
-            <div className="min-w-[120px]">
-              <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Start Year</label>
-              <select value={customStartYear} onChange={e => setCustomStartYear(Number(e.target.value))} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
-                {Array.from({ length: 7 }, (_, i) => 1960 + i * 10).map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-                </div>
-            <div className="min-w-[120px]">
-              <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>End Year</label>
-              <select value={customEndYear} onChange={e => setCustomEndYear(Number(e.target.value))} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
-                {Array.from({ length: 7 }, (_, i) => 2023 - i * 5).map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-                </div>
-            {historicalLoading && <div className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className={`text-sm ${tc.textSec}`}>Loading...</span></div>}
-              </div>
-            )}
-
-        {/* Map controls */}
-        {viewMode === 'map' && (
-          <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
-            <div className="min-w-[160px]">
-              <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Metric</label>
-              <select value={mapMetric} onChange={e => setMapMetric(e.target.value as MapMetric)} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
-                {MAP_METRICS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
-              </select>
-                  </div>
-            <div className="min-w-[160px]">
-              <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Map Style</label>
-              <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: isDarkMode ? '#374151' : '#d1d5db' }}>
-                <button onClick={() => setMapStyle('choropleth')} className={`flex-1 px-3 py-1.5 text-sm font-medium transition-colors ${mapStyle === 'choropleth' ? tc.subtabActive : tc.subtab}`}>
-                  Choropleth
-                    </button>
-                <button onClick={() => setMapStyle('bubble')} className={`flex-1 px-3 py-1.5 text-sm font-medium transition-colors ${mapStyle === 'bubble' ? tc.subtabActive : tc.subtab}`}>
-                  Bubble
-                      </button>
-                  </div>
-                </div>
-            <div className="flex items-end gap-1">
-              <button onClick={() => setMapPosition(p => ({ ...p, zoom: Math.min(p.zoom * 1.5, 8) }))} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
-              <button onClick={() => setMapPosition(p => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }))} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
-              <button onClick={() => setMapPosition({ coordinates: [0, 20], zoom: 1 })} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Reset"><RotateCcw className="w-4 h-4" /></button>
-                          </div>
-            {detailCountry && (
-              <div className="flex items-end">
-                <button onClick={() => setDetailCountry(null)} className={`px-3 py-1.5 rounded-lg text-sm border ${tc.inactiveBg}`}>
-                  Clear Selection
-                          </button>
-                          </div>
-                          )}
-            <div className="flex items-end gap-2 flex-wrap shrink-0 ml-auto">
-              <SocialShareMenu title={`Trade Map: ${MAP_METRICS.find(m => m.id === mapMetric)?.label ?? ''}`} isDarkMode={isDarkMode} />
-            </div>
-                        </div>
-        )}
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="blue" />
 
         {/* Main Content Area */}
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 min-w-0">
 
             {/* ==================== RANKINGS VIEW ==================== */}
-            {viewMode === 'rankings' && (
+            <ChapterSection id="chapter-1" index={1} title="Country Trade Rankings" isDarkMode={isDarkMode} accent="blue">
+              <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
+                    <div className="min-w-[140px]">
+                      <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Region</label>
+                      <select value={filterRegion} onChange={e => setFilterRegion(e.target.value)} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
+                        {regions.map(r => <option key={r} value={r}>{r}</option>)}
+                      </select>
+                  </div>
+                    <div className="min-w-[140px]">
+                      <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Sort By</label>
+                      <select value={sortBy} onChange={e => { setSortBy(e.target.value); setSortDir('desc'); }} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
+                        {sortOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                </div>
+                <div className="flex-1 min-w-[180px]">
+                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Search</label>
+                  <div className="relative">
+                    <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${tc.textSec}`} />
+                    <input value={countrySearch} onChange={e => setCountrySearch(e.target.value)} placeholder="Search countries..."
+                      className={`w-full pl-9 pr-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`} />
+                      </div>
+                    </div>
+                  </div>
               <div id={slugify('Country Trade Rankings')} className={`rounded-xl border overflow-hidden ${tc.card}`}>
                   <div className="p-4 border-b flex items-center justify-between gap-2 flex-wrap" style={{ borderColor: isDarkMode ? '#374151' : '#e5e7eb' }}>
                     <h3 className={`font-semibold ${tc.text}`}>Country Trade Rankings</h3>
@@ -756,10 +671,20 @@ const TradingPlacesPage: React.FC = () => {
                     </table>
                   </div>
                 </div>
-              )}
+            </ChapterSection>
 
             {/* ==================== COUNTRY FOCUS VIEW ==================== */}
-            {viewMode === 'countryFocus' && (
+            <ChapterSection id="chapter-2" index={2} title="Country Focus" isDarkMode={isDarkMode} accent="blue">
+              <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
+                <div className="flex-1 min-w-[180px]">
+                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Search</label>
+                  <div className="relative">
+                    <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${tc.textSec}`} />
+                    <input value={countrySearch} onChange={e => setCountrySearch(e.target.value)} placeholder="Search countries..."
+                      className={`w-full pl-9 pr-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`} />
+                      </div>
+                    </div>
+                  </div>
               <div className="space-y-6">
                 {/* Country Selector */}
                 <div className={`rounded-xl border p-3 ${tc.card}`}>
@@ -893,10 +818,26 @@ const TradingPlacesPage: React.FC = () => {
                 </div>
                 </div>
               </div>
-            )}
+            </ChapterSection>
 
             {/* ==================== HISTORICAL VIEW ==================== */}
-            {viewMode === 'historical' && (
+            <ChapterSection id="chapter-3" index={3} title="Historical Trade Trends" isDarkMode={isDarkMode} accent="blue" lazy>
+              <RequestOnMount request={setShowHistoricalView} />
+              <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
+                <div className="min-w-[120px]">
+                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Start Year</label>
+                  <select value={customStartYear} onChange={e => setCustomStartYear(Number(e.target.value))} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
+                    {Array.from({ length: 7 }, (_, i) => 1960 + i * 10).map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                    </div>
+                <div className="min-w-[120px]">
+                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>End Year</label>
+                  <select value={customEndYear} onChange={e => setCustomEndYear(Number(e.target.value))} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
+                    {Array.from({ length: 7 }, (_, i) => 2023 - i * 5).map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                    </div>
+                {historicalLoading && <div className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /><span className={`text-sm ${tc.textSec}`}>Loading...</span></div>}
+                  </div>
               <div className="space-y-6">
                 {globalTradeVolumeData.length > 0 && (
                   <div id={slugify('Global Trade Volume Over Time')} className={`rounded-xl border p-4 ${tc.card}`}>
@@ -995,10 +936,10 @@ const TradingPlacesPage: React.FC = () => {
                   </div>
                 )}
                   </div>
-            )}
+            </ChapterSection>
 
             {/* ==================== TARIFFS & BLOCS VIEW ==================== */}
-            {viewMode === 'tariffs' && (
+            <ChapterSection id="chapter-4" index={4} title="Tariffs and Trade Blocs" isDarkMode={isDarkMode} accent="blue" lazy>
               <div className="space-y-6">
                 {/* Sub-tabs */}
                 <div className={`rounded-xl border p-2 flex flex-wrap gap-1 ${tc.card}`}>
@@ -1217,10 +1158,44 @@ const TradingPlacesPage: React.FC = () => {
                   </div>
                 )}
                 </div>
-              )}
+            </ChapterSection>
 
             {/* ==================== MAP VIEW ==================== */}
-            {viewMode === 'map' && (
+            <ChapterSection id="chapter-5" index={5} title="Trade Map" isDarkMode={isDarkMode} accent="blue" lazy>
+              <div className={`rounded-xl border p-4 mb-4 flex flex-wrap gap-4 items-end ${tc.card}`}>
+                <div className="min-w-[160px]">
+                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Metric</label>
+                  <select value={mapMetric} onChange={e => setMapMetric(e.target.value as MapMetric)} className={`w-full px-3 py-1.5 rounded-lg border text-sm ${tc.selectBg}`}>
+                    {MAP_METRICS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+                  </select>
+                      </div>
+                <div className="min-w-[160px]">
+                  <label className={`block text-xs font-medium mb-1 ${tc.textSec}`}>Map Style</label>
+                  <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: isDarkMode ? '#374151' : '#d1d5db' }}>
+                    <button onClick={() => setMapStyle('choropleth')} className={`flex-1 px-3 py-1.5 text-sm font-medium transition-colors ${mapStyle === 'choropleth' ? tc.subtabActive : tc.subtab}`}>
+                      Choropleth
+                        </button>
+                    <button onClick={() => setMapStyle('bubble')} className={`flex-1 px-3 py-1.5 text-sm font-medium transition-colors ${mapStyle === 'bubble' ? tc.subtabActive : tc.subtab}`}>
+                      Bubble
+                          </button>
+                      </div>
+                    </div>
+                <div className="flex items-end gap-1">
+                  <button onClick={() => setMapPosition(p => ({ ...p, zoom: Math.min(p.zoom * 1.5, 8) }))} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
+                  <button onClick={() => setMapPosition(p => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }))} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
+                  <button onClick={() => setMapPosition({ coordinates: [0, 20], zoom: 1 })} className={`p-2 rounded-lg border ${tc.inactiveBg}`} title="Reset"><RotateCcw className="w-4 h-4" /></button>
+                              </div>
+                {detailCountry && (
+                  <div className="flex items-end">
+                    <button onClick={() => setDetailCountry(null)} className={`px-3 py-1.5 rounded-lg text-sm border ${tc.inactiveBg}`}>
+                      Clear Selection
+                              </button>
+                              </div>
+                              )}
+                <div className="flex items-end gap-2 flex-wrap shrink-0 ml-auto">
+                  <SocialShareMenu title={`Trade Map: ${MAP_METRICS.find(m => m.id === mapMetric)?.label ?? ''}`} isDarkMode={isDarkMode} />
+                </div>
+                            </div>
               <div className="space-y-4">
                 <style>{`
                   @keyframes flowForward { to { stroke-dashoffset: -24; } }
@@ -1720,12 +1695,12 @@ const TradingPlacesPage: React.FC = () => {
                       </div>
                 )}
                 </div>
-              )}
+            </ChapterSection>
           </div>
 
           {/* ==================== DETAIL PANEL ==================== */}
           {detailCountryData && (
-            <div ref={panelRef} id={slugify(`${detailCountryData.name} trade profile`)} className={`w-full lg:w-96 flex-shrink-0 rounded-xl border p-5 ${tc.card} self-start lg:sticky lg:top-4`}>
+            <div ref={panelRef} id={slugify(`${detailCountryData.name} trade profile`)} className={`w-full lg:w-96 flex-shrink-0 rounded-xl border p-5 ${tc.card} self-start lg:sticky lg:top-16`}>
               <div className="flex items-center justify-between gap-2 mb-4">
                 <div className="flex items-center gap-3">
                   <FlagIcon code={detailCountryData.code} size="w-8 h-6" />

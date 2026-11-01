@@ -26,6 +26,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
 
@@ -62,6 +63,8 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, sha
     </div>
   );
 }
+
+const NAV = ['Bazaar', 'Balance', 'Openness', 'Tariffs', 'Shipping', 'Agreements', 'Supply chains', 'Trade wars'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function TradeLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -240,8 +243,10 @@ export default function TradeLedgerPage() {
           </div>
         </div>
 
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="amber" />
+
         {/* Chapter 1 — The Global Bazaar */}
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -266,7 +271,7 @@ export default function TradeLedgerPage() {
         </section>
 
         {/* Chapter 2 — The Balance */}
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -281,7 +286,7 @@ export default function TradeLedgerPage() {
         </section>
 
         {/* Chapter 3 — The Openness Race */}
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -292,7 +297,7 @@ export default function TradeLedgerPage() {
         </section>
 
         {/* Chapter 4 — The Tariff Wall */}
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -304,7 +309,7 @@ export default function TradeLedgerPage() {
         </section>
 
         {/* Chapter 5 — The Shipping Lanes */}
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
@@ -315,7 +320,7 @@ export default function TradeLedgerPage() {
         </section>
 
         {/* Chapter 6 — Trade Agreements */}
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
@@ -326,33 +331,39 @@ export default function TradeLedgerPage() {
           <TradeAgreementsTable isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          {/* Chapter 7 — Supply-Chain Concentration */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 7"
-              share={false}
-              title="Supply-Chain Concentration"
-              subtitle="Where the world's critical inputs come from. Rare earths, lithium, cobalt, semiconductors, solar PV — any product where the top-3 producers combine for &gt;90% is a real single-point-of-failure risk."
-            />
-            <div className="mb-6">
-              <SupplyChainTreemap isDarkMode={isDarkMode} />
-            </div>
-            <SupplyChainConcentrationTable isDarkMode={isDarkMode} />
-          </section>
+        {/* Chapter 7 — Supply-Chain Concentration */}
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 7"
+                share={false}
+                title="Supply-Chain Concentration"
+                subtitle="Where the world's critical inputs come from. Rare earths, lithium, cobalt, semiconductors, solar PV — any product where the top-3 producers combine for &gt;90% is a real single-point-of-failure risk."
+              />
+              <div className="mb-6">
+                <SupplyChainTreemap isDarkMode={isDarkMode} />
+              </div>
+              <SupplyChainConcentrationTable isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-          {/* Chapter 8 — Trade Wars */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 8"
-              title="Trade Wars"
-              subtitle="Every major tariff, sanction, export-control and chokepoint event since 2018, colour-coded by severity. Filter to see only the systemic ones."
-            />
-            <TradeFrictionsTimeline isDarkMode={isDarkMode} />
-          </section>
-        </LazyMount>
+        {/* Chapter 8 — Trade Wars */}
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 8"
+                title="Trade Wars"
+                subtitle="Every major tariff, sanction, export-control and chokepoint event since 2018, colour-coded by severity. Filter to see only the systemic ones."
+              />
+              <TradeFrictionsTimeline isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/trade-ledger" isDarkMode={isDarkMode} />
 

@@ -13,6 +13,7 @@ import RelatedPages from '../components/RelatedPages';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
 import { fetchOilReserves, fetchOilProduction, type ReservesSnapshot, type ProductionSnapshot } from '../services/eia';
+import ChapterNav from '../components/ChapterNav';
 
 const CommodityTicker = dynamic(() => import('../components/CommodityTicker'), { ssr: false });
 const ResourceHoldersPanel = dynamic(() => import('../components/ResourceHoldersPanel'), { ssr: false });
@@ -67,6 +68,8 @@ function kpiChange(latest?: { value: number } | null, prior?: { value: number } 
   if (!latest || !prior || prior.value === 0) return null;
   return ((latest.value - prior.value) / prior.value) * 100;
 }
+
+const NAV = ['Reserves', 'Dependence', 'Boom and bust', 'Reserves clock', 'Curse'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function ResourcesPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -270,8 +273,10 @@ export default function ResourcesPage() {
           </div>
         </div>
 
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="amber" />
+
         {/* Chapter 1 — Who Has What? */}
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -294,7 +299,7 @@ export default function ResourcesPage() {
         </section>
 
         {/* Chapter 2 — Dependence Quadrant */}
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -319,7 +324,7 @@ export default function ResourcesPage() {
         </section>
 
         {/* Chapter 3 — Boom & Bust */}
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -338,7 +343,7 @@ export default function ResourcesPage() {
         </section>
 
         {/* Chapter 4 — Reserves Clock */}
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -354,7 +359,7 @@ export default function ResourcesPage() {
         </section>
 
         {/* Chapter 5 — Petrostate Vulnerability */}
-        <section className="mb-6">
+        <section id="chapter-5" className="mb-6 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"

@@ -14,6 +14,8 @@ import { COUNTRY_COLORS as countryColors } from '../utils/countryMappings';
 import BulkChartDownload from '../components/BulkChartDownload';
 import ChartDownloadButton from '../components/ChartDownloadButton';
 import SocialShareMenu from '../components/SocialShareMenu';
+import ChapterNav from '../components/ChapterNav';
+import ChapterSection from '../components/ChapterSection';
 import { slugify } from '../lib/share';
 import InfoPanel from '../components/InfoPanel';
 import { economicMetrics } from '../data/economicMetrics';
@@ -52,7 +54,7 @@ const CostOfLivingOverview = dynamic(() => import('../components/inflation/CostO
   loading: panelSkeleton('the index table'),
 });
 
-// Under the Inflation tab all four cities are stacked, which is a lot of
+// In the Inflation chapter all four cities are stacked, which is a lot of
 // recharts to mount at once. Each panel waits until it is near the viewport.
 function LazyCityPanel({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -83,7 +85,7 @@ function LazyCityPanel({ children }: { children: React.ReactNode }) {
 }
 
 
-type InflationTab = 'inflation' | 'cost-of-living' | 'world-map';
+const NAV = ['Inflation rates', 'Cost of living', 'World map'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 const LATEST_STATS_TITLE = 'Latest inflation rate by country';
 
@@ -97,7 +99,6 @@ export default function InflationPage() {
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["USA", "UK", "Germany"]);
   const [selectedPeriod, setSelectedPeriod] = useState<'5y' | '10y' | 'all'>('all');
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
-  const [activeTab, setActiveTab] = useState<InflationTab>('inflation');
   const [selectedCityTab, setSelectedCityTab] = useState<CityTab>('overview');
   const inflationChartRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -140,7 +141,7 @@ export default function InflationPage() {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="w-full max-w-5xl mx-auto p-4 space-y-8">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <div>
             <h1 className="text-2xl font-bold mb-2">Inflation & Cost of Living</h1>
@@ -165,8 +166,8 @@ export default function InflationPage() {
             or deflation, and explore cost of living differences across major cities worldwide.
           </p>
           <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Switch between the Inflation Rates tab for cross-country analysis and the Cost of Living
-            tab for city-level price comparisons including rent, groceries, and purchasing power indices.
+            Start with Inflation Rates for cross-country analysis, then Cost of Living for city-level
+            price comparisons including rent, groceries, and purchasing power indices.
           </p>
         </div>
         <PageTakeaways page="inflation" isDarkMode={isDarkMode} />
@@ -176,42 +177,10 @@ export default function InflationPage() {
 
         {!loading && !error && (
         <>
-        {/* Tab Navigation */}
-        <div className={`flex gap-2 p-1 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-          <button
-            onClick={() => setActiveTab('inflation')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              activeTab === 'inflation'
-                ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 shadow')
-                : (isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200')
-            }`}
-          >
-            Inflation Rates
-          </button>
-          <button
-            onClick={() => setActiveTab('cost-of-living')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              activeTab === 'cost-of-living'
-                ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 shadow')
-                : (isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200')
-            }`}
-          >
-            Cost of Living Index
-          </button>
-          <button
-            onClick={() => setActiveTab('world-map')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              activeTab === 'world-map'
-                ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 shadow')
-                : (isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200')
-            }`}
-          >
-            World Map
-          </button>
-        </div>
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="blue" />
 
         {/* Inflation Tab Content */}
-        {activeTab === 'inflation' && (
+        <ChapterSection id="chapter-1" index={1} title="Inflation Rates" isDarkMode={isDarkMode} accent="blue">
         <>
         {/* Country Selector */}
         <div className="mb-4">
@@ -355,10 +324,10 @@ export default function InflationPage() {
           </LazyCityPanel>
         ))}
         </>
-        )}
+        </ChapterSection>
 
         {/* Cost of Living Tab Content */}
-        {activeTab === 'cost-of-living' && (
+        <ChapterSection id="chapter-2" index={2} title="Cost of Living" isDarkMode={isDarkMode} accent="blue">
           <div className="space-y-6">
             {/* Introduction */}
             <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
@@ -416,10 +385,10 @@ export default function InflationPage() {
               <CityCostPanel city={selectedCityTab} isDarkMode={isDarkMode} compact />
             )}
                   </div>
-        )}
+        </ChapterSection>
 
         {/* World Map Tab Content */}
-        {activeTab === 'world-map' && (
+        <ChapterSection id="chapter-3" index={3} title="World Map" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-6">
             {/* Introduction */}
             <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
@@ -468,7 +437,7 @@ export default function InflationPage() {
               </div>
             </div>
           </div>
-        )}
+        </ChapterSection>
         </>
         )}
       </div>

@@ -9,6 +9,8 @@ import { fetchCulturalData, CulturalData, CountryData, COUNTRY_NAMES } from '../
 import { fetchCulturalStaticData, CulturalStaticData } from '../services/culturalData';
 import StalenessBanner from '../components/StalenessBanner';
 import SocialShareMenu from '../components/SocialShareMenu';
+import ChapterNav from '../components/ChapterNav';
+import ChapterSection, { RequestOnMount } from '../components/ChapterSection';
 import { slugify } from '../lib/share';
 import { QS_SNAPSHOT_DATE } from '../data/universityRankings';
 import {
@@ -240,9 +242,13 @@ const EducationDashboard = dynamic(
   }
 );
 
+const NAV = [
+  'Overview', 'Heritage', 'Creative economy', 'Tourism & soft power', 'Infrastructure', 'Media & publishing', 'Digital culture',
+  'Participation', 'Cultural trade', 'Languages', 'Education', 'Passports', 'Compare', 'Insights',
+].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
+
 const CulturalCapitalPage = () => {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
-  const [activeSection, setActiveSection] = useState<string>('overview');
   const [culturalData, setCulturalData] = useState<CulturalData | null>(null);
   const [staticData, setStaticData] = useState<CulturalStaticData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -252,10 +258,12 @@ const CulturalCapitalPage = () => {
   const [passportLoading, setPassportLoading] = useState(false);
   const [passportError, setPassportError] = useState<string | null>(null);
   const passportLoadingRef = useRef(false);
+  const [passportRequested, setPassportRequested] = useState(false);
   const [educationData, setEducationData] = useState<EducationLiveData | null>(null);
   const [educationLoading, setEducationLoading] = useState(false);
   const [educationError, setEducationError] = useState<string | null>(null);
   const educationLoadingRef = useRef(false);
+  const [educationRequested, setEducationRequested] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -288,7 +296,7 @@ const CulturalCapitalPage = () => {
   }, []);
 
   useEffect(() => {
-    if (activeSection !== 'passport') return;
+    if (!passportRequested) return;
     if (passportLive) return;
     if (passportLoadingRef.current) return;
 
@@ -315,10 +323,10 @@ const CulturalCapitalPage = () => {
     };
     loadPassport();
     return () => { cancelled = true; };
-  }, [activeSection, passportLive]);
+  }, [passportRequested, passportLive]);
 
   useEffect(() => {
-    if (activeSection !== 'education') return;
+    if (!educationRequested) return;
     if (educationData) return;
     if (educationLoadingRef.current) return;
 
@@ -345,7 +353,7 @@ const CulturalCapitalPage = () => {
     };
     loadEducation();
     return () => { cancelled = true; };
-  }, [activeSection, educationData]);
+  }, [educationRequested, educationData]);
 
   const passportFallback: PassportLiveData = React.useMemo(() => {
     const passports: Record<string, PassportProfile> = {};
@@ -457,7 +465,7 @@ const CulturalCapitalPage = () => {
 
   return (
     <div className={`min-h-screen ${themeColors.background} ${themeColors.text}`}>
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
           <div>
@@ -529,252 +537,226 @@ const CulturalCapitalPage = () => {
           </div>
         )}
 
-        {/* Navigation Tabs */}
-        <div className={`flex flex-wrap gap-2 mb-8 p-1 rounded-lg ${
-          isDarkMode ? 'bg-gray-800' : 'bg-gray-100'
-        }`}>
-          {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'heritage', label: 'Heritage & Preservation' },
-            { id: 'creative', label: 'Creative Economy' },
-            { id: 'tourism', label: 'Tourism & Soft Power' },
-            { id: 'infrastructure', label: 'Cultural Infrastructure' },
-            { id: 'media', label: 'Media & Publishing' },
-            { id: 'digital', label: 'Digital Culture' },
-            { id: 'participation', label: 'Cultural Participation' },
-            { id: 'trade', label: 'Cultural Trade' },
-            { id: 'diversity', label: 'Linguistic Diversity' },
-            { id: 'education', label: 'Education' },
-            { id: 'passport', label: 'Passport Strength' },
-            { id: 'compare', label: 'Country Comparison' },
-            { id: 'insights', label: 'Insights' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSection(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeSection === tab.id
-                  ? isDarkMode
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-white text-gray-900 shadow'
-                  : isDarkMode
-                    ? 'text-gray-400 hover:text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="purple" />
 
         {/* Overview Section */}
-        {activeSection === 'overview' && staticData && (
-          <div className="space-y-8">
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h2 className="text-xl font-bold mb-4">Cultural Capital Landscape</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                    Heritage &amp; Preservation
-                  </h3>
-                  <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
-                    UNESCO World Heritage Sites, Intangible Cultural Heritage, Memory of the World,
-                    and endangered languages represent humanity&apos;s irreplaceable cultural legacy.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Heritage Sites', 'Intangible Heritage', 'Memory of World', 'Endangered Languages'].map(item => (
-                      <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                    Creative Economy
-                  </h3>
-                  <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
-                    The creative economy encompasses goods and services rooted in culture, creativity,
-                    and intellectual property &mdash; from film and music to design and publishing.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Creative Trade', 'Film Industry', 'Cultural Jobs', 'IP Trade'].map(item => (
-                      <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
-                    Media &amp; Digital Culture
-                  </h3>
-                  <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
-                    Music, gaming, streaming, and publishing revenue reveal the economic power of
-                    contemporary creative industries and digital cultural production.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Music Revenue', 'Gaming Revenue', 'Streaming', 'Book Publishing'].map(item => (
-                      <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                    Participation &amp; Diversity
-                  </h3>
-                  <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
-                    Library density, performing arts attendance, cultural participation rates, and
-                    linguistic diversity reflect how deeply culture permeates everyday life.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Libraries', 'Performing Arts', 'Participation Rate', 'Language Diversity'].map(item => (
-                      <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id={slugify('Global Heritage Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`px-4 py-3 border-b ${themeColors.border} flex items-start justify-between gap-2 flex-wrap`}>
-                <div>
-                  <h2 className="text-xl font-bold">Global Heritage Map</h2>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    UNESCO World Heritage Sites by country
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <SocialShareMenu title="Global Heritage Map" isDarkMode={isDarkMode} />
-                </div>
-              </div>
-              <HeritageWorldMap
-                isDarkMode={isDarkMode}
-                heritageData={staticData.heritageSites}
-              />
-            </div>
-
-            <CulturalRankingTable
-              isDarkMode={isDarkMode}
-              heritageData={staticData.heritageSites}
-              tourismArrivals={culturalData?.tourismArrivals || []}
-              tourismReceipts={culturalData?.tourismReceipts || []}
-              creativeGoodsExports={staticData.creativeGoodsExports}
-              creativeServicesExports={staticData.creativeServicesExports}
-              museumDensity={staticData.museumDensity}
-              creativeCities={staticData.creativeCities}
-              culturalEmployment={staticData.culturalEmployment}
-              featureFilms={staticData.featureFilms}
-              intangibleHeritage={intangibleHeritageByCountry}
-              musicRevenue={latestMusicRevenue}
-              libraryDensity={libraryDensityByCountry}
-              selectedCountries={selectedCountries}
-            />
-          </div>
-        )}
-
-        {/* Heritage Section */}
-        {activeSection === 'heritage' && staticData && (
-          <div className="space-y-8">
-            <HeritageSitesChart
-              isDarkMode={isDarkMode}
-              heritageData={staticData.heritageSites}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-
-            <IntangibleHeritageChart
-              isDarkMode={isDarkMode}
-              intangibleHeritage={intangibleHeritageByCountry}
-              endangeredSites={endangeredSitesByCountry}
-              memoryOfWorld={memoryOfWorldByCountry}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-
-            <div id={slugify('Heritage by Region')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                <h3 className="text-lg font-semibold">Heritage by Region</h3>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <SocialShareMenu title="Heritage by Region" subject="dataset" isDarkMode={isDarkMode} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { label: 'Europe', countries: ['Italy', 'France', 'Germany', 'Spain', 'UK'], color: isDarkMode ? 'text-blue-400' : 'text-blue-600' },
-                  { label: 'Asia-Pacific', countries: ['China', 'Japan', 'India', 'Australia', 'SouthKorea'], color: isDarkMode ? 'text-amber-400' : 'text-amber-600' },
-                  { label: 'Americas', countries: ['Mexico', 'USA', 'Brazil', 'Canada', 'Argentina'], color: isDarkMode ? 'text-emerald-400' : 'text-emerald-600' },
-                  { label: 'MENA & Africa', countries: ['Egypt', 'Turkey', 'SouthAfrica', 'Nigeria', 'SaudiArabia'], color: isDarkMode ? 'text-purple-400' : 'text-purple-600' },
-                ].map(region => (
-                  <div key={region.label} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                    <h4 className={`font-semibold mb-2 ${region.color}`}>{region.label}</h4>
-                    <div className="space-y-1">
-                      {region.countries.map(country => (
-                        <div key={country} className="flex justify-between text-sm">
-                          <span className={themeColors.textSecondary}>{country}</span>
-                          <span className="font-medium">{staticData.heritageSites[country]?.total || 0}</span>
-                        </div>
+        <ChapterSection id="chapter-1" index={1} title="Cultural Capital Overview" isDarkMode={isDarkMode} accent="purple">
+          {staticData && (
+            <div className="space-y-8">
+              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <h2 className="text-xl font-bold mb-4">Cultural Capital Landscape</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                    <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                      Heritage &amp; Preservation
+                    </h3>
+                    <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
+                      UNESCO World Heritage Sites, Intangible Cultural Heritage, Memory of the World,
+                      and endangered languages represent humanity&apos;s irreplaceable cultural legacy.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Heritage Sites', 'Intangible Heritage', 'Memory of World', 'Endangered Languages'].map(item => (
+                        <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
+                          {item}
+                        </span>
                       ))}
                     </div>
                   </div>
-                ))}
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                    <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                      Creative Economy
+                    </h3>
+                    <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
+                      The creative economy encompasses goods and services rooted in culture, creativity,
+                      and intellectual property &mdash; from film and music to design and publishing.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Creative Trade', 'Film Industry', 'Cultural Jobs', 'IP Trade'].map(item => (
+                        <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                    <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>
+                      Media &amp; Digital Culture
+                    </h3>
+                    <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
+                      Music, gaming, streaming, and publishing revenue reveal the economic power of
+                      contemporary creative industries and digital cultural production.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Music Revenue', 'Gaming Revenue', 'Streaming', 'Book Publishing'].map(item => (
+                        <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                    <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                      Participation &amp; Diversity
+                    </h3>
+                    <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
+                      Library density, performing arts attendance, cultural participation rates, and
+                      linguistic diversity reflect how deeply culture permeates everyday life.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Libraries', 'Performing Arts', 'Participation Rate', 'Language Diversity'].map(item => (
+                        <span key={item} className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id={slugify('Global Heritage Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className={`px-4 py-3 border-b ${themeColors.border} flex items-start justify-between gap-2 flex-wrap`}>
+                  <div>
+                    <h2 className="text-xl font-bold">Global Heritage Map</h2>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      UNESCO World Heritage Sites by country
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Global Heritage Map" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
+                <HeritageWorldMap
+                  isDarkMode={isDarkMode}
+                  heritageData={staticData.heritageSites}
+                />
+              </div>
+
+              <CulturalRankingTable
+                isDarkMode={isDarkMode}
+                heritageData={staticData.heritageSites}
+                tourismArrivals={culturalData?.tourismArrivals || []}
+                tourismReceipts={culturalData?.tourismReceipts || []}
+                creativeGoodsExports={staticData.creativeGoodsExports}
+                creativeServicesExports={staticData.creativeServicesExports}
+                museumDensity={staticData.museumDensity}
+                creativeCities={staticData.creativeCities}
+                culturalEmployment={staticData.culturalEmployment}
+                featureFilms={staticData.featureFilms}
+                intangibleHeritage={intangibleHeritageByCountry}
+                musicRevenue={latestMusicRevenue}
+                libraryDensity={libraryDensityByCountry}
+                selectedCountries={selectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
+
+        {/* Heritage Section */}
+        <ChapterSection id="chapter-2" index={2} title="Heritage and Preservation" isDarkMode={isDarkMode} accent="purple">
+          {staticData && (
+            <div className="space-y-8">
+              <HeritageSitesChart
+                isDarkMode={isDarkMode}
+                heritageData={staticData.heritageSites}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+
+              <IntangibleHeritageChart
+                isDarkMode={isDarkMode}
+                intangibleHeritage={intangibleHeritageByCountry}
+                endangeredSites={endangeredSitesByCountry}
+                memoryOfWorld={memoryOfWorldByCountry}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+
+              <div id={slugify('Heritage by Region')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">Heritage by Region</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Heritage by Region" subject="dataset" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Europe', countries: ['Italy', 'France', 'Germany', 'Spain', 'UK'], color: isDarkMode ? 'text-blue-400' : 'text-blue-600' },
+                    { label: 'Asia-Pacific', countries: ['China', 'Japan', 'India', 'Australia', 'SouthKorea'], color: isDarkMode ? 'text-amber-400' : 'text-amber-600' },
+                    { label: 'Americas', countries: ['Mexico', 'USA', 'Brazil', 'Canada', 'Argentina'], color: isDarkMode ? 'text-emerald-400' : 'text-emerald-600' },
+                    { label: 'MENA & Africa', countries: ['Egypt', 'Turkey', 'SouthAfrica', 'Nigeria', 'SaudiArabia'], color: isDarkMode ? 'text-purple-400' : 'text-purple-600' },
+                  ].map(region => (
+                    <div key={region.label} className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                      <h4 className={`font-semibold mb-2 ${region.color}`}>{region.label}</h4>
+                      <div className="space-y-1">
+                        {region.countries.map(country => (
+                          <div key={country} className="flex justify-between text-sm">
+                            <span className={themeColors.textSecondary}>{country}</span>
+                            <span className="font-medium">{staticData.heritageSites[country]?.total || 0}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Creative Economy Section */}
-        {activeSection === 'creative' && staticData && culturalData && (
-          <div className="space-y-8">
-            <CreativeEconomyChart
-              isDarkMode={isDarkMode}
-              creativeGoodsExports={staticData.creativeGoodsExports}
-              creativeServicesExports={staticData.creativeServicesExports}
-              trademarkData={culturalData.trademarkApplications}
-              featureFilms={staticData.featureFilms}
-              culturalEmployment={staticData.culturalEmployment}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-3" index={3} title="The Creative Economy" isDarkMode={isDarkMode} accent="purple" lazy>
+          {staticData && culturalData && (
+            <div className="space-y-8">
+              <CreativeEconomyChart
+                isDarkMode={isDarkMode}
+                creativeGoodsExports={staticData.creativeGoodsExports}
+                creativeServicesExports={staticData.creativeServicesExports}
+                trademarkData={culturalData.trademarkApplications}
+                featureFilms={staticData.featureFilms}
+                culturalEmployment={staticData.culturalEmployment}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Tourism & Soft Power Section */}
-        {activeSection === 'tourism' && staticData && culturalData && (
-          <div className="space-y-8">
-            <TourismTrendsChart
-              isDarkMode={isDarkMode}
-              tourismArrivals={culturalData.tourismArrivals}
-              tourismReceipts={culturalData.tourismReceipts}
-              tourismExpenditure={culturalData.tourismExpenditure}
-              netMigration={culturalData.netMigration}
-              softPowerRankings={staticData.softPowerRankings}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-4" index={4} title="Tourism and Soft Power" isDarkMode={isDarkMode} accent="purple" lazy>
+          {staticData && culturalData && (
+            <div className="space-y-8">
+              <TourismTrendsChart
+                isDarkMode={isDarkMode}
+                tourismArrivals={culturalData.tourismArrivals}
+                tourismReceipts={culturalData.tourismReceipts}
+                tourismExpenditure={culturalData.tourismExpenditure}
+                netMigration={culturalData.netMigration}
+                softPowerRankings={staticData.softPowerRankings}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Cultural Infrastructure Section */}
-        {activeSection === 'infrastructure' && staticData && culturalData && (
-          <div className="space-y-8">
-            <CulturalInfraChart
-              isDarkMode={isDarkMode}
-              museumDensity={staticData.museumDensity}
-              creativeCities={staticData.creativeCities}
-              educationExpenditure={culturalData.educationExpenditure}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-5" index={5} title="Cultural Infrastructure" isDarkMode={isDarkMode} accent="purple" lazy>
+          {staticData && culturalData && (
+            <div className="space-y-8">
+              <CulturalInfraChart
+                isDarkMode={isDarkMode}
+                museumDensity={staticData.museumDensity}
+                creativeCities={staticData.creativeCities}
+                educationExpenditure={culturalData.educationExpenditure}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Media & Publishing Section */}
-        {activeSection === 'media' && (
+        <ChapterSection id="chapter-6" index={6} title="Media and Publishing" isDarkMode={isDarkMode} accent="purple" lazy>
           <div className="space-y-8">
             <MediaPublishingChart
               isDarkMode={isDarkMode}
@@ -785,10 +767,10 @@ const CulturalCapitalPage = () => {
               onCountryChange={setSelectedCountries}
             />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Digital Culture Section */}
-        {activeSection === 'digital' && (
+        <ChapterSection id="chapter-7" index={7} title="Digital Culture" isDarkMode={isDarkMode} accent="purple" lazy>
           <div className="space-y-8">
             <DigitalCultureChart
               isDarkMode={isDarkMode}
@@ -798,10 +780,10 @@ const CulturalCapitalPage = () => {
               onCountryChange={setSelectedCountries}
             />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Cultural Participation Section */}
-        {activeSection === 'participation' && (
+        <ChapterSection id="chapter-8" index={8} title="Cultural Participation" isDarkMode={isDarkMode} accent="purple" lazy>
           <div className="space-y-8">
             <CulturalParticipationChart
               isDarkMode={isDarkMode}
@@ -812,24 +794,26 @@ const CulturalCapitalPage = () => {
               onCountryChange={setSelectedCountries}
             />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Cultural Trade Section */}
-        {activeSection === 'trade' && culturalData && (
-          <div className="space-y-8">
-            <CulturalTradeChart
-              isDarkMode={isDarkMode}
-              ipReceipts={culturalData.ipReceipts}
-              ipPayments={culturalData.ipPayments}
-              culturalGoodsImports={culturalGoodsImportsByCountry}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-9" index={9} title="Cultural Trade" isDarkMode={isDarkMode} accent="purple" lazy>
+          {culturalData && (
+            <div className="space-y-8">
+              <CulturalTradeChart
+                isDarkMode={isDarkMode}
+                ipReceipts={culturalData.ipReceipts}
+                ipPayments={culturalData.ipPayments}
+                culturalGoodsImports={culturalGoodsImportsByCountry}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Linguistic Diversity Section */}
-        {activeSection === 'diversity' && (
+        <ChapterSection id="chapter-10" index={10} title="Linguistic Diversity" isDarkMode={isDarkMode} accent="purple" lazy>
           <div className="space-y-8">
             <LinguisticDiversityChart
               isDarkMode={isDarkMode}
@@ -839,10 +823,11 @@ const CulturalCapitalPage = () => {
               onCountryChange={setSelectedCountries}
             />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Education Section */}
-        {activeSection === 'education' && (
+        <ChapterSection id="chapter-11" index={11} title="Education" isDarkMode={isDarkMode} accent="purple" lazy>
+          <RequestOnMount request={setEducationRequested} />
           <div className="space-y-8">
             <div className={`p-4 rounded-lg border ${
               isDarkMode ? 'bg-gray-800 border-blue-500/50 text-blue-400' : 'bg-white border-blue-400 text-blue-700'
@@ -907,10 +892,11 @@ const CulturalCapitalPage = () => {
               </p>
             </div>
           </div>
-        )}
+        </ChapterSection>
 
         {/* Passport Strength Section */}
-        {activeSection === 'passport' && (
+        <ChapterSection id="chapter-12" index={12} title="Passport Strength" isDarkMode={isDarkMode} accent="purple" lazy>
+          <RequestOnMount request={setPassportRequested} />
           <div className="space-y-8">
             <div className={`p-4 rounded-lg border ${
               isDarkMode ? 'bg-gray-800 border-emerald-500/50 text-emerald-400' : 'bg-white border-emerald-400 text-emerald-700'
@@ -985,211 +971,215 @@ const CulturalCapitalPage = () => {
               </p>
             </div>
           </div>
-        )}
+        </ChapterSection>
 
         {/* Country Comparison Section */}
-        {activeSection === 'compare' && staticData && culturalData && (
-          <div className="space-y-8">
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Select Countries to Compare</h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                {Object.values(COUNTRY_NAMES).map(country => (
-                  <button
-                    key={country}
-                    onClick={() => {
-                      if (selectedCountries.includes(country)) {
-                        setSelectedCountries(selectedCountries.filter(c => c !== country));
-                      } else if (selectedCountries.length < 12) {
-                        setSelectedCountries([...selectedCountries, country]);
-                      }
-                    }}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                      selectedCountries.includes(country) ? 'ring-2 ring-purple-500' : ''
-                    } ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
-                    style={{
-                      backgroundColor: selectedCountries.includes(country)
-                        ? (isDarkMode ? culturalChartColors[country] + '40' : culturalChartColors[country] + '20')
-                        : undefined,
-                    }}
-                  >
-                    {country}
-                  </button>
-                ))}
+        <ChapterSection id="chapter-13" index={13} title="Country Comparison" isDarkMode={isDarkMode} accent="purple" lazy>
+          {staticData && culturalData && (
+            <div className="space-y-8">
+              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <h3 className="text-lg font-semibold mb-4">Select Countries to Compare</h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                  {Object.values(COUNTRY_NAMES).map(country => (
+                    <button
+                      key={country}
+                      onClick={() => {
+                        if (selectedCountries.includes(country)) {
+                          setSelectedCountries(selectedCountries.filter(c => c !== country));
+                        } else if (selectedCountries.length < 12) {
+                          setSelectedCountries([...selectedCountries, country]);
+                        }
+                      }}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                        selectedCountries.includes(country) ? 'ring-2 ring-purple-500' : ''
+                      } ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+                      style={{
+                        backgroundColor: selectedCountries.includes(country)
+                          ? (isDarkMode ? culturalChartColors[country] + '40' : culturalChartColors[country] + '20')
+                          : undefined,
+                      }}
+                    >
+                      {country}
+                    </button>
+                  ))}
+                </div>
+                <p className={`text-xs mt-3 ${themeColors.textTertiary}`}>
+                  Select up to 12 countries. Currently selected: {selectedCountries.length}
+                </p>
               </div>
-              <p className={`text-xs mt-3 ${themeColors.textTertiary}`}>
-                Select up to 12 countries. Currently selected: {selectedCountries.length}
-              </p>
-            </div>
 
-            <CulturalRadarChart
-              isDarkMode={isDarkMode}
-              heritageData={staticData.heritageSites}
-              tourismArrivals={culturalData.tourismArrivals}
-              creativeGoodsExports={staticData.creativeGoodsExports}
-              museumDensity={staticData.museumDensity}
-              culturalEmployment={staticData.culturalEmployment}
-              featureFilms={staticData.featureFilms}
-              softPowerRankings={staticData.softPowerRankings}
-              musicRevenue={latestMusicRevenue}
-              libraryDensity={libraryDensityByCountry}
-              selectedCountries={selectedCountries}
-            />
+              <CulturalRadarChart
+                isDarkMode={isDarkMode}
+                heritageData={staticData.heritageSites}
+                tourismArrivals={culturalData.tourismArrivals}
+                creativeGoodsExports={staticData.creativeGoodsExports}
+                museumDensity={staticData.museumDensity}
+                culturalEmployment={staticData.culturalEmployment}
+                featureFilms={staticData.featureFilms}
+                softPowerRankings={staticData.softPowerRankings}
+                musicRevenue={latestMusicRevenue}
+                libraryDensity={libraryDensityByCountry}
+                selectedCountries={selectedCountries}
+              />
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div id={slugify('Heritage Sites Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                  <h3 className="text-lg font-semibold">Heritage Sites Comparison</h3>
-                  <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    <SocialShareMenu title="Heritage Sites Comparison" isDarkMode={isDarkMode} />
+              <div className="grid md:grid-cols-2 gap-6">
+                <div id={slugify('Heritage Sites Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                    <h3 className="text-lg font-semibold">Heritage Sites Comparison</h3>
+                    <div className="flex items-center gap-2 flex-wrap shrink-0">
+                      <SocialShareMenu title="Heritage Sites Comparison" isDarkMode={isDarkMode} />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {selectedCountries.map(country => {
+                      const value = staticData.heritageSites[country]?.total || 0;
+                      const maxValue = 60;
+                      const width = Math.min((value / maxValue) * 100, 100);
+                      return (
+                        <div key={country}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>{country}</span>
+                            <span className="font-medium">{value} sites</span>
+                          </div>
+                          <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ width: `${width}%`, backgroundColor: culturalChartColors[country] }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-                <div className="space-y-3">
-                  {selectedCountries.map(country => {
-                    const value = staticData.heritageSites[country]?.total || 0;
-                    const maxValue = 60;
-                    const width = Math.min((value / maxValue) * 100, 100);
-                    return (
-                      <div key={country}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>{country}</span>
-                          <span className="font-medium">{value} sites</span>
-                        </div>
-                        <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{ width: `${width}%`, backgroundColor: culturalChartColors[country] }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
 
-              <div id={slugify('Creative Goods Exports ($B)')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                  <h3 className="text-lg font-semibold">Creative Goods Exports ($B)</h3>
-                  <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    <SocialShareMenu title="Creative Goods Exports ($B)" isDarkMode={isDarkMode} />
+                <div id={slugify('Creative Goods Exports ($B)')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                    <h3 className="text-lg font-semibold">Creative Goods Exports ($B)</h3>
+                    <div className="flex items-center gap-2 flex-wrap shrink-0">
+                      <SocialShareMenu title="Creative Goods Exports ($B)" isDarkMode={isDarkMode} />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-3">
-                  {selectedCountries.map(country => {
-                    const value = staticData.creativeGoodsExports[country] || 0;
-                    const maxValue = 200;
-                    const width = Math.min((value / maxValue) * 100, 100);
-                    return (
-                      <div key={country}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>{country}</span>
-                          <span className="font-medium">${value.toFixed(1)}B</span>
+                  <div className="space-y-3">
+                    {selectedCountries.map(country => {
+                      const value = staticData.creativeGoodsExports[country] || 0;
+                      const maxValue = 200;
+                      const width = Math.min((value / maxValue) * 100, 100);
+                      return (
+                        <div key={country}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>{country}</span>
+                            <span className="font-medium">${value.toFixed(1)}B</span>
+                          </div>
+                          <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ width: `${width}%`, backgroundColor: culturalChartColors[country] }}
+                            />
+                          </div>
                         </div>
-                        <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{ width: `${width}%`, backgroundColor: culturalChartColors[country] }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Insights Section */}
-        {activeSection === 'insights' && staticData && culturalData && (
-          <div className="space-y-8">
-            <div className={`p-4 rounded-lg border ${
-              isDarkMode ? 'bg-gray-800 border-purple-500 text-purple-400' : 'bg-white border-purple-400 text-purple-700'
-            }`}>
-              <h3 className="font-semibold">Advanced Analytics &amp; Insights</h3>
-              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Explore the relationships between cultural metrics, compare countries across
-                multiple dimensions, and identify cultural capital strengths and gaps.
-              </p>
-            </div>
+        <ChapterSection id="chapter-14" index={14} title="Insights" isDarkMode={isDarkMode} accent="purple" lazy>
+          {staticData && culturalData && (
+            <div className="space-y-8">
+              <div className={`p-4 rounded-lg border ${
+                isDarkMode ? 'bg-gray-800 border-purple-500 text-purple-400' : 'bg-white border-purple-400 text-purple-700'
+              }`}>
+                <h3 className="font-semibold">Advanced Analytics &amp; Insights</h3>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Explore the relationships between cultural metrics, compare countries across
+                  multiple dimensions, and identify cultural capital strengths and gaps.
+                </p>
+              </div>
 
-            <CulturalHeatmapChart
-              isDarkMode={isDarkMode}
-              heritageData={staticData.heritageSites}
-              tourismArrivals={culturalData.tourismArrivals}
-              creativeGoodsExports={staticData.creativeGoodsExports}
-              creativeServicesExports={staticData.creativeServicesExports}
-              museumDensity={staticData.museumDensity}
-              culturalEmployment={staticData.culturalEmployment}
-              featureFilms={staticData.featureFilms}
-              educationExpenditure={culturalData.educationExpenditure}
-              intangibleHeritage={intangibleHeritageByCountry}
-              musicRevenue={latestMusicRevenue}
-              gamingRevenue={latestGamingRevenue}
-              libraryDensity={libraryDensityByCountry}
-              selectedCountries={selectedCountries}
-            />
+              <CulturalHeatmapChart
+                isDarkMode={isDarkMode}
+                heritageData={staticData.heritageSites}
+                tourismArrivals={culturalData.tourismArrivals}
+                creativeGoodsExports={staticData.creativeGoodsExports}
+                creativeServicesExports={staticData.creativeServicesExports}
+                museumDensity={staticData.museumDensity}
+                culturalEmployment={staticData.culturalEmployment}
+                featureFilms={staticData.featureFilms}
+                educationExpenditure={culturalData.educationExpenditure}
+                intangibleHeritage={intangibleHeritageByCountry}
+                musicRevenue={latestMusicRevenue}
+                gamingRevenue={latestGamingRevenue}
+                libraryDensity={libraryDensityByCountry}
+                selectedCountries={selectedCountries}
+              />
 
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Key Insights</h3>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>
-                    Heritage Concentration
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    Europe holds the largest share of UNESCO World Heritage Sites, with Italy, France,
-                    Germany, and Spain each exceeding 50 inscriptions. China and Turkey lead in intangible heritage.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>
-                    Digital Cultural Power
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    The USA leads global music and gaming revenue, but China and Japan are close competitors
-                    in gaming. South Korea&apos;s streaming originals output punches far above its population weight.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
-                    Cultural Infrastructure
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    Finland leads library density globally with 154 per million people. Nordic countries
-                    also lead cultural participation rates, with Sweden at 78%.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-amber-900/30' : 'bg-amber-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
-                    Linguistic Diversity
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    India, USA, and Brazil each have over 170 endangered languages. Papua New Guinea has the
-                    highest language diversity index at 0.99, reflecting extraordinary cultural plurality.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-rose-900/30' : 'bg-rose-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-rose-400' : 'text-rose-700'}`}>
-                    IP Trade Flows
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    The USA generates the highest IP receipts globally, reflecting the dominance of American
-                    cultural content. Many developing nations are net IP importers, indicating reliance on foreign content.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-teal-900/30' : 'bg-teal-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-teal-400' : 'text-teal-700'}`}>
-                    Publishing &amp; Streaming
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    China publishes over 500,000 book titles annually, the most globally. The USA leads
-                    streaming original production with 820+ titles, followed by the UK and South Korea.
-                  </p>
+              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <h3 className="text-lg font-semibold mb-4">Key Insights</h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>
+                      Heritage Concentration
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      Europe holds the largest share of UNESCO World Heritage Sites, with Italy, France,
+                      Germany, and Spain each exceeding 50 inscriptions. China and Turkey lead in intangible heritage.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-emerald-900/30' : 'bg-emerald-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                      Digital Cultural Power
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      The USA leads global music and gaming revenue, but China and Japan are close competitors
+                      in gaming. South Korea&apos;s streaming originals output punches far above its population weight.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                      Cultural Infrastructure
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      Finland leads library density globally with 154 per million people. Nordic countries
+                      also lead cultural participation rates, with Sweden at 78%.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-amber-900/30' : 'bg-amber-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>
+                      Linguistic Diversity
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      India, USA, and Brazil each have over 170 endangered languages. Papua New Guinea has the
+                      highest language diversity index at 0.99, reflecting extraordinary cultural plurality.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-rose-900/30' : 'bg-rose-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-rose-400' : 'text-rose-700'}`}>
+                      IP Trade Flows
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      The USA generates the highest IP receipts globally, reflecting the dominance of American
+                      cultural content. Many developing nations are net IP importers, indicating reliance on foreign content.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-teal-900/30' : 'bg-teal-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-teal-400' : 'text-teal-700'}`}>
+                      Publishing &amp; Streaming
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      China publishes over 500,000 book titles annually, the most globally. The USA leads
+                      streaming original production with 820+ titles, followed by the UK and South Korea.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Footer / Sources */}
         <div className={`mt-12 p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>

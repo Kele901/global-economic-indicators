@@ -28,6 +28,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
 
@@ -62,6 +63,8 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: {
     </div>
   );
 }
+
+const NAV = ['Compute', 'Models', 'Patents', 'Chips', 'Investment', 'Energy', 'Talent', 'Regulation'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function AiLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -201,8 +204,10 @@ export default function AiLedgerPage() {
           </div>
         </div>
 
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="violet" />
+
         {/* Chapter 1 — The Compute Race */}
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -220,7 +225,7 @@ export default function AiLedgerPage() {
         </section>
 
         {/* Chapter 2 — Model Releases */}
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -231,7 +236,7 @@ export default function AiLedgerPage() {
         </section>
 
         {/* Chapter 3 — AI Patents */}
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -242,7 +247,7 @@ export default function AiLedgerPage() {
         </section>
 
         {/* Chapter 4 — Chip Manufacturing */}
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -253,7 +258,7 @@ export default function AiLedgerPage() {
         </section>
 
         {/* Chapter 5 — AI Investment */}
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
@@ -264,7 +269,7 @@ export default function AiLedgerPage() {
         </section>
 
         {/* Chapter 6 — Energy & Water */}
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
@@ -274,29 +279,35 @@ export default function AiLedgerPage() {
           <DataCenterEnergyChart isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          {/* Chapter 7 — Talent & Research */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 7"
-              title="Talent & Research"
-              subtitle="MacroPolo tracks the world's top-tier AI researchers by undergraduate origin and current host country. The gap reveals brain-drain direction: China produces 47% of the world's top-tier undergraduates but hosts only 12% at PhD level."
-            />
-            <AiTalentGrid isDarkMode={isDarkMode} />
-          </section>
+        {/* Chapter 7 — Talent & Research */}
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 7"
+                title="Talent & Research"
+                subtitle="MacroPolo tracks the world's top-tier AI researchers by undergraduate origin and current host country. The gap reveals brain-drain direction: China produces 47% of the world's top-tier undergraduates but hosts only 12% at PhD level."
+              />
+              <AiTalentGrid isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-          {/* Chapter 8 — AI Regulation */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 8"
-              title="AI Regulation"
-              subtitle="Landmark AI laws, executive orders and safety institutes 2023-2025. The EU AI Act is the world's first horizontal AI regulation; the US pivoted from Biden's risk EO to Trump's AI-leadership mandate in January 2025."
-            />
-            <AiRegulationTimeline isDarkMode={isDarkMode} />
-          </section>
-        </LazyMount>
+        {/* Chapter 8 — AI Regulation */}
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 8"
+                title="AI Regulation"
+                subtitle="Landmark AI laws, executive orders and safety institutes 2023-2025. The EU AI Act is the world's first horizontal AI regulation; the US pivoted from Biden's risk EO to Trump's AI-leadership mandate in January 2025."
+              />
+              <AiRegulationTimeline isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/ai-ledger" isDarkMode={isDarkMode} />
 

@@ -33,6 +33,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
@@ -95,6 +96,8 @@ function computeScore(debt: number | null, debtService: number | null, budget: n
   if (score >= 25) return { score, label: 'Elevated', color: 'text-orange-500' };
   return { score, label: 'High Risk', color: 'text-red-500' };
 }
+
+const NAV = ['Debt load', 'Public vs private', 'Debt service', 'Ratings', 'Defaults', 'Central banks', 'Households', 'Fiscal'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function DebtLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -294,8 +297,10 @@ export default function DebtLedgerPage() {
           </div>
         </div>
 
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="rose" />
+
         {/* Chapter 1 — Global Debt Load */}
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -389,7 +394,7 @@ export default function DebtLedgerPage() {
         </section>
 
         {/* Chapter 2 — Public vs Private */}
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -400,7 +405,7 @@ export default function DebtLedgerPage() {
         </section>
 
         {/* Chapter 3 — Debt Service Peaks */}
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -411,7 +416,7 @@ export default function DebtLedgerPage() {
         </section>
 
         {/* Chapter 4 — Rating & CDS */}
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -422,7 +427,7 @@ export default function DebtLedgerPage() {
         </section>
 
         {/* Chapter 5 — Sovereign Defaults */}
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
@@ -433,7 +438,7 @@ export default function DebtLedgerPage() {
         </section>
 
         {/* Chapter 6 — Central Bank Balance Sheets */}
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
@@ -443,34 +448,40 @@ export default function DebtLedgerPage() {
           <CentralBankBalanceSheetChart isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          {/* Chapter 7 — Household Debt */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 7"
-              title="Household Debt"
-              subtitle="The private side of the leverage story. BIS 2024 household debt in % of GDP. Spain deleveraged the most since 2010; South Korea and Australia levered up the fastest."
-            />
-            <HouseholdDebtChart isDarkMode={isDarkMode} />
-          </section>
+        {/* Chapter 7 — Household Debt */}
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 7"
+                title="Household Debt"
+                subtitle="The private side of the leverage story. BIS 2024 household debt in % of GDP. Spain deleveraged the most since 2010; South Korea and Australia levered up the fastest."
+              />
+              <HouseholdDebtChart isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-          {/* Chapter 8 — Fiscal Reckoning */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 8"
-              title="Fiscal Reckoning"
-              subtitle="The equation that ends the story: when interest rates exceed growth (r > g), debt compounds. Countries in the top-right quadrant are structurally in a debt spiral. Japan sits stubbornly in the bottom-right."
-            />
-            <FiscalReckoningQuadrant
-              isDarkMode={isDarkMode}
-              governmentDebt={governmentDebt}
-              gdpGrowth={gdpGrowth}
-              interestRates={interestRates}
-            />
-          </section>
-        </LazyMount>
+        {/* Chapter 8 — Fiscal Reckoning */}
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 8"
+                title="Fiscal Reckoning"
+                subtitle="The equation that ends the story: when interest rates exceed growth (r > g), debt compounds. Countries in the top-right quadrant are structurally in a debt spiral. Japan sits stubbornly in the bottom-right."
+              />
+              <FiscalReckoningQuadrant
+                isDarkMode={isDarkMode}
+                governmentDebt={governmentDebt}
+                gdpGrowth={gdpGrowth}
+                interestRates={interestRates}
+              />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/debt" isDarkMode={isDarkMode} />
 

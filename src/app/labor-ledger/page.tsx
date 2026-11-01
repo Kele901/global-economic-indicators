@@ -34,6 +34,7 @@ import LazyMount from '../components/LazyMount';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
 import SocialShareMenu from '../components/SocialShareMenu';
+import ChapterNav from '../components/ChapterNav';
 import { slugify } from '../lib/share';
 
 const skeleton = (label: string, height?: string) => {
@@ -63,6 +64,8 @@ const TOUR_STEPS: TourStep[] = [
   { chapter: 'Chapter 7', title: 'The gender gap', body: 'Male against female participation in 2025. Sweden and Norway are near parity; India, Turkey and Mexico run gaps of 30-45 percentage points.' },
   { chapter: 'Chapter 8', title: 'Youth unemployment over time', body: 'The same story as Chapter 1 on a time axis, by income group through 2025. The 2020-21 COVID spike was the sharpest short-term shock on record.' },
 ];
+
+const NAV = ['Unemployment', 'Wages', 'Unions', 'Informality', 'Demographics', 'AI risk', 'Gender', 'Youth'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, shareSubject = 'chart' }: { isDarkMode: boolean; chapter: string; title: string; subtitle: string; share?: boolean; shareSubject?: 'chart' | 'dataset'; }) {
   return (
@@ -218,7 +221,9 @@ export default function LaborLedgerPage() {
           </div>
         </div>
 
-        <section className="mb-14">
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="purple" />
+
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1" share={false}
             title="Who Is Out of Work"
             subtitle="Live overall and youth unemployment for every country in the roster, sorted by the youth multiple. A high multiple on top of a low headline rate is the signature of a two-tier labour market, not a weak economy." />
@@ -230,56 +235,62 @@ export default function LaborLedgerPage() {
           />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 2" share={false}
             title="Wages 2023"
             subtitle="Median hourly wage in USD-PPP terms. Bar colour marks whether real wages grew (green) or shrank (red) between 2019-2023. High inflation between 2021-2023 wiped out cash growth across most of Europe." />
           <WagesChart isDarkMode={isDarkMode} shareTitle="Wages 2023" inflationRates={data?.inflationRates} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3" share={false}
             title="Unions & Collective Bargaining"
             subtitle="Density = share of workers who are union members. Coverage = share of workers whose pay is set by collective agreement. Latest OECD/ICTWSS figures, mostly 2023-24. In France and Spain the two diverge wildly because sectoral agreements extend to non-members." />
           <UnionisationChart isDarkMode={isDarkMode} shareTitle="Unions & Collective Bargaining" giniCoefficient={data?.giniCoefficient} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4" shareSubject="dataset"
             title="Informal Employment"
             subtitle="No contract, no social insurance, often no minimum wage. Dominant in Sub-Saharan Africa and South Asia. Any wage or productivity comparison that ignores it will overstate reality by a huge margin." />
           <InformalEmploymentGrid isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5"
             title="The Demographic Cliff"
             subtitle="UN DESA WPP 2024 working-age population 2000-2050. China peaked in 2015 and is set to lose 260M workers by 2050. Nigeria overtakes both the US and EU by mid-century." />
           <WorkingAgeTrajectoryChart isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6" shareSubject="dataset"
             title="AI Displacement Risk"
             subtitle="OECD 2024 employment shares in occupations with high generative-AI exposure. High-exposure ≠ certain displacement — the complementarity column shows how likely AI is to augment rather than replace those workers." />
           <AiDisplacementRiskTable isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
-              title="The Gender Gap"
-              subtitle="Male vs female labour-force participation, ILO modelled estimates for 2025. Sweden and Norway lead on parity; India, Turkey and Mexico have gaps of 30-45pp. Closing the gender gap is one of the largest untapped growth signals in labour economics." />
-            <GenderGapChart isDarkMode={isDarkMode} />
-          </section>
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
+                title="The Gender Gap"
+                subtitle="Male vs female labour-force participation, ILO modelled estimates for 2025. Sweden and Norway lead on parity; India, Turkey and Mexico have gaps of 30-45pp. Closing the gender gap is one of the largest untapped growth signals in labour economics." />
+              <GenderGapChart isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
-              title="Youth Unemployment 2010-2025"
-              subtitle="ILO modelled estimates by World Bank income group. The 2020-21 COVID spike was the sharpest short-term shock in the modern era. Middle-income countries now carry the highest youth rates, about 4pp above low-income countries." />
-            <YouthUnemploymentTimeline isDarkMode={isDarkMode} />
-          </section>
-        </LazyMount>
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
+                title="Youth Unemployment 2010-2025"
+                subtitle="ILO modelled estimates by World Bank income group. The 2020-21 COVID spike was the sharpest short-term shock in the modern era. Middle-income countries now carry the highest youth rates, about 4pp above low-income countries." />
+              <YouthUnemploymentTimeline isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/labor-ledger" isDarkMode={isDarkMode} />
 

@@ -7,6 +7,8 @@ import ThemeToggle from '../components/ThemeToggle';
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SocialShareMenu from '../components/SocialShareMenu';
+import ChapterNav from '../components/ChapterNav';
+import ChapterSection from '../components/ChapterSection';
 import { slugify } from '../lib/share';
 import { fetchTechnologyData, TechnologyData, CountryData, COUNTRY_NAMES } from '../services/worldbank';
 import { 
@@ -212,9 +214,13 @@ const TechCapitalCyclesChart = dynamic(
   }
 );
 
+const NAV = [
+  'Overview', 'Patents & IP', 'R&D', 'Tech trade', 'Compare', 'Digital infrastructure',
+  'Startups & VC', 'AI', 'Digital economy', 'Workforce', 'Tech & capital', 'Insights',
+].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
+
 const TechnologyPage = () => {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
-  const [activeSection, setActiveSection] = useState<string>('overview');
   const [techData, setTechData] = useState<TechnologyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -338,7 +344,7 @@ const TechnologyPage = () => {
 
   return (
     <div className={`min-h-screen ${themeColors.background} ${themeColors.text}`}>
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
           <div>
@@ -366,7 +372,7 @@ const TechnologyPage = () => {
           </p>
           <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Data sourced from the World Bank, FRED, WIPO, ITU, Eurostat, and curated institutional reports.
-            Use the tabs below to navigate between different aspects of the global technology landscape.
+            Use the chapter menu below to jump between different aspects of the global technology landscape.
           </p>
         </div>
         <PageTakeaways page="technology" isDarkMode={isDarkMode} />
@@ -428,566 +434,551 @@ const TechnologyPage = () => {
           </div>
         )}
 
-        {/* Navigation Tabs */}
-        <div className={`flex flex-wrap gap-2 mb-8 p-1 rounded-lg ${
-          isDarkMode ? 'bg-gray-800' : 'bg-gray-100'
-        }`}>
-          {[
-            { id: 'overview', label: 'Overview', icon: '📊' },
-            { id: 'patents', label: 'Patents & IP', icon: '📜' },
-            { id: 'rd', label: 'R&D Investment', icon: '🔬' },
-            { id: 'trade', label: 'Tech Trade', icon: '🌐' },
-            { id: 'compare', label: 'Country Comparison', icon: '📈' },
-            { id: 'infrastructure', label: 'Digital Infrastructure', icon: '🌐' },
-            { id: 'startups', label: 'Startups & VC', icon: '🚀' },
-            { id: 'ai', label: 'AI & Emerging Tech', icon: '🤖' },
-            { id: 'digital-economy', label: 'Digital Economy', icon: '💳' },
-            { id: 'workforce', label: 'Tech Workforce', icon: '👩‍💻' },
-            { id: 'capital-cycles', label: 'Tech & Capital', icon: '🔄' },
-            { id: 'insights', label: 'Insights', icon: '💡' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSection(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeSection === tab.id
-                  ? isDarkMode 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-white text-gray-900 shadow'
-                  : isDarkMode
-                    ? 'text-gray-400 hover:text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <span className="mr-2">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="blue" />
 
         {/* Section: Overview */}
-        {activeSection === 'overview' && techData && (
-          <div className="space-y-8">
-            {/* Key Insights */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h2 className="text-xl font-bold mb-4">Technology &amp; Innovation Landscape</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                    Patent Activity
-                  </h3>
-                  <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
-                    Patent applications are a key indicator of innovation activity. Countries with 
-                    high patent filings typically have strong R&amp;D ecosystems and IP protection frameworks.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Resident Patents', 'Non-Resident Patents', 'Trademarks'].map(item => (
-                      <span 
-                        key={item}
-                        className={`text-xs px-2 py-1 rounded ${
-                          isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
-                        }`}
-                      >
-                        {item}
-                      </span>
-                    ))}
+        <ChapterSection id="chapter-1" index={1} title="Technology and Innovation Overview" isDarkMode={isDarkMode} accent="blue">
+          {techData && (
+            <div className="space-y-8">
+              {/* Key Insights */}
+              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <h2 className="text-xl font-bold mb-4">Technology &amp; Innovation Landscape</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                    <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                      Patent Activity
+                    </h3>
+                    <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
+                      Patent applications are a key indicator of innovation activity. Countries with 
+                      high patent filings typically have strong R&amp;D ecosystems and IP protection frameworks.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['Resident Patents', 'Non-Resident Patents', 'Trademarks'].map(item => (
+                        <span 
+                          key={item}
+                          className={`text-xs px-2 py-1 rounded ${
+                            isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
+                          }`}
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                    R&amp;D Investment
-                  </h3>
-                  <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
-                    Research and development spending as a percentage of GDP reflects a nation&apos;s 
-                    commitment to innovation and long-term economic competitiveness.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {['R&D Spending', 'Researchers', 'Technicians'].map(item => (
-                      <span 
-                        key={item}
-                        className={`text-xs px-2 py-1 rounded ${
-                          isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
-                        }`}
-                      >
-                        {item}
-                      </span>
-                    ))}
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                    <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                      R&amp;D Investment
+                    </h3>
+                    <p className={`text-sm ${themeColors.textSecondary} mb-3`}>
+                      Research and development spending as a percentage of GDP reflects a nation&apos;s 
+                      commitment to innovation and long-term economic competitiveness.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {['R&D Spending', 'Researchers', 'Technicians'].map(item => (
+                        <span 
+                          key={item}
+                          className={`text-xs px-2 py-1 rounded ${
+                            isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                          }`}
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Innovation Map */}
-            <div id={slugify('Global Innovation Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className={`px-4 py-3 border-b ${themeColors.border} flex items-start justify-between gap-2 flex-wrap`}>
-                <div>
-                  <h2 className="text-xl font-bold">Global Innovation Map</h2>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    R&amp;D spending as percentage of GDP by country
-                  </p>
+              {/* Innovation Map */}
+              <div id={slugify('Global Innovation Map')} className={`rounded-xl overflow-hidden ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className={`px-4 py-3 border-b ${themeColors.border} flex items-start justify-between gap-2 flex-wrap`}>
+                  <div>
+                    <h2 className="text-xl font-bold">Global Innovation Map</h2>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      R&amp;D spending as percentage of GDP by country
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Global Innovation Map" isDarkMode={isDarkMode} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <SocialShareMenu title="Global Innovation Map" isDarkMode={isDarkMode} />
-                </div>
+                <TechWorldMap
+                  isDarkMode={isDarkMode}
+                  data={techData.rdSpending}
+                  metric="rdSpending"
+                  selectedYear={selectedYear}
+                />
               </div>
-              <TechWorldMap
+
+              {/* Innovation Rankings */}
+              <InnovationRankingTable
                 isDarkMode={isDarkMode}
-                data={techData.rdSpending}
-                metric="rdSpending"
+                techData={techData}
                 selectedYear={selectedYear}
               />
             </div>
-
-            {/* Innovation Rankings */}
-            <InnovationRankingTable
-              isDarkMode={isDarkMode}
-              techData={techData}
-              selectedYear={selectedYear}
-            />
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Section: Patents & IP */}
-        {activeSection === 'patents' && techData && (
-          <div className="space-y-8">
-            <div className={`p-4 rounded-lg border ${
-              isDarkMode 
-                ? 'bg-gray-800 border-blue-500 text-blue-400' 
-                : 'bg-white border-blue-400 text-blue-700'
-            }`}>
-              <h3 className="font-semibold">Understanding Patent Data</h3>
-              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Patent applications indicate the level of innovation activity. Resident patents reflect 
-                domestic innovation, while non-resident patents show foreign interest in a market.
-              </p>
-            </div>
+        <ChapterSection id="chapter-2" index={2} title="Patents and Intellectual Property" isDarkMode={isDarkMode} accent="blue">
+          {techData && (
+            <div className="space-y-8">
+              <div className={`p-4 rounded-lg border ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-blue-500 text-blue-400' 
+                  : 'bg-white border-blue-400 text-blue-700'
+              }`}>
+                <h3 className="font-semibold">Understanding Patent Data</h3>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Patent applications indicate the level of innovation activity. Resident patents reflect 
+                  domestic innovation, while non-resident patents show foreign interest in a market.
+                </p>
+              </div>
 
-            <PatentTrendsChart
-              isDarkMode={isDarkMode}
-              patentData={techData.patentApplicationsResident}
-              nonResidentData={techData.patentApplicationsNonResident}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
+              <PatentTrendsChart
+                isDarkMode={isDarkMode}
+                patentData={techData.patentApplicationsResident}
+                nonResidentData={techData.patentApplicationsNonResident}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
 
-            {/* Trademark Trends Chart */}
-            <TrademarkTrendsChart
-              isDarkMode={isDarkMode}
-              trademarkData={techData.trademarkApplications}
-              patentData={techData.patentApplicationsResident}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
+              {/* Trademark Trends Chart */}
+              <TrademarkTrendsChart
+                isDarkMode={isDarkMode}
+                trademarkData={techData.trademarkApplications}
+                patentData={techData.patentApplicationsResident}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
 
-            {/* Trademark Applications Summary */}
-            <div id={slugify('Trademark Applications Summary')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                <h3 className="text-lg font-semibold">Trademark Applications Summary</h3>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <SocialShareMenu title="Trademark Applications Summary" isDarkMode={isDarkMode} />
+              {/* Trademark Applications Summary */}
+              <div id={slugify('Trademark Applications Summary')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">Trademark Applications Summary</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Trademark Applications Summary" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
+                <p className={`text-sm ${themeColors.textSecondary} mb-4`}>
+                  Trademark filings indicate commercial activity and brand development across economies.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {defaultTechCountries.slice(0, 10).map(country => {
+                    const value = getLatestValue(techData.trademarkApplications, country);
+                    return (
+                      <div 
+                        key={country}
+                        className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}
+                      >
+                        <div className="text-lg font-bold" style={{ color: techChartColors[country] }}>
+                          {value ? formatNumber(value) : 'N/A'}
+                        </div>
+                        <div className={`text-xs ${themeColors.textTertiary}`}>{country}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              <p className={`text-sm ${themeColors.textSecondary} mb-4`}>
-                Trademark filings indicate commercial activity and brand development across economies.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {defaultTechCountries.slice(0, 10).map(country => {
-                  const value = getLatestValue(techData.trademarkApplications, country);
-                  return (
-                    <div 
-                      key={country}
-                      className={`p-3 rounded-lg ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}
-                    >
-                      <div className="text-lg font-bold" style={{ color: techChartColors[country] }}>
-                        {value ? formatNumber(value) : 'N/A'}
-                      </div>
-                      <div className={`text-xs ${themeColors.textTertiary}`}>{country}</div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Section: R&D Investment */}
-        {activeSection === 'rd' && techData && (
-          <div className="space-y-8">
-            <div className={`p-4 rounded-lg border ${
-              isDarkMode 
-                ? 'bg-gray-800 border-emerald-500 text-emerald-400' 
-                : 'bg-white border-emerald-400 text-emerald-700'
-            }`}>
-              <h3 className="font-semibold">R&amp;D Investment Metrics</h3>
-              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Research and development spending is a key driver of long-term economic growth 
-                and technological advancement. Leading economies typically invest 2-4% of GDP in R&amp;D.
-              </p>
-            </div>
-
-            <RDSpendingChart
-              isDarkMode={isDarkMode}
-              rdData={techData.rdSpending}
-              researchersData={techData.researchersRD}
-              techniciansData={techData.techniciansRD}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-
-            {/* R&D Efficiency Analysis */}
-            <RDEfficiencyChart
-              isDarkMode={isDarkMode}
-              rdData={techData.rdSpending}
-              patentData={techData.patentApplicationsResident}
-              researchersData={techData.researchersRD}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-
-            {/* Researchers per Million */}
-            <div id={slugify('Research Workforce')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                <h3 className="text-lg font-semibold">Research Workforce</h3>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <SocialShareMenu title="Research Workforce" isDarkMode={isDarkMode} />
-                </div>
+        <ChapterSection id="chapter-3" index={3} title="R&D Investment" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <div className={`p-4 rounded-lg border ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-emerald-500 text-emerald-400' 
+                  : 'bg-white border-emerald-400 text-emerald-700'
+              }`}>
+                <h3 className="font-semibold">R&amp;D Investment Metrics</h3>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Research and development spending is a key driver of long-term economic growth 
+                  and technological advancement. Leading economies typically invest 2-4% of GDP in R&amp;D.
+                </p>
               </div>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className={`text-sm font-medium mb-3 ${themeColors.textSecondary}`}>
-                    Researchers per Million People
-                  </h4>
-                  <div className="space-y-2">
-                    {defaultTechCountries.slice(0, 5).map(country => {
-                      const value = getLatestValue(techData.researchersRD, country);
-                      return (
-                        <div key={country} className="flex items-center justify-between">
-                          <span className={themeColors.textSecondary}>{country}</span>
-                          <span className="font-medium" style={{ color: techChartColors[country] }}>
-                            {value ? formatNumber(value) : 'N/A'}
-                          </span>
-                        </div>
-                      );
-                    })}
+
+              <RDSpendingChart
+                isDarkMode={isDarkMode}
+                rdData={techData.rdSpending}
+                researchersData={techData.researchersRD}
+                techniciansData={techData.techniciansRD}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+
+              {/* R&D Efficiency Analysis */}
+              <RDEfficiencyChart
+                isDarkMode={isDarkMode}
+                rdData={techData.rdSpending}
+                patentData={techData.patentApplicationsResident}
+                researchersData={techData.researchersRD}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+
+              {/* Researchers per Million */}
+              <div id={slugify('Research Workforce')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">Research Workforce</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Research Workforce" isDarkMode={isDarkMode} />
                   </div>
                 </div>
-                <div>
-                  <h4 className={`text-sm font-medium mb-3 ${themeColors.textSecondary}`}>
-                    Technicians per Million People
-                  </h4>
-                  <div className="space-y-2">
-                    {defaultTechCountries.slice(0, 5).map(country => {
-                      const value = getLatestValue(techData.techniciansRD, country);
-                      return (
-                        <div key={country} className="flex items-center justify-between">
-                          <span className={themeColors.textSecondary}>{country}</span>
-                          <span className="font-medium" style={{ color: techChartColors[country] }}>
-                            {value ? formatNumber(value) : 'N/A'}
-                          </span>
-                        </div>
-                      );
-                    })}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className={`text-sm font-medium mb-3 ${themeColors.textSecondary}`}>
+                      Researchers per Million People
+                    </h4>
+                    <div className="space-y-2">
+                      {defaultTechCountries.slice(0, 5).map(country => {
+                        const value = getLatestValue(techData.researchersRD, country);
+                        return (
+                          <div key={country} className="flex items-center justify-between">
+                            <span className={themeColors.textSecondary}>{country}</span>
+                            <span className="font-medium" style={{ color: techChartColors[country] }}>
+                              {value ? formatNumber(value) : 'N/A'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className={`text-sm font-medium mb-3 ${themeColors.textSecondary}`}>
+                      Technicians per Million People
+                    </h4>
+                    <div className="space-y-2">
+                      {defaultTechCountries.slice(0, 5).map(country => {
+                        const value = getLatestValue(techData.techniciansRD, country);
+                        return (
+                          <div key={country} className="flex items-center justify-between">
+                            <span className={themeColors.textSecondary}>{country}</span>
+                            <span className="font-medium" style={{ color: techChartColors[country] }}>
+                              {value ? formatNumber(value) : 'N/A'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Section: Tech Trade */}
-        {activeSection === 'trade' && techData && (
-          <div className="space-y-8">
-            <div className={`p-4 rounded-lg border ${
-              isDarkMode 
-                ? 'bg-gray-800 border-purple-500 text-purple-400' 
-                : 'bg-white border-purple-400 text-purple-700'
-            }`}>
-              <h3 className="font-semibold">Technology Trade Indicators</h3>
-              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                High-tech exports and ICT goods trade reflect a country&apos;s position in global 
-                technology value chains and manufacturing sophistication.
-              </p>
-            </div>
-
-            <TechExportsChart
-              isDarkMode={isDarkMode}
-              hightechData={techData.hightechExports}
-              ictData={techData.ictExports}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-
-            {/* IP Trade Balance Chart */}
-            <IPTradeBalanceChart
-              isDarkMode={isDarkMode}
-              ipReceipts={techData.ipReceipts}
-              ipPayments={techData.ipPayments}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-
-            {/* IP Royalties */}
-            <div id={slugify('Intellectual Property Flows')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                <h3 className="text-lg font-semibold">Intellectual Property Flows</h3>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <SocialShareMenu title="Intellectual Property Flows" isDarkMode={isDarkMode} />
-                </div>
+        <ChapterSection id="chapter-4" index={4} title="Technology Trade" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <div className={`p-4 rounded-lg border ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-purple-500 text-purple-400' 
+                  : 'bg-white border-purple-400 text-purple-700'
+              }`}>
+                <h3 className="font-semibold">Technology Trade Indicators</h3>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  High-tech exports and ICT goods trade reflect a country&apos;s position in global 
+                  technology value chains and manufacturing sophistication.
+                </p>
               </div>
-              <p className={`text-sm ${themeColors.textSecondary} mb-4`}>
-                IP receipts and payments show the flow of technology licensing and royalties between countries.
-              </p>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className={`text-sm font-medium mb-3 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-                    IP Receipts (Income)
-                  </h4>
-                  <div className="space-y-2">
-                    {defaultTechCountries.slice(0, 5).map(country => {
-                      const value = getLatestValue(techData.ipReceipts, country);
-                      return (
-                        <div key={country} className="flex items-center justify-between">
-                          <span className={themeColors.textSecondary}>{country}</span>
-                          <span className="font-medium text-green-500">
-                            ${value ? formatNumber(value) : 'N/A'}
-                          </span>
-                        </div>
-                      );
-                    })}
+
+              <TechExportsChart
+                isDarkMode={isDarkMode}
+                hightechData={techData.hightechExports}
+                ictData={techData.ictExports}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+
+              {/* IP Trade Balance Chart */}
+              <IPTradeBalanceChart
+                isDarkMode={isDarkMode}
+                ipReceipts={techData.ipReceipts}
+                ipPayments={techData.ipPayments}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+
+              {/* IP Royalties */}
+              <div id={slugify('Intellectual Property Flows')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">Intellectual Property Flows</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Intellectual Property Flows" isDarkMode={isDarkMode} />
                   </div>
                 </div>
-                <div>
-                  <h4 className={`text-sm font-medium mb-3 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                    IP Payments (Costs)
-                  </h4>
-                  <div className="space-y-2">
-                    {defaultTechCountries.slice(0, 5).map(country => {
-                      const value = getLatestValue(techData.ipPayments, country);
-                      return (
-                        <div key={country} className="flex items-center justify-between">
-                          <span className={themeColors.textSecondary}>{country}</span>
-                          <span className="font-medium text-orange-500">
-                            ${value ? formatNumber(value) : 'N/A'}
-                          </span>
-                        </div>
-                      );
-                    })}
+                <p className={`text-sm ${themeColors.textSecondary} mb-4`}>
+                  IP receipts and payments show the flow of technology licensing and royalties between countries.
+                </p>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className={`text-sm font-medium mb-3 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
+                      IP Receipts (Income)
+                    </h4>
+                    <div className="space-y-2">
+                      {defaultTechCountries.slice(0, 5).map(country => {
+                        const value = getLatestValue(techData.ipReceipts, country);
+                        return (
+                          <div key={country} className="flex items-center justify-between">
+                            <span className={themeColors.textSecondary}>{country}</span>
+                            <span className="font-medium text-green-500">
+                              ${value ? formatNumber(value) : 'N/A'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className={`text-sm font-medium mb-3 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>
+                      IP Payments (Costs)
+                    </h4>
+                    <div className="space-y-2">
+                      {defaultTechCountries.slice(0, 5).map(country => {
+                        const value = getLatestValue(techData.ipPayments, country);
+                        return (
+                          <div key={country} className="flex items-center justify-between">
+                            <span className={themeColors.textSecondary}>{country}</span>
+                            <span className="font-medium text-orange-500">
+                              ${value ? formatNumber(value) : 'N/A'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Section: Country Comparison */}
-        {activeSection === 'compare' && techData && (
-          <div className="space-y-8">
-            {/* Country Selector */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Select Countries to Compare</h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                {Object.values(COUNTRY_NAMES).map(country => (
-                  <button
-                    key={country}
-                    onClick={() => {
-                      if (selectedCountries.includes(country)) {
-                        setSelectedCountries(selectedCountries.filter(c => c !== country));
-                      } else if (selectedCountries.length < 10) {
-                        setSelectedCountries([...selectedCountries, country]);
-                      }
-                    }}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                      selectedCountries.includes(country)
-                        ? 'ring-2 ring-blue-500'
-                        : ''
-                    } ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
-                    style={{
-                      backgroundColor: selectedCountries.includes(country) 
-                        ? (isDarkMode ? techChartColors[country] + '40' : techChartColors[country] + '20')
-                        : undefined,
-                      borderColor: selectedCountries.includes(country) ? techChartColors[country] : undefined
-                    }}
-                  >
-                    {country}
-                  </button>
-                ))}
-              </div>
-              <p className={`text-xs mt-3 ${themeColors.textTertiary}`}>
-                Select up to 10 countries. Currently selected: {selectedCountries.length}
-              </p>
-            </div>
-
-            {/* Comparison Charts */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div id={slugify('R&D Spending Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                  <h3 className="text-lg font-semibold">R&amp;D Spending Comparison</h3>
-                  <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    <SocialShareMenu title="R&D Spending Comparison" isDarkMode={isDarkMode} />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  {selectedCountries.map(country => {
-                    const value = getLatestValue(techData.rdSpending, country);
-                    const maxValue = 5; // Max R&D as % of GDP for scale
-                    const width = value ? Math.min((value / maxValue) * 100, 100) : 0;
-                    return (
-                      <div key={country}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>{country}</span>
-                          <span className="font-medium">{value ? formatPercent(value) : 'N/A'}</span>
-                        </div>
-                        <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                          <div 
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{ 
-                              width: `${width}%`,
-                              backgroundColor: techChartColors[country]
-                            }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div id={slugify('High-Tech Exports Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                  <h3 className="text-lg font-semibold">High-Tech Exports Comparison</h3>
-                  <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    <SocialShareMenu title="High-Tech Exports Comparison" isDarkMode={isDarkMode} />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  {selectedCountries.map(country => {
-                    const value = getLatestValue(techData.hightechExports, country);
-                    const maxValue = 50; // Max high-tech exports % for scale
-                    const width = value ? Math.min((value / maxValue) * 100, 100) : 0;
-                    return (
-                      <div key={country}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>{country}</span>
-                          <span className="font-medium">{value ? formatPercent(value) : 'N/A'}</span>
-                        </div>
-                        <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                          <div 
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{ 
-                              width: `${width}%`,
-                              backgroundColor: techChartColors[country]
-                            }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Scientific Output */}
-            <div id={slugify('Scientific Publications')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
-                <h3 className="text-lg font-semibold">Scientific Publications</h3>
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <SocialShareMenu title="Scientific Publications" isDarkMode={isDarkMode} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {selectedCountries.map(country => {
-                  const value = getLatestValue(techData.scientificPublications, country);
-                  return (
-                    <div 
+        <ChapterSection id="chapter-5" index={5} title="Country Comparison" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              {/* Country Selector */}
+              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <h3 className="text-lg font-semibold mb-4">Select Countries to Compare</h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                  {Object.values(COUNTRY_NAMES).map(country => (
+                    <button
                       key={country}
-                      className={`p-4 rounded-lg text-center ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}
+                      onClick={() => {
+                        if (selectedCountries.includes(country)) {
+                          setSelectedCountries(selectedCountries.filter(c => c !== country));
+                        } else if (selectedCountries.length < 10) {
+                          setSelectedCountries([...selectedCountries, country]);
+                        }
+                      }}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                        selectedCountries.includes(country)
+                          ? 'ring-2 ring-blue-500'
+                          : ''
+                      } ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+                      style={{
+                        backgroundColor: selectedCountries.includes(country) 
+                          ? (isDarkMode ? techChartColors[country] + '40' : techChartColors[country] + '20')
+                          : undefined,
+                        borderColor: selectedCountries.includes(country) ? techChartColors[country] : undefined
+                      }}
                     >
-                      <div className="text-2xl font-bold" style={{ color: techChartColors[country] }}>
-                        {value ? formatNumber(value) : 'N/A'}
-                      </div>
-                      <div className={`text-sm ${themeColors.textSecondary}`}>{country}</div>
-                      <div className={`text-xs ${themeColors.textTertiary}`}>articles</div>
+                      {country}
+                    </button>
+                  ))}
+                </div>
+                <p className={`text-xs mt-3 ${themeColors.textTertiary}`}>
+                  Select up to 10 countries. Currently selected: {selectedCountries.length}
+                </p>
+              </div>
+
+              {/* Comparison Charts */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div id={slugify('R&D Spending Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                    <h3 className="text-lg font-semibold">R&amp;D Spending Comparison</h3>
+                    <div className="flex items-center gap-2 flex-wrap shrink-0">
+                      <SocialShareMenu title="R&D Spending Comparison" isDarkMode={isDarkMode} />
                     </div>
-                  );
-                })}
+                  </div>
+                  <div className="space-y-3">
+                    {selectedCountries.map(country => {
+                      const value = getLatestValue(techData.rdSpending, country);
+                      const maxValue = 5; // Max R&D as % of GDP for scale
+                      const width = value ? Math.min((value / maxValue) * 100, 100) : 0;
+                      return (
+                        <div key={country}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>{country}</span>
+                            <span className="font-medium">{value ? formatPercent(value) : 'N/A'}</span>
+                          </div>
+                          <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                            <div 
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${width}%`,
+                                backgroundColor: techChartColors[country]
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div id={slugify('High-Tech Exports Comparison')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                    <h3 className="text-lg font-semibold">High-Tech Exports Comparison</h3>
+                    <div className="flex items-center gap-2 flex-wrap shrink-0">
+                      <SocialShareMenu title="High-Tech Exports Comparison" isDarkMode={isDarkMode} />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {selectedCountries.map(country => {
+                      const value = getLatestValue(techData.hightechExports, country);
+                      const maxValue = 50; // Max high-tech exports % for scale
+                      const width = value ? Math.min((value / maxValue) * 100, 100) : 0;
+                      return (
+                        <div key={country}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>{country}</span>
+                            <span className="font-medium">{value ? formatPercent(value) : 'N/A'}</span>
+                          </div>
+                          <div className={`h-3 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                            <div 
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${width}%`,
+                                backgroundColor: techChartColors[country]
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Scientific Output */}
+              <div id={slugify('Scientific Publications')} className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-4">
+                  <h3 className="text-lg font-semibold">Scientific Publications</h3>
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SocialShareMenu title="Scientific Publications" isDarkMode={isDarkMode} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {selectedCountries.map(country => {
+                    const value = getLatestValue(techData.scientificPublications, country);
+                    return (
+                      <div 
+                        key={country}
+                        className={`p-4 rounded-lg text-center ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-50'}`}
+                      >
+                        <div className="text-2xl font-bold" style={{ color: techChartColors[country] }}>
+                          {value ? formatNumber(value) : 'N/A'}
+                        </div>
+                        <div className={`text-sm ${themeColors.textSecondary}`}>{country}</div>
+                        <div className={`text-xs ${themeColors.textTertiary}`}>articles</div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         {/* Section: Digital Infrastructure */}
-        {activeSection === 'infrastructure' && techData && (
-          <div className="space-y-8">
-            <DigitalInfraChart
-              isDarkMode={isDarkMode}
-              broadbandData={techData.broadbandSubscriptions}
-              mobileData={techData.mobileSubscriptions}
-              secureServersData={techData.secureServers}
-              internetUsersData={techData.internetUsers}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-6" index={6} title="Digital Infrastructure" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <DigitalInfraChart
+                isDarkMode={isDarkMode}
+                broadbandData={techData.broadbandSubscriptions}
+                mobileData={techData.mobileSubscriptions}
+                secureServersData={techData.secureServers}
+                internetUsersData={techData.internetUsers}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Section: Startups & VC */}
-        {activeSection === 'startups' && techData && (
-          <div className="space-y-8">
-            <VCFundingChart
-              isDarkMode={isDarkMode}
-              vcFundingData={techData.vcFunding}
-              unicornData={techData.unicornCount}
-              startupDensityData={techData.startupDensity}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-7" index={7} title="Startups and Venture Capital" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <VCFundingChart
+                isDarkMode={isDarkMode}
+                vcFundingData={techData.vcFunding}
+                unicornData={techData.unicornCount}
+                startupDensityData={techData.startupDensity}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Section: AI & Emerging Tech */}
-        {activeSection === 'ai' && techData && (
-          <div className="space-y-8">
-            <AIEmergingTechChart
-              isDarkMode={isDarkMode}
-              aiPatentData={techData.aiPatents}
-              generalPatentData={techData.patentApplicationsResident}
-              hightechExportsData={techData.hightechExports}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-8" index={8} title="AI and Emerging Tech" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <AIEmergingTechChart
+                isDarkMode={isDarkMode}
+                aiPatentData={techData.aiPatents}
+                generalPatentData={techData.patentApplicationsResident}
+                hightechExportsData={techData.hightechExports}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Section: Digital Economy */}
-        {activeSection === 'digital-economy' && techData && (
-          <div className="space-y-8">
-            <DigitalEconomyChart
-              isDarkMode={isDarkMode}
-              ecommerceData={techData.ecommerceAdoption}
-              digitalPaymentsData={techData.digitalPayments}
-              ictServiceExportsData={techData.ictServiceExports}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-9" index={9} title="The Digital Economy" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <DigitalEconomyChart
+                isDarkMode={isDarkMode}
+                ecommerceData={techData.ecommerceAdoption}
+                digitalPaymentsData={techData.digitalPayments}
+                ictServiceExportsData={techData.ictServiceExports}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Section: Tech Workforce */}
-        {activeSection === 'workforce' && techData && (
-          <div className="space-y-8">
-            <TechWorkforceChart
-              isDarkMode={isDarkMode}
-              stemGraduatesData={techData.stemGraduates}
-              techEmploymentData={techData.techEmployment}
-              researchersData={techData.researchersRD}
-              selectedCountries={selectedCountries}
-              onCountryChange={setSelectedCountries}
-            />
-          </div>
-        )}
+        <ChapterSection id="chapter-10" index={10} title="The Tech Workforce" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <TechWorkforceChart
+                isDarkMode={isDarkMode}
+                stemGraduatesData={techData.stemGraduates}
+                techEmploymentData={techData.techEmployment}
+                researchersData={techData.researchersRD}
+                selectedCountries={selectedCountries}
+                onCountryChange={setSelectedCountries}
+              />
+            </div>
+          )}
+        </ChapterSection>
 
         {/* Section: Tech & Capital Cycles */}
-        {activeSection === 'capital-cycles' && (
+        <ChapterSection id="chapter-11" index={11} title="Technology and Capital Cycles" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-6">
             <div className={`p-5 rounded-xl border ${themeColors.cardBg} ${themeColors.border}`}>
               <h2 className={`text-xl font-bold mb-2 ${themeColors.text}`}>
@@ -1009,86 +1000,88 @@ const TechnologyPage = () => {
             </div>
             <TechCapitalCyclesChart isDarkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Insights */}
-        {activeSection === 'insights' && techData && (
-          <div className="space-y-8">
-            <div className={`p-4 rounded-lg border ${
-              isDarkMode 
-                ? 'bg-gray-800 border-indigo-500 text-indigo-400' 
-                : 'bg-white border-indigo-400 text-indigo-700'
-            }`}>
-              <h3 className="font-semibold">Advanced Analytics &amp; Insights</h3>
-              <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Explore the relationships between innovation inputs and outputs, compare countries across 
-                multiple metrics, and understand the flow of technology development.
-              </p>
-            </div>
+        <ChapterSection id="chapter-12" index={12} title="Insights" isDarkMode={isDarkMode} accent="blue" lazy>
+          {techData && (
+            <div className="space-y-8">
+              <div className={`p-4 rounded-lg border ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-indigo-500 text-indigo-400' 
+                  : 'bg-white border-indigo-400 text-indigo-700'
+              }`}>
+                <h3 className="font-semibold">Advanced Analytics &amp; Insights</h3>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Explore the relationships between innovation inputs and outputs, compare countries across 
+                  multiple metrics, and understand the flow of technology development.
+                </p>
+              </div>
 
-            {/* Tech Ecosystem Flow Sankey */}
-            <TechFlowSankey
-              isDarkMode={isDarkMode}
-              rdSpending={techData.rdSpending}
-              stemGraduates={techData.stemGraduates}
-              patentData={techData.patentApplicationsResident}
-              scientificPublications={techData.scientificPublications}
-              researchersData={techData.researchersRD}
-              hightechExports={techData.hightechExports}
-              techEmployment={techData.techEmployment}
-              vcFunding={techData.vcFunding}
-              selectedYear={selectedYear}
-            />
+              {/* Tech Ecosystem Flow Sankey */}
+              <TechFlowSankey
+                isDarkMode={isDarkMode}
+                rdSpending={techData.rdSpending}
+                stemGraduates={techData.stemGraduates}
+                patentData={techData.patentApplicationsResident}
+                scientificPublications={techData.scientificPublications}
+                researchersData={techData.researchersRD}
+                hightechExports={techData.hightechExports}
+                techEmployment={techData.techEmployment}
+                vcFunding={techData.vcFunding}
+                selectedYear={selectedYear}
+              />
 
-            {/* Technology Metrics Heatmap */}
-            <TechHeatmapChart
-              isDarkMode={isDarkMode}
-              rdSpending={techData.rdSpending}
-              patentData={techData.patentApplicationsResident}
-              researchersData={techData.researchersRD}
-              hightechExports={techData.hightechExports}
-              internetUsers={techData.internetUsers}
-              vcFunding={techData.vcFunding}
-              stemGraduates={techData.stemGraduates}
-              aiPatents={techData.aiPatents}
-              selectedYear={selectedYear}
-            />
+              {/* Technology Metrics Heatmap */}
+              <TechHeatmapChart
+                isDarkMode={isDarkMode}
+                rdSpending={techData.rdSpending}
+                patentData={techData.patentApplicationsResident}
+                researchersData={techData.researchersRD}
+                hightechExports={techData.hightechExports}
+                internetUsers={techData.internetUsers}
+                vcFunding={techData.vcFunding}
+                stemGraduates={techData.stemGraduates}
+                aiPatents={techData.aiPatents}
+                selectedYear={selectedYear}
+              />
 
-            {/* Key Insights Summary */}
-            <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
-              <h3 className="text-lg font-semibold mb-4">Key Insights</h3>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
-                    Innovation Pipeline
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    The Sankey diagram shows how R&amp;D investment and education flow through research 
-                    outputs to economic outcomes like exports and employment.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>
-                    Multi-Metric Comparison
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    The heatmap provides a comprehensive view of how countries perform across all 
-                    technology metrics, revealing strengths and weaknesses.
-                  </p>
-                </div>
-                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-green-900/30' : 'bg-green-50'}`}>
-                  <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-green-400' : 'text-green-700'}`}>
-                    Efficiency Analysis
-                  </h4>
-                  <p className={`text-sm ${themeColors.textSecondary}`}>
-                    Some countries achieve high innovation output with relatively low R&amp;D spending, 
-                    indicating efficient use of resources.
-                  </p>
+              {/* Key Insights Summary */}
+              <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
+                <h3 className="text-lg font-semibold mb-4">Key Insights</h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                      Innovation Pipeline
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      The Sankey diagram shows how R&amp;D investment and education flow through research 
+                      outputs to economic outcomes like exports and employment.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>
+                      Multi-Metric Comparison
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      The heatmap provides a comprehensive view of how countries perform across all 
+                      technology metrics, revealing strengths and weaknesses.
+                    </p>
+                  </div>
+                  <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-green-900/30' : 'bg-green-50'}`}>
+                    <h4 className={`font-medium mb-2 ${isDarkMode ? 'text-green-400' : 'text-green-700'}`}>
+                      Efficiency Analysis
+                    </h4>
+                    <p className={`text-sm ${themeColors.textSecondary}`}>
+                      Some countries achieve high innovation output with relatively low R&amp;D spending, 
+                      indicating efficient use of resources.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </ChapterSection>
 
         </>
         )}

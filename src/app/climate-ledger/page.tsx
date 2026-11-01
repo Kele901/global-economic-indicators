@@ -24,6 +24,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
 
@@ -67,6 +68,8 @@ function formatKt(kt: number): string {
   const mt = kt / 1_000;
   return `${mt.toFixed(0)} MtCO₂`;
 }
+
+const NAV = ['Emissions', 'Divergence', 'Energy mix', 'Renewables', 'Coal', 'Finance', 'Risk', 'Pledges'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function ClimateLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -249,8 +252,10 @@ export default function ClimateLedgerPage() {
           </div>
         </div>
 
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="emerald" />
+
         {/* Chapter 1 — The Global Bill */}
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -281,7 +286,7 @@ export default function ClimateLedgerPage() {
         </section>
 
         {/* Chapter 2 — The Divergence */}
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -296,7 +301,7 @@ export default function ClimateLedgerPage() {
         </section>
 
         {/* Chapter 3 — The Energy Mix */}
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -311,7 +316,7 @@ export default function ClimateLedgerPage() {
         </section>
 
         {/* Chapter 4 — The Renewables Race */}
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -325,7 +330,7 @@ export default function ClimateLedgerPage() {
         </section>
 
         {/* Chapter 5 — The Coal Pipeline */}
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
@@ -336,7 +341,7 @@ export default function ClimateLedgerPage() {
         </section>
 
         {/* Chapter 6 — Climate Finance */}
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
@@ -346,39 +351,45 @@ export default function ClimateLedgerPage() {
           <ClimateFinanceFlows isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          {/* Chapter 7 — Physical Risk */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 7"
-              title="Physical Risk"
-              share={false}
-              subtitle="The other side of the ledger: what a warmer planet does to the people on it. Air quality now, disasters over the last three decades."
-            />
-            <div className="grid grid-cols-1 gap-4">
-              <AirPollutionGrid
+        {/* Chapter 7 — Physical Risk */}
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
                 isDarkMode={isDarkMode}
-                pm25={data?.pm25 ?? []}
+                chapter="Chapter 7"
+                title="Physical Risk"
+                share={false}
+                subtitle="The other side of the ledger: what a warmer planet does to the people on it. Air quality now, disasters over the last three decades."
               />
-              <DisasterTimelineChart isDarkMode={isDarkMode} />
-            </div>
-          </section>
+              <div className="grid grid-cols-1 gap-4">
+                <AirPollutionGrid
+                  isDarkMode={isDarkMode}
+                  pm25={data?.pm25 ?? []}
+                />
+                <DisasterTimelineChart isDarkMode={isDarkMode} />
+              </div>
+            </section>
+          </LazyMount>
+        </div>
 
-          {/* Chapter 8 — The Pledges */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 8"
-              title="The Pledges"
-              subtitle="Every top-20 emitter has a Paris pledge. The actual-vs-target column shows how many are on track — and how many are trending in the wrong direction."
-            />
-            <NdcTargetTable
-              isDarkMode={isDarkMode}
-              co2EmissionsKt={co2Kt}
-            />
-          </section>
-        </LazyMount>
+        {/* Chapter 8 — The Pledges */}
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 8"
+                title="The Pledges"
+                subtitle="Every top-20 emitter has a Paris pledge. The actual-vs-target column shows how many are on track — and how many are trending in the wrong direction."
+              />
+              <NdcTargetTable
+                isDarkMode={isDarkMode}
+                co2EmissionsKt={co2Kt}
+              />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/climate-ledger" isDarkMode={isDarkMode} />
 

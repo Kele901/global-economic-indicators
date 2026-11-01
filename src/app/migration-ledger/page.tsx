@@ -26,6 +26,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import SocialShareMenu from '../components/SocialShareMenu';
 import { slugify } from '../lib/share';
 
@@ -61,6 +62,8 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, sha
     </div>
   );
 }
+
+const NAV = ['Flows', 'Refugees', 'Remittances', 'Stocks', 'Asylum', 'Brain drain', 'Diaspora', 'Borders'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function MigrationLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -223,8 +226,10 @@ export default function MigrationLedgerPage() {
           </div>
         </div>
 
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="sky" />
+
         {/* Chapter 1 — The People Flows */}
-        <section className="mb-14">
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 1"
@@ -249,7 +254,7 @@ export default function MigrationLedgerPage() {
         </section>
 
         {/* Chapter 2 — Refugees & Displacement */}
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 2"
@@ -260,7 +265,7 @@ export default function MigrationLedgerPage() {
         </section>
 
         {/* Chapter 3 — Remittance Corridors */}
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 3"
@@ -275,7 +280,7 @@ export default function MigrationLedgerPage() {
         </section>
 
         {/* Chapter 4 — Migrant Stocks */}
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 4"
@@ -287,7 +292,7 @@ export default function MigrationLedgerPage() {
         </section>
 
         {/* Chapter 5 — Asylum Flows */}
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 5"
@@ -298,7 +303,7 @@ export default function MigrationLedgerPage() {
         </section>
 
         {/* Chapter 6 — Brain Gain / Brain Drain */}
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader
             isDarkMode={isDarkMode}
             chapter="Chapter 6"
@@ -309,32 +314,38 @@ export default function MigrationLedgerPage() {
           <BrainMigrationTable isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          {/* Chapter 7 — Diaspora Contributions */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 7"
-              title="Diaspora Contributions"
-              subtitle="Remittances scaled against GDP. Small figures for absolute-USD giants like India (2% of GDP), massive figures for Nepal, Tajikistan, El Salvador (&gt;20% of GDP)."
-            />
-            <DiasporaContributionsChart
-              isDarkMode={isDarkMode}
-              remittances={remittances}
-            />
-          </section>
+        {/* Chapter 7 — Diaspora Contributions */}
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 7"
+                title="Diaspora Contributions"
+                subtitle="Remittances scaled against GDP. Small figures for absolute-USD giants like India (2% of GDP), massive figures for Nepal, Tajikistan, El Salvador (&gt;20% of GDP)."
+              />
+              <DiasporaContributionsChart
+                isDarkMode={isDarkMode}
+                remittances={remittances}
+              />
+            </section>
+          </LazyMount>
+        </div>
 
-          {/* Chapter 8 — Border & Policy */}
-          <section className="mb-14">
-            <ChapterHeader
-              isDarkMode={isDarkMode}
-              chapter="Chapter 8"
-              title="Border &amp; Policy"
-              subtitle="The Mediterranean central route has killed nearly 25,000 people since 2014 — the deadliest border in the world. IOM Missing Migrants Project cumulative counts."
-            />
-            <MigrantSafetyTimeline isDarkMode={isDarkMode} />
-          </section>
-        </LazyMount>
+        {/* Chapter 8 — Border & Policy */}
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 8"
+                title="Border &amp; Policy"
+                subtitle="The Mediterranean central route has killed nearly 25,000 people since 2014 — the deadliest border in the world. IOM Missing Migrants Project cumulative counts."
+              />
+              <MigrantSafetyTimeline isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/migration-ledger" isDarkMode={isDarkMode} />
 

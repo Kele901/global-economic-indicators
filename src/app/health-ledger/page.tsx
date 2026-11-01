@@ -26,6 +26,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
 import SocialShareMenu from '../components/SocialShareMenu';
@@ -75,6 +76,8 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true, sha
     </div>
   );
 }
+
+const NAV = ['Spending', 'Outcomes', 'Longevity', 'Preparedness', 'Pharma', 'Nutrition', 'Mental health', 'Disease burden'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function HealthLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -215,7 +218,9 @@ export default function HealthLedgerPage() {
           </div>
         </div>
 
-        <section className="mb-14">
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="emerald" />
+
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1" share={false}
             title="What Each Country Commits"
             subtitle="Live health expenditure as a share of GDP across the full roster, with life expectancy overlaid on the right axis. The bars are sorted by spending and the line refuses to follow them — the first and most important fact about health systems is that money alone does not buy years." />
@@ -227,56 +232,62 @@ export default function HealthLedgerPage() {
           />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 2"
             title="Spending vs Outcomes"
             subtitle="Health spending per capita on the x-axis, life expectancy on the y-axis. Most countries cluster along a curve of diminishing returns; the US is the outlier that pays much more and lives shorter." />
           <SpendVsOutcomeChart isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3"
             title="Life-Expectancy Divergence"
             subtitle="1990-2023 average life expectancy by World Bank income group. Convergence stalled after 2015 and briefly reversed during COVID. The HIC-LIC gap is still ~16 years." />
           <LifeExpectancyDivergenceChart isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4" shareSubject="dataset"
             title="Pandemic Preparedness"
             subtitle="Johns Hopkins Global Health Security Index + WHO JEE core-capacity scores. Even the highest-ranked countries fell short during COVID; the ranking system itself is being re-evaluated." />
           <PandemicReadinessGrid isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5" shareSubject="dataset"
             title="The Pharma Industry"
             subtitle="Top-15 pharmaceutical firms by 2024 R&D spend. Concentrated in the US (7), Europe (7) and Japan (1). Chinese firms are growing fast but not yet in the top-15 by absolute R&D." />
           <PharmaConcentrationTable isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6"
             title="Obesity vs Undernutrition"
             subtitle="The 'double burden' paradox: countries battling obesity and undernutrition simultaneously. Ultra-processed cheap calories meet inadequate micronutrient intake in the same population." />
           <DualBurdenChart isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7" shareSubject="dataset"
-              title="The Mental-Health Gap"
-              subtitle="What share of people with a diagnosable mental disorder receive no treatment? Roughly half in the OECD, 90%+ in low-income countries. Psychiatrist density is the strongest system-level predictor." />
-            <MentalHealthGapTable isDarkMode={isDarkMode} />
-          </section>
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7" shareSubject="dataset"
+                title="The Mental-Health Gap"
+                subtitle="What share of people with a diagnosable mental disorder receive no treatment? Roughly half in the OECD, 90%+ in low-income countries. Psychiatrist density is the strongest system-level predictor." />
+              <MentalHealthGapTable isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
-              title="Disease Burden Shift 1990-2023"
-              subtitle="Global DALY rates by broad cause. Communicable-disease burden collapsed; NCDs and mental health held steady. COVID temporarily reversed some of the progress in 2020-21." />
-            <DiseaseBurdenTimeline isDarkMode={isDarkMode} />
-          </section>
-        </LazyMount>
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
+                title="Disease Burden Shift 1990-2023"
+                subtitle="Global DALY rates by broad cause. Communicable-disease burden collapsed; NCDs and mental health held steady. COVID temporarily reversed some of the progress in 2020-21." />
+              <DiseaseBurdenTimeline isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/health-ledger" isDarkMode={isDarkMode} />
 

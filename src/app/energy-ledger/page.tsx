@@ -29,6 +29,7 @@ import RelatedPages from '../components/RelatedPages';
 import ChartMeta from '../components/ChartMeta';
 import DataQualityBadge from '../components/DataQualityBadge';
 import LazyMount from '../components/LazyMount';
+import ChapterNav from '../components/ChapterNav';
 import GuidedTour, { type TourStep } from '../components/GuidedTour';
 import SkeletonCard from '../components/SkeletonCard';
 import SocialShareMenu from '../components/SocialShareMenu';
@@ -79,6 +80,8 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: {
     </div>
   );
 }
+
+const NAV = ['Dependence', 'Power mix', 'Batteries', 'LNG', 'Nuclear', 'Capacity', 'Reserves', 'Intensity'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function EnergyLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -214,7 +217,9 @@ export default function EnergyLedgerPage() {
           </div>
         </div>
 
-        <section className="mb-14">
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="amber" />
+
+        <section id="chapter-1" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 1"
             title="Who Depends on Whom"
             share={false}
@@ -227,7 +232,7 @@ export default function EnergyLedgerPage() {
           />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-2" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 2"
             title="Electricity Generation Mix"
             subtitle="Stacked bars showing where each major economy's electricity actually comes from in 2023. The mix reflects both geology (hydro-rich Norway, gas-rich Qatar) and policy (nuclear-heavy France, coal-heavy India)." />
@@ -237,49 +242,55 @@ export default function EnergyLedgerPage() {
           </div>
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-3" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 3"
             title="The Battery Storage Revolution"
             subtitle="BNEF Global Storage Outlook: cumulative operational GWh 2015-2030. Grid-scale batteries went from novelty to essential in five years." />
           <StorageBuildoutChart isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-4" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 4"
             title="LNG Flows Redrawn"
             subtitle="Post-Ukraine, US LNG dethroned Qatar as the world's biggest exporter; Europe replaced Asia as the biggest premium buyer. Filter by exporter to see specific flow patterns." />
           <LngFlowsTable isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-5" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 5"
             title="The Nuclear Restart"
             subtitle="IAEA PRIS September 2025: operable reactors + build pipeline + policy stance. China dominates the build queue; Germany's phase-out completed in 2023; Italy is putting new nuclear back on the ballot." />
           <NuclearStatusTable isDarkMode={isDarkMode} />
         </section>
 
-        <section className="mb-14">
+        <section id="chapter-6" className="mb-14 scroll-mt-16">
           <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 6"
             title="Capacity Factors"
             subtitle="What share of nameplate capacity each source actually delivers over a year, alongside its lifecycle CO₂ intensity. Nuclear runs flat-out; solar sits idle overnight; storage exists to bridge the gap." />
           <CapacityFactorGrid isDarkMode={isDarkMode} />
         </section>
 
-        <LazyMount isDarkMode={isDarkMode}>
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
-              title="Reserves Reranked"
-              subtitle="Oil + gas + coal converted to a common barrel-of-oil-equivalent basis. Russia and the US lead on combined reserves; Venezuela and Saudi Arabia lead on crude alone; China and Australia hold most of the coal." />
-            <ReservesRankingChart isDarkMode={isDarkMode} />
-          </section>
+        <div id="chapter-7" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 7"
+                title="Reserves Reranked"
+                subtitle="Oil + gas + coal converted to a common barrel-of-oil-equivalent basis. Russia and the US lead on combined reserves; Venezuela and Saudi Arabia lead on crude alone; China and Australia hold most of the coal." />
+              <ReservesRankingChart isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
-          <section className="mb-14">
-            <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
-              title="Energy Intensity per GDP"
-              subtitle="Primary energy per unit of GDP-PPP. Lower = more efficient. YoY change shows which economies are getting more efficient (bottom-left quadrant). Middle East petrostates sit in the top-right." />
-            <EnergyIntensityQuadrant isDarkMode={isDarkMode} />
-          </section>
-        </LazyMount>
+        <div id="chapter-8" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader isDarkMode={isDarkMode} chapter="Chapter 8"
+                title="Energy Intensity per GDP"
+                subtitle="Primary energy per unit of GDP-PPP. Lower = more efficient. YoY change shows which economies are getting more efficient (bottom-left quadrant). Middle East petrostates sit in the top-right." />
+              <EnergyIntensityQuadrant isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
 
         <RelatedPages currentPath="/energy-ledger" isDarkMode={isDarkMode} />
 

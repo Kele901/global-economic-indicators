@@ -18,6 +18,8 @@ import MonetaryPolicyRegimeTimeline from '../components/MonetaryPolicyRegimeTime
 import GeopoliticalCycleOverlay from '../components/GeopoliticalCycleOverlay';
 import CycleReportGenerator from '../components/CycleReportGenerator';
 import SocialShareMenu from '../components/SocialShareMenu';
+import ChapterNav from '../components/ChapterNav';
+import ChapterSection from '../components/ChapterSection';
 import { slugify } from '../lib/share';
 import { 
   crisisEvents, 
@@ -44,6 +46,11 @@ const CrisisWorldMap = dynamic(
   }
 );
 
+const NAV = [
+  'Overview', 'Current conditions', 'Market cycles', 'Empire cycles', 'Crisis history',
+  'Debt cycles', 'Geopolitics', 'Macro frameworks', 'Compare to today',
+].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
+
 const EconomicCyclesPage = () => {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
   const [selectedEmpire, setSelectedEmpire] = useState<EmpireCycle | null>(null);
@@ -52,8 +59,6 @@ const EconomicCyclesPage = () => {
   const [crisisFilter, setCrisisFilter] = useState<CrisisType | 'all'>('all');
   const [decadeFilter, setDecadeFilter] = useState<number | 'all'>('all');
   const [generationFilter, setGenerationFilter] = useState<CrisisGeneration | 'all'>('all');
-  const [activeSection, setActiveSection] = useState<string>('overview');
-
   // Dispatch theme change event
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -85,7 +90,7 @@ const EconomicCyclesPage = () => {
 
   return (
     <div className={`min-h-screen ${themeColors.background} ${themeColors.text}`}>
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
           <div>
@@ -153,42 +158,10 @@ const EconomicCyclesPage = () => {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className={`flex flex-wrap gap-2 mb-8 p-1 rounded-lg ${
-          isDarkMode ? 'bg-gray-800' : 'bg-gray-100'
-        }`}>
-          {[
-            { id: 'overview', label: 'Cycle Overview', icon: '📊' },
-            { id: 'current', label: 'Current Conditions', icon: '🔴' },
-            { id: 'markets', label: 'Market Cycles', icon: '💹' },
-            { id: 'empires', label: 'Empire Cycles', icon: '👑' },
-            { id: 'crises', label: 'Crisis History', icon: '⚠️' },
-            { id: 'debt', label: 'Debt Cycles', icon: '📈' },
-            { id: 'geopolitical', label: 'Geopolitics', icon: '🌍' },
-            { id: 'macro', label: 'Macro Frameworks', icon: '📚' },
-            { id: 'compare', label: 'Compare to Today', icon: '🔍' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSection(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                activeSection === tab.id
-                  ? isDarkMode 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-white text-gray-900 shadow'
-                  : isDarkMode
-                    ? 'text-gray-400 hover:text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <span className="mr-2">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <ChapterNav isDarkMode={isDarkMode} chapters={NAV} accent="blue" />
 
         {/* Section: Overview */}
-        {activeSection === 'overview' && (
+        <ChapterSection id="chapter-1" index={1} title="Cycle Overview" isDarkMode={isDarkMode} accent="blue">
           <div className="space-y-8">
             {/* Intro Quote */}
             <p className={`text-center italic ${themeColors.textSecondary}`}>
@@ -288,10 +261,10 @@ const EconomicCyclesPage = () => {
 
             <KondratievWaveChart isDarkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Current Conditions */}
-        {activeSection === 'current' && (
+        <ChapterSection id="chapter-2" index={2} title="Current Conditions" isDarkMode={isDarkMode} accent="blue">
           <div className="space-y-8">
             <div className={`rounded-xl p-5 border ${
               isDarkMode ? 'bg-gray-800 border-red-500/40' : 'bg-white border-red-300'
@@ -330,10 +303,10 @@ const EconomicCyclesPage = () => {
 
             <LiveBusinessCycleDashboard isDarkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Market Cycles */}
-        {activeSection === 'markets' && (
+        <ChapterSection id="chapter-3" index={3} title="Market Cycles" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-8">
             <div className={`rounded-xl p-5 border ${
               isDarkMode ? 'bg-gray-800 border-emerald-500/40' : 'bg-white border-emerald-300'
@@ -372,10 +345,10 @@ const EconomicCyclesPage = () => {
 
             <MarketCycleIndicators isDarkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Empire Cycles */}
-        {activeSection === 'empires' && (
+        <ChapterSection id="chapter-4" index={4} title="Empire Cycles" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-8">
             <div className={`p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
               <h2 className="text-xl font-bold mb-2">The Big Cycle: Rise and Fall of Empires</h2>
@@ -430,10 +403,10 @@ const EconomicCyclesPage = () => {
               ))}
             </div>
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Crisis History */}
-        {activeSection === 'crises' && (
+        <ChapterSection id="chapter-5" index={5} title="Crisis History" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-8">
             {/* Filters */}
             <div className={`p-4 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>
@@ -563,10 +536,10 @@ const EconomicCyclesPage = () => {
               </div>
             </div>
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Debt Cycles */}
-        {activeSection === 'debt' && (
+        <ChapterSection id="chapter-6" index={6} title="Debt Cycles" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-8">
             <div className={`px-4 py-3 rounded-lg border ${
               isDarkMode 
@@ -668,10 +641,10 @@ const EconomicCyclesPage = () => {
 
             <MinskyMomentTracker isDarkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Geopolitics */}
-        {activeSection === 'geopolitical' && (
+        <ChapterSection id="chapter-7" index={7} title="Geopolitics" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-8">
             <div className={`rounded-xl p-5 border ${
               isDarkMode ? 'bg-gray-800 border-sky-500/40' : 'bg-white border-sky-300'
@@ -711,10 +684,10 @@ const EconomicCyclesPage = () => {
 
             <GeopoliticalCycleOverlay isDarkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: International Macro Frameworks */}
-        {activeSection === 'macro' && (
+        <ChapterSection id="chapter-8" index={8} title="Macro Frameworks" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-8">
             <div className={`rounded-xl p-5 border ${
               isDarkMode ? 'bg-gray-800 border-cyan-500/40' : 'bg-white border-cyan-300'
@@ -756,14 +729,14 @@ const EconomicCyclesPage = () => {
             <MonetaryPolicyRegimeTimeline isDarkMode={isDarkMode} />
             <InternationalMacroFrameworks darkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Section: Compare to Today */}
-        {activeSection === 'compare' && (
+        <ChapterSection id="chapter-9" index={9} title="Compare to Today" isDarkMode={isDarkMode} accent="blue" lazy>
           <div className="space-y-8">
             <CrisisComparisonTool isDarkMode={isDarkMode} />
           </div>
-        )}
+        </ChapterSection>
 
         {/* Footer / Sources */}
         <div className={`mt-12 p-6 rounded-xl ${themeColors.cardBg} border ${themeColors.border}`}>

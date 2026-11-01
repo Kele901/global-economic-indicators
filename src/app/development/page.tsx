@@ -20,7 +20,7 @@ import LazyMount from '../components/LazyMount';
 import SkeletonCard from '../components/SkeletonCard';
 import DataDownloadButton from '../components/DataDownloadButton';
 import SocialShareMenu from '../components/SocialShareMenu';
-import ChapterNav from '../components/development/ChapterNav';
+import ChapterNav from '../components/ChapterNav';
 import { ChapterMeta, Stat, countryName } from '../components/development/ui';
 import type { ChapterProps } from '../components/development/data';
 import { slugify } from '../lib/share';
