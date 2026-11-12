@@ -1,0 +1,355 @@
+// Curated snapshot of the AI power network: who supplies, funds, partners
+// with and buys from whom across the AI stack, from lithography optics to
+// frontier labs. Company profiles live in aiPowerNetworkCompanies.ts.
+//
+// Every figure is approximate and dated. Listed values are market caps from
+// exchange data as of NETWORK_LAST_UPDATED; private values are the latest
+// funding-round or deal valuation. Revenue is the latest full fiscal year
+// unless revenueBasis says otherwise (AI labs report annualised run-rates,
+// which are not GAAP revenue). Refresh quarterly and bump the stamp.
+
+import { TECH_COMPANIES } from './aiPowerNetworkCompanies';
+import {
+  LINK_KINDS,
+  makeDataset,
+  type CategoryId,
+  type Chokepoint,
+  type LinkKind,
+  type TechCategory,
+  type TechCompany,
+  type TechLink,
+} from './network/types';
+
+export type { CategoryId, Chokepoint, LinkKind, SourceRef, TechCategory, TechCompany, TechLink } from './network/types';
+export { LINK_KINDS };
+
+export const NETWORK_LAST_UPDATED = '2026-11-12';
+
+// Order follows the physical stack: tools and materials at the bottom,
+// money at the top. The radial layout walks categories in this order.
+export const TECH_CATEGORIES: TechCategory[] = [
+  { id: 'equipment',  label: 'Equipment & materials', color: '#14b8a6', description: 'Lithography, deposition, etch, inspection, test and the silicon wafers every chip starts from.' },
+  { id: 'foundry',    label: 'Foundry & packaging',   color: '#0ea5e9', description: 'Fabs that manufacture chips for others, and the firms that package and test them.' },
+  { id: 'memory',     label: 'Memory',                color: '#3b82f6', description: 'DRAM, high-bandwidth memory (HBM) and NAND flash that feed data to AI processors.' },
+  { id: 'design',     label: 'Chip design',           color: '#22c55e', description: 'GPUs, CPUs, custom accelerators and the architectures they are built on.' },
+  { id: 'networking', label: 'Networking',            color: '#6366f1', description: 'Switches, optics and connectivity chips that link thousands of accelerators into one machine.' },
+  { id: 'systems',    label: 'Systems & servers',     color: '#8b5cf6', description: 'Contract manufacturers and server makers that assemble AI racks.' },
+  { id: 'power',      label: 'Power & cooling',       color: '#f97316', description: 'Turbines, grid equipment, power distribution and liquid cooling for AI data centres.' },
+  { id: 'cloud',      label: 'Cloud & platforms',     color: '#eab308', description: 'Hyperscalers and GPU clouds that rent compute and run AI at global scale.' },
+  { id: 'labs',       label: 'AI labs',               color: '#ec4899', description: 'Developers of frontier and open-weight foundation models.' },
+  { id: 'enterprise', label: 'Enterprise AI',         color: '#d946ef', description: 'Software platforms that put AI to work inside businesses and governments.' },
+  { id: 'devices',    label: 'Devices & robotics',    color: '#ef4444', description: 'Phones, cars and robots that carry AI to billions of people.' },
+  { id: 'capital',    label: 'Capital & sovereign AI', color: '#84cc16', description: 'Investors and state-backed champions financing the build-out.' },
+];
+
+export const CATEGORY_BY_ID: Record<CategoryId, TechCategory> = Object.fromEntries(
+  TECH_CATEGORIES.map((c) => [c.id, c]),
+) as Record<CategoryId, TechCategory>;
+
+const L = (source: string, target: string, kind: LinkKind, note: string): TechLink => ({ source, target, kind, note });
+
+export const TECH_LINKS: TechLink[] = [
+  // ── Nvidia: suppliers ────────────────────────────────────────────────
+  L('tsmc', 'nvidia', 'supplies', 'Manufactures Nvidia GPUs on its 4nm and 3nm-class processes and packages them with CoWoS.'),
+  L('sk-hynix', 'nvidia', 'supplies', 'Lead supplier of HBM3E and HBM4 memory stacks for Blackwell and Rubin.'),
+  L('micron', 'nvidia', 'supplies', 'HBM3E for Blackwell systems and LPDDR memory for Grace CPUs.'),
+  L('samsung', 'nvidia', 'supplies', 'HBM3E qualified for Nvidia platforms, plus GDDR7 for GeForce cards.'),
+  L('ase', 'nvidia', 'supplies', 'Back-end packaging and test for Nvidia GPUs, partly through its SPIL subsidiary.'),
+  L('amkor', 'nvidia', 'supplies', 'Advanced packaging partner for Nvidia chips made in Arizona.'),
+  L('advantest', 'nvidia', 'supplies', 'Automated test systems that verify every AI GPU before it ships.'),
+  L('arm', 'nvidia', 'supplies', 'Grace and Vera CPUs are built on the Arm architecture.'),
+  L('foxconn', 'nvidia', 'supplies', 'Assembles GB200/GB300 rack systems and is building Nvidia AI-server capacity in Houston.'),
+  L('wistron', 'nvidia', 'supplies', 'Makes HGX baseboards and DGX systems; building an Nvidia supercomputer plant in Dallas.'),
+  L('coherent', 'nvidia', 'supplies', '800G and 1.6T optical transceivers for InfiniBand and Spectrum-X networks.'),
+  // ── Nvidia: customers ────────────────────────────────────────────────
+  L('nvidia', 'microsoft', 'supplies', 'Azure is one of the largest buyers of Blackwell rack systems.'),
+  L('nvidia', 'amazon', 'supplies', 'AWS rents Nvidia GPU instances alongside its own Trainium chips.'),
+  L('nvidia', 'alphabet', 'supplies', 'Google Cloud offers Nvidia GPUs alongside its in-house TPUs.'),
+  L('nvidia', 'meta', 'supplies', 'Hundreds of thousands of Nvidia GPUs train and serve Llama models.'),
+  L('nvidia', 'oracle', 'supplies', 'OCI superclusters and the Stargate sites run on Nvidia GB200 systems.'),
+  L('nvidia', 'coreweave', 'supplies', 'Typically first in line for each new Nvidia platform.'),
+  L('nvidia', 'openai', 'supplies', 'GPT models are trained and served on Nvidia hardware across Azure, OCI and CoreWeave.'),
+  L('nvidia', 'xai', 'supplies', 'The Colossus supercomputer in Memphis runs on hundreds of thousands of Nvidia GPUs.'),
+  L('nvidia', 'tesla', 'supplies', 'Tesla trains its self-driving networks on large Nvidia H100/H200 clusters.'),
+  L('nvidia', 'dell', 'supplies', 'GPUs and reference designs for PowerEdge AI servers.'),
+  L('nvidia', 'supermicro', 'supplies', 'GPUs for liquid-cooled Supermicro AI racks.'),
+  L('nvidia', 'hpe', 'supplies', 'GPUs for HPE ProLiant and Cray AI systems.'),
+  L('nvidia', 'alibaba', 'supplies', 'Alibaba Cloud runs Nvidia GPUs, within the limits of US export controls.'),
+  L('nvidia', 'deepseek', 'supplies', 'DeepSeek-V3 was trained on 2,048 export-grade H800 GPUs.'),
+  L('nvidia', 'g42', 'supplies', 'Nvidia systems power the Stargate UAE cluster in Abu Dhabi.'),
+  L('nvidia', 'softbank', 'supplies', 'SoftBank built a national-scale DGX SuperPOD for Japan on Nvidia systems.'),
+  // ── Nvidia: investments ──────────────────────────────────────────────
+  L('nvidia', 'openai', 'investment', 'Letter of intent (Sep 2025) to invest up to $100bn as OpenAI deploys 10 GW of Nvidia systems.'),
+  L('nvidia', 'anthropic', 'investment', 'Committed up to $10bn (Nov 2025); named a cornerstone investor in the 2026 IPO.'),
+  L('nvidia', 'xai', 'investment', 'Strategic investor in xAI’s $20bn Series E (Jan 2026).'),
+  L('nvidia', 'coreweave', 'investment', 'Long-standing shareholder that also agreed to buy unused CoreWeave capacity (2025).'),
+  L('nvidia', 'intel', 'investment', '$5bn equity stake (Sep 2025) plus joint x86 and RTX product development.'),
+  L('nvidia', 'figure-ai', 'investment', 'Investor in Figure’s 2024 and 2025 funding rounds.'),
+  // ── Nvidia: partnerships ─────────────────────────────────────────────
+  L('mediatek', 'nvidia', 'partnership', 'Co-designed the GB10 Grace Blackwell superchip inside DGX Spark.'),
+  L('marvell', 'nvidia', 'partnership', 'NVLink Fusion partner for custom silicon that plugs into Nvidia racks.'),
+  L('qualcomm', 'nvidia', 'partnership', 'NVLink Fusion partner for custom data-centre CPUs.'),
+  L('astera-labs', 'nvidia', 'partnership', 'NVLink Fusion ecosystem partner for scale-up connectivity.'),
+  L('quanta', 'nvidia', 'partnership', 'Builds Nvidia-based AI racks for the hyperscalers.'),
+  L('vertiv', 'nvidia', 'partnership', 'Power and liquid-cooling reference designs, including 800 VDC rack power and the DSX blueprint.'),
+  L('schneider', 'nvidia', 'partnership', 'Validated power and cooling reference designs for Blackwell and Vera Rubin AI factories.'),
+  L('siemens-energy', 'nvidia', 'partnership', 'Grid-aware power reference design aligned with Nvidia’s DSX AI-factory architecture.'),
+  L('ge-vernova', 'nvidia', 'partnership', 'Grid-to-rack power partner in Nvidia’s Omniverse DSX gigawatt AI-factory blueprint.'),
+  L('palantir', 'nvidia', 'partnership', 'Nvidia accelerated computing and models integrated into Palantir AIP (Oct 2025).'),
+  L('sap', 'nvidia', 'partnership', 'Nvidia AI built into SAP Business AI and the Joule assistant.'),
+  L('mistral', 'nvidia', 'partnership', 'Mistral Compute: a sovereign AI cloud in France built on 18,000 Grace Blackwell chips.'),
+
+  // ── TSMC ─────────────────────────────────────────────────────────────
+  L('asml', 'tsmc', 'supplies', 'EUV and DUV scanners for every leading-edge node.'),
+  L('applied-materials', 'tsmc', 'supplies', 'Deposition, etch and materials-engineering tools.'),
+  L('lam-research', 'tsmc', 'supplies', 'Plasma etch and deposition tools.'),
+  L('tokyo-electron', 'tsmc', 'supplies', 'Coater/developer tracks paired with every EUV scanner, plus etch and deposition.'),
+  L('kla', 'tsmc', 'supplies', 'Inspection and metrology that catch defects at nanometre scale.'),
+  L('shin-etsu', 'tsmc', 'supplies', '300mm silicon wafers, photoresists and photomask blanks.'),
+  L('sumco', 'tsmc', 'supplies', '300mm prime silicon wafers.'),
+  L('tsmc', 'apple', 'supplies', 'Sole manufacturer of Apple’s A-series and M-series chips.'),
+  L('tsmc', 'amd', 'supplies', 'EPYC, Ryzen and Instinct chips on 3nm/4nm-class nodes with CoWoS packaging.'),
+  L('tsmc', 'broadcom', 'supplies', 'Custom XPUs such as Google’s TPU, and Tomahawk switch chips.'),
+  L('tsmc', 'qualcomm', 'supplies', 'Snapdragon smartphone and PC processors.'),
+  L('tsmc', 'mediatek', 'supplies', 'Dimensity smartphone processors.'),
+  L('tsmc', 'marvell', 'supplies', 'Custom ASICs and optical DSPs.'),
+  L('tsmc', 'intel', 'supplies', 'Compute tiles for Intel’s Lunar Lake and Arrow Lake PC chips.'),
+  L('tsmc', 'amazon', 'supplies', 'Trainium and Graviton chips designed by AWS’s Annapurna Labs.'),
+  L('tsmc', 'tesla', 'supplies', 'Tesla’s AI5 self-driving chip (dual-sourced with Samsung).'),
+  L('ase', 'tsmc', 'partnership', 'Handles overflow advanced-packaging and test work as CoWoS demand outruns capacity.'),
+  L('amkor', 'tsmc', 'partnership', 'Packages chips from TSMC’s Arizona fabs (agreement signed 2024).'),
+  L('sk-hynix', 'tsmc', 'partnership', 'TSMC manufactures the logic base die for SK hynix HBM4.'),
+
+  // ── Samsung, SMIC and memory makers ──────────────────────────────────
+  L('asml', 'samsung', 'supplies', 'EUV scanners for Samsung’s foundry and DRAM fabs.'),
+  L('applied-materials', 'samsung', 'supplies', 'Deposition and etch tools.'),
+  L('lam-research', 'samsung', 'supplies', 'Etch tools for V-NAND and DRAM.'),
+  L('tokyo-electron', 'samsung', 'supplies', 'Coater/developer, etch and deposition tools.'),
+  L('kla', 'samsung', 'supplies', 'Process-control and inspection systems.'),
+  L('shin-etsu', 'samsung', 'supplies', 'Silicon wafers.'),
+  L('sumco', 'samsung', 'supplies', 'Silicon wafers.'),
+  L('samsung', 'apple', 'supplies', 'OLED displays (Samsung Display) and memory for iPhone.'),
+  L('samsung', 'tesla', 'supplies', '$16.5bn contract (Jul 2025) to make Tesla’s AI6 chip in Taylor, Texas.'),
+  L('samsung', 'amd', 'supplies', 'HBM3E memory for AMD Instinct MI350 accelerators.'),
+  L('samsung', 'mistral', 'investment', 'Co-led Mistral’s 2026 Series D.'),
+  L('qualcomm', 'samsung', 'supplies', 'Snapdragon processors in Galaxy flagship phones.'),
+  L('google-deepmind', 'samsung', 'partnership', 'Gemini models power much of Samsung’s Galaxy AI.'),
+  L('asml', 'smic', 'supplies', 'DUV scanners only: Dutch export rules bar EUV sales to China.'),
+  L('tokyo-electron', 'smic', 'supplies', 'Chip tools for SMIC’s fabs, subject to Japanese export controls.'),
+  L('asml', 'sk-hynix', 'supplies', 'EUV scanners for advanced DRAM nodes.'),
+  L('applied-materials', 'sk-hynix', 'supplies', 'Deposition and etch tools for DRAM and HBM.'),
+  L('advantest', 'sk-hynix', 'supplies', 'Memory and HBM test systems.'),
+  L('sk-hynix', 'kioxia', 'investment', 'Indirect stake through the Bain-led consortium that bought Toshiba Memory in 2018.'),
+  L('asml', 'micron', 'supplies', 'EUV scanners for Micron’s 1-gamma DRAM.'),
+  L('tokyo-electron', 'micron', 'supplies', 'Coater/developer, etch and deposition tools.'),
+  L('lam-research', 'micron', 'supplies', 'Etch and deposition tools for DRAM and NAND.'),
+  L('micron', 'amd', 'supplies', 'HBM3E 12-high memory for Instinct MI350.'),
+  L('lam-research', 'kioxia', 'supplies', 'High-aspect-ratio etch for BiCS 3D NAND.'),
+  L('kioxia', 'apple', 'supplies', 'NAND flash storage for iPhone and Mac.'),
+
+  // ── Equipment makers ─────────────────────────────────────────────────
+  L('zeiss-smt', 'asml', 'supplies', 'Sole supplier of the mirrors and optics inside every EUV machine.'),
+  L('asml', 'zeiss-smt', 'investment', 'Owns 24.9% of Carl Zeiss SMT Holding (2016).'),
+  L('asml', 'intel', 'supplies', 'First High-NA EUV systems (EXE:5000), installed in Oregon.'),
+  L('asml', 'mistral', 'investment', 'Led Mistral’s Series C (Sep 2025) with €1.3bn, becoming its largest shareholder.'),
+  L('applied-materials', 'intel', 'supplies', 'Tools for gate-all-around transistors and backside power on Intel 18A.'),
+  L('kla', 'intel', 'supplies', 'Inspection and metrology for Intel fabs.'),
+  L('shin-etsu', 'intel', 'supplies', 'Silicon wafers and photoresists.'),
+
+  // ── Chip designers ───────────────────────────────────────────────────
+  L('intel', 'dell', 'supplies', 'Xeon CPUs in PowerEdge servers.'),
+  L('intel', 'hpe', 'supplies', 'Xeon CPUs in ProLiant servers and Aurora supercomputer.'),
+  L('intel', 'microsoft', 'supplies', 'Microsoft is an Intel Foundry customer on the 18A process (2024).'),
+  L('intel', 'amazon', 'supplies', 'Custom Xeon 6 processors and an AI fabric chip on 18A for AWS (2024).'),
+  L('softbank', 'intel', 'investment', '$2bn equity investment (Aug 2025).'),
+  L('amd', 'microsoft', 'supplies', 'Instinct MI300X accelerators serve Azure OpenAI workloads.'),
+  L('amd', 'meta', 'supplies', 'Meta runs Llama inference on Instinct GPUs.'),
+  L('amd', 'oracle', 'supplies', '50,000 Instinct MI450 GPUs for OCI from 2026.'),
+  L('amd', 'openai', 'supplies', '6 GW of Instinct GPUs from 2026; OpenAI received warrants for up to 160m AMD shares.'),
+  L('amd', 'hpe', 'supplies', 'EPYC CPUs and Instinct GPUs inside HPE Cray exascale supercomputers.'),
+  L('broadcom', 'alphabet', 'supplies', 'Co-designs each generation of Google’s TPU.'),
+  L('broadcom', 'meta', 'supplies', 'Co-designs Meta’s MTIA accelerators.'),
+  L('broadcom', 'openai', 'supplies', 'Co-developing 10 GW of custom OpenAI accelerators (Oct 2025).'),
+  L('broadcom', 'apple', 'supplies', 'Wireless connectivity and RF components for iPhone.'),
+  L('broadcom', 'arista', 'supplies', 'Tomahawk and Jericho switch silicon inside Arista switches.'),
+  L('arm', 'qualcomm', 'supplies', 'Architecture licence behind Snapdragon CPUs.'),
+  L('arm', 'apple', 'supplies', 'Architecture licence behind Apple silicon.'),
+  L('arm', 'amazon', 'supplies', 'AWS Graviton CPUs are built on Arm Neoverse.'),
+  L('arm', 'microsoft', 'supplies', 'Azure Cobalt CPUs are built on Arm Neoverse.'),
+  L('arm', 'alphabet', 'supplies', 'Google Axion CPUs are built on Arm Neoverse.'),
+  L('arm', 'mediatek', 'supplies', 'CPU cores in Dimensity processors.'),
+  L('softbank', 'arm', 'investment', 'Owns roughly 90% of Arm.'),
+  L('qualcomm', 'apple', 'supplies', '5G modems for iPhone, now being replaced by Apple’s in-house modem.'),
+  L('qualcomm', 'microsoft', 'partnership', 'Snapdragon X launched Microsoft’s Copilot+ PC category (2024).'),
+  L('marvell', 'amazon', 'supplies', 'Custom-silicon partner for AWS AI and networking chips.'),
+  L('marvell', 'microsoft', 'supplies', 'Reported custom-accelerator partner for Microsoft’s Maia program.'),
+  L('mediatek', 'alphabet', 'supplies', 'Reported design partner on a Google TPU variant.'),
+
+  // ── Packaging, networking and systems ────────────────────────────────
+  L('ase', 'apple', 'supplies', 'System-in-package modules for Apple Watch and AirPods (via USI).'),
+  L('amkor', 'apple', 'supplies', 'Apple is the first customer of Amkor’s Arizona packaging campus.'),
+  L('arista', 'microsoft', 'supplies', 'One of Arista’s two largest customers for cloud and AI networking.'),
+  L('arista', 'meta', 'supplies', 'Ethernet switches for Meta’s AI training clusters.'),
+  L('coherent', 'apple', 'supplies', 'VCSEL lasers for Face ID, backed by Apple’s Advanced Manufacturing Fund.'),
+  L('astera-labs', 'amazon', 'supplies', 'AWS is Astera’s largest customer for retimers and fabric switches.'),
+  L('foxconn', 'apple', 'supplies', 'Assembles the majority of iPhones.'),
+  L('foxconn', 'openai', 'partnership', 'Co-designing US-made data-centre hardware for OpenAI (Nov 2025).'),
+  L('softbank', 'foxconn', 'partnership', 'SoftBank bought Foxconn’s Ohio plant to build Stargate equipment (2025).'),
+  L('quanta', 'microsoft', 'supplies', 'AI server racks for Azure through its QCT unit.'),
+  L('quanta', 'meta', 'supplies', 'Open Compute servers for Meta data centres.'),
+  L('quanta', 'alphabet', 'supplies', 'Servers for Google data centres.'),
+  L('wistron', 'microsoft', 'supplies', 'Its Wiwynn subsidiary builds Azure cloud servers.'),
+  L('dell', 'xai', 'supplies', 'Built part of the Colossus supercomputer.'),
+  L('dell', 'coreweave', 'supplies', 'First cloud deployment of Nvidia GB300 NVL72 racks (2025).'),
+  L('supermicro', 'xai', 'supplies', 'Liquid-cooled GPU racks for Colossus.'),
+  L('vertiv', 'coreweave', 'supplies', 'Liquid cooling for CoreWeave’s ~140 kW GB300 racks.'),
+
+  // ── Hyperscalers and compute deals ───────────────────────────────────
+  L('microsoft', 'openai', 'investment', 'About 27% of OpenAI Group PBC after the Oct 2025 recapitalisation.'),
+  L('openai', 'microsoft', 'customer', 'Committed an incremental $250bn of Azure services (Oct 2025).'),
+  L('microsoft', 'anthropic', 'investment', 'Up to $5bn investment (Nov 2025).'),
+  L('anthropic', 'microsoft', 'customer', 'Committed to $30bn of Azure compute (Nov 2025).'),
+  L('microsoft', 'coreweave', 'customer', 'CoreWeave’s largest customer in 2024.'),
+  L('microsoft', 'g42', 'investment', '$1.5bn minority stake (Apr 2024).'),
+  L('microsoft', 'mistral', 'partnership', 'Mistral models distributed on Azure, with a small 2024 investment.'),
+  L('microsoft', 'figure-ai', 'investment', 'Investor in Figure’s 2024 Series B.'),
+  L('amazon', 'anthropic', 'investment', '$8bn invested in 2023–24.'),
+  L('anthropic', 'amazon', 'customer', 'Primary training partner; Project Rainier runs on Trainium2 chips.'),
+  L('openai', 'amazon', 'customer', '$38bn, seven-year AWS compute agreement (Nov 2025).'),
+  L('amazon', 'openai', 'investment', 'Reported anchor investor in OpenAI’s March 2026 round.'),
+  L('alphabet', 'google-deepmind', 'investment', 'Wholly owned since 2014.'),
+  L('alphabet', 'anthropic', 'investment', 'Reported ~14% stake after more than $3bn invested.'),
+  L('anthropic', 'alphabet', 'customer', 'Access to up to one million Google TPUs (Oct 2025).'),
+  L('openai', 'alphabet', 'customer', 'Added Google Cloud capacity in 2025.'),
+  L('meta', 'alphabet', 'customer', 'Google Cloud agreement worth more than $10bn (Aug 2025).'),
+  L('apple', 'alphabet', 'partnership', 'Gemini models will underpin Apple Foundation Models and the new Siri (Jan 2026).'),
+  L('meta', 'coreweave', 'customer', '$14.2bn compute contract (Sep 2025).'),
+  L('openai', 'oracle', 'customer', 'Reported ~$300bn five-year Stargate compute contract (Sep 2025).'),
+  L('openai', 'coreweave', 'customer', 'Contracts worth about $22.4bn.'),
+  L('softbank', 'oracle', 'partnership', 'Stargate equity partners alongside OpenAI and MGX.'),
+  L('palantir', 'oracle', 'partnership', 'Palantir platforms run on Oracle Cloud Infrastructure (2024).'),
+  L('palantir', 'microsoft', 'partnership', 'Palantir on Azure Government for classified workloads (2024).'),
+  L('sap', 'microsoft', 'partnership', 'Joule assistant integrated with Microsoft 365 Copilot.'),
+  L('apple', 'alibaba', 'partnership', 'Alibaba’s models power Apple Intelligence in China (2025).'),
+
+  // ── AI labs ──────────────────────────────────────────────────────────
+  L('softbank', 'openai', 'investment', '$64.6bn invested in total for roughly 13% (Oct 2026).'),
+  L('apple', 'openai', 'partnership', 'ChatGPT built into Siri and Apple Intelligence (2024).'),
+  L('g42', 'openai', 'partnership', 'Stargate UAE: a 1 GW AI cluster in Abu Dhabi (May 2025).'),
+  L('sap', 'openai', 'partnership', '“OpenAI for Germany” sovereign service for the public sector (Sep 2025).'),
+  L('salesforce', 'openai', 'partnership', 'OpenAI models inside Agentforce and ChatGPT (Oct 2025).'),
+  L('salesforce', 'anthropic', 'investment', 'Salesforce Ventures is an investor; Claude is offered inside Agentforce.'),
+  L('palantir', 'anthropic', 'partnership', 'Claude for US defence and intelligence agencies via Palantir and AWS (Nov 2024).'),
+  L('tesla', 'xai', 'partnership', 'xAI’s Grok assistant runs in Tesla vehicles (2025).'),
+];
+
+export const CHOKEPOINTS: Chokepoint[] = [
+  {
+    id: 'euv',
+    title: 'EUV lithography',
+    sharePct: 100,
+    shareLabel: '100% of EUV scanners',
+    holders: ['asml'],
+    dependency: 'Every chip at 7nm and below is printed on an ASML EUV machine. No other company has shipped one.',
+    dependents: ['tsmc', 'samsung', 'intel', 'sk-hynix', 'micron'],
+    source: 'ASML annual report 2025',
+  },
+  {
+    id: 'euv-optics',
+    title: 'EUV optics',
+    sharePct: 100,
+    shareLabel: 'Sole supplier to ASML',
+    holders: ['zeiss-smt'],
+    dependency: 'The mirrors in every EUV scanner are made by one Zeiss division in Oberkochen, Germany.',
+    dependents: ['asml'],
+    source: 'ZEISS Group annual report 2024/25',
+  },
+  {
+    id: 'foundry',
+    title: 'Leading-edge foundry',
+    sharePct: 70,
+    shareLabel: '~70% of foundry revenue',
+    holders: ['tsmc'],
+    dependency: 'TSMC makes nearly all advanced AI accelerators, including Nvidia, AMD, Google TPU and AWS Trainium chips.',
+    dependents: ['nvidia', 'amd', 'broadcom', 'apple', 'amazon', 'qualcomm'],
+    source: 'TrendForce foundry rankings, 2025',
+  },
+  {
+    id: 'accelerators',
+    title: 'AI accelerators',
+    sharePct: 80,
+    shareLabel: '~80%+ of AI accelerator spend',
+    holders: ['nvidia'],
+    dependency: 'Most frontier models are trained on Nvidia GPUs, and CUDA software makes switching slow and costly.',
+    dependents: ['microsoft', 'meta', 'openai', 'xai', 'oracle', 'coreweave'],
+    source: 'Analyst estimates; Nvidia FY2026 data-centre revenue',
+  },
+  {
+    id: 'hbm',
+    title: 'High-bandwidth memory',
+    sharePct: 55,
+    shareLabel: '~55% of HBM supply',
+    holders: ['sk-hynix'],
+    dependency: 'Each AI GPU needs stacks of HBM; three companies make it and SK hynix leads.',
+    dependents: ['nvidia', 'amd', 'broadcom'],
+    source: 'TrendForce and Counterpoint HBM estimates, 2025',
+  },
+  {
+    id: 'wafers',
+    title: 'Silicon wafers',
+    sharePct: 55,
+    shareLabel: '~55% for the top two',
+    holders: ['shin-etsu', 'sumco'],
+    dependency: 'Two Japanese firms supply over half the world’s ultra-pure silicon wafers.',
+    dependents: ['tsmc', 'samsung', 'intel'],
+    source: 'SEMI and company reports',
+  },
+  {
+    id: 'track',
+    title: 'EUV coater/developers',
+    sharePct: 95,
+    shareLabel: 'Virtually all EUV tracks',
+    holders: ['tokyo-electron'],
+    dependency: 'The machines that coat and develop photoresist for EUV are almost all made by Tokyo Electron.',
+    dependents: ['tsmc', 'samsung', 'intel'],
+    source: 'Tokyo Electron investor materials',
+  },
+  {
+    id: 'process-control',
+    title: 'Process control',
+    sharePct: 55,
+    shareLabel: '>50% of inspection & metrology',
+    holders: ['kla'],
+    dependency: 'Fabs rely on KLA tools to find nanometre-scale defects before they ruin a wafer.',
+    dependents: ['tsmc', 'samsung', 'intel'],
+    source: 'Gartner / TechInsights equipment share estimates',
+  },
+];
+
+export { TECH_COMPANIES };
+
+export const COMPANY_BY_ID: Record<string, TechCompany> = Object.fromEntries(
+  TECH_COMPANIES.map((c) => [c.id, c]),
+);
+
+export const DEFAULT_HUB = 'nvidia';
+
+export const AI_NETWORK = makeDataset({
+  id: 'ai',
+  sourceId: 'ai-power-network',
+  lastUpdated: NETWORK_LAST_UPDATED,
+  categories: TECH_CATEGORIES,
+  companies: TECH_COMPANIES,
+  links: TECH_LINKS,
+  chokepoints: CHOKEPOINTS,
+  defaultHub: DEFAULT_HUB,
+  quickPicks: ['nvidia', 'tsmc', 'asml', 'microsoft', 'alphabet', 'amazon', 'openai', 'anthropic', 'micron', 'sk-hynix'],
+  chapterHash: '#chapter-9',
+  filename: 'ai-power-network',
+  shareTitle: 'The AI Power Network',
+  layersLabel: `${TECH_CATEGORIES.length} layers of the stack`,
+  roleLabel: 'Role in AI',
+  footnote:
+    'AI-lab revenue is the annualised run-rate the company or press reported, not audited revenue. '
+    + 'Links show publicly announced relationships and are not exhaustive.',
+});

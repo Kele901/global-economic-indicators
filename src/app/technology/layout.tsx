@@ -3,7 +3,7 @@ import { withOgImage } from '../lib/og';
 
 export const metadata: Metadata = withOgImage('/technology', {
   title: 'Technology & Innovation | Global Economic Indicators',
-  description: 'Compare R&D spending, patent applications, high-tech exports, AI development, venture capital, digital economy metrics, and innovation rankings across 30+ countries worldwide.',
+  description: 'Compare R&D spending, patent applications, high-tech exports, AI development, venture capital, digital economy metrics, and innovation rankings across 30+ countries worldwide, plus an interactive power network of about 140 companies from energy and metals to chips, cars, AI and payments.',
 });
 
 export default function TechnologyLayout({ children }: { children: React.ReactNode }) {

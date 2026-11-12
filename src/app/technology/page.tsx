@@ -214,9 +214,21 @@ const TechCapitalCyclesChart = dynamic(
   }
 );
 
+const TechPowerNetwork = dynamic(
+  () => import('../components/aiNetwork/TechPowerNetwork'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] sm:h-[600px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
+        <span className="text-gray-500 dark:text-gray-400">Loading network...</span>
+      </div>
+    )
+  }
+);
+
 const NAV = [
   'Overview', 'Patents & IP', 'R&D', 'Tech trade', 'Compare', 'Digital infrastructure',
-  'Startups & VC', 'AI', 'Digital economy', 'Workforce', 'Tech & capital', 'Insights',
+  'Startups & VC', 'AI', 'Digital economy', 'Workforce', 'Tech & capital', 'Power network', 'Insights',
 ].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 const TechnologyPage = () => {
@@ -1002,8 +1014,29 @@ const TechnologyPage = () => {
           </div>
         </ChapterSection>
 
+        {/* Section: Tech Power Network */}
+        <ChapterSection id="chapter-12" index={12} title="The Tech Power Network" isDarkMode={isDarkMode} accent="blue" lazy>
+          <div className="space-y-6">
+            <div className={`p-5 rounded-xl border ${themeColors.cardBg} ${themeColors.border}`}>
+              <h2 className={`text-xl font-bold mb-2 ${themeColors.text}`}>
+                From oil wells to app stores
+              </h2>
+              <p className={`text-sm ${themeColors.textSecondary}`}>
+                About 140 companies across energy, metals, materials, chips, cars, infrastructure, AI, software and
+                payments, and the publicly announced deals that tie them together. Oil majors now sign power
+                contracts with hyperscalers, nuclear plants are restarted for data centres, and copper, quartz
+                and industrial gases flow into the fabs that make AI chips. Carmakers pull in the same batteries,
+                rare-earth magnets and Nvidia stacks. Pick any company to put it at the centre; sectors start
+                folded into bubbles that expand on click, and the physical-flow chips trace one input, such as
+                electricity or rare earths, through the whole network.
+              </p>
+            </div>
+            <TechPowerNetwork isDarkMode={isDarkMode} />
+          </div>
+        </ChapterSection>
+
         {/* Section: Insights */}
-        <ChapterSection id="chapter-12" index={12} title="Insights" isDarkMode={isDarkMode} accent="blue" lazy>
+        <ChapterSection id="chapter-13" index={13} title="Insights" isDarkMode={isDarkMode} accent="blue" lazy>
           {techData && (
             <div className="space-y-8">
               <div className={`p-4 rounded-lg border ${

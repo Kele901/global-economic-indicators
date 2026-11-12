@@ -3,7 +3,7 @@
 import {
   US, CA, MX, BR, CL, AR, CO, GB, FR, DE, IT, ES, SE, CH, NO, NL, PT, BE, PL, GR,
   RU, UA, TR, SA, EG, IL, IR, AE, QA, MA, NG, ZA, KE, ET, GH, JP, AU, KR, CN, IN,
-  ID, SG, VN, TH, PH, PK, BD, TW,
+  ID, SG, VN, TH, PH, PK, BD, TW, FI, IE,
 } from 'country-flag-icons/react/3x2';
 
 // One flag lookup for the whole site, keyed by the internal wbKey. Pages used to
@@ -14,7 +14,7 @@ export const COUNTRY_FLAGS: Record<string, React.ComponentType<{ className?: str
   Brazil: BR, Chile: CL, Argentina: AR, Colombia: CO,
   UK: GB, France: FR, Germany: DE, Italy: IT, Spain: ES, Sweden: SE,
   Switzerland: CH, Norway: NO, Netherlands: NL, Portugal: PT, Belgium: BE,
-  Poland: PL, Greece: GR,
+  Poland: PL, Greece: GR, Finland: FI, Ireland: IE,
   Russia: RU, Ukraine: UA,
   Turkey: TR, SaudiArabia: SA, Egypt: EG, Israel: IL, Iran: IR, UAE: AE,
   Qatar: QA, Morocco: MA,

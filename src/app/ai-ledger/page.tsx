@@ -1,6 +1,6 @@
 'use client';
 
-// AI/Technology Ledger — 8-chapter scrollytelling page mirroring the
+// AI/Technology Ledger — 9-chapter scrollytelling page mirroring the
 // Trade / Migration / Debt / Climate / Defense Ledger structure. Pulls
 // live WB technology-adjacent indicators (patent applications, R&D
 // share, tertiary researchers) and joins them with the curated
@@ -21,6 +21,7 @@ import {
   DATA_CENTRE_ENERGY_2015_2030,
   AI_REGULATION_TIMELINE,
 } from '../services/aiCurated';
+import { NETWORK_LAST_UPDATED } from '../services/aiPowerNetwork';
 import StalenessBanner from '../components/StalenessBanner';
 import DataDownloadButton from '../components/DataDownloadButton';
 import Breadcrumbs from '../components/Breadcrumbs';
@@ -40,6 +41,7 @@ const AiInvestmentChart        = dynamic(() => import('../components/AiInvestmen
 const DataCenterEnergyChart    = dynamic(() => import('../components/DataCenterEnergyChart'),    { ssr: false });
 const AiTalentGrid             = dynamic(() => import('../components/AiTalentGrid'),             { ssr: false });
 const AiRegulationTimeline     = dynamic(() => import('../components/AiRegulationTimeline'),     { ssr: false });
+const AiPowerNetwork           = dynamic(() => import('../components/aiNetwork/AiPowerNetwork'), { ssr: false });
 
 type GlobalData = Awaited<ReturnType<typeof fetchGlobalData>>;
 
@@ -64,7 +66,7 @@ function ChapterHeader({ isDarkMode, chapter, title, subtitle, share = true }: {
   );
 }
 
-const NAV = ['Compute', 'Models', 'Patents', 'Chips', 'Investment', 'Energy', 'Talent', 'Regulation'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
+const NAV = ['Compute', 'Models', 'Patents', 'Chips', 'Investment', 'Energy', 'Talent', 'Regulation', 'Power Network'].map((label, i) => ({ id: `chapter-${i + 1}`, label }));
 
 export default function AiLedgerPage() {
   const [isDarkMode] = useLocalStorage('isDarkMode', false);
@@ -137,7 +139,8 @@ export default function AiLedgerPage() {
               Where AI is made, funded, powered, staffed and governed. Live World Bank
               research indicators joined with Stanford AI Index model counts, Epoch AI
               release history, SEMI foundry capacity, IEA data-centre energy, MacroPolo
-              talent flows and the 2023-2025 global policy timeline.
+              talent flows, the 2023-2025 global policy timeline and a map of the
+              companies that hold the AI economy together.
             </p>
           </div>
           <ThemeToggle isDarkMode={isDarkMode} className="self-end sm:self-auto" />
@@ -309,6 +312,21 @@ export default function AiLedgerPage() {
           </LazyMount>
         </div>
 
+        {/* Chapter 9 — AI Power Network */}
+        <div id="chapter-9" className="scroll-mt-16">
+          <LazyMount isDarkMode={isDarkMode}>
+            <section className="mb-14">
+              <ChapterHeader
+                isDarkMode={isDarkMode}
+                chapter="Chapter 9"
+                title="The AI Power Network"
+                subtitle="Around sixty companies hold up the AI economy, from the only maker of EUV scanners to the labs training frontier models. Every link is a real supply contract, compute deal, equity stake or partnership. Hover to trace a company's ties, click for its full profile, and re-centre the map on anyone to see the industry from their side."
+              />
+              <AiPowerNetwork isDarkMode={isDarkMode} />
+            </section>
+          </LazyMount>
+        </div>
+
         <RelatedPages currentPath="/ai-ledger" isDarkMode={isDarkMode} />
 
         <footer className={`mt-16 pt-6 border-t text-xs ${textMuted} ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -316,6 +334,8 @@ export default function AiLedgerPage() {
           Historical model releases from Epoch AI + lab announcements. Fab capacity from SEMI + TrendForce Q2-2025.
           Data-centre energy projections from IEA Electricity 2025. Talent flows from MacroPolo Global AI Talent Tracker.
           Regulation timeline compiled from Stanford HAI AI Index Chapter 7, OECD.AI, and the EU AI Act official journal.
+          AI power network compiled from company annual reports and SEC filings, exchange market caps, reported funding rounds,
+          TrendForce and Counterpoint share estimates, and company partnership announcements (as of {NETWORK_LAST_UPDATED}).
           {loading ? ' Loading…' : ''}
         </footer>
       </div>

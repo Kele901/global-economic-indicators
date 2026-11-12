@@ -13,6 +13,7 @@ import { CURATED_LAST_UPDATED as TRADE_CURATED_LAST_UPDATED } from '../services/
 import { CURATED_LAST_UPDATED as MIGRATION_CURATED_LAST_UPDATED } from '../services/migrationCurated';
 import { CURATED_LAST_UPDATED as DEBT_CURATED_LAST_UPDATED } from '../services/debtCurated';
 import { CURATED_LAST_UPDATED as AI_CURATED_LAST_UPDATED } from '../services/aiCurated';
+import { NETWORK_LAST_UPDATED } from '../services/aiPowerNetwork';
 import { CURATED_LAST_UPDATED as HEALTH_CURATED_LAST_UPDATED } from '../services/healthCurated';
 import { CURATED_LAST_UPDATED as ENERGY_CURATED_LAST_UPDATED } from '../services/energyCurated';
 import { CURATED_LAST_UPDATED as LABOR_CURATED_LAST_UPDATED } from '../services/laborCurated';
@@ -1047,6 +1048,30 @@ export const DATA_SOURCES: DataSourceEntry[] = [
     lastUpdated: AI_CURATED_LAST_UPDATED,
     notes: 'Stanford AI Index 2024/25 notable-model counts, Epoch AI frontier model release registry 2018-2025, SEMI + TrendForce foundry capacity Q2-2025, Stanford AI Index + CB Insights AI private-market investment 2018-2024, IEA Electricity 2025 data-centre energy projections, MacroPolo Global AI Talent Tracker, 2023-2025 AI regulation timeline (EU AI Act, US EOs, GAISI, PRC generative-AI rules). Powers /ai-ledger.',
     sourceUrl: 'https://hai.stanford.edu/ai-index',
+  },
+  {
+    id: 'ai-power-network',
+    name: 'AI power network (companies and relationships)',
+    category: 'technology',
+    provider: 'Curated',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: NETWORK_LAST_UPDATED,
+    notes: 'Profiles of ~60 companies across the AI stack and ~180 supply, compute, investment and partnership links. Revenue from latest annual reports and 10-K/20-F filings (non-USD converted at 2025 average rates); listed values are exchange market caps; private values are the latest reported funding round or deal valuation; AI-lab revenue is company or press-reported run-rate. Chokepoint shares are TrendForce, Counterpoint, SEMI and company estimates. Powers the Power Network chapter of /ai-ledger.',
+    sourceUrl: 'https://www.sec.gov/edgar',
+    qualityFlags: ['curated', 'estimate'],
+  },
+  {
+    id: 'tech-power-network',
+    name: 'Tech power network (companies, relationships and commodity flows)',
+    category: 'technology',
+    provider: 'Curated',
+    refreshCadence: 'quarterly',
+    live: false,
+    lastUpdated: NETWORK_LAST_UPDATED,
+    notes: 'The AI power network plus ~80 energy, nuclear, mining, materials, battery, grid, carmaker, auto-tech, internet, software, cybersecurity, telecoms and payments companies (~140 total, 24 categories in 9 sectors) and ~350 links, with physical inputs such as electricity, copper, rare earths, lithium and batteries tagged on supply links. Revenue from latest annual reports (non-USD at 2025 average rates; "(approx.)" where only guidance or press estimates exist); listed values are exchange market caps; private values are the latest funding-round, buyout or deal valuation. Mineral chokepoint shares are IEA and USGS estimates. Powers the Power Network chapter of /technology.',
+    sourceUrl: 'https://www.iea.org/reports/global-critical-minerals-outlook-2024',
+    qualityFlags: ['curated', 'estimate'],
   },
 
   // ── FX correlations ───────────────────────────────────────────────────
